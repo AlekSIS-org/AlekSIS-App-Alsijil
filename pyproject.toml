@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "BiscuIT-App-Alsijil"
+version = "1.0a0.dev0"
+packages = [
+    { include = "biscuit" }
+]
+readme = "README.md"
+
+description = "BiscuIT School Information System (SIS) - App Alsijil (Class register)"
+authors = ["BiscuIT Team <biscuit-dev@lists.teckids.org>"]
+license = "MIT"
+homepage = "https://biscuit.edugit.org/"
+repository = "https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil"
+documentation = "https://biscuit.edugit.org/docs/html/"
+classifiers = [
+    "Environment :: Web Environment",
+    "Intended Audience :: Education",
+    "Topic :: Education"
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+BiscuIT-ng = {version = "^1.0a0.dev0", allows-prereleases = true, path = "../../.."}
+BiscuIT-App-Alsijil = {version = "^1.0a0.dev0", allows-prereleases = true, path = "../BiscuIT-App-Alsijil"}
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
