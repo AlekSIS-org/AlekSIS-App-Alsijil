@@ -3,7 +3,7 @@ from typing import Optional
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week
