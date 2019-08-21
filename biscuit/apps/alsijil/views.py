@@ -1,4 +1,7 @@
+from typing import Optional
+
 from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
@@ -7,7 +10,7 @@ from biscuit.apps.chronos.util import current_lesson_periods, current_week
 
 
 @login_required
-def lesson(request, week=None, period_id=None):
+def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional[int] = None) -> HttpResponse:
     context = {}
 
     if week and period_id:
