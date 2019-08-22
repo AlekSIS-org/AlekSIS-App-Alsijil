@@ -27,14 +27,15 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
 
-    lesson_documentation, created = LessonDocumentation.objects.get_or_create(lesson_period=lesson_period, week=wanted_week)
-    lesson_documentation_form = LessonDocumentationForm(request.POST or None, instance=lesson_documentation)
+    if lesson_period:
+        lesson_documentation, created = LessonDocumentation.objects.get_or_create(lesson_period=lesson_period, week=wanted_week)
+        lesson_documentation_form = LessonDocumentationForm(request.POST or None, instance=lesson_documentation)
 
-    if request.method == 'POST':
-        if request.POST.get('action', None) == 'lesson_documentation':
-            if lesson_documentation_form.is_valid():
-                lesson_documentation_form.save()
+        if request.method == 'POST':
+            if request.POST.get('action', None) == 'lesson_documentation':
+                if lesson_documentation_form.is_valid():
+                    lesson_documentation_form.save()
 
-    context['lesson_documentation_form'] = lesson_documentation_form
+        context['lesson_documentation_form'] = lesson_documentation_form
 
     return render(request, 'alsijil/lesson.html', context)
