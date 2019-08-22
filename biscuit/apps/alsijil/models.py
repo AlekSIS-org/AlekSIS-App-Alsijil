@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from biscuit.chronos.util import current_week
+from biscuit.apps.chronos.util import current_week
 from biscuit.core.mixins import SchoolRelated
 
 
