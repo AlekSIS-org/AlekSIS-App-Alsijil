@@ -1,0 +1,47 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load bootstrap4 i18n %}
+
+{% block page_title %}
+ {% blocktrans %}Lesson{% endblocktrans %}
+
+ -
+
+ {% for group in lesson_period.get_groups.all %}
+  <span>{{ group.short_name }}</span>,
+ {% endfor %}
+
+ {{ lesson_period.get_subject.name }},
+
+ {% for teacher in lesson_period.get_teachers.all %}
+  {{ teacher.short_name }}
+ {% endfor %}
+{% endblock %}
+
+{% block content %}
+ <div class="card">
+  <div class="card-header bg-light text-dark">
+   {% blocktrans %}Lesson documentation{% endblocktrans %}
+  </div>
+  <div class="card-body">
+   <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form lesson_documentation_form %}
+    <input type="hidden" name="action" value="lesson_documentation" />
+    <input type="submit" value="Update" />
+   </form>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="card-header bg-light text-dark">
+   {% blocktrans %}Personal notes{% endblocktrans %}
+  </div>
+  <div class="card-body">
+   <p class="card-text">
+    This feature is still missing.
+   </p>
+  </div>
+ </div>
+{% endblock %}
+ 
