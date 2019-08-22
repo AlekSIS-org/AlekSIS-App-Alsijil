@@ -27,7 +27,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
 
-    lesson_documentation, created = LessonDocumentation.get_or_create(lesson_period=lesson_period, week=week)
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create(lesson_period=lesson_period, week=week)
     lesson_documentation_form = LessonDocumentationForm(request.POST or None, instance=lesson_documentation)
 
     if request.method == 'POST':
