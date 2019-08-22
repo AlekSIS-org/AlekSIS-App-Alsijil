@@ -20,8 +20,8 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
         lesson_period = LessonPeriod.objects.get(pk=period_id)
         wanted_week = week
     else:
-        lesson_period = current_lesson_periods().filter(
-            lesson__teachers=request.user.person).first()
+        lesson_period = current_lesson_periods().get_or_none(
+            lesson__teachers=request.user.person)
         wanted_week = current_week()
 
     context['lesson_period'] = lesson_period
