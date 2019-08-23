@@ -26,4 +26,4 @@ class PersonalNoteForm(forms.ModelForm):
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
-    PersonalNote, form=PersonalNoteForm, extra=0)
+    PersonalNote, form=PersonalNoteForm, max_num=0, extra=0)
