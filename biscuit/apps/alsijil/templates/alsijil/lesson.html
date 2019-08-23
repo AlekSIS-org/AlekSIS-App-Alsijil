@@ -1,0 +1,72 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load bootstrap4 i18n %}
+
+{% if lesson_period %}
+ {% block page_title %}
+  {% blocktrans %}Lesson{% endblocktrans %}
+
+  -
+
+  {% for group in lesson_period.get_groups.all %}
+   <span>{{ group.short_name }}</span>,
+  {% endfor %}
+
+  {{ lesson_period.get_subject.name }},
+
+  {% for teacher in lesson_period.get_teachers.all %}
+   {{ teacher.short_name }}
+  {% endfor %}
+ {% endblock %}
+
+ {% block content %}
+  <div class="card">
+   <div class="card-header bg-light text-dark">
+    {% blocktrans %}Lesson documentation{% endblocktrans %}
+   </div>
+   <div class="card-body">
+    <form method="post">
+     {% csrf_token %}
+     {% bootstrap_form lesson_documentation_form %}
+     <input type="hidden" name="action" value="lesson_documentation" />
+     <input type="submit" value="Update" />
+    </form>
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-header bg-light text-dark">
+    {% blocktrans %}Personal notes{% endblocktrans %}
+   </div>
+   <div class="card-body">
+    <form method="post">
+     {% csrf_token %}
+     {{ personal_note_formset.management_form }}
+
+     <table class="table table-striped table-bordered table-hover table-condensed table-responsive w-100 d-block d-md-table">
+      <tr>
+       <th>{% blocktrans %}Person{% endblocktrans %}</th>
+       <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+       <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+       <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+       <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+      </tr>
+      {% for form in personal_note_formset %}
+       {% form.id %}
+       <tr>
+        <td>{{ form.person_name }}</td>
+        <td>{{ form.absent }}</td>
+        <td>{{ form.late }}</td>
+        <td>{{ form.excused }}</td>
+        <td>{{ form.remarks }}</td>
+       </tr>
+      {% endfor %}
+     </table>
+
+     <input type="hidden" name="action" value="personal_notes" />
+     <input type="submit" value="Update" />
+    </form>
+   </div>
+  </div>
+ {% endblock %}
+{% endif %}
