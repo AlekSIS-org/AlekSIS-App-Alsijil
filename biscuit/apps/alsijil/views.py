@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week
 
-from .forms import LessonDocumentationForm
+from .forms import LessonDocumentationForm, PersonalNoteFormSet
 from .models import LessonDocumentation, PersonalNote
 
 
