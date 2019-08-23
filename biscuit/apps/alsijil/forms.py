@@ -19,7 +19,10 @@ class PersonalNoteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['person_name'].initial = str(self.instance.person)
+        try:
+            self.fields['person_name'].initial = str(self.instance.person)
+        except:
+            pass
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
