@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-22 19:59+0200\n"
-"PO-Revision-Date: 2019-08-22 19:59+0200\n"
+"POT-Creation-Date: 2019-08-23 22:32+0200\n"
+"PO-Revision-Date: 2019-08-23 22:34+0200\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -29,10 +29,42 @@ msgstr "Klassenbuch"
 msgid "Current lesson"
 msgstr "Aktuelle Unterrichtsstunde"
 
-#: models.py:28
+#: models.py:27
 msgid "Lesson topic"
 msgstr "Fach"
 
-#: models.py:29
+#: models.py:28
 msgid "Homework"
 msgstr "Hausaufgaben"
+
+#: templates/alsijil/lesson.html:7
+msgid "Lesson"
+msgstr "Unterrichtsstunde"
+
+#: templates/alsijil/lesson.html:25
+msgid "Lesson documentation"
+msgstr "Unterrichtsstundenbeschreibung"
+
+#: templates/alsijil/lesson.html:39
+msgid "Personal notes"
+msgstr "Notizen"
+
+#: templates/alsijil/lesson.html:48
+msgid "Person"
+msgstr "Person"
+
+#: templates/alsijil/lesson.html:49
+msgid "Absent"
+msgstr "Abwesend"
+
+#: templates/alsijil/lesson.html:50
+msgid "Tardiness"
+msgstr "Verspätung"
+
+#: templates/alsijil/lesson.html:51
+msgid "Excused"
+msgstr "Entschuldigungen"
+
+#: templates/alsijil/lesson.html:52
+msgid "Remarks"
+msgstr "Bemerkungen"
