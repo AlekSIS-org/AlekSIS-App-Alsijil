@@ -52,6 +52,7 @@
        <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
       </tr>
       {% for form in personal_note_formset %}
+       {% form.id %}
        <tr>
         <td>{{ form.person_name }}</td>
         <td>{{ form.absent }}</td>
