@@ -16,7 +16,7 @@ class PersonalNoteForm(forms.ModelForm):
         fields = ['person', 'absent', 'late', 'excused', 'remarks']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*awrgs, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['person'].widget.attrs['readonly'] = True
 
     def clean_person(self):
