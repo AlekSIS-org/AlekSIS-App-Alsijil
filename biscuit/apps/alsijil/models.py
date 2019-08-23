@@ -5,7 +5,7 @@ from biscuit.core.mixins import SchoolRelated
 
 
 class PersonalNote(SchoolRelated):
-    person = models.ForeignKey('core.Person', models.CASCADE)
+    person = models.ForeignKey('core.Person', models.CASCADE, editable=False)
 
     week = models.IntegerField()
     lesson_period = models.ForeignKey('chronos.LessonPeriod', models.CASCADE)
