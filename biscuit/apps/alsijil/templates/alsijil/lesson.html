@@ -45,8 +45,7 @@
 
      <table class="table table-striped table-bordered table-hover table-condensed table-responsive w-100 d-block d-md-table">
       <tr>
-       <th>{% blocktrans %}Last name{% endblocktrans %}</th>
-       <th>{% blocktrans %}First name{% endblocktrans %}</th>
+       <th>{% blocktrans %}Person{% endblocktrans %}</th>
        <th>{% blocktrans %}Absent{% endblocktrans %}</th>
        <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
        <th>{% blocktrans %}Excused{% endblocktrans %}</th>
@@ -54,8 +53,7 @@
       </tr>
       {% for form in personal_note_formset %}
        <tr>
-        <td>{{ form.person__last_name }}</td>
-        <td>{{ form.person__firstname }}</td>
+        <td>{{ form.person }}</td>
         <td>{{ form.absent }}</td>
         <td>{{ form.late }}</td>
         <td>{{ form.excused }}</td>
