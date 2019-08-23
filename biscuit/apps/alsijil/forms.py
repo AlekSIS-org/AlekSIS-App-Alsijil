@@ -13,14 +13,13 @@ class LessonDocumentationForm(forms.ModelForm):
 class PersonalNoteForm(forms.ModelForm):
     class Meta:
         model = PersonalNote
-        fields = ['person', 'absent', 'late', 'excused', 'remarks']
+        fields = ['absent', 'late', 'excused', 'remarks']
+
+    person_name = forms.CharField(disabled=True)
 
     def __init__(self, *args, **kwargs):
+        kwargs.update(initial={'person_name': str(kwargs['instance'].person)})
         super().__init__(*args, **kwargs)
-        self.fields['person'].widget.attrs['readonly'] = True
-
-    def clean_person(self):
-      return self.instance.person
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
