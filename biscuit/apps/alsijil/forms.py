@@ -10,5 +10,18 @@ class LessonDocumentationForm(forms.ModelForm):
         fields = ['topic', 'homework']
 
 
+class PersonalNoteForm(forms.ModelForm):
+    class Meta:
+        model = PersonalNote
+        fields = ['person', 'absent', 'late', 'excused', 'remarks']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*awrgs, **kwargs)
+        self.fields['person'].widget.attrs['readonly'] = True
+
+    def clean_person(self):
+      return self.instance.person
+
+
 PersonalNoteFormSet = forms.modelformset_factory(
-    PersonalNote, fields=('person', 'absent', 'late', 'excused', 'remarks'))
+    PersonalNote, form=PersonalNoteForm)
