@@ -52,7 +52,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
             elif request.POST.get('action', None) == 'personal_notes':
                 # Save all personal notes
                 if personal_note_formset.is_valid():
-                    lesson_documentation_form.save()
+                    personal_note_formset.save()
 
         context['lesson_documentation_form'] = lesson_documentation_form
         context['personal_note_formset'] = personal_note_formset
