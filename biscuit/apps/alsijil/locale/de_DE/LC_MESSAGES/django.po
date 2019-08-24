@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-23 22:32+0200\n"
-"PO-Revision-Date: 2019-08-23 22:34+0200\n"
+"POT-Creation-Date: 2019-08-24 13:58+0200\n"
+"PO-Revision-Date: 2019-08-26 11:59+0200\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -47,7 +47,7 @@ msgstr "Unterrichtsstundenbeschreibung"
 
 #: templates/alsijil/lesson.html:39
 msgid "Personal notes"
-msgstr "Notizen"
+msgstr "Persönliche Notizen"
 
 #: templates/alsijil/lesson.html:48
 msgid "Person"
@@ -63,7 +63,7 @@ msgstr "Verspätung"
 
 #: templates/alsijil/lesson.html:51
 msgid "Excused"
-msgstr "Entschuldigungen"
+msgstr "Entschuldigt"
 
 #: templates/alsijil/lesson.html:52
 msgid "Remarks"
