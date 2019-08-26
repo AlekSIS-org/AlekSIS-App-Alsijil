@@ -87,7 +87,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
             # Get number of filled-in documentations
             qs.annotate(Count('documentations',
                               filter=Q(documentations__week=wanted_week,
-                                       documentations__topic__regex=r'.+'))
+                                       documentations__topic__regex=r'.+')))
 
             # Combine the lesson periods of all lessons
             lesson_periods = lesson.periods.union(lesson_periods)
