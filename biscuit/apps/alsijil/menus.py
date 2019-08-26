@@ -10,7 +10,7 @@ MENUS = {
                 {
                     'name': _('Current lesson'),
                     'url': 'lesson',
-                    'validators': ['menu_generator.validators.is_authenticated']
+                    'validators': ['menu_generator.validators.is_authenticated', 'menu_generator.validators.is_superuser']
                 }
             ]
         }
