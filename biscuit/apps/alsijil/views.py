@@ -69,7 +69,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     week_start = week_days(wanted_week)[0]
     week_end = week_days(wanted_week)[-1]
 
-    if request.GET,get('group_id', None):
+    if request.GET.get('group_id', None):
         # Use requested group
         group = Group.objects.get(pk=request.GET['group_id'])
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
