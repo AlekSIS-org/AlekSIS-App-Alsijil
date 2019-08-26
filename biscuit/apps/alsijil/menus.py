@@ -6,6 +6,7 @@ MENUS = {
             'name': _('Class register'),
             'url': '#',
             'root': True,
+            'validators': ['menu_generator.validators.is_authenticated'],
             'submenu': [
                 {
                     'name': _('Current lesson'),
