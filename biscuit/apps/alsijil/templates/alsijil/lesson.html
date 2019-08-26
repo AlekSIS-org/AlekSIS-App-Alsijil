@@ -2,27 +2,23 @@
 {% extends "core/base.html" %}
 {% load bootstrap4 i18n %}
 
-{% if lesson_period %}
- {% block page_title %}
-  {% blocktrans %}Lesson{% endblocktrans %}
+{% block page_title %}
+ {% blocktrans %}Lesson documentation{% endblocktrans %}
+{% endblock %}
 
-  -
-
-  {% for group in lesson_period.get_groups.all %}
-   <span>{{ group.short_name }}</span>,
-  {% endfor %}
-
-  {{ lesson_period.get_subject.name }},
-
-  {% for teacher in lesson_period.get_teachers.all %}
-   {{ teacher.short_name }}
-  {% endfor %}
- {% endblock %}
-
- {% block content %}
+{% block content %}
+ {% if lesson_period %}
   <div class="card">
    <div class="card-header bg-light text-dark">
-    {% blocktrans %}Lesson documentation{% endblocktrans %}
+    {% for group in lesson_period.get_groups.all %}
+     <span>{{ group.short_name }}</span>,
+    {% endfor %}
+
+    {{ lesson_period.get_subject.name }},
+
+    {% for teacher in lesson_period.get_teachers.all %}
+     {{ teacher.short_name }}
+    {% endfor %}
    </div>
    <div class="card-body">
     <form method="post">
@@ -68,5 +64,19 @@
     </form>
    </div>
   </div>
- {% endblock %}
-{% endif %}
+ {% else %}
+  <div class="card text-white bg-danger">
+   <div class="card-header">
+    {% blocktrans %}No lesson found{% endblocktrans %}
+   </div>
+   <div class="card-body">
+    <p>
+     {% blocktrans %}
+      You either selected an invalid lesson or there
+      is currently no lesson in progress.
+     {% endblocktrans %}
+    </p>
+   </div>
+  </div>
+ {% endif %}
+{% endblock %}
