@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-08-24 13:58+0200\n"
+"PO-Revision-Date: 2019-08-26 11:59+0200\n"
+"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
+"Language-Team: \n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.3\n"
+
+#: apps.py:7
+msgid "BiscuIT - Alsijil (Class register)"
+msgstr "BiscuIT - Alsijil (Klassenbuch)"
+
+#: menus.py:6
+msgid "Class register"
+msgstr "Klassenbuch"
+
+#: menus.py:11
+msgid "Current lesson"
+msgstr "Aktuelle Unterrichtsstunde"
+
+#: models.py:27
+msgid "Lesson topic"
+msgstr "Fach"
+
+#: models.py:28
+msgid "Homework"
+msgstr "Hausaufgaben"
+
+#: templates/alsijil/lesson.html:7
+msgid "Lesson"
+msgstr "Unterrichtsstunde"
+
+#: templates/alsijil/lesson.html:25
+msgid "Lesson documentation"
+msgstr "Unterrichtsstundenbeschreibung"
+
+#: templates/alsijil/lesson.html:39
+msgid "Personal notes"
+msgstr "Persönliche Notizen"
+
+#: templates/alsijil/lesson.html:48
+msgid "Person"
+msgstr "Person"
+
+#: templates/alsijil/lesson.html:49
+msgid "Absent"
+msgstr "Abwesend"
+
+#: templates/alsijil/lesson.html:50
+msgid "Tardiness"
+msgstr "Verspätung"
+
+#: templates/alsijil/lesson.html:51
+msgid "Excused"
+msgstr "Entschuldigt"
+
+#: templates/alsijil/lesson.html:52
+msgid "Remarks"
+msgstr "Bemerkungen"
