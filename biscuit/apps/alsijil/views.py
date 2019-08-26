@@ -7,7 +7,8 @@ from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
 from biscuit.apps.chronos.models import Lesson, LessonPeriod
-from biscuit.apps.chronos.util import current_lesson_periods, current_week
+from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
+from biscuit.core.models import Group
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet
 from .models import LessonDocumentation, PersonalNote
@@ -69,9 +70,9 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     week_start = week_days(wanted_week)[0]
     week_end = week_days(wanted_week)[-1]
 
-    if request.GET.get('group_id', None):
+    if request.GET.get('group', None):
         # Use requested group
-        group = Group.objects.get(pk=request.GET['group_id'])
+        group = Group.objects.get(pk=request.GET['group'])
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         # Try to select group from owned groups of user
         group = request.user.person.owner_of.first()
@@ -80,20 +81,14 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
     lesson_periods = LessonPeriod.objects.none()
 
+    periods_by_day = {}
     if group:
         for lesson in group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
-            qs = lesson.periods
-
-            # Get number of filled-in documentations
-            qs.annotate(Count('documentations',
-                              filter=Q(documentations__week=wanted_week,
-                                       documentations__topic__regex=r'.+')))
-
-            # Combine the lesson periods of all lessons
-            lesson_periods = lesson.periods.union(lesson_periods)
+            for lesson_period in lesson.lesson_periods.all():
+                periods_by_day.setdefault(lesson_period.period.get_weekday_display(), []).append(lesson_period)
 
     context['week'] = wanted_week
     context['group'] = group
-    context['lesson_periods'] = lesson_periods
+    context['periods_by_day'] = periods_by_day
 
     return render(request, 'alsijil/group_week.html', context)
