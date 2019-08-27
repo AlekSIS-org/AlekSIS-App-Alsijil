@@ -32,7 +32,11 @@
          {% for period in periods %}
           <tr>
            <td>{{ period.period.period }}</td>
-           <td>{{ period.lesson.subject.name }}</td>
+           <td>
+             <a href="{% url 'lesson_by_week_and_period' week period.id %}">
+               {{ period.lesson.subject.name }}
+             </a>
+           </td>
            <td>{{ period.lesson.teachers|join:', ' }}</td>
           </tr>
          {% endfor %}
