@@ -12,6 +12,11 @@ MENUS = {
                     'name': _('Current lesson'),
                     'url': 'lesson',
                     'validators': ['menu_generator.validators.is_authenticated']
+                },
+                {
+                    'name': _('Current week'),
+                    'url': 'group_week',
+                    'validators': ['menu_generator.validators.is_authenticated']
                 }
             ]
         }
