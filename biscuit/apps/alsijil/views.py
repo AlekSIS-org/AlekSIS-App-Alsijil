@@ -33,8 +33,10 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
     if lesson_period:
         # Create or get lesson documentation object; can be empty when first opening lesson
-        lesson_documentation, created = LessonDocumentation.objects.get_or_create(lesson_period=lesson_period, week=wanted_week)
-        lesson_documentation_form = LessonDocumentationForm(request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
+        lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+            lesson_period=lesson_period, week=wanted_week)
+        lesson_documentation_form = LessonDocumentationForm(
+            request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
         # Create all missing personal notes about members of all groups in lesson
         for group in lesson_period.lesson.groups.all():
@@ -43,8 +45,10 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
                                                                    week=wanted_week)
 
         # Create a formset that holds all personal notes for all persons in this lesson
-        persons_qs = PersonalNote.objects.filter(lesson_period=lesson_period, week=wanted_week)
-        personal_note_formset = PersonalNoteFormSet(request.POST or None, queryset=persons_qs, prefix='personal_notes')
+        persons_qs = PersonalNote.objects.filter(
+            lesson_period=lesson_period, week=wanted_week)
+        personal_note_formset = PersonalNoteFormSet(
+            request.POST or None, queryset=persons_qs, prefix='personal_notes')
 
         if request.method == 'POST':
             if request.POST.get('action', None) == 'lesson_documentation':
@@ -85,7 +89,8 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     if group:
         for lesson in group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
             for lesson_period in lesson.lesson_periods.all():
-                periods_by_day.setdefault(lesson_period.period.get_weekday_display(), []).append(lesson_period)
+                periods_by_day.setdefault(
+                    lesson_period.period.get_weekday_display(), []).append(lesson_period)
 
     context['week'] = wanted_week
     context['group'] = group
