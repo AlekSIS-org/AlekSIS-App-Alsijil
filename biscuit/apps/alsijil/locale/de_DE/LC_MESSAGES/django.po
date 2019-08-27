@@ -31,7 +31,7 @@ msgstr "Aktuelle Unterrichtsstunde"
 
 #: models.py:27
 msgid "Lesson topic"
-msgstr "Fach"
+msgstr "Stundenthema"
 
 #: models.py:28
 msgid "Homework"
