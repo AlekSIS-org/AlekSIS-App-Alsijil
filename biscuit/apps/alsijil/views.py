@@ -83,8 +83,6 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     else:
         group = None
 
-    lesson_periods = LessonPeriod.objects.none()
-
     periods_by_day = {}
     if group:
         for lesson in group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
