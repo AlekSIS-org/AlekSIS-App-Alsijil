@@ -2,6 +2,11 @@
 {% extends "core/base.html" %}
 {% load bootstrap4 i18n %}
 
+{% block bootstrap4_extra_head %}
+ {{ block.super }}
+ <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
+{% endblock %}
+
 {% block page_title %}
  {% blocktrans %}Lesson documentation{% endblocktrans %}
 {% endblock %}
