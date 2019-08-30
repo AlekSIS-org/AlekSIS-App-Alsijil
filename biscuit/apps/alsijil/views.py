@@ -11,7 +11,7 @@ from biscuit.apps.chronos.models import Lesson, LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
 from biscuit.core.models import Group
 
-from .forms import LessonDocumentationForm, PersonalNoteFormSet
+from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation, PersonalNote
 
 
@@ -89,8 +89,12 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     for weekday, periods in sorted(periods_by_day_unsorted.items()):
         periods_by_day[dict(TimePeriod.WEEKDAY_CHOICES)[weekday]] = sorted(periods, key=lambda p: p.period.period)
 
+    # Add a form to filter the view
+    select_form = SelectForm(request.GET or None)
+
     context['week'] = wanted_week
     context['group'] = group
     context['periods_by_day'] = periods_by_day
+    context['select_form'] = select_form
 
     return render(request, 'alsijil/group_week.html', context)

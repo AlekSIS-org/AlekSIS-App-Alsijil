@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
+from biscuit.core.models import Group
+
 from .models import LessonDocumentation, PersonalNote
 
 
@@ -24,6 +26,12 @@ class PersonalNoteForm(forms.ModelForm):
             self.fields['person_name'].initial = str(self.instance.person)
         except:
             pass
+
+
+class SelectForm(forms.Form):
+    group = forms.ModelChoiceField(
+        queryset=Group.objects.annotate(lessons_count=Count('lessons')).filter(lessons_count__gt=0),
+        label=_('Group'), required=False)
 
 
 PersonalNoteFormSet = forms.modelformset_factory(

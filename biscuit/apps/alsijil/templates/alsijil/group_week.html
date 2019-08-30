@@ -7,6 +7,14 @@
 {% endblock %}
 
 {% block content %}
+ <form method="get">
+  {% csrf_token %}
+  <ul id="timetable_select_form">
+   {{ select_form.as_ul }}
+  </ul>
+  <input type="submit" value="Select" /> 
+ </form>
+
  {% if group %}
   <div class="row">
    <div class="col-md-7">
