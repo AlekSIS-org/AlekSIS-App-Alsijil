@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from biscuit.apps.chronos.models import Lesson, LessonPeriod
+from biscuit.apps.chronos.models import Lesson, LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
 from biscuit.core.models import Group
 
@@ -77,12 +78,16 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     else:
         group = None
 
-    periods_by_day = {}
+    periods_by_day_unsorted = {}
     if group:
         for lesson in group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
             for lesson_period in lesson.lesson_periods.all():
-                periods_by_day.setdefault(
-                    lesson_period.period.get_weekday_display(), []).append(lesson_period)
+                periods_by_day_unsorted.setdefault(
+                    lesson_period.period.weekday, []).append(lesson_period)
+
+    periods_by_day = OrderedDict()
+    for weekday, periods in sorted(periods_by_day_unsorted.items()):
+        periods_by_day[dict(TimePeriod.WEEKDAY_CHOICES)[weekday]] = sorted(periods, key=lambda p: p.period.period)
 
     context['week'] = wanted_week
     context['group'] = group
