@@ -13,35 +13,32 @@
 
 {% block content %}
  {% if lesson_period %}
-  <div class="card">
-   <div class="card-header bg-light text-dark">
-    {% for group in lesson_period.get_groups.all %}
-     <span>{{ group.short_name }}</span>,
-    {% endfor %}
+  <form method="post">
+   {% csrf_token %}
 
-    {{ lesson_period.get_subject.name }},
+   <div class="card">
+    <div class="card-header bg-light text-dark">
+     {% for group in lesson_period.get_groups.all %}
+      <span>{{ group.short_name }}</span>,
+     {% endfor %}
 
-    {% for teacher in lesson_period.get_teachers.all %}
-     {{ teacher.short_name }}
-    {% endfor %}
-   </div>
-   <div class="card-body">
-    <form method="post">
+     {{ lesson_period.get_subject.name }},
+
+     {% for teacher in lesson_period.get_teachers.all %}
+      {{ teacher.short_name }}
+     {% endfor %}
+    </div>
+    <div class="card-body">
      {% csrf_token %}
      {% bootstrap_form lesson_documentation_form %}
-     <input type="hidden" name="action" value="lesson_documentation" />
-     <input type="submit" value="Update" />
-    </form>
+    </div>
    </div>
-  </div>
 
-  <div class="card">
-   <div class="card-header bg-light text-dark">
-    {% blocktrans %}Personal notes{% endblocktrans %}
-   </div>
-   <div class="card-body">
-    <form method="post">
-     {% csrf_token %}
+   <div class="card">
+    <div class="card-header bg-light text-dark">
+     {% blocktrans %}Personal notes{% endblocktrans %}
+    </div>
+    <div class="card-body">
      {{ personal_note_formset.management_form }}
 
      <table class="table table-striped table-bordered table-hover table-condensed table-responsive w-100 d-block d-md-table">
@@ -63,12 +60,10 @@
        </tr>
       {% endfor %}
      </table>
-
-     <input type="hidden" name="action" value="personal_notes" />
-     <input type="submit" value="Update" />
-    </form>
+    </div>
    </div>
-  </div>
+   <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" />
+  </form>
  {% else %}
   <div class="card text-white bg-danger">
    <div class="card-header">
