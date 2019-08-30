@@ -19,8 +19,8 @@
      </div>
      <div class="card-body">
       {% for weekday, periods in periods_by_day.items %}
+       <h3>{{ weekday }}</h3>
        <table class="table table-striped table-bordered table-hover table-responsive-xl">
-        <caption>{{ weekday }}</caption>
         <thead>
          <tr>
           <th>{% blocktrans %}Period{% endblocktrans %}</th>
