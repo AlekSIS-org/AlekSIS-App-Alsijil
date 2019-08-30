@@ -18,6 +18,7 @@ class PersonalNote(SchoolRelated):
 
     class Meta:
         unique_together = [['school', 'lesson_period', 'week', 'person']]
+        ordering = ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period', 'person__last_name', 'person__first_name']
 
 
 class LessonDocumentation(SchoolRelated):
@@ -29,3 +30,4 @@ class LessonDocumentation(SchoolRelated):
 
     class Meta:
         unique_together = [['school', 'lesson_period', 'week']]
+        ordering = ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period']
