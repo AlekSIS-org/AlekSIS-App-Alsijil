@@ -45,7 +45,7 @@
                {{ period.lesson.subject.name }}
              </a>
            </td>
-           <td>{{ period.lesson.teachers|join:', ' }}</td>
+           <td>{{ period.lesson.teacher_names }}</td>
           </tr>
          {% endfor %}
         </tbody>
