@@ -26,7 +26,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     else:
         # Determine current lesson by current date and time
         lesson_period = current_lesson_periods().filter(
-            lesson__teachers=request.user.person).first()
+            Q(lesson__substitutions__teachers=request.user.person) | Q(lesson__teachers=request.user.person)).first()
         wanted_week = current_week()
 
     context['lesson_period'] = lesson_period
