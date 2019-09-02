@@ -36,7 +36,8 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
         # Create or get lesson documentation object; can be empty when first opening lesson
         lesson_documentation, created = LessonDocumentation.objects.get_or_create(
             lesson_period=lesson_period, week=wanted_week)
-        lesson_documentation_form = LessonDocumentationForm(request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
+        lesson_documentation_form = LessonDocumentationForm(
+            request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
         # Create all missing personal notes about members of all groups in lesson
         for group in lesson_period.lesson.groups.all():
@@ -47,7 +48,8 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
         # Create a formset that holds all personal notes for all persons in this lesson
         persons_qs = PersonalNote.objects.filter(
             lesson_period=lesson_period, week=wanted_week)
-        personal_note_formset = PersonalNoteFormSet(request.POST or None, queryset=persons_qs, prefix='personal_notes')
+        personal_note_formset = PersonalNoteFormSet(
+            request.POST or None, queryset=persons_qs, prefix='personal_notes')
 
         if request.method == 'POST':
             if lesson_documentation_form.is_valid():
@@ -87,7 +89,8 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
     periods_by_day = OrderedDict()
     for weekday, periods in sorted(periods_by_day_unsorted.items()):
-        periods_by_day[dict(TimePeriod.WEEKDAY_CHOICES)[weekday]] = sorted(periods, key=lambda p: p.period.period)
+        periods_by_day[dict(TimePeriod.WEEKDAY_CHOICES)[weekday]] = sorted(
+            periods, key=lambda p: p.period.period)
 
     # Add a form to filter the view
     select_form = SelectForm(request.GET or None)

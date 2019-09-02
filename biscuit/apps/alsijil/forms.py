@@ -22,7 +22,8 @@ class PersonalNoteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['person_name'].widget.attrs.update({'class':'alsijil-lesson-personal-note-name'})
+        self.fields['person_name'].widget.attrs.update(
+            {'class': 'alsijil-lesson-personal-note-name'})
         try:
             self.fields['person_name'].initial = str(self.instance.person)
         except:

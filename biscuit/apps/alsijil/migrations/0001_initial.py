@@ -18,15 +18,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PersonalNote',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('week', models.IntegerField()),
                 ('absent', models.BooleanField(default=False)),
                 ('late', models.IntegerField(default=0)),
                 ('excused', models.BooleanField(default=False)),
                 ('remarks', models.CharField(blank=True, max_length=200)),
-                ('lesson_period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
+                ('lesson_period', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Person')),
-                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
+                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school,
+                                             on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
                 'unique_together': {('school', 'lesson_period', 'week', 'person')},
@@ -35,12 +38,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LessonDocumentation',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('week', models.IntegerField()),
                 ('topic', models.CharField(blank=True, max_length=200, verbose_name='Lesson topic')),
                 ('homework', models.CharField(blank=True, max_length=200, verbose_name='Homework')),
-                ('lesson_period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
-                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
+                ('lesson_period', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
+                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school,
+                                             on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
                 'unique_together': {('school', 'lesson_period', 'week')},

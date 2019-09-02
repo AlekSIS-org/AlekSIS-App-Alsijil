@@ -18,16 +18,19 @@ class PersonalNote(SchoolRelated):
 
     class Meta:
         unique_together = [['school', 'lesson_period', 'week', 'person']]
-        ordering = ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period', 'person__last_name', 'person__first_name']
+        ordering = ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday',
+                    'lesson_period__period__period', 'person__last_name', 'person__first_name']
 
 
 class LessonDocumentation(SchoolRelated):
     week = models.IntegerField()
-    lesson_period = models.ForeignKey('chronos.LessonPeriod', models.CASCADE, related_name='documentations')
+    lesson_period = models.ForeignKey(
+        'chronos.LessonPeriod', models.CASCADE, related_name='documentations')
 
     topic = models.CharField(verbose_name=_('Lesson topic'), max_length=200, blank=True)
     homework = models.CharField(verbose_name=_('Homework'), max_length=200, blank=True)
 
     class Meta:
         unique_together = [['school', 'lesson_period', 'week']]
-        ordering = ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period']
+        ordering = ['lesson_period__lesson__date_start', 'week',
+                    'lesson_period__period__weekday', 'lesson_period__period__period']
