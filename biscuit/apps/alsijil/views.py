@@ -81,7 +81,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
     periods_by_day_unsorted = {}
     if group:
-        for act_group in [group] + group.child_groups.all():
+        for act_group in [group] + list(group.child_groups.all()):
             for lesson in act_group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
                 for lesson_period in lesson.lesson_periods.all():
                     periods_by_day_unsorted.setdefault(
