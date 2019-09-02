@@ -24,10 +24,9 @@ class PersonalNoteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['person_name'].widget.attrs.update(
             {'class': 'alsijil-lesson-personal-note-name'})
-        try:
+
+        if self.instance and getattr(self.instance, 'person', None):
             self.fields['person_name'].initial = str(self.instance.person)
-        except:
-            pass
 
 
 class SelectForm(forms.Form):

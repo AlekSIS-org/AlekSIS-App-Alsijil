@@ -2,12 +2,11 @@ from collections import OrderedDict
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
 
-from biscuit.apps.chronos.models import Lesson, LessonPeriod, TimePeriod
+from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
 from biscuit.core.models import Group
 
