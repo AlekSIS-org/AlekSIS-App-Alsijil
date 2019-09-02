@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-27 15:23+0200\n"
+"POT-Creation-Date: 2019-09-02 13:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,6 +22,10 @@ msgstr ""
 msgid "BiscuIT - Alsijil (Class register)"
 msgstr ""
 
+#: forms.py:35
+msgid "Group"
+msgstr ""
+
 #: menus.py:6
 msgid "Class register"
 msgstr ""
@@ -30,71 +34,75 @@ msgstr ""
 msgid "Current lesson"
 msgstr ""
 
-#: models.py:27
-msgid "Lesson topic"
-msgstr ""
-
-#: models.py:28
-msgid "Homework"
-msgstr ""
-
-#: templates/alsijil/group_week.html:6
+#: menus.py:17 templates/alsijil/group_week.html:6
 msgid "Current week"
 msgstr ""
 
-#: templates/alsijil/group_week.html:15
+#: models.py:28
+msgid "Lesson topic"
+msgstr ""
+
+#: models.py:29
+msgid "Homework"
+msgstr ""
+
+#: templates/alsijil/group_week.html:23
 msgid "Week"
 msgstr ""
 
-#: templates/alsijil/group_week.html:26
+#: templates/alsijil/group_week.html:34
 msgid "Period"
 msgstr ""
 
-#: templates/alsijil/group_week.html:27
+#: templates/alsijil/group_week.html:35
 msgid "Subject"
 msgstr ""
 
-#: templates/alsijil/group_week.html:28
+#: templates/alsijil/group_week.html:36
 msgid "Teachers"
 msgstr ""
 
-#: templates/alsijil/group_week.html:48 templates/alsijil/lesson.html:35
+#: templates/alsijil/group_week.html:60 templates/alsijil/lesson.html:39
 msgid "Personal notes"
 msgstr ""
 
-#: templates/alsijil/group_week.html:59
+#: templates/alsijil/group_week.html:71
 msgid "No group selected"
 msgstr ""
 
-#: templates/alsijil/group_week.html:63
+#: templates/alsijil/group_week.html:75
 msgid ""
 "\n"
 "      You must select a group to see the week summary.\n"
 "     "
 msgstr ""
 
-#: templates/alsijil/lesson.html:6
+#: templates/alsijil/lesson.html:11
 msgid "Lesson documentation"
 msgstr ""
 
-#: templates/alsijil/lesson.html:44
+#: templates/alsijil/lesson.html:46
 msgid "Person"
 msgstr ""
 
-#: templates/alsijil/lesson.html:45
+#: templates/alsijil/lesson.html:47
 msgid "Absent"
 msgstr ""
 
-#: templates/alsijil/lesson.html:46
+#: templates/alsijil/lesson.html:48
 msgid "Tardiness"
 msgstr ""
 
-#: templates/alsijil/lesson.html:47
+#: templates/alsijil/lesson.html:49
 msgid "Excused"
 msgstr ""
 
-#: templates/alsijil/lesson.html:48
+#: templates/alsijil/lesson.html:50
 msgid "Remarks"
+msgstr ""
+
+#: templates/alsijil/lesson.html:65
+msgid "Save"
 msgstr ""
 
 #: templates/alsijil/lesson.html:70
