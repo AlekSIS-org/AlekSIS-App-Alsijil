@@ -31,6 +31,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
+    context['day'] = week_days(wanted_week)[lesson_period.period.weekday]
 
     if lesson_period:
         # Create or get lesson documentation object; can be empty when first opening lesson
