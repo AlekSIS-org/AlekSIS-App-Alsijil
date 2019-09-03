@@ -9,7 +9,7 @@ from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
-from biscuit.core.models import Group
+from biscuit.core.models import Group, Person
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation, PersonalNote
