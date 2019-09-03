@@ -29,13 +29,13 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
             Q(substitutions__teachers=request.user.person) | Q(lesson__teachers=request.user.person)).first()
         wanted_week = current_week()
 
-    context['lesson_period'] = lesson_period
-    context['week'] = wanted_week
-    context['day'] = week_days(wanted_week)[lesson_period.period.weekday]
-
     if not lesson_period:
         #XXX TODO: nice error page (“no lesson currently running for you?” or so)
         return HttpResponseNotFound("no current lesson found for you")
+
+    context['lesson_period'] = lesson_period
+    context['week'] = wanted_week
+    context['day'] = week_days(wanted_week)[lesson_period.period.weekday]
 
     # Create or get lesson documentation object; can be empty when first opening lesson
     lesson_documentation, created = LessonDocumentation.objects.get_or_create(
