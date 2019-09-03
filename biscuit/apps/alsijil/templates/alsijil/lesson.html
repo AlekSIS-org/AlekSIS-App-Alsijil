@@ -9,7 +9,17 @@
 {% endblock %}
 
 {% block page_title %}
- {% blocktrans %}Lesson documentation{% endblocktrans %}
+ {{ day }} - 
+
+ {% for group in lesson_period.get_groups.all %}
+  <span>{{ group.short_name }}</span>,
+ {% endfor %},
+
+ {{ lesson_period.get_subject.name }},
+
+ {% for teacher in lesson_period.get_teachers.all %}
+  {{ teacher.short_name }}
+ {% endfor %}
 {% endblock %}
 
 {% block content %}
@@ -19,15 +29,7 @@
 
    <div class="card">
     <div class="card-header bg-light text-dark">
-     {% for group in lesson_period.get_groups.all %}
-      <span>{{ group.short_name }}</span>,
-     {% endfor %}
-
-     {{ lesson_period.get_subject.name }},
-
-     {% for teacher in lesson_period.get_teachers.all %}
-      {{ teacher.short_name }}
-     {% endfor %}
+     {% blocktrans %}Lesson documentation{% endblocktrans %}
     </div>
     <div class="card-body">
      {% csrf_token %}

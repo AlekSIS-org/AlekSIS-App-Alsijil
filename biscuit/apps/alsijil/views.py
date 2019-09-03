@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
@@ -30,6 +31,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
+    context['day'] = week_days(wanted_week)[lesson_period.period.weekday]
 
     if lesson_period:
         # Create or get lesson documentation object; can be empty when first opening lesson
@@ -40,7 +42,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
         # Create all missing personal notes about members of all groups in lesson
         for group in lesson_period.lesson.groups.all():
-            for person in group.members.all():
+            for person in group.members.filter(is_active=True):
                 note, created = PersonalNote.objects.get_or_create(person=person, lesson_period=lesson_period,
                                                                    week=wanted_week)
 
@@ -63,6 +65,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
 
 @login_required
+@cache_page(60 * 60 * 4)
 def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse:
     context = {}
 
@@ -81,10 +84,11 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
     periods_by_day_unsorted = {}
     if group:
-        for lesson in group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
-            for lesson_period in lesson.lesson_periods.all():
-                periods_by_day_unsorted.setdefault(
-                    lesson_period.period.weekday, []).append(lesson_period)
+        for act_group in [group] + list(group.child_groups.all()):
+            for lesson in act_group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
+                for lesson_period in lesson.lesson_periods.all():
+                    periods_by_day_unsorted.setdefault(
+                        lesson_period.period.weekday, []).append(lesson_period)
 
     periods_by_day = OrderedDict()
     for weekday, periods in sorted(periods_by_day_unsorted.items()):
