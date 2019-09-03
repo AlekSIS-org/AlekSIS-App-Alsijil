@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
@@ -41,13 +41,17 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
             request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
         # Create all missing personal notes about members of all groups in lesson
-        missing_persons = Person.objects.filter(
+        missing_persons = Person.objects.annotate(
+            no_personal_notes=~Exists(PersonalNote.objects.filter(
+                week=wanted_week,
+                lesson_period=lesson_period,
+                person__pk=OuterRef('pk')
+            ))
+        ).filter(
             member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
-            is_active=True
-        ).exclude(
-            personal_notes__week=wanted_week,
-            personal_notes__lesson_period=lesson_period
-        ).all()
+            is_active=True,
+            no_personal_notes=True
+        )
         PersonalNote.objects.bulk_create([
             PersonalNote(person=person, lesson_period=lesson_period,
                          week=wanted_wek) for person in missing_persons
