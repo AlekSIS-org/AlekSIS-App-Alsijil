@@ -2,9 +2,7 @@
 {% extends "core/base.html" %}
 {% load bootstrap4 font_awesome i18n week_helpers %}
 
-{% block bootstrap4_extra_head %}
- <title>{% block bootstrap4_title %}{% blocktrans%}BiscuIT - Current week{% endblocktrans %}{% endblock %}</title>
-{% endblock %}
+{% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} - {{ block.super }}{% endblock %}
 
 {% block page_title %}
  {% blocktrans %}Current week{% endblocktrans %}
