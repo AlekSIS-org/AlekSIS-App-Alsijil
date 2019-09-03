@@ -33,47 +33,47 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     context['week'] = wanted_week
     context['day'] = week_days(wanted_week)[lesson_period.period.weekday]
 
-    if lesson_period:
-        # Create or get lesson documentation object; can be empty when first opening lesson
-        lesson_documentation, created = LessonDocumentation.objects.get_or_create(
-            lesson_period=lesson_period, week=wanted_week)
-        lesson_documentation_form = LessonDocumentationForm(
-            request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
-
-        # Create all missing personal notes about members of all groups in lesson
-        missing_persons = Person.objects.annotate(
-            no_personal_notes=~Exists(PersonalNote.objects.filter(
-                week=wanted_week,
-                lesson_period=lesson_period,
-                person__pk=OuterRef('pk')
-            ))
-        ).filter(
-            member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
-            is_active=True,
-            no_personal_notes=True
-        )
-        PersonalNote.objects.bulk_create([
-            PersonalNote(person=person, lesson_period=lesson_period,
-                         week=wanted_week) for person in missing_persons
-        ])
-
-        # Create a formset that holds all personal notes for all persons in this lesson
-        persons_qs = PersonalNote.objects.select_related('person').filter(
-            lesson_period=lesson_period, week=wanted_week)
-        personal_note_formset = PersonalNoteFormSet(
-            request.POST or None, queryset=persons_qs, prefix='personal_notes')
-
-        if request.method == 'POST':
-            if lesson_documentation_form.is_valid():
-                lesson_documentation_form.save()
-            if personal_note_formset.is_valid():
-                personal_note_formset.save()
-
-        context['lesson_documentation_form'] = lesson_documentation_form
-        context['personal_note_formset'] = personal_note_formset
-    else:
+    if not lesson_period:
         #XXX TODO: nice error page (“no lesson currently running for you?” or so)
         return HttpResponseNotFound("no current lesson found for you")
+
+    # Create or get lesson documentation object; can be empty when first opening lesson
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+        lesson_period=lesson_period, week=wanted_week)
+    lesson_documentation_form = LessonDocumentationForm(
+        request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
+
+    # Create all missing personal notes about members of all groups in lesson
+    missing_persons = Person.objects.annotate(
+        no_personal_notes=~Exists(PersonalNote.objects.filter(
+            week=wanted_week,
+            lesson_period=lesson_period,
+            person__pk=OuterRef('pk')
+        ))
+    ).filter(
+        member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
+        is_active=True,
+        no_personal_notes=True
+    )
+    PersonalNote.objects.bulk_create([
+        PersonalNote(person=person, lesson_period=lesson_period,
+                     week=wanted_week) for person in missing_persons
+    ])
+
+    # Create a formset that holds all personal notes for all persons in this lesson
+    persons_qs = PersonalNote.objects.select_related('person').filter(
+        lesson_period=lesson_period, week=wanted_week)
+    personal_note_formset = PersonalNoteFormSet(
+        request.POST or None, queryset=persons_qs, prefix='personal_notes')
+
+    if request.method == 'POST':
+        if lesson_documentation_form.is_valid():
+            lesson_documentation_form.save()
+        if personal_note_formset.is_valid():
+            personal_note_formset.save()
+
+    context['lesson_documentation_form'] = lesson_documentation_form
+    context['personal_note_formset'] = personal_note_formset
 
     return render(request, 'alsijil/lesson.html', context)
 
