@@ -3,7 +3,7 @@ from typing import Optional
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef, Q
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 
@@ -71,6 +71,9 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
         context['lesson_documentation_form'] = lesson_documentation_form
         context['personal_note_formset'] = personal_note_formset
+    else:
+        #XXX TODO: nice error page (“no lesson currently running for you?” or so)
+        return HttpResponseNotFound("no current lesson found for you")
 
     return render(request, 'alsijil/lesson.html', context)
 
