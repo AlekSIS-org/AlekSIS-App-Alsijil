@@ -41,19 +41,17 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
             request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
         # Create all missing personal notes about members of all groups in lesson
-
-        missing_pks = Person.objects.filter(
+        missing_persons = Person.objects.filter(
             member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
             is_active=True
         ).exclude(
             personal_notes__week=wanted_week,
             personal_notes__lesson_period=lesson_period
-        ).values_list('pk', flat=True)
-
-        for group in lesson_period.lesson.groups.all():
-            for person in group.members.filter(is_active=True):
-                note, created = PersonalNote.objects.get_or_create(person=person, lesson_period=lesson_period,
-                                                                   week=wanted_week)
+        ).all()
+        PersonalNote.objects.bulk_create([
+            PersonalNote(person=person, lesson_period=lesson_period,
+                         week=wanted_wek) for person in missing_persons
+        ])
 
         # Create a formset that holds all personal notes for all persons in this lesson
         persons_qs = PersonalNote.objects.filter(
