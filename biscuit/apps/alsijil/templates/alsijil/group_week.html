@@ -2,7 +2,7 @@
 {% extends "core/base.html" %}
 {% load bootstrap4 font_awesome i18n week_helpers %}
 
-{% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} - {{ block.super }}{% endblock %}
+{% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} — {{ block.super }}{% endblock %}
 
 {% block page_title %}
  {% blocktrans %}Current week{% endblocktrans %}
@@ -22,8 +22,7 @@
     <div class="card">
      <div class="card-header bg-light text-dark">
       {% blocktrans %}Week{% endblocktrans %}
-      {{ week }} ({{ week|week_start }} - {{ week|week_end }})
-      ,
+      {{ week }} ({{ week|week_start }} — {{ week|week_end }}),
       {{ group.name }}
      </div>
      <div class="card-body">
