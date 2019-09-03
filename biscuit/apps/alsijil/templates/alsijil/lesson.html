@@ -7,6 +7,8 @@
  <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
 {% endblock %}
 
+{% block bootstrap4_title %}{% blocktrans%}Lesson documentation{% endblocktrans %} - {{ block.super }}{% endblock %}
+
 {% block page_title %}
  {{ day }} - 
 
