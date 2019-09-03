@@ -54,7 +54,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
         )
         PersonalNote.objects.bulk_create([
             PersonalNote(person=person, lesson_period=lesson_period,
-                         week=wanted_wek) for person in missing_persons
+                         week=wanted_week) for person in missing_persons
         ])
 
         # Create a formset that holds all personal notes for all persons in this lesson
