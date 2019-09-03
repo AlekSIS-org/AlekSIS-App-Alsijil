@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
 from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
@@ -63,6 +64,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
 
 @login_required
+@cache_page(60 * 60 * 4)
 def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse:
     context = {}
 
