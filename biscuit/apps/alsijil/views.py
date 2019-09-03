@@ -40,7 +40,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
         # Create all missing personal notes about members of all groups in lesson
         for group in lesson_period.lesson.groups.all():
-            for person in group.members.all():
+            for person in group.members.filter(is_active=True):
                 note, created = PersonalNote.objects.get_or_create(person=person, lesson_period=lesson_period,
                                                                    week=wanted_week)
 
