@@ -99,7 +99,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     periods_by_day_unsorted = {}
     if group:
         for act_group in [group] + list(group.child_groups.all()):
-            for lesson in act_group.lessons.select_related(
+            for lesson in act_group.lessons.prefetch_related(
                 'lesson_period',
                 'lesson_period__period',
                 'lesson_period__period__lesson__teachers'
