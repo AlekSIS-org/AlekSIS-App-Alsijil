@@ -81,7 +81,6 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
 
 @login_required
-@cache_page(60 * 60 * 4)
 def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse:
     context = {}
 
