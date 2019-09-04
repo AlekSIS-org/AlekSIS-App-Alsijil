@@ -28,7 +28,7 @@
           </div>
           <div class="card-body">
             {% regroup lesson_periods by period.weekday as periods_by_day %}
-            {% for weekday, periods in periods_by_day.items %}
+            {% for weekday, periods in periods_by_day %}
               <h3>{{ weekday }}</h3>
               <table class="table table-striped table-bordered table-hover table-responsive-xl">
                 <thead>
