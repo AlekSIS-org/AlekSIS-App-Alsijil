@@ -81,7 +81,7 @@
               <p class="card-text">
                 {% trans "Summed up tardiness" %}: {{ person.tardiness }}
               </p>
-              {% for note in person.personal_notes.all %}
+              {% for note in person.personal_notes|only_week:week %}
                 {% if note.remarks %}
                   <blockquote class="blockquote mb-0">
                     {{ note.remarks }}
