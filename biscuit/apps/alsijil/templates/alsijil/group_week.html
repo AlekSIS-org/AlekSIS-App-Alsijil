@@ -60,9 +60,25 @@
         <div class="card-header bg-light text-dark">
           {% blocktrans %}Personal notes{% endblocktrans %}
         </div>
-        <div class="card-body">
-          Not implemented yet.
-        </div>
+        {% for person in persons %}
+          <div class="card-body">
+            <h5 class="card-title">{{ person.full_name }}</h5>
+            <p class="card-text">
+              {% trans "Absent" %}: {{ person.absences }}
+              ({{ person.unexcused }} {% trans "unexcused" %})
+            </p>
+            <p class="card-text">
+              {% trans "Summed up tardiness" %}: {{ person.tardiness }}
+            </p>
+            {% for note in person.personal_notes %}
+              {% if note.remarks %}
+                <p class="card-text">
+                  {{ note.remarks }}
+                </p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>

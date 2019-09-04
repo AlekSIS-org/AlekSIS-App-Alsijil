@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -101,6 +101,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     if not group:
         raise Http404(_('You must select a group to see the week summary.'))
 
+    # Get all lesson periods for the selected group
     lesson_periods = LessonPeriod.objects.filter(
         lesson__date_start__lte=week_start,
         lesson__date_end__gte=week_end
@@ -114,12 +115,26 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
         Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group']))
     )
 
+    # Aggregate all personal notes for this group and week
+    persons = Person.objects.filter(
+        is_active=True
+    ).filter(
+        Q(member_of=group) | Q(member_of__parent_groups=group)
+    ).prefetch_related(
+        'personal_notes'
+    ).annotate(
+        absences=Count('personal_notes__absent', filter=Q(week=wanted_week, absent=True)),
+        unexcused=Count('personal_notes__absent', filter=Q(week=wanted_week, absent=True, excused=False)),
+        tardiness=Sum('personal_notes__tardiness', filter=Q(week=wanted_week))
+    )
+
     # Add a form to filter the view
     select_form = SelectForm(request.GET or None)
 
     context['week'] = wanted_week
     context['group'] = group
     context['lesson_periods'] = lesson_periods
+    context['persons'] = persons
     context['select_form'] = select_form
 
     return render(request, 'alsijil/group_week.html', context)
