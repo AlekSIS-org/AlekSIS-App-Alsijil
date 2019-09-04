@@ -44,7 +44,7 @@
                       {% if period.has_documentation %}
                         table-success
                       {% else %}
-                        {% weekday_to_date week weekday as current_date %}
+                        {% weekday_to_date week period.period.weekday as current_date %}
                         {% today as today %}
                         {% if current_date < today %}
                           table-danger
