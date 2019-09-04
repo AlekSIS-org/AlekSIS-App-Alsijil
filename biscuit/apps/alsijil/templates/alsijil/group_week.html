@@ -87,7 +87,7 @@
                     {{ note.remarks }}
                     <footer class="blockquote-footer">
                       {% weekday_to_date week note.lesson_period.period.weekday as note_date %}
-                      {{ note_date }}, {{ note.lesson_period.subject.name }}
+                      {{ note_date }}, {{ note.lesson_period.lesson.subject.name }}
                     </footer>
                   </blockquote>
                 {% endif %}
