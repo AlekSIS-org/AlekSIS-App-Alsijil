@@ -17,79 +17,94 @@
     <input type="submit" value="Select" />
   </form>
 
-  <div class="row">
-    <div class="col-md-7">
-      <div class="card">
-        <div class="card-header bg-light text-dark">
-          {% blocktrans %}Week{% endblocktrans %}
-          {{ week }} ({{ week|week_start }} — {{ week|week_end }}),
-          {{ group.name }}
-        </div>
-        <div class="card-body">
-          {% regroup lesson_periods by period.weekday as periods_by_day %}
-          {% for weekday, periods in periods_by_day.items %}
-            <h3>{{ weekday }}</h3>
-            <table class="table table-striped table-bordered table-hover table-responsive-xl">
-              <thead>
-                <tr>
-                  <th>{% blocktrans %}Period{% endblocktrans %}</th>
-                  <th>{% blocktrans %}Subject{% endblocktrans %}</th>
-                  <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for period in periods %}
-                  <tr class="
-                    {% if period.has_documentation %}
-                      table-success
-                    {% else %}
-                      {% weekday_to_date week weekday as current_date %}
-                      {% today as today %}
-                      {% if current_date < today %}
-                        table-danger
-                      {% endif %}
-                    {% endif %}
-                  ">
-                    <td>{{ period.period.period }}</td>
-                    <td>
-                      <a href="{% url 'lesson_by_week_and_period' week period.id %}">
-                        {{ period.lesson.subject.name }}
-                      </a>
-                    </td>
-                    <td>{{ period.lesson.teacher_names }}</td>
+  {% if group %}
+    <div class="row">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Week{% endblocktrans %}
+            {{ week }} ({{ week|week_start }} — {{ week|week_end }}),
+            {{ group.name }}
+          </div>
+          <div class="card-body">
+            {% regroup lesson_periods by period.weekday as periods_by_day %}
+            {% for weekday, periods in periods_by_day.items %}
+              <h3>{{ weekday }}</h3>
+              <table class="table table-striped table-bordered table-hover table-responsive-xl">
+                <thead>
+                  <tr>
+                    <th>{% blocktrans %}Period{% endblocktrans %}</th>
+                    <th>{% blocktrans %}Subject{% endblocktrans %}</th>
+                    <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for period in periods %}
+                    <tr class="
+                      {% if period.has_documentation %}
+                        table-success
+                      {% else %}
+                        {% weekday_to_date week weekday as current_date %}
+                        {% today as today %}
+                        {% if current_date < today %}
+                          table-danger
+                        {% endif %}
+                      {% endif %}
+                    ">
+                      <td>{{ period.period.period }}</td>
+                      <td>
+                        <a href="{% url 'lesson_by_week_and_period' week period.id %}">
+                          {{ period.lesson.subject.name }}
+                        </a>
+                      </td>
+                      <td>{{ period.lesson.teacher_names }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Personal notes{% endblocktrans %}
+          </div>
+          {% for person in persons %}
+            <div class="card-body">
+              <h5 class="card-title">{{ person.full_name }}</h5>
+              <p class="card-text">
+                {% trans "Absent" %}: {{ person.absences }}
+                ({{ person.unexcused }} {% trans "unexcused" %})
+              </p>
+              <p class="card-text">
+                {% trans "Summed up tardiness" %}: {{ person.tardiness }}
+              </p>
+              {% for note in person.personal_notes %}
+                {% if note.remarks %}
+                  <p class="card-text">
+                    {{ note.remarks }}
+                  </p>
+                {% endif %}
+              {% endfor %}
+            </div>
           {% endfor %}
         </div>
       </div>
     </div>
-    <div class="col-md-5">
-      <div class="card">
-        <div class="card-header bg-light text-dark">
-          {% blocktrans %}Personal notes{% endblocktrans %}
-        </div>
-        {% for person in persons %}
-          <div class="card-body">
-            <h5 class="card-title">{{ person.full_name }}</h5>
-            <p class="card-text">
-              {% trans "Absent" %}: {{ person.absences }}
-              ({{ person.unexcused }} {% trans "unexcused" %})
-            </p>
-            <p class="card-text">
-              {% trans "Summed up tardiness" %}: {{ person.tardiness }}
-            </p>
-            {% for note in person.personal_notes %}
-              {% if note.remarks %}
-                <p class="card-text">
-                  {{ note.remarks }}
-                </p>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endfor %}
+  {% else %}
+    <div class="card text-white bg-danger">
+      <div class="card-header">
+        {% blocktrans %}No group selected{% endblocktrans %}
+      </div>
+      <div class="card-body">
+        <p>
+          {% blocktrans %}
+            You must select a group to see the week summary.
+          {% endblocktrans %}
+        </p>
       </div>
     </div>
-  </div>
+  {% endif %}
 {% endblock %}
