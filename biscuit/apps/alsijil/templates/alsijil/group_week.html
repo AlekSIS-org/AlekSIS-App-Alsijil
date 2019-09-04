@@ -83,9 +83,13 @@
               </p>
               {% for note in person.personal_notes.all %}
                 {% if note.remarks %}
-                  <p class="card-text">
+                  <blockquote class="blockquote mb-0">
                     {{ note.remarks }}
-                  </p>
+                    <footer class="blockquote-footer">
+                      {% weekday_to_date week note.lesson_period.period.weekday as note_date %}
+                      {{ note_date }}, {{ note.lesson_period.subject.name }}
+                    </footer>
+                  </blockquote>
                 {% endif %}
               {% endfor %}
             </div>
