@@ -24,63 +24,47 @@
 {% endblock %}
 
 {% block content %}
- {% if lesson_period %}
-  <form method="post">
-   {% csrf_token %}
+ <form method="post">
+  {% csrf_token %}
 
-   <div class="card">
-    <div class="card-header bg-light text-dark">
-     {% blocktrans %}Lesson documentation{% endblocktrans %}
-    </div>
-    <div class="card-body">
-     {% csrf_token %}
-     {% bootstrap_form lesson_documentation_form %}
-    </div>
-   </div>
-
-   <div class="card">
-    <div class="card-header bg-light text-dark">
-     {% blocktrans %}Personal notes{% endblocktrans %}
-    </div>
-    <div class="card-body">
-     {{ personal_note_formset.management_form }}
-
-     <table class="table table-striped table-bordered table-hover table-responsive-xl">
-      <tr>
-       <th>{% blocktrans %}Person{% endblocktrans %}</th>
-       <th>{% blocktrans %}Absent{% endblocktrans %}</th>
-       <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
-       <th>{% blocktrans %}Excused{% endblocktrans %}</th>
-       <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
-      </tr>
-      {% for form in personal_note_formset %}
-       {{ form.id }}
-       <tr>
-        <td>{{ form.person_name }}</td>
-        <td>{{ form.absent }}</td>
-        <td>{{ form.late }}</td>
-        <td>{{ form.excused }}</td>
-        <td>{{ form.remarks }}</td>
-       </tr>
-      {% endfor %}
-     </table>
-    </div>
-   </div>
-   <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" />
-  </form>
- {% else %}
-  <div class="card text-white bg-danger">
-   <div class="card-header">
-    {% blocktrans %}No lesson found{% endblocktrans %}
+  <div class="card">
+   <div class="card-header bg-light text-dark">
+    {% blocktrans %}Lesson documentation{% endblocktrans %}
    </div>
    <div class="card-body">
-    <p>
-     {% blocktrans %}
-      You either selected an invalid lesson or there
-      is currently no lesson in progress.
-     {% endblocktrans %}
-    </p>
+    {% csrf_token %}
+    {% bootstrap_form lesson_documentation_form %}
    </div>
   </div>
- {% endif %}
+
+  <div class="card">
+   <div class="card-header bg-light text-dark">
+    {% blocktrans %}Personal notes{% endblocktrans %}
+   </div>
+   <div class="card-body">
+    {{ personal_note_formset.management_form }}
+
+    <table class="table table-striped table-bordered table-hover table-responsive-xl">
+     <tr>
+      <th>{% blocktrans %}Person{% endblocktrans %}</th>
+      <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+      <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+      <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+      <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+     </tr>
+     {% for form in personal_note_formset %}
+      {{ form.id }}
+      <tr>
+       <td>{{ form.person_name }}</td>
+       <td>{{ form.absent }}</td>
+       <td>{{ form.late }}</td>
+       <td>{{ form.excused }}</td>
+       <td>{{ form.remarks }}</td>
+      </tr>
+     {% endfor %}
+    </table>
+   </div>
+  </div>
+  <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" />
+ </form>
 {% endblock %}

@@ -3,8 +3,9 @@ from typing import Optional
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef, Q
-from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
@@ -30,8 +31,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
         wanted_week = current_week()
 
     if not lesson_period:
-        #XXX TODO: nice error page (“no lesson currently running for you?” or so)
-        return HttpResponseNotFound("no current lesson found for you")
+        raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
 
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
