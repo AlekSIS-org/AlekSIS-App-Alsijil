@@ -135,7 +135,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
                 personal_notes__absent=True,
                 personal_notes__excused=False
             )),
-            tardiness=Sum('personal_notes__tardiness', filter=Q(
+            tardiness=Sum('personal_notes__late', filter=Q(
                 personal_notes__week=wanted_week
             ))
         )
