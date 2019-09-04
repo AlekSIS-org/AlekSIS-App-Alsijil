@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('excused', models.BooleanField(default=False)),
                 ('remarks', models.CharField(blank=True, max_length=200)),
                 ('lesson_period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Person')),
+                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='personal_notes', to='core.Person')),
                 ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
