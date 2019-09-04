@@ -126,9 +126,18 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
         ).prefetch_related(
             'personal_notes'
         ).annotate(
-            absences=Count('personal_notes__absent', filter=Q(week=wanted_week, absent=True)),
-            unexcused=Count('personal_notes__absent', filter=Q(week=wanted_week, absent=True, excused=False)),
-            tardiness=Sum('personal_notes__tardiness', filter=Q(week=wanted_week))
+            absences=Count('personal_notes__absent', filter=Q(
+                personal_notes__week=wanted_week,
+                personal_notes__absent=True
+            )),
+            unexcused=Count('personal_notes__absent', filter=Q(
+                personal_notes__week=wanted_week,
+                personal_notes__absent=True,
+                personal_notes__excused=False
+            )),
+            tardiness=Sum('personal_notes__tardiness', filter=Q(
+                personal_notes__week=wanted_week
+            ))
         )
     else:
         lesson_periods = None
