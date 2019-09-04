@@ -104,8 +104,8 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     # Get all lesson periods for the selected group
     lesson_periods = LessonPeriod.objects.annotate(
         has_documentation=Exists(LessonDocumentation.objects.filter(
-            lesson_period=OuterRef('pk'),
-            ~Q(topic__exact='')
+            ~Q(topic__exact=''),
+            lesson_period=OuterRef('pk')
         ))
     ).filter(
         lesson__date_start__lte=week_start,
