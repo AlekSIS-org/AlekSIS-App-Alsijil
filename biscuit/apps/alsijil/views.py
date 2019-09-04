@@ -98,25 +98,28 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     else:
         group = None
 
-    periods_by_day_unsorted = {}
-    if group:
-        for act_group in [group] + list(group.child_groups.all()):
-            for lesson in act_group.lessons.filter(date_start__lte=week_start, date_end__gte=week_end):
-                for lesson_period in lesson.lesson_periods.all():
-                    periods_by_day_unsorted.setdefault(
-                        lesson_period.period.weekday, []).append(lesson_period)
+    if not group:
+        raise Http404(_('You must select a group to see the week summary.'))
 
-    periods_by_day = OrderedDict()
-    for weekday, periods in sorted(periods_by_day_unsorted.items()):
-        periods_by_day[dict(TimePeriod.WEEKDAY_CHOICES)[weekday]] = sorted(
-            periods, key=lambda p: p.period.period)
+    lesson_periods = LessonPeriod.objects.filter(
+        lesson__date_start__lte=week_start,
+        lesson__date_end__gte=week_end
+    ).select_related(
+        'lesson', 'lesson__subject', 'period', 'room'
+    ).prefetch_related(
+        'lesson__groups', 'lesson__teachers', 'substitutions'
+    ).extra(
+        select={'_week': wanted_week}
+    ).filter(
+        Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group']))
+    )
 
     # Add a form to filter the view
     select_form = SelectForm(request.GET or None)
 
     context['week'] = wanted_week
     context['group'] = group
-    context['periods_by_day'] = periods_by_day
+    context['lesson_periods'] = lesson_periods
     context['select_form'] = select_form
 
     return render(request, 'alsijil/group_week.html', context)
