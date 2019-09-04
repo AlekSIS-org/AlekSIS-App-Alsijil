@@ -43,7 +43,11 @@
                     {% if period.has_documentation %}
                       table-success
                     {% else %}
-                      table-warning
+                      {% weekday_to_date week weekday as current_date %}
+                      {% today as today %}
+                      {% if current_date < today %}
+                        table-danger
+                      {% endif %}
                     {% endif %}
                   ">
                     <td>{{ period.period.period }}</td>
