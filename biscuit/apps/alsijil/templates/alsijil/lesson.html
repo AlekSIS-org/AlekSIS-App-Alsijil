@@ -3,68 +3,68 @@
 {% load bootstrap4 i18n static %}
 
 {% block bootstrap4_extra_head %}
- {{ block.super }}
- <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
 {% endblock %}
 
 {% block bootstrap4_title %}{% blocktrans%}Lesson documentation{% endblocktrans %} - {{ block.super }}{% endblock %}
 
 {% block page_title %}
- {{ day }} - 
+  {{ day }} -
 
- {% for group in lesson_period.get_groups.all %}
-  <span>{{ group.short_name }}</span>,
- {% endfor %},
+  {% for group in lesson_period.get_groups.all %}
+    <span>{{ group.short_name }}</span>,
+  {% endfor %},
 
- {{ lesson_period.get_subject.name }},
+  {{ lesson_period.get_subject.name }},
 
- {% for teacher in lesson_period.get_teachers.all %}
-  {{ teacher.short_name }}
- {% endfor %}
+  {% for teacher in lesson_period.get_teachers.all %}
+    {{ teacher.short_name }}
+  {% endfor %}
 {% endblock %}
 
 {% block content %}
- <form method="post">
-  {% csrf_token %}
-
-  <div class="card">
-   <div class="card-header bg-light text-dark">
-    {% blocktrans %}Lesson documentation{% endblocktrans %}
-   </div>
-   <div class="card-body">
+  <form method="post">
     {% csrf_token %}
-    {% bootstrap_form lesson_documentation_form %}
-   </div>
-  </div>
 
-  <div class="card">
-   <div class="card-header bg-light text-dark">
-    {% blocktrans %}Personal notes{% endblocktrans %}
-   </div>
-   <div class="card-body">
-    {{ personal_note_formset.management_form }}
+    <div class="card">
+      <div class="card-header bg-light text-dark">
+        {% blocktrans %}Lesson documentation{% endblocktrans %}
+      </div>
+      <div class="card-body">
+        {% csrf_token %}
+        {% bootstrap_form lesson_documentation_form %}
+      </div>
+    </div>
 
-    <table class="table table-striped table-bordered table-hover table-responsive-xl">
-     <tr>
-      <th>{% blocktrans %}Person{% endblocktrans %}</th>
-      <th>{% blocktrans %}Absent{% endblocktrans %}</th>
-      <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
-      <th>{% blocktrans %}Excused{% endblocktrans %}</th>
-      <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
-     </tr>
-     {% for form in personal_note_formset %}
-      {{ form.id }}
-      <tr>
-       <td>{{ form.person_name }}</td>
-       <td>{{ form.absent }}</td>
-       <td>{{ form.late }}</td>
-       <td>{{ form.excused }}</td>
-       <td>{{ form.remarks }}</td>
-      </tr>
-     {% endfor %}
-    </table>
-   </div>
-  </div>
-  <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" />
- </form>
+    <div class="card">
+      <div class="card-header bg-light text-dark">
+        {% blocktrans %}Personal notes{% endblocktrans %}
+      </div>
+      <div class="card-body">
+        {{ personal_note_formset.management_form }}
+
+        <table class="table table-striped table-bordered table-hover table-responsive-xl">
+          <tr>
+            <th>{% blocktrans %}Person{% endblocktrans %}</th>
+            <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+            <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+            <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+            <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+          </tr>
+          {% for form in personal_note_formset %}
+            {{ form.id }}
+            <tr>
+              <td>{{ form.person_name }}</td>
+              <td>{{ form.absent }}</td>
+              <td>{{ form.late }}</td>
+              <td>{{ form.excused }}</td>
+              <td>{{ form.remarks }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+    <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" />
+  </form>
 {% endblock %}

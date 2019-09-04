@@ -1,82 +1,83 @@
 {# -*- engine:django -*- #}
+
 {% extends "core/base.html" %}
 {% load bootstrap4 font_awesome i18n week_helpers %}
 
 {% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} — {{ block.super }}{% endblock %}
 
 {% block page_title %}
- {% blocktrans %}Current week{% endblocktrans %}
+  {% blocktrans %}Current week{% endblocktrans %}
 {% endblock %}
 
 {% block content %}
- <form method="get">
-  <ul id="timetable_select_form">
-   {{ select_form.as_ul }}
-  </ul>
-  <input type="submit" value="Select" />
- </form>
+  <form method="get">
+    <ul id="timetable_select_form">
+      {{ select_form.as_ul }}
+    </ul>
+    <input type="submit" value="Select" />
+  </form>
 
- {% if group %}
-  <div class="row">
-   <div class="col-md-7">
-    <div class="card">
-     <div class="card-header bg-light text-dark">
-      {% blocktrans %}Week{% endblocktrans %}
-      {{ week }} ({{ week|week_start }} — {{ week|week_end }}),
-      {{ group.name }}
-     </div>
-     <div class="card-body">
-      {% for weekday, periods in periods_by_day.items %}
-       <h3>{{ weekday }}</h3>
-       <table class="table table-striped table-bordered table-hover table-responsive-xl">
-        <thead>
-         <tr>
-          <th>{% blocktrans %}Period{% endblocktrans %}</th>
-          <th>{% blocktrans %}Subject{% endblocktrans %}</th>
-          <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
-         </tr>
-        </thead>
-        <tbody>
-         {% for period in periods %}
-          <tr>
-           <td>{{ period.period.period }}</td>
-           <td>
-             <a href="{% url 'lesson_by_week_and_period' week period.id %}">
-               {{ period.lesson.subject.name }}
-             </a>
-           </td>
-           <td>{{ period.lesson.teacher_names }}</td>
-          </tr>
-         {% endfor %}
-        </tbody>
-       </table>
-      {% endfor %}
-     </div>
+  {% if group %}
+    <div class="row">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Week{% endblocktrans %}
+            {{ week }} ({{ week|week_start }} — {{ week|week_end }}),
+            {{ group.name }}
+          </div>
+          <div class="card-body">
+            {% for weekday, periods in periods_by_day.items %}
+              <h3>{{ weekday }}</h3>
+              <table class="table table-striped table-bordered table-hover table-responsive-xl">
+                <thead>
+                  <tr>
+                    <th>{% blocktrans %}Period{% endblocktrans %}</th>
+                    <th>{% blocktrans %}Subject{% endblocktrans %}</th>
+                    <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for period in periods %}
+                    <tr>
+                      <td>{{ period.period.period }}</td>
+                      <td>
+                        <a href="{% url 'lesson_by_week_and_period' week period.id %}">
+                          {{ period.lesson.subject.name }}
+                        </a>
+                      </td>
+                      <td>{{ period.lesson.teacher_names }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Personal notes{% endblocktrans %}
+          </div>
+          <div class="card-body">
+            Not implemented yet.
+          </div>
+        </div>
+      </div>
     </div>
-   </div>
-   <div class="col-md-5">
-    <div class="card">
-     <div class="card-header bg-light text-dark">
-      {% blocktrans %}Personal notes{% endblocktrans %}
-     </div>
-     <div class="card-body">
-      Not implemented yet.
-     </div>
+  {% else %}
+    <div class="card text-white bg-danger">
+      <div class="card-header">
+        {% blocktrans %}No group selected{% endblocktrans %}
+      </div>
+      <div class="card-body">
+        <p>
+          {% blocktrans %}
+            You must select a group to see the week summary.
+          {% endblocktrans %}
+        </p>
+      </div>
     </div>
-   </div>
-  </div>
- {% else %}
-  <div class="card text-white bg-danger">
-   <div class="card-header">
-    {% blocktrans %}No group selected{% endblocktrans %}
-   </div>
-   <div class="card-body">
-    <p>
-     {% blocktrans %}
-      You must select a group to see the week summary.
-     {% endblocktrans %}
-    </p>
-   </div>
-  </div>
- {% endif %}
+  {% endif %}
 {% endblock %}
