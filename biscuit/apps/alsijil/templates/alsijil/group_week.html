@@ -6,7 +6,7 @@
 {% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} — {{ block.super }}{% endblock %}
 
 {% block page_title %}
-  {% blocktrans %}Current week{% endblocktrans %}
+  {% blocktrans %}Week{% endblocktrans %} {{ week }} ({{ week|week_start }} - {{ week|week_end }}), {{ group.name }}
 {% endblock %}
 
 {% block content %}
@@ -22,9 +22,15 @@
       <div class="col-md-7">
         <div class="card">
           <div class="card-header bg-light text-dark">
-            {% blocktrans %}Week{% endblocktrans %}
-            {{ week }} ({{ week|week_start }} - {{ week|week_end }}),
-            {{ group.name }}
+            {% blocktrans %}Lessons{% endblocktrans %}
+            <div class="btn-group" role="group" aria-label="Week actions">
+              <a href="{% url 'group_week_by_week' week_prev %}" class="btn btn-secondary">
+                {% fa 'arrow-left' %}
+              </a>
+              <a href="{% url 'group_week_by_week' week_next %}" class="btn btn-secondary">
+                {% fa 'arrow-right' %}
+              </a>
+            </div>
           </div>
           <div class="card-body">
             {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
