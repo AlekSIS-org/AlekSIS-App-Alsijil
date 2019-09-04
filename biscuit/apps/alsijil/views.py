@@ -102,7 +102,12 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
         raise Http404(_('You must select a group to see the week summary.'))
 
     # Get all lesson periods for the selected group
-    lesson_periods = LessonPeriod.objects.filter(
+    lesson_periods = LessonPeriod.objects.annotate(
+        has_documentation=Exists(LessonDocumentation.objects.filter(
+            lesson_period=OuterRef('pk'),
+            ~Q(topic__exact='')
+        ))
+    ).filter(
         lesson__date_start__lte=week_start,
         lesson__date_end__gte=week_end
     ).select_related(
