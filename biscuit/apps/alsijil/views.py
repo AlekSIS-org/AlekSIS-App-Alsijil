@@ -43,7 +43,7 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     lesson_documentation_form = LessonDocumentationForm(
         request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
-    # FInd all persons in the associated groups that do not yet have a personal note for this lesson
+    # Find all persons in the associated groups that do not yet have a personal note for this lesson
     missing_persons = Person.objects.annotate(
         no_personal_notes=~Exists(PersonalNote.objects.filter(
             week=wanted_week,
