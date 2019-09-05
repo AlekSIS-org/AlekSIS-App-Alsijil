@@ -115,7 +115,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
         ).extra(
             select={'_week': wanted_week}
         ).filter(
-            Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group')
+            Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
         )
 
         # Aggregate all personal notes for this group and week
