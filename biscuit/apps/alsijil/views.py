@@ -147,6 +147,8 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     select_form = SelectForm(request.GET or None)
 
     context['week'] = wanted_week
+    context['week_next'] = wanted_week + 1
+    context['week_prev'] = wanted_week - 1
     context['group'] = group
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
