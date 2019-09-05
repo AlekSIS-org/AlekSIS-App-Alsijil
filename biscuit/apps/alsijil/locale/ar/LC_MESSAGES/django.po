@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-02 13:14+0000\n"
+"POT-Creation-Date: 2019-09-05 20:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,10 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
-
-#: apps.py:7
-msgid "BiscuIT - Alsijil (Class register)"
-msgstr ""
 
 #: forms.py:35
 msgid "Group"
@@ -38,81 +34,85 @@ msgstr ""
 msgid "Current week"
 msgstr ""
 
-#: models.py:28
+#: models.py:30
 msgid "Lesson topic"
 msgstr ""
 
-#: models.py:29
+#: models.py:31
 msgid "Homework"
 msgstr ""
 
-#: templates/alsijil/group_week.html:23
+#: templates/alsijil/group_week.html:9
 msgid "Week"
 msgstr ""
 
-#: templates/alsijil/group_week.html:34
+#: templates/alsijil/group_week.html:25
+msgid "Lessons"
+msgstr ""
+
+#: templates/alsijil/group_week.html:42
 msgid "Period"
 msgstr ""
 
-#: templates/alsijil/group_week.html:35
+#: templates/alsijil/group_week.html:43
 msgid "Subject"
 msgstr ""
 
-#: templates/alsijil/group_week.html:36
+#: templates/alsijil/group_week.html:44
 msgid "Teachers"
 msgstr ""
 
-#: templates/alsijil/group_week.html:60 templates/alsijil/lesson.html:39
+#: templates/alsijil/group_week.html:78 templates/alsijil/lesson.html:42
 msgid "Personal notes"
 msgstr ""
 
-#: templates/alsijil/group_week.html:71
-msgid "No group selected"
-msgstr ""
-
-#: templates/alsijil/group_week.html:75
-msgid ""
-"\n"
-"      You must select a group to see the week summary.\n"
-"     "
-msgstr ""
-
-#: templates/alsijil/lesson.html:11
-msgid "Lesson documentation"
-msgstr ""
-
-#: templates/alsijil/lesson.html:46
-msgid "Person"
-msgstr ""
-
-#: templates/alsijil/lesson.html:47
+#: templates/alsijil/group_week.html:84 templates/alsijil/lesson.html:50
 msgid "Absent"
 msgstr ""
 
-#: templates/alsijil/lesson.html:48
-msgid "Tardiness"
+#: templates/alsijil/group_week.html:85
+msgid "unexcused"
+msgstr ""
+
+#: templates/alsijil/group_week.html:88
+msgid "Summed up tardiness"
+msgstr ""
+
+#: templates/alsijil/group_week.html:109
+msgid "No group selected"
+msgstr ""
+
+#: templates/alsijil/group_week.html:113
+msgid ""
+"\n"
+"            You must select a group to see the week summary.\n"
+"          "
+msgstr ""
+
+#: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:32
+msgid "Lesson documentation"
 msgstr ""
 
 #: templates/alsijil/lesson.html:49
+msgid "Person"
+msgstr ""
+
+#: templates/alsijil/lesson.html:51
+msgid "Tardiness"
+msgstr ""
+
+#: templates/alsijil/lesson.html:52
 msgid "Excused"
 msgstr ""
 
-#: templates/alsijil/lesson.html:50
+#: templates/alsijil/lesson.html:53
 msgid "Remarks"
 msgstr ""
 
-#: templates/alsijil/lesson.html:65
+#: templates/alsijil/lesson.html:68
 msgid "Save"
 msgstr ""
 
-#: templates/alsijil/lesson.html:70
-msgid "No lesson found"
-msgstr ""
-
-#: templates/alsijil/lesson.html:74
-msgid ""
-"\n"
-"      You either selected an invalid lesson or there\n"
-"      is currently no lesson in progress.\n"
-"     "
+#: views.py:34
+msgid "You either selected an invalid lesson or there is currently no lesson in progress."
 msgstr ""
