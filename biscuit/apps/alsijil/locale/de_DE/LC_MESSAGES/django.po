@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-05 20:34+0000\n"
-"PO-Revision-Date: 2019-09-02 14:11+0000\n"
+"PO-Revision-Date: 2019-09-05 20:54+0000\n"
 "Last-Translator: Dominik George <dominik.george@teckids.org>\n"
-"Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/biscuit-app-alsijil/de/>\n"
+"Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
+"biscuit-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,10 +48,8 @@ msgid "Week"
 msgstr "Woche"
 
 #: templates/alsijil/group_week.html:25
-#, fuzzy
-#| msgid "Lesson"
 msgid "Lessons"
-msgstr "Unterrichtsstunde"
+msgstr "Unterrichtsstunden"
 
 #: templates/alsijil/group_week.html:42
 msgid "Period"
@@ -73,33 +72,27 @@ msgid "Absent"
 msgstr "Abwesend"
 
 #: templates/alsijil/group_week.html:85
-#, fuzzy
-#| msgid "Excused"
 msgid "unexcused"
-msgstr "Entschuldigt"
+msgstr "unentschuldigt"
 
 #: templates/alsijil/group_week.html:88
 msgid "Summed up tardiness"
-msgstr ""
+msgstr "Summierte Verspätung"
 
 #: templates/alsijil/group_week.html:109
 msgid "No group selected"
 msgstr "Keine Gruppe ausgewählt"
 
 #: templates/alsijil/group_week.html:113
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      You must select a group to see the week summary.\n"
-#| "     "
 msgid ""
 "\n"
 "            You must select a group to see the week summary.\n"
 "          "
 msgstr ""
 "\n"
-"      Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu sehen.\n"
-"     "
+"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu "
+"sehen.\n"
+"          "
 
 #: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:32
 msgid "Lesson documentation"
@@ -126,18 +119,10 @@ msgid "Save"
 msgstr "Speichern"
 
 #: views.py:34
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      You either selected an invalid lesson or there\n"
-#| "      is currently no lesson in progress.\n"
-#| "     "
 msgid "You either selected an invalid lesson or there is currently no lesson in progress."
 msgstr ""
-"\n"
-"      Sie haben eine ungültige Stunde ausgewählt oder es\n"
-"      läuft momentan keine Stunde.\n"
-"     "
+"Sie haben eine ungültige Stunde ausgewählt oder es\n"
+"      läuft momentan keine Stunde."
 
 #~ msgid "BiscuIT - Alsijil (Class register)"
 #~ msgstr "BiscuIT - Alsijil (Klassenbuch)"
