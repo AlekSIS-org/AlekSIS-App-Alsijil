@@ -14,7 +14,9 @@
     <ul id="timetable_select_form">
       {{ select_form.as_ul }}
     </ul>
-    <input type="submit" value="Select" />
+    <button type="submit" class="btn btn-primary">
+      {% blocktrans %}Select{% endblocktrans %}
+    </button>
   </form>
 
   {% if group %}
