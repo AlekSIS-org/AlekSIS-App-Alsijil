@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-05 20:34+0000\n"
+"POT-Creation-Date: 2019-09-07 23:31+0200\n"
 "PO-Revision-Date: 2019-09-05 20:54+0000\n"
 "Last-Translator: Dominik George <dominik.george@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
@@ -47,43 +47,47 @@ msgstr "Hausaufgaben"
 msgid "Week"
 msgstr "Woche"
 
-#: templates/alsijil/group_week.html:25
+#: templates/alsijil/group_week.html:18
+msgid "Select"
+msgstr ""
+
+#: templates/alsijil/group_week.html:27
 msgid "Lessons"
 msgstr "Unterrichtsstunden"
 
-#: templates/alsijil/group_week.html:42
+#: templates/alsijil/group_week.html:44
 msgid "Period"
 msgstr "Stunde"
 
-#: templates/alsijil/group_week.html:43
+#: templates/alsijil/group_week.html:45
 msgid "Subject"
 msgstr "Fach"
 
-#: templates/alsijil/group_week.html:44
+#: templates/alsijil/group_week.html:46
 msgid "Teachers"
 msgstr "Lehrkräfte"
 
-#: templates/alsijil/group_week.html:78 templates/alsijil/lesson.html:42
+#: templates/alsijil/group_week.html:80 templates/alsijil/lesson.html:54
 msgid "Personal notes"
 msgstr "Persönliche Notizen"
 
-#: templates/alsijil/group_week.html:84 templates/alsijil/lesson.html:50
+#: templates/alsijil/group_week.html:86 templates/alsijil/lesson.html:62
 msgid "Absent"
 msgstr "Abwesend"
 
-#: templates/alsijil/group_week.html:85
+#: templates/alsijil/group_week.html:87
 msgid "unexcused"
 msgstr "unentschuldigt"
 
-#: templates/alsijil/group_week.html:88
+#: templates/alsijil/group_week.html:90
 msgid "Summed up tardiness"
 msgstr "Summierte Verspätung"
 
-#: templates/alsijil/group_week.html:109
+#: templates/alsijil/group_week.html:111
 msgid "No group selected"
 msgstr "Keine Gruppe ausgewählt"
 
-#: templates/alsijil/group_week.html:113
+#: templates/alsijil/group_week.html:115
 msgid ""
 "\n"
 "            You must select a group to see the week summary.\n"
@@ -94,32 +98,38 @@ msgstr ""
 "sehen.\n"
 "          "
 
-#: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:32
+#: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:34
 msgid "Lesson documentation"
 msgstr "Stunden-Dokumentation"
 
-#: templates/alsijil/lesson.html:49
+#: templates/alsijil/lesson.html:45
+msgid "Change history"
+msgstr ""
+
+#: templates/alsijil/lesson.html:61
 msgid "Person"
 msgstr "Person"
 
-#: templates/alsijil/lesson.html:51
+#: templates/alsijil/lesson.html:63
 msgid "Tardiness"
 msgstr "Verspätung"
 
-#: templates/alsijil/lesson.html:52
+#: templates/alsijil/lesson.html:64
 msgid "Excused"
 msgstr "Entschuldigt"
 
-#: templates/alsijil/lesson.html:53
+#: templates/alsijil/lesson.html:65
 msgid "Remarks"
 msgstr "Bemerkungen"
 
-#: templates/alsijil/lesson.html:68
+#: templates/alsijil/lesson.html:81
 msgid "Save"
 msgstr "Speichern"
 
 #: views.py:34
-msgid "You either selected an invalid lesson or there is currently no lesson in progress."
+msgid ""
+"You either selected an invalid lesson or there is currently no lesson in "
+"progress."
 msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
