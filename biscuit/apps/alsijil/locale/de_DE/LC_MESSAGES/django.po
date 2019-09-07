@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-07 23:31+0200\n"
-"PO-Revision-Date: 2019-09-05 20:54+0000\n"
-"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
+"PO-Revision-Date: 2019-09-07 22:03+0000\n"
+"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -49,7 +49,7 @@ msgstr "Woche"
 
 #: templates/alsijil/group_week.html:18
 msgid "Select"
-msgstr ""
+msgstr "Auswählen"
 
 #: templates/alsijil/group_week.html:27
 msgid "Lessons"
@@ -104,7 +104,7 @@ msgstr "Stunden-Dokumentation"
 
 #: templates/alsijil/lesson.html:45
 msgid "Change history"
-msgstr ""
+msgstr "Veränderungen"
 
 #: templates/alsijil/lesson.html:61
 msgid "Person"
