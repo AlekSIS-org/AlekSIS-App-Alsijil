@@ -116,14 +116,14 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
             select={'_week': wanted_week}
         ).filter(
             Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
-        )
+        ).distinct()
 
         # Aggregate all personal notes for this group and week
         persons = Person.objects.filter(
             is_active=True
         ).filter(
             Q(member_of=group) | Q(member_of__parent_groups=group)
-        ).prefetch_related(
+        ).distinct().prefetch_related(
             'personal_notes'
         ).annotate(
             absences=Count('personal_notes__absent', filter=Q(
