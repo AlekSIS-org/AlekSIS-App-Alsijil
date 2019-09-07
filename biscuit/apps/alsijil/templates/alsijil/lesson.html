@@ -27,13 +27,27 @@
   <form method="post">
     {% csrf_token %}
 
-    <div class="card">
-      <div class="card-header bg-light text-dark">
-        {% blocktrans %}Lesson documentation{% endblocktrans %}
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Lesson documentation{% endblocktrans %}
+          </div>
+          <div class="card-body">
+            {% csrf_token %}
+            {% bootstrap_form lesson_documentation_form %}
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        {% csrf_token %}
-        {% bootstrap_form lesson_documentation_form %}
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header bg-light text-dark">
+            {% blocktrans %}Change history{% endblocktrans %}
+          </div>
+          <div class="card-body">
+            {% include 'core/crud_events_ul.html' with class_ul='list-group list-group-flush' class_li='list-group-item' obj=lesson_documentation %}
+          </div>
+        </div>
       </div>
     </div>
 
