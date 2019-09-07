@@ -26,10 +26,10 @@
           <div class="card-header bg-light text-dark">
             {% blocktrans %}Lessons{% endblocktrans %}
             <div class="btn-group" role="group" aria-label="Week actions">
-              <a href="{% url 'group_week_by_week' week_prev %}" class="btn btn-secondary">
+              <a href="{% url 'group_week_by_week' week_prev %}?{{ request.GET.urlencode }}" class="btn btn-secondary">
                 {% fa 'arrow-left' %}
               </a>
-              <a href="{% url 'group_week_by_week' week_next %}" class="btn btn-secondary">
+              <a href="{% url 'group_week_by_week' week_next %}?{{ request.GET.urlencode }}" class="btn btn-secondary">
                 {% fa 'arrow-right' %}
               </a>
             </div>
