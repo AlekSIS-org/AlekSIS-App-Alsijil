@@ -1,15 +1,11 @@
 {# -*- engine:django -*- #}
 
-{% extends "core/base.html" %}
+{% extends "core/turnable.html" %}
 {% load bootstrap4 font_awesome i18n week_helpers %}
 
 {% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} — {{ block.super }}{% endblock %}
 
-{% block page_title %}
-  {% blocktrans %}Week{% endblocktrans %} {{ week }} ({{ week|week_start }} - {{ week|week_end }}), {{ group.name }}
-{% endblock %}
-
-{% block content %}
+{% block current_content %}
   <form method="get">
     <ul id="timetable_select_form">
       {{ select_form.as_ul }}
@@ -25,14 +21,6 @@
         <div class="card">
           <div class="card-header bg-light text-dark">
             {% blocktrans %}Lessons{% endblocktrans %}
-            <div class="btn-group" role="group" aria-label="Week actions">
-              <a href="{% url 'group_week_by_week' week_prev %}?{{ request.GET.urlencode }}" class="btn btn-secondary">
-                {% fa 'arrow-left' %}
-              </a>
-              <a href="{% url 'group_week_by_week' week_next %}?{{ request.GET.urlencode }}" class="btn btn-secondary">
-                {% fa 'arrow-right' %}
-              </a>
-            </div>
           </div>
           <div class="card-body">
             {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
