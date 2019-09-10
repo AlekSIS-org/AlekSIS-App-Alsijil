@@ -147,9 +147,12 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
     # Add a form to filter the view
     select_form = SelectForm(request.GET or None)
 
+
+
+    context['current_head'] = _('Week (%s %s - %s) ') % (wanted_week, week_start, week_end)
     context['week'] = wanted_week
-    context['week_next'] = wanted_week + 1
-    context['week_prev'] = wanted_week - 1
+    context['url_next'] = '%s?%s' % (redirect('group_week_by_week', week=wanted_week + 1), request.GET.urlencode())
+    context['url_prev'] = '%s?%s' % (redirect('group_week_by_week', week=wanted_week - 1), request.GET.urlencode())
     context['group'] = group
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
