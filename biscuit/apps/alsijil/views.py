@@ -151,8 +151,8 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
     context['current_head'] = _('Week (%s %s - %s) ') % (wanted_week, week_start, week_end)
     context['week'] = wanted_week
-    context['url_next'] = '%s?%s' % (redirect('group_week_by_week', week=wanted_week + 1), request.GET.urlencode())
-    context['url_prev'] = '%s?%s' % (redirect('group_week_by_week', week=wanted_week - 1), request.GET.urlencode())
+    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', week=wanted_week + 1), request.GET.urlencode())
+    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', week=wanted_week - 1), request.GET.urlencode())
     context['group'] = group
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
