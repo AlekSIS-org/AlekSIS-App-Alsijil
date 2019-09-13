@@ -44,16 +44,20 @@
                         {% today as today %}
                         {% if current_date < today %}
                           table-danger
+                        {% else %}
+                          {% if period.get_substitution %}
+                            table-warning
+                          {% endif %}
                         {% endif %}
                       {% endif %}
                     ">
                       <td>{{ period.period.period }}</td>
                       <td>
                         <a href="{% url 'lesson_by_week_and_period' week period.id %}">
-                          {{ period.lesson.subject.name }}
+                          {{ period.get_subject.name }}
                         </a>
                       </td>
-                      <td>{{ period.lesson.teacher_names }}</td>
+                      <td>{{ period.get_teacher_names }}</td>
                     </tr>
                   {% endfor %}
                 </tbody>
