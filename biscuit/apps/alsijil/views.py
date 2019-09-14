@@ -134,18 +134,18 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
         ).annotate(
             absences=Count('personal_notes__absent', filter=Q(
                 personal_notes__lesson_period__in=lesson_periods,
-                personal_notes__week=wanted_week,
+                personal_notes__week=wanted_week.week,
                 personal_notes__absent=True
             )),
             unexcused=Count('personal_notes__absent', filter=Q(
                 personal_notes__lesson_period__in=lesson_periods,
-                personal_notes__week=wanted_week,
+                personal_notes__week=wanted_week.week,
                 personal_notes__absent=True,
                 personal_notes__excused=False
             )),
             tardiness=Sum('personal_notes__late', filter=Q(
                 personal_notes__lesson_period__in=lesson_periods,
-                personal_notes__week=wanted_week
+                personal_notes__week=wanted_week.week
             ))
         )
     else:
