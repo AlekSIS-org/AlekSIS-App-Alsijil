@@ -166,8 +166,8 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
-    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', args=[week_prev.year, week_prev.week]), request.GET.urlencode())
-    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', args=[week_next.year, week_next.week]), request.GET.urlencode())
+    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', args=[week_prev.year, week_prev.week]), request.GET.urlencode())
+    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', args=[week_next.year, week_next.week]), request.GET.urlencode())
 
 
     return render(request, 'alsijil/group_week.html', context)
