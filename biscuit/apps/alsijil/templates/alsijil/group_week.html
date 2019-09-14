@@ -47,6 +47,9 @@
                         {% else %}
                           {% if period.get_substitution %}
                             table-warning
+                            {% if period.get_substitution.cancelled %}
+                              alsijil-lesson-cancelled
+                            {% endif %}
                           {% endif %}
                         {% endif %}
                       {% endif %}

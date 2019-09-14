@@ -3,3 +3,8 @@ input.alsijil-lesson-personal-note-name:disabled {
     border: 0;
     color: #212529;
 }
+
+.alsijil-lesson-cancelled {
+    background-color: inherit !important;
+    text-decoration: line-through;
+}
