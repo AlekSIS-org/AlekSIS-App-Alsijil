@@ -110,8 +110,8 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
                 week=wanted_week.week
             ))
         ).filter(
-            lesson__date_start__lte=wanted_week[0] + timedelta(days=1) * F('period__weekday') - 1,
-            lesson__date_end__gte=wanted_week[0] + timedelta(days=1) * F('period__weekday') - 1
+            lesson__date_start__lte=wanted_week[0] + timedelta(days=1) * (F('period__weekday') - 1),
+            lesson__date_end__gte=wanted_week[0] + timedelta(days=1) * (F('period__weekday') - 1)
         ).select_related(
             'lesson', 'lesson__subject', 'period', 'room'
         ).prefetch_related(
