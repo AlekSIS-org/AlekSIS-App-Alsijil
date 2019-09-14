@@ -9,7 +9,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
-from biscuit.apps.chronos.util import current_lesson_periods, current_week, week_days
+from biscuit.apps.chronos.util import CalendarWeek, current_lesson_periods
 from biscuit.core.models import Group, Person
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
@@ -17,36 +17,36 @@ from .models import LessonDocumentation, PersonalNote
 
 
 @login_required
-def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional[int] = None) -> HttpResponse:
+def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None, period_id: Optional[int] = None) -> HttpResponse:
     context = {}
 
-    if week and period_id:
+    if year and week and period_id:
         # Get a specific lesson period if provided in URL
         lesson_period = LessonPeriod.objects.get(pk=period_id)
-        wanted_week = week
+        wanted_week = CalendarWeek(year=year, week=week)
     else:
         # Determine current lesson by current date and time
         lesson_period = current_lesson_periods().filter(
             Q(substitutions__teachers=request.user.person) | Q(lesson__teachers=request.user.person)).first()
-        wanted_week = current_week()
+        wanted_week = CalendarWeek()
 
     if not lesson_period:
         raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
 
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
-    context['day'] = week_days(wanted_week)[lesson_period.period.weekday - 1]
+    context['day'] = wanted_week[lesson_period.period.weekday - 1]
 
     # Create or get lesson documentation object; can be empty when first opening lesson
     lesson_documentation, created = LessonDocumentation.objects.get_or_create(
-        lesson_period=lesson_period, week=wanted_week)
+        lesson_period=lesson_period, week=wanted_week.week)
     lesson_documentation_form = LessonDocumentationForm(
         request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
     missing_persons = Person.objects.annotate(
         no_personal_notes=~Exists(PersonalNote.objects.filter(
-            week=wanted_week,
+            week=wanted_week.week,
             lesson_period=lesson_period,
             person__pk=OuterRef('pk')
         ))
@@ -59,12 +59,12 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
     # Create all missing personal notes
     PersonalNote.objects.bulk_create([
         PersonalNote(person=person, lesson_period=lesson_period,
-                     week=wanted_week) for person in missing_persons
+                     week=wanted_week.week) for person in missing_persons  # FIXME Respect year as well
     ])
 
     # Create a formset that holds all personal notes for all persons in this lesson
     persons_qs = PersonalNote.objects.select_related('person').filter(
-        lesson_period=lesson_period, week=wanted_week)
+        lesson_period=lesson_period, week=wanted_week.week)  # FIXME Respect year as well
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix='personal_notes')
 
@@ -82,12 +82,16 @@ def lesson(request: HttpRequest, week: Optional[int] = None, period_id: Optional
 
 
 @login_required
-def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse:
+def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None) -> HttpResponse:
     context = {}
 
-    wanted_week = week or current_week()
-    week_start = week_days(wanted_week)[0]
-    week_end = week_days(wanted_week)[-1]
+    if year and week:
+        wanted_week = CalendarWeek(year=year, week=week)
+    else:
+        wanted_week = CalendarWeek()
+
+    week_start = wanted_week[0]
+    week_end = wanted_week[-1]
 
     if request.GET.get('group', None):
         # Use requested group
@@ -104,7 +108,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
             has_documentation=Exists(LessonDocumentation.objects.filter(
                 ~Q(topic__exact=''),
                 lesson_period=OuterRef('pk'),
-                week=wanted_week
+                week=wanted_week.week
             ))
         ).filter(
             lesson__date_start__lte=week_start,
@@ -114,7 +118,7 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
         ).prefetch_related(
             'lesson__groups', 'lesson__teachers', 'substitutions'
         ).extra(
-            select={'_week': wanted_week}
+            select={'_week': wanted_week.week}
         ).filter(
             Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
         ).distinct()
@@ -128,15 +132,18 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
             'personal_notes'
         ).annotate(
             absences=Count('personal_notes__absent', filter=Q(
+                personal_notes__lesson_period__in=lesson_periods,
                 personal_notes__week=wanted_week,
                 personal_notes__absent=True
             )),
             unexcused=Count('personal_notes__absent', filter=Q(
+                personal_notes__lesson_period__in=lesson_periods,
                 personal_notes__week=wanted_week,
                 personal_notes__absent=True,
                 personal_notes__excused=False
             )),
             tardiness=Sum('personal_notes__late', filter=Q(
+                personal_notes__lesson_period__in=lesson_periods,
                 personal_notes__week=wanted_week
             ))
         )
@@ -149,13 +156,17 @@ def group_week(request: HttpRequest, week: Optional[int] = None) -> HttpResponse
 
 
 
-    context['current_head'] = _('Week (%s %s - %s) ') % (wanted_week, week_start, week_end)
+    context['current_head'] = str(wanted_week)
     context['week'] = wanted_week
-    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', week=wanted_week + 1), request.GET.urlencode())
-    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', week=wanted_week - 1), request.GET.urlencode())
     context['group'] = group
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
     context['select_form'] = select_form
+
+    week_prev = wanted_week - 1
+    week_next = wanted_week + 1
+    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', year=week_prev.year, week=week_prev.week), request.GET.urlencode())
+    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', year=week_next.year, week=week_next.week), request.GET.urlencode())
+
 
     return render(request, 'alsijil/group_week.html', context)
