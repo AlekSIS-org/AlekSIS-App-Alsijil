@@ -1,8 +1,9 @@
 from collections import OrderedDict
+from datetime import timedelta
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Exists, OuterRef, Q, Sum
+from django.db.models import Count, Exists, F, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -91,9 +92,6 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
     else:
         wanted_week = CalendarWeek()
 
-    week_start = wanted_week[0]
-    week_end = wanted_week[-1]
-
     if request.GET.get('group', None):
         # Use requested group
         group = Group.objects.get(pk=request.GET['group'])
@@ -112,8 +110,8 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
                 week=wanted_week.week
             ))
         ).filter(
-            lesson__date_start__lte=week_start,
-            lesson__date_end__gte=week_end
+            lesson__date_start__lte=wanted_week[0] + timedelta(days=1) * F('lesson__weekday') - 1,
+            lesson__date_end__gte=wanted_week[0] + timedelta(days=1) * F('lesson__weekday') - 1
         ).select_related(
             'lesson', 'lesson__subject', 'period', 'room'
         ).prefetch_related(
