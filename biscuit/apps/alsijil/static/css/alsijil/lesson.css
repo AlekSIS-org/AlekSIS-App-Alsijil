@@ -5,6 +5,5 @@ input.alsijil-lesson-personal-note-name:disabled {
 }
 
 .alsijil-lesson-cancelled {
-    background-color: inherit !important;
     text-decoration: line-through;
 }
