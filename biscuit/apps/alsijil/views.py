@@ -5,7 +5,7 @@ from typing import Optional
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Exists, F, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
@@ -169,3 +169,52 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
 
 
     return render(request, 'alsijil/group_week.html', context)
+
+
+@login_required
+def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
+    context = {}
+
+    group = get_object_or_404(Group, pk=id_)
+
+    # Get all lesson periods for the selected group
+    lesson_periods = LessonPeriod.objects.annotate(
+        has_documentation=Exists(LessonDocumentation.objects.filter(
+            ~Q(topic__exact=''),
+            lesson_period=OuterRef('pk'),
+        ))
+    ).select_related(
+        'lesson', 'lesson__subject', 'period', 'room'
+    ).prefetch_related(
+        'lesson__groups', 'lesson__teachers', 'substitutions'
+    ).filter(
+        Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
+    ).distinct()
+
+    # Aggregate all personal notes for this group and week
+    persons = Person.objects.filter(
+        is_active=True
+    ).filter(
+        Q(member_of=group) | Q(member_of__parent_groups=group)
+    ).distinct().prefetch_related(
+        'personal_notes'
+    ).annotate(
+        absences=Count('personal_notes__absent', filter=Q(
+            personal_notes__lesson_period__in=lesson_periods,
+            personal_notes__absent=True
+        )),
+        unexcused=Count('personal_notes__absent', filter=Q(
+            personal_notes__lesson_period__in=lesson_periods,
+            personal_notes__absent=True,
+            personal_notes__excused=False
+        )),
+        tardiness=Sum('personal_notes__late', filter=Q(
+            personal_notes__lesson_period__in=lesson_periods,
+        ))
+    )
+
+    context['group'] = group
+    context['lesson_periods'] = lesson_periods
+    context['persons'] = persons
+
+    return render(request, 'alsijil/print/full_register.html', context)

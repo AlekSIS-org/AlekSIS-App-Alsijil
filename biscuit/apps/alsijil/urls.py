@@ -10,4 +10,6 @@ urlpatterns = [
     path('group/week', views.group_week, name='group_week'),
     path('group/week/<int:year>/<int:week>', views.group_week,
          name='group_week_by_week'),
+    path('print/group/<int:id_>', views.full_register_group,
+        name='full_register_group')
 ]
