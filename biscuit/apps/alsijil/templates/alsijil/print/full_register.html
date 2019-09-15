@@ -1,0 +1,93 @@
+{% load staticfiles i18n cropping data_helpers %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet"
+      href="https://raw.githubusercontent.com/cognitom/paper-css/master/paper.min.css" />
+    <link rel="stylesheet"
+      href="{% static 'css/alsijil/full_register.css' %}" />
+  </head>
+
+  <body class="A4">
+    <section class="sheet padding-10mm" id="titlepage">
+      <h1>{% trans 'Class register' %}</h1>
+      <img src="{% cropped_thumbnail group.school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
+      <p id="group-desc">
+        {{ group.name }}
+      </p>
+      <p id="group-owners">
+        {{ group.owners.all|join:', ' }}
+      </p>
+    </section>
+
+    <section class="sheet padding-10mm" id="persons-overview">
+      <h2>{% trans 'Persons in group' %} {{ group.name }}</h2>
+
+      <table id="persons">
+        <thead>
+          <tr>
+            <th>{% trans 'No.' %}</th>
+            <th>{% trans 'Last name' %}</th>
+            <th>{% trans 'First name' %}</th>
+            <th>{% trans 'Sex' %}</th>
+            <th>{% trans 'Date of birth' %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for person in group.members.all %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ person.last_name }}</td>
+              <td>{{ person.first_name }}</td>
+              <td>{{ person.get_sex_display }}</td>
+              <td>{{ person.date_of_birth }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="sheet padding-10mm" id="lessons-overview">
+      <h2>{% trans 'Teachers and lessons in group' %} {{ group.name }}</h2>
+
+      <table id="lessons">
+        <thead>
+          <tr>
+            <th>{% trans 'Subject' %}</th>
+            <th>{% trans 'Teacher' %}</th>
+            <th>{% trans 'Lesson start' %}</th>
+            <th>{% trans 'Lesson end' %}</th>
+            <th>{% trans 'Per week' %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for lesson in group.lessons.all %}
+            <tr>
+              <td>{{ lesson.subject.name }}</td>
+              <td>{{ lesson.teachers.all|join:', ' }}</td>
+              <td>{{ lesson.date_start }}</td>
+              <td>{{ lesson.date_end }}</td>
+              <td>{{ lesson.lesson_periods.count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    {% for week in weeks %}
+      <section class="sheet padding-10mm">
+        <h2>{% trans 'Lesson documentation for week' %} {{ week }}</h2>
+
+        {% for day in week %}
+          <h3>{{ day }}</h3>
+          {{ periods_by_day|get_dict:day }}
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </body>
+</html>
