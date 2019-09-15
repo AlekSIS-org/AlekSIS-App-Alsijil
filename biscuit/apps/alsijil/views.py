@@ -183,6 +183,9 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             ~Q(topic__exact=''),
             lesson_period=OuterRef('pk'),
         ))
+    ).filter(
+        lesson__date_start__gte=group.school.current_term.date_start,
+        lesson__date_end__lte=group.school.current_term.date_end
     ).select_related(
         'lesson', 'lesson__subject', 'period', 'room'
     ).prefetch_related(
@@ -213,8 +216,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         ))
     )
 
+    weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
+    periods_by_day = {}
+    for week in weeks:
+        for day in week:
+            periods_by_day[day] = lesson_periods.filter(
+                period__weekday=day.isoweekday()
+            )
+
     context['group'] = group
+    context['weeks'] = weeks
     context['lesson_periods'] = lesson_periods
+    context['periods_by_day'] = periods_by_day
     context['persons'] = persons
 
     return render(request, 'alsijil/print/full_register.html', context)
