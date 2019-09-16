@@ -218,11 +218,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
     periods_by_day = {}
-    for week in weeks:
-        for day in week:
-            periods_by_day[day] = lesson_periods.filter(
-                period__weekday=day.isoweekday()
-            )
+    for lesson_period in lesson_periods:
+        for week in weeks:
+            day = week[lesson_period.period.weekday - 1]
+            if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
+                periods_by_day.setdefault(day, []).append(lesson_period)
 
     context['group'] = group
     context['weeks'] = weeks
