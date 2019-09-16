@@ -15,9 +15,11 @@
         {% blocktrans %}Select{% endblocktrans %}
       </button>
     </form>
-    <a class="btn btn-secondary" href="{% url 'full_register_group' group.id %}">
-      {% fa 'print' %}
-    </a>
+    {% if group %}
+      <a class="btn btn-secondary" href="{% url 'full_register_group' group.id %}">
+        {% fa 'print' %}
+      </a>
+    {% endif %}
   </div>
 
   {% if group %}
