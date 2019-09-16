@@ -53,7 +53,27 @@ body.legal.landscape  .sheet { width: 357mm; height: 215mm }
 
 body {
   font-family: Arial, Helvetica, san-serif;
-  font-size: 11pt;
+  font-size: 10pt;
+}
+
+section.sheet.smallprint {
+  font-size: 8pt;
+}
+
+section.sheet.bigprint {
+  font-size: 12pt;
+}
+
+span.signature-line {
+  display: inline-block;
+  width: 10em;
+  border-bottom: 1px solid;
+}
+
+#titlepage {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
 #titlepage h1 {
@@ -73,9 +93,17 @@ body {
   text-align: center;
 }
 
+#titlepage p#printed-info {
+  text-align: center;
+}
+
 #titlepage p#group-owners {
   font-size: 130%;
   text-align: center;
+}
+
+#titlepage p#signatures {
+  padding-top: 2em;
 }
 
 table {
@@ -90,4 +118,20 @@ th, td {
 
 tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+
+tr.lesson-substituted {
+  background-color: #ffc107;
+}
+
+tr.lesson-cancelled {
+  background-color: #dc3545;
+}
+
+tr.lesson-cancelled td {
+  text-decoration: line-through:
+}
+
+tr.lesson-substituted td.lesson-subj {
+  text-decoration: line-through;
 }

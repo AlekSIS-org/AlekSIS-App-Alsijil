@@ -12,15 +12,50 @@
   </head>
 
   <body class="A4">
-    <section class="sheet padding-10mm" id="titlepage">
-      <h1>{% trans 'Class register' %}</h1>
-      <img src="{% cropped_thumbnail group.school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
-      <p id="group-desc">
-        {{ group.name }}
-      </p>
-      <p id="group-owners">
-        {{ group.owners.all|join:', ' }}
-      </p>
+    <section class="sheet padding-10mm bigprint" id="titlepage">
+      <div>
+        <h1>{% trans 'Class register' %}</h1>
+        <img src="{% cropped_thumbnail group.school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
+        <p id="group-desc">
+          {{ group.name }}
+        </p>
+        <p id="group-owners">
+          {% trans 'Owners' %}:
+          {{ group.owners.all|join:', ' }}
+        </p>
+        <p id="printed-info">
+          {% trans 'Printed on' %} {{ today }}
+        </p>
+      </div>
+      <div>
+        <hr />
+      </div>
+      <div>
+        <p>
+          {% blocktrans %}
+            This printout is intended for archival purposes. The main copy of
+            the class register is stored in the BiscuIT School Information
+            System.
+          {% endblocktrans %}
+        </p>
+        <p>
+          {% blocktrans %}
+            Copies of the class register, both digital and as printout, must
+            only be kept inside the school and/or on devices authorised by the
+            school.
+          {% endblocktrans %}
+        </p>
+        <p>
+          {% blocktrans %}
+            The owner of the group and the headteacher confirm the above, as
+            well as the correctness of this printout.
+          {% endblocktrans %}
+        </p>
+        <p id="signatures">
+          <span class="signature-line"></span> ({% trans 'Owners' %}),
+          <span class="signature-line"></span> ({% trans 'Headteacher' %})
+        </p>
+      </div>
     </section>
 
     <section class="sheet padding-10mm" id="persons-overview">
@@ -80,12 +115,56 @@
     </section>
 
     {% for week in weeks %}
-      <section class="sheet padding-10mm">
-        <h2>{% trans 'Lesson documentation for week' %} {{ week }}</h2>
+      <section class="sheet padding-10mm smallprint">
+        <h2>{% trans 'Lesson documentation for calendar week' %} {{ week.week }}</h2>
 
         {% for day in week %}
-          <h3>{{ day }}</h3>
-          {{ periods_by_day|get_dict:day }}
+          {% if periods_by_day|get_dict:day %}
+            <h3>{{ day }}</h3>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>{% trans 'Pe.' %}</th>
+                  <th>{% trans 'Subj.' %}</th>
+                  <th>{% trans 'Subs.' %}</th>
+                  <th>{% trans 'Lesson topic' %}</th>
+                  <th>{% trans 'Homework' %}</th>
+                  <th>{% trans 'Te.' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for period, documentations, substitution in periods_by_day|get_dict:day %}
+                  <tr class="
+                    {% if substitution %}
+                      {% if substitution.cancelled %}
+                        lesson-cancelled
+                      {% else %}
+                        lesson-substituted
+                      {% endif %}
+                    {% endif %}
+                  ">
+                    <td class="lesson-pe">{{ period.period.period }}</td>
+                    <td class="lesson-subj">{{ period.lesson.subject.abbrev }}</td>
+                    <td class="lesson-subs">{{ substitution.subject.abbrev }}</td>
+                    <td class="lesson-topic">
+                      {% if substitution.cancelled %}
+                        {% trans 'Lesson cancelled' %}
+                      {% else %}
+                        {{ documentations.0.topic }}
+                      {% endif %}
+                    </td>
+                    <td class="lesson-homework">{{ documentations.0.homework }}</td>
+                    <td class="lesson-te">
+                      {% if documentations.0.topic %}
+                        {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
         {% endfor %}
       </section>
     {% endfor %}

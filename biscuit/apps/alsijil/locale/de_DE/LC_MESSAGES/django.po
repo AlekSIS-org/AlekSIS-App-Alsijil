@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-07 23:31+0200\n"
-"PO-Revision-Date: 2019-09-07 22:03+0000\n"
-"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
+"POT-Creation-Date: 2019-09-16 12:07+0000\n"
+"PO-Revision-Date: 2019-09-16 12:17+0000\n"
+"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Group"
 msgstr "Gruppe"
 
-#: menus.py:6
+#: menus.py:6 templates/alsijil/print/full_register.html:17
 msgid "Class register"
 msgstr "Klassenbuch"
 
@@ -35,67 +35,63 @@ msgstr "Aktuelle Unterrichtsstunde"
 msgid "Current week"
 msgstr "Aktuelle Woche"
 
-#: models.py:30
+#: models.py:30 templates/alsijil/print/full_register.html:131
 msgid "Lesson topic"
 msgstr "Stundenthema"
 
-#: models.py:31
+#: models.py:31 templates/alsijil/print/full_register.html:132
 msgid "Homework"
 msgstr "Hausaufgaben"
 
-#: templates/alsijil/group_week.html:9
-msgid "Week"
-msgstr "Woche"
-
-#: templates/alsijil/group_week.html:18
+#: templates/alsijil/group_week.html:14
 msgid "Select"
 msgstr "Auswählen"
 
-#: templates/alsijil/group_week.html:27
+#: templates/alsijil/group_week.html:23
 msgid "Lessons"
 msgstr "Unterrichtsstunden"
 
-#: templates/alsijil/group_week.html:44
+#: templates/alsijil/group_week.html:32
 msgid "Period"
 msgstr "Stunde"
 
-#: templates/alsijil/group_week.html:45
+#: templates/alsijil/group_week.html:33
+#: templates/alsijil/print/full_register.html:95
 msgid "Subject"
 msgstr "Fach"
 
-#: templates/alsijil/group_week.html:46
+#: templates/alsijil/group_week.html:34
 msgid "Teachers"
 msgstr "Lehrkräfte"
 
-#: templates/alsijil/group_week.html:80 templates/alsijil/lesson.html:54
+#: templates/alsijil/group_week.html:75 templates/alsijil/lesson.html:54
 msgid "Personal notes"
 msgstr "Persönliche Notizen"
 
-#: templates/alsijil/group_week.html:86 templates/alsijil/lesson.html:62
+#: templates/alsijil/group_week.html:81 templates/alsijil/lesson.html:62
 msgid "Absent"
 msgstr "Abwesend"
 
-#: templates/alsijil/group_week.html:87
+#: templates/alsijil/group_week.html:82
 msgid "unexcused"
 msgstr "unentschuldigt"
 
-#: templates/alsijil/group_week.html:90
+#: templates/alsijil/group_week.html:85
 msgid "Summed up tardiness"
 msgstr "Summierte Verspätung"
 
-#: templates/alsijil/group_week.html:111
+#: templates/alsijil/group_week.html:106
 msgid "No group selected"
 msgstr "Keine Gruppe ausgewählt"
 
-#: templates/alsijil/group_week.html:115
+#: templates/alsijil/group_week.html:110
 msgid ""
 "\n"
 "            You must select a group to see the week summary.\n"
 "          "
 msgstr ""
 "\n"
-"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu "
-"sehen.\n"
+"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu sehen.\n"
 "          "
 
 #: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:34
@@ -126,13 +122,139 @@ msgstr "Bemerkungen"
 msgid "Save"
 msgstr "Speichern"
 
-#: views.py:34
+#: templates/alsijil/print/full_register.html:23
+#: templates/alsijil/print/full_register.html:55
+msgid "Owners"
+msgstr "Leiter/-innen"
+
+#: templates/alsijil/print/full_register.html:27
+msgid "Printed on"
+msgstr "Gedruckt am"
+
+#: templates/alsijil/print/full_register.html:35
 msgid ""
-"You either selected an invalid lesson or there is currently no lesson in "
-"progress."
+"\n"
+"            This printout is intended for archival purposes. The main copy of\n"
+"            the class register is stored in the BiscuIT School Information\n"
+"            System.\n"
+"          "
+msgstr ""
+"\n"
+"            Dieser Ausdruck ist für Archivierungszwecke gedacht. Die "
+"Hauptkopie\n"
+"            des Klassenbusches ist im BiscuIT-Schul-Informations-System "
+"gespeichert.\n"
+"          "
+
+#: templates/alsijil/print/full_register.html:42
+msgid ""
+"\n"
+"            Copies of the class register, both digital and as printout, must\n"
+"            only be kept inside the school and/or on devices authorised by the\n"
+"            school.\n"
+"          "
+msgstr ""
+"\n"
+"            Kopien des Klassenbuches, sowohl digital als auch als Ausdruck, "
+"dürfen\n"
+"            ausschließlich in der Schule und/oder auf vonder Schule "
+"autorisierten Geräten\n"
+"            gespeichert werden.\n"
+"          "
+
+#: templates/alsijil/print/full_register.html:49
+msgid ""
+"\n"
+"            The owner of the group and the headteacher confirm the above, as\n"
+"            well as the correctness of this printout.\n"
+"          "
+msgstr ""
+"\n"
+"            Die Leitung der Gruppe sowie die Schulleitung bestätigen die "
+"obigen Hinweise sowie\n"
+"            die Richtigkeit des Ausdrucks.\n"
+"          "
+
+#: templates/alsijil/print/full_register.html:56
+msgid "Headteacher"
+msgstr "Schulleitung"
+
+#: templates/alsijil/print/full_register.html:62
+msgid "Persons in group"
+msgstr "Personen in der Gruppe"
+
+#: templates/alsijil/print/full_register.html:67
+msgid "No."
+msgstr "Nr."
+
+#: templates/alsijil/print/full_register.html:68
+msgid "Last name"
+msgstr "Nachname"
+
+#: templates/alsijil/print/full_register.html:69
+msgid "First name"
+msgstr "Vorname"
+
+#: templates/alsijil/print/full_register.html:70
+msgid "Sex"
+msgstr "Geschlecht"
+
+#: templates/alsijil/print/full_register.html:71
+msgid "Date of birth"
+msgstr "Geburtsdatum"
+
+#: templates/alsijil/print/full_register.html:90
+msgid "Teachers and lessons in group"
+msgstr "Lehrkräfte und Fächer der Gruppe"
+
+#: templates/alsijil/print/full_register.html:96
+msgid "Teacher"
+msgstr "Lehrkraft"
+
+#: templates/alsijil/print/full_register.html:97
+msgid "Lesson start"
+msgstr "Unterrichtsbeginn"
+
+#: templates/alsijil/print/full_register.html:98
+msgid "Lesson end"
+msgstr "Unterrichtsende"
+
+#: templates/alsijil/print/full_register.html:99
+msgid "Per week"
+msgstr "Pro Woche"
+
+#: templates/alsijil/print/full_register.html:119
+msgid "Lesson documentation for calendar week"
+msgstr "Unterrichtsdokumentation für Kalenderwoche"
+
+#: templates/alsijil/print/full_register.html:128
+msgid "Pe."
+msgstr "Std."
+
+#: templates/alsijil/print/full_register.html:129
+msgid "Subj."
+msgstr "Fa."
+
+#: templates/alsijil/print/full_register.html:130
+msgid "Subs."
+msgstr "Vertr."
+
+#: templates/alsijil/print/full_register.html:133
+msgid "Te."
+msgstr "Lk."
+
+#: templates/alsijil/print/full_register.html:152
+msgid "Lesson cancelled"
+msgstr "Stunde ist ausgefallen"
+
+#: views.py:36
+msgid "You either selected an invalid lesson or there is currently no lesson in progress."
 msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
+
+#~ msgid "Week"
+#~ msgstr "Woche"
 
 #~ msgid "BiscuIT - Alsijil (Class register)"
 #~ msgstr "BiscuIT - Alsijil (Klassenbuch)"

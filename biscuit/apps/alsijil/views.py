@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
@@ -192,7 +192,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     ).select_related(
         'lesson', 'lesson__subject', 'period', 'room'
     ).prefetch_related(
-        'lesson__groups', 'lesson__teachers', 'substitutions'
+        'lesson__groups', 'lesson__teachers', 'substitutions', 'documentations'
     ).filter(
         Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
     ).distinct()
@@ -221,16 +221,21 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
     periods_by_day = {}
-    for week in weeks:
-        for day in week:
-            periods_by_day[day] = lesson_periods.filter(
-                period__weekday=day.isoweekday()
-            )
+    for lesson_period in lesson_periods:
+        for week in weeks:
+            day = week[lesson_period.period.weekday - 1]
+
+            if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
+                documentations = list(filter(lambda d: d.week == week.week, lesson_period.documentations.all()))
+                substitution = lesson_period.get_substitution(week.week)
+
+                periods_by_day.setdefault(day, []).append((lesson_period, documentations, substitution))
 
     context['group'] = group
     context['weeks'] = weeks
     context['lesson_periods'] = lesson_periods
     context['periods_by_day'] = periods_by_day
     context['persons'] = persons
+    context['today'] = date.today()
 
     return render(request, 'alsijil/print/full_register.html', context)
