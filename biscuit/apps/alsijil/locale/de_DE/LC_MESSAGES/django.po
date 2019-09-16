@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-16 12:07+0000\n"
-"PO-Revision-Date: 2019-09-07 22:03+0000\n"
-"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
-"Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/biscuit-app-alsijil/de/>\n"
+"PO-Revision-Date: 2019-09-16 12:17+0000\n"
+"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
+"Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
+"biscuit-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -124,11 +125,11 @@ msgstr "Speichern"
 #: templates/alsijil/print/full_register.html:23
 #: templates/alsijil/print/full_register.html:55
 msgid "Owners"
-msgstr ""
+msgstr "Leiter/-innen"
 
 #: templates/alsijil/print/full_register.html:27
 msgid "Printed on"
-msgstr ""
+msgstr "Gedruckt am"
 
 #: templates/alsijil/print/full_register.html:35
 msgid ""
@@ -138,6 +139,12 @@ msgid ""
 "            System.\n"
 "          "
 msgstr ""
+"\n"
+"            Dieser Ausdruck ist für Archivierungszwecke gedacht. Die "
+"Hauptkopie\n"
+"            des Klassenbusches ist im BiscuIT-Schul-Informations-System "
+"gespeichert.\n"
+"          "
 
 #: templates/alsijil/print/full_register.html:42
 msgid ""
@@ -147,6 +154,13 @@ msgid ""
 "            school.\n"
 "          "
 msgstr ""
+"\n"
+"            Kopien des Klassenbuches, sowohl digital als auch als Ausdruck, "
+"dürfen\n"
+"            ausschließlich in der Schule und/oder auf vonder Schule "
+"autorisierten Geräten\n"
+"            gespeichert werden.\n"
+"          "
 
 #: templates/alsijil/print/full_register.html:49
 msgid ""
@@ -155,94 +169,83 @@ msgid ""
 "            well as the correctness of this printout.\n"
 "          "
 msgstr ""
+"\n"
+"            Die Leitung der Gruppe sowie die Schulleitung bestätigen die "
+"obigen Hinweise sowie\n"
+"            die Richtigkeit des Ausdrucks.\n"
+"          "
 
 #: templates/alsijil/print/full_register.html:56
-#, fuzzy
-#| msgid "Teachers"
 msgid "Headteacher"
-msgstr "Lehrkräfte"
+msgstr "Schulleitung"
 
 #: templates/alsijil/print/full_register.html:62
-#, fuzzy
-#| msgid "Personal notes"
 msgid "Persons in group"
-msgstr "Persönliche Notizen"
+msgstr "Personen in der Gruppe"
 
 #: templates/alsijil/print/full_register.html:67
 msgid "No."
-msgstr ""
+msgstr "Nr."
 
 #: templates/alsijil/print/full_register.html:68
 msgid "Last name"
-msgstr ""
+msgstr "Nachname"
 
 #: templates/alsijil/print/full_register.html:69
 msgid "First name"
-msgstr ""
+msgstr "Vorname"
 
 #: templates/alsijil/print/full_register.html:70
 msgid "Sex"
-msgstr ""
+msgstr "Geschlecht"
 
 #: templates/alsijil/print/full_register.html:71
 msgid "Date of birth"
-msgstr ""
+msgstr "Geburtsdatum"
 
 #: templates/alsijil/print/full_register.html:90
 msgid "Teachers and lessons in group"
-msgstr ""
+msgstr "Lehrkräfte und Fächer der Gruppe"
 
 #: templates/alsijil/print/full_register.html:96
-#, fuzzy
-#| msgid "Teachers"
 msgid "Teacher"
-msgstr "Lehrkräfte"
+msgstr "Lehrkraft"
 
 #: templates/alsijil/print/full_register.html:97
-#, fuzzy
-#| msgid "Lessons"
 msgid "Lesson start"
-msgstr "Unterrichtsstunden"
+msgstr "Unterrichtsbeginn"
 
 #: templates/alsijil/print/full_register.html:98
-#, fuzzy
-#| msgid "Lessons"
 msgid "Lesson end"
-msgstr "Unterrichtsstunden"
+msgstr "Unterrichtsende"
 
 #: templates/alsijil/print/full_register.html:99
-#, fuzzy
-#| msgid "Current week"
 msgid "Per week"
-msgstr "Aktuelle Woche"
+msgstr "Pro Woche"
 
 #: templates/alsijil/print/full_register.html:119
-#, fuzzy
-#| msgid "Lesson documentation"
 msgid "Lesson documentation for calendar week"
-msgstr "Stunden-Dokumentation"
+msgstr "Unterrichtsdokumentation für Kalenderwoche"
 
 #: templates/alsijil/print/full_register.html:128
 msgid "Pe."
-msgstr ""
+msgstr "Std."
 
 #: templates/alsijil/print/full_register.html:129
-#, fuzzy
-#| msgid "Subject"
 msgid "Subj."
-msgstr "Fach"
+msgstr "Fa."
 
 #: templates/alsijil/print/full_register.html:130
 msgid "Subs."
-msgstr ""
+msgstr "Vertr."
 
 #: templates/alsijil/print/full_register.html:133
 msgid "Te."
-msgstr ""
+msgstr "Lk."
 
 #: templates/alsijil/print/full_register.html:152
 msgid "Lesson cancelled"
-msgstr ""
+msgstr "Stunde ist ausgefallen"
 
 #: views.py:36
 msgid "You either selected an invalid lesson or there is currently no lesson in progress."
