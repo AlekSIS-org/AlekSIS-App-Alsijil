@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
@@ -233,5 +233,6 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context['lesson_periods'] = lesson_periods
     context['periods_by_day'] = periods_by_day
     context['persons'] = persons
+    context['today'] = date.today()
 
     return render(request, 'alsijil/print/full_register.html', context)
