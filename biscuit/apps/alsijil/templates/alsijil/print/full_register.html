@@ -80,12 +80,56 @@
     </section>
 
     {% for week in weeks %}
-      <section class="sheet padding-10mm">
-        <h2>{% trans 'Lesson documentation for week' %} {{ week }}</h2>
+      <section class="sheet padding-10mm smallprint">
+        <h2>{% trans 'Lesson documentation for calendar week' %} {{ week.week }}</h2>
 
         {% for day in week %}
-          <h3>{{ day }}</h3>
-          {{ periods_by_day|get_dict:day }}
+          {% if periods_by_day|get_dict:day %}
+            <h3>{{ day }}</h3>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>{% trans 'Pe.' %}</th>
+                  <th>{% trans 'Subj.' %}</th>
+                  <th>{% trans 'Subs.' %}</th>
+                  <th>{% trans 'Lesson topic' %}</th>
+                  <th>{% trans 'Homework' %}</th>
+                  <th>{% trans 'Te.' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for period, documentations, substitution in periods_by_day|get_dict:day %}
+                  <tr class="
+                    {% if substitution %}
+                      {% if substitution.cancelled %}
+                        lesson-cancelled
+                      {% else %}
+                        lesson-substituted
+                      {% endif %}
+                    {% endif %}
+                  ">
+                    <td class="lesson-pe">{{ period.period.period }}</td>
+                    <td class="lesson-subj">{{ period.lesson.subject.abbrev }}</td>
+                    <td class="lesson-subs">{{ substitution.subject.abbrev }}</td>
+                    <td class="lesson-topic">
+                      {% if substitution.cancelled %}
+                        {% trans 'Lesson cancelled' %}
+                      {% else %}
+                        {{ documentations.0.topic }}
+                      {% endif %}
+                    </td>
+                    <td class="lesson-homework">{{ documentations.0.homework }}</td>
+                    <td class="lesson-te">
+                      {% if documentations.0.topic %}
+                        {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
         {% endfor %}
       </section>
     {% endfor %}

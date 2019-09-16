@@ -189,7 +189,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     ).select_related(
         'lesson', 'lesson__subject', 'period', 'room'
     ).prefetch_related(
-        'lesson__groups', 'lesson__teachers', 'substitutions'
+        'lesson__groups', 'lesson__teachers', 'substitutions', 'documentations'
     ).filter(
         Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
     ).distinct()
@@ -221,8 +221,12 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     for lesson_period in lesson_periods:
         for week in weeks:
             day = week[lesson_period.period.weekday - 1]
+
             if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
-                periods_by_day.setdefault(day, []).append(lesson_period)
+                documentations = list(filter(lambda d: d.week == week.week, lesson_period.documentations.all()))
+                substitution = lesson_period.get_substitution(week.week)
+
+                periods_by_day.setdefault(day, []).append((lesson_period, documentations, substitution))
 
     context['group'] = group
     context['weeks'] = weeks
