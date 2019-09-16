@@ -1,10 +1,10 @@
 from collections import OrderedDict
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Exists, F, OuterRef, Q, Sum
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, Http403, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -34,6 +34,9 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
 
     if not lesson_period:
         raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
+
+    if lesson_period.lesson.periods.time_start < datetime.now() or lesson_period.lesson.get_calendar_week < CalendarWeek():
+        raise Http403(_('You are not allowed to create a lesson documentation for a lesson in the future.'))
 
     context['lesson_period'] = lesson_period
     context['week'] = wanted_week
