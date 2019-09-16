@@ -6,14 +6,19 @@
 {% block bootstrap4_title %}{% blocktrans%}Current week{% endblocktrans %} — {{ block.super }}{% endblock %}
 
 {% block current_content %}
-  <form method="get">
-    <ul id="timetable_select_form">
-      {{ select_form.as_ul }}
-    </ul>
-    <button type="submit" class="btn btn-secondary">
-      {% blocktrans %}Select{% endblocktrans %}
-    </button>
-  </form>
+  <div class="d-flex justify-content-between">
+    <form method="get">
+      <ul id="timetable_select_form">
+        {{ select_form.as_ul }}
+      </ul>
+      <button type="submit" class="btn btn-secondary">
+        {% blocktrans %}Select{% endblocktrans %}
+      </button>
+    </form>
+    <a class="btn btn-secondary" href="{% url 'full_register_group' group.id %}">
+      {% fa 'print' %}
+    </a>
+  </div>
 
   {% if group %}
     <div class="row">
