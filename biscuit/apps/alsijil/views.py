@@ -198,28 +198,6 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
     ).distinct()
 
-    # Aggregate all personal notes for this group and week
-    persons = Person.objects.filter(
-        is_active=True
-    ).filter(
-        Q(member_of=group) | Q(member_of__parent_groups=group)
-    ).distinct().prefetch_related(
-        'personal_notes'
-    ).annotate(
-        absences=Count('personal_notes__absent', filter=Q(
-            personal_notes__lesson_period__in=lesson_periods,
-            personal_notes__absent=True
-        )),
-        unexcused=Count('personal_notes__absent', filter=Q(
-            personal_notes__lesson_period__in=lesson_periods,
-            personal_notes__absent=True,
-            personal_notes__excused=False
-        )),
-        tardiness=Sum('personal_notes__late', filter=Q(
-            personal_notes__lesson_period__in=lesson_periods,
-        ))
-    )
-
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
     periods_by_day = {}
     for lesson_period in lesson_periods:
@@ -228,15 +206,14 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
             if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
                 documentations = list(filter(lambda d: d.week == week.week, lesson_period.documentations.all()))
+                notes = list(filter(lambda d: d.week == week.week, lesson_period.personal_notes.all()))
                 substitution = lesson_period.get_substitution(week.week)
 
-                periods_by_day.setdefault(day, []).append((lesson_period, documentations, substitution))
+                periods_by_day.setdefault(day, []).append((lesson_period, documentations, notes, substitution))
 
     context['group'] = group
     context['weeks'] = weeks
-    context['lesson_periods'] = lesson_periods
     context['periods_by_day'] = periods_by_day
-    context['persons'] = persons
     context['today'] = date.today()
 
     return render(request, 'alsijil/print/full_register.html', context)

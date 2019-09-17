@@ -130,11 +130,12 @@
                   <th>{% trans 'Subs.' %}</th>
                   <th>{% trans 'Lesson topic' %}</th>
                   <th>{% trans 'Homework' %}</th>
+                  <th>{% trans 'Notes' %}</th>
                   <th>{% trans 'Te.' %}</th>
                 </tr>
               </thead>
               <tbody>
-                {% for period, documentations, substitution in periods_by_day|get_dict:day %}
+                {% for period, documentations, notes, substitution in periods_by_day|get_dict:day %}
                   <tr class="
                     {% if substitution %}
                       {% if substitution.cancelled %}
@@ -155,6 +156,29 @@
                       {% endif %}
                     </td>
                     <td class="lesson-homework">{{ documentations.0.homework }}</td>
+                    <td class="lesson-notes">
+                      {% for note in notes %}
+                        {% if note.absent %}
+                          <span class="lesson-note-absent">
+                            {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                            {% if note.excused %}
+                              <span class="lesson-note-excused">
+                               ({% trans 'e' %})
+                              </span>
+                            {% endif %}
+                        {% endif %}
+                        {% if note.late %}
+                          <span class="lesson-note-late">
+                            {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                            ({{ note.late }}′)
+                            {% if note.excused %}
+                              <span class="lesson-note-excused">
+                               ({% trans 'e' %})
+                              </span>
+                            {% endif %}
+                        {% endif %}
+                      {% endfor %}
+                    </td>
                     <td class="lesson-te">
                       {% if documentations.0.topic %}
                         {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}

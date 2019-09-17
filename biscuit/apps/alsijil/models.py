@@ -8,7 +8,7 @@ class PersonalNote(SchoolRelated):
     person = models.ForeignKey('core.Person', models.CASCADE, related_name='personal_notes')
 
     week = models.IntegerField()
-    lesson_period = models.ForeignKey('chronos.LessonPeriod', models.CASCADE)
+    lesson_period = models.ForeignKey('chronos.LessonPeriod', models.CASCADE, related_name='personal_notes')
 
     absent = models.BooleanField(default=False)
     late = models.IntegerField(default=0)

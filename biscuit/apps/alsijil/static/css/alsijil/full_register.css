@@ -135,3 +135,19 @@ tr.lesson-cancelled td {
 tr.lesson-substituted td.lesson-subj {
   text-decoration: line-through;
 }
+
+td.lesson-notes {
+  font-size: 80%;
+}
+
+td.lesson-notes span.lesson-note-absent {
+  color: #cc0000;
+}
+
+td.lesson-notes span.lesson-note-late {
+  color: #ff9933;
+}
+
+td.lesson-notes span.lesson-note-excused {
+  color: #009933;
+}
