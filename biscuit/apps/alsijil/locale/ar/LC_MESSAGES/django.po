@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-16 12:07+0000\n"
+"POT-Creation-Date: 2019-09-17 15:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: forms.py:35
 msgid "Group"
@@ -34,56 +35,56 @@ msgstr ""
 msgid "Current week"
 msgstr ""
 
-#: models.py:30 templates/alsijil/print/full_register.html:131
+#: models.py:30 templates/alsijil/print/full_register.html:128
 msgid "Lesson topic"
 msgstr ""
 
-#: models.py:31 templates/alsijil/print/full_register.html:132
+#: models.py:31 templates/alsijil/print/full_register.html:129
 msgid "Homework"
 msgstr ""
 
-#: templates/alsijil/group_week.html:14
+#: templates/alsijil/group_week.html:15
 msgid "Select"
 msgstr ""
 
-#: templates/alsijil/group_week.html:23
+#: templates/alsijil/group_week.html:30
 msgid "Lessons"
 msgstr ""
 
-#: templates/alsijil/group_week.html:32
+#: templates/alsijil/group_week.html:39
 msgid "Period"
 msgstr ""
 
-#: templates/alsijil/group_week.html:33
+#: templates/alsijil/group_week.html:40
 #: templates/alsijil/print/full_register.html:95
 msgid "Subject"
 msgstr ""
 
-#: templates/alsijil/group_week.html:34
+#: templates/alsijil/group_week.html:41
 msgid "Teachers"
 msgstr ""
 
-#: templates/alsijil/group_week.html:75 templates/alsijil/lesson.html:54
+#: templates/alsijil/group_week.html:82 templates/alsijil/lesson.html:54
 msgid "Personal notes"
 msgstr ""
 
-#: templates/alsijil/group_week.html:81 templates/alsijil/lesson.html:62
+#: templates/alsijil/group_week.html:88 templates/alsijil/lesson.html:62
 msgid "Absent"
 msgstr ""
 
-#: templates/alsijil/group_week.html:82
+#: templates/alsijil/group_week.html:89
 msgid "unexcused"
 msgstr ""
 
-#: templates/alsijil/group_week.html:85
+#: templates/alsijil/group_week.html:92
 msgid "Summed up tardiness"
 msgstr ""
 
-#: templates/alsijil/group_week.html:106
+#: templates/alsijil/group_week.html:113
 msgid "No group selected"
 msgstr ""
 
-#: templates/alsijil/group_week.html:110
+#: templates/alsijil/group_week.html:117
 msgid ""
 "\n"
 "            You must select a group to see the week summary.\n"
@@ -130,7 +131,8 @@ msgstr ""
 #: templates/alsijil/print/full_register.html:35
 msgid ""
 "\n"
-"            This printout is intended for archival purposes. The main copy of\n"
+"            This printout is intended for archival purposes. The main copy "
+"of\n"
 "            the class register is stored in the BiscuIT School Information\n"
 "            System.\n"
 "          "
@@ -139,8 +141,10 @@ msgstr ""
 #: templates/alsijil/print/full_register.html:42
 msgid ""
 "\n"
-"            Copies of the class register, both digital and as printout, must\n"
-"            only be kept inside the school and/or on devices authorised by the\n"
+"            Copies of the class register, both digital and as printout, "
+"must\n"
+"            only be kept inside the school and/or on devices authorised by "
+"the\n"
 "            school.\n"
 "          "
 msgstr ""
@@ -148,7 +152,8 @@ msgstr ""
 #: templates/alsijil/print/full_register.html:49
 msgid ""
 "\n"
-"            The owner of the group and the headteacher confirm the above, as\n"
+"            The owner of the group and the headteacher confirm the above, "
+"as\n"
 "            well as the correctness of this printout.\n"
 "          "
 msgstr ""
@@ -205,26 +210,43 @@ msgstr ""
 msgid "Lesson documentation for calendar week"
 msgstr ""
 
-#: templates/alsijil/print/full_register.html:128
+#: templates/alsijil/print/full_register.html:125
 msgid "Pe."
 msgstr ""
 
-#: templates/alsijil/print/full_register.html:129
+#: templates/alsijil/print/full_register.html:126
 msgid "Subj."
 msgstr ""
 
-#: templates/alsijil/print/full_register.html:130
+#: templates/alsijil/print/full_register.html:127
 msgid "Subs."
 msgstr ""
 
-#: templates/alsijil/print/full_register.html:133
+#: templates/alsijil/print/full_register.html:130
+msgid "Notes"
+msgstr ""
+
+#: templates/alsijil/print/full_register.html:131
 msgid "Te."
 msgstr ""
 
-#: templates/alsijil/print/full_register.html:152
+#: templates/alsijil/print/full_register.html:158
 msgid "Lesson cancelled"
 msgstr ""
 
-#: views.py:36
-msgid "You either selected an invalid lesson or there is currently no lesson in progress."
+#: templates/alsijil/print/full_register.html:171
+#: templates/alsijil/print/full_register.html:181
+msgid "e"
+msgstr ""
+
+#: views.py:37
+msgid ""
+"You either selected an invalid lesson or there is currently no lesson in "
+"progress."
+msgstr ""
+
+#: views.py:40
+msgid ""
+"You are not allowed to create a lesson documentation for a lesson in the "
+"future."
 msgstr ""
