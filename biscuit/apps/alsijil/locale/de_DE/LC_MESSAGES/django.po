@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-17 15:41+0200\n"
-"PO-Revision-Date: 2019-09-16 12:17+0000\n"
-"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
+"PO-Revision-Date: 2019-09-17 19:44+0000\n"
+"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -246,7 +246,7 @@ msgstr "Vertr."
 
 #: templates/alsijil/print/full_register.html:130
 msgid "Notes"
-msgstr ""
+msgstr "Notizen"
 
 #: templates/alsijil/print/full_register.html:131
 msgid "Te."
@@ -259,7 +259,7 @@ msgstr "Stunde ist ausgefallen"
 #: templates/alsijil/print/full_register.html:171
 #: templates/alsijil/print/full_register.html:181
 msgid "e"
-msgstr ""
+msgstr "e"
 
 #: views.py:37
 msgid ""
@@ -274,6 +274,8 @@ msgid ""
 "You are not allowed to create a lesson documentation for a lesson in the "
 "future."
 msgstr ""
+"Ihnen ist es nicht erlaubt, eine Eintragung für eine Unterrichtsstunde in "
+"der Zukunft vorzunehmen."
 
 #~ msgid "Week"
 #~ msgstr "Woche"
