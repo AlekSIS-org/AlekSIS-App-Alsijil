@@ -120,6 +120,15 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
+tr.lessons-day-first {
+  border-top: 2px solid;
+}
+
+th.lessons-day-head {
+  writing-mode: tb-rl;
+  transform: rotate(-180deg);
+}
+
 tr.lesson-substituted {
   background-color: #ffc107;
 }

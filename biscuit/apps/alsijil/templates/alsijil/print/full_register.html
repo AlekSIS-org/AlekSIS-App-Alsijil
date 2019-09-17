@@ -118,24 +118,23 @@
       <section class="sheet padding-10mm smallprint">
         <h2>{% trans 'Lesson documentation for calendar week' %} {{ week.week }}</h2>
 
-        {% for day in week %}
-          {% if periods_by_day|get_dict:day %}
-            <h3>{{ day }}</h3>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>{% trans 'Pe.' %}</th>
-                  <th>{% trans 'Subj.' %}</th>
-                  <th>{% trans 'Subs.' %}</th>
-                  <th>{% trans 'Lesson topic' %}</th>
-                  <th>{% trans 'Homework' %}</th>
-                  <th>{% trans 'Notes' %}</th>
-                  <th>{% trans 'Te.' %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for period, documentations, notes, substitution in periods_by_day|get_dict:day %}
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>{% trans 'Pe.' %}</th>
+              <th>{% trans 'Subj.' %}</th>
+              <th>{% trans 'Subs.' %}</th>
+              <th>{% trans 'Lesson topic' %}</th>
+              <th>{% trans 'Homework' %}</th>
+              <th>{% trans 'Notes' %}</th>
+              <th>{% trans 'Te.' %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for day in week %}
+              {% with periods_by_day|get_dict:day as periods %}
+                {% for period, documentations, notes, substitution in periods %}
                   <tr class="
                     {% if substitution %}
                       {% if substitution.cancelled %}
@@ -144,7 +143,13 @@
                         lesson-substituted
                       {% endif %}
                     {% endif %}
+                    {% if forloop.first %}
+                      lessons-day-first
+                    {% endif %}
                   ">
+                    {% if forloop.first %}
+                      <th rowspan="{{ periods|length }}" class="lessons-day-head">{{ day }}</th>
+                    {% endif %}
                     <td class="lesson-pe">{{ period.period.period }}</td>
                     <td class="lesson-subj">{{ period.lesson.subject.abbrev }}</td>
                     <td class="lesson-subs">{{ substitution.subject.abbrev }}</td>
@@ -186,10 +191,10 @@
                     </td>
                   </tr>
                 {% endfor %}
-              </tbody>
-            </table>
-          {% endif %}
-        {% endfor %}
+              {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
       </section>
     {% endfor %}
   </body>
