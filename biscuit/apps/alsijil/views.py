@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, F, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
@@ -33,8 +33,10 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
             Q(substitutions__teachers=request.user.person) | Q(lesson__teachers=request.user.person)).first()
         wanted_week = CalendarWeek()
 
-    if not lesson_period:
-        raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
+        if lesson_period:
+            return redirect('lesson_by_week_and_period', wanted_week.year, wanted_week.week, lesson_period.pk)
+        else:
+            raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
 
     if datetime.combine(wanted_week[lesson_period.period.weekday - 1], lesson_period.period.time_start) > datetime.now():
         raise PermissionDenied(_('You are not allowed to create a lesson documentation for a lesson in the future.'))
