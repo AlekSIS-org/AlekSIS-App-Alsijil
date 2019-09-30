@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-17 15:41+0200\n"
+"POT-Creation-Date: 2019-09-30 22:14+0200\n"
 "PO-Revision-Date: 2019-09-17 19:44+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
@@ -19,9 +19,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 3.8\n"
 
-#: forms.py:35
+#: forms.py:36
 msgid "Group"
 msgstr "Gruppe"
+
+#: forms.py:40 templates/alsijil/print/full_register.html:96
+msgid "Teacher"
+msgstr "Lehrkraft"
+
+#: forms.py:44
+msgid "Room"
+msgstr ""
 
 #: menus.py:6 templates/alsijil/print/full_register.html:17
 msgid "Class register"
@@ -31,7 +39,7 @@ msgstr "Klassenbuch"
 msgid "Current lesson"
 msgstr "Aktuelle Unterrichtsstunde"
 
-#: menus.py:17 templates/alsijil/group_week.html:6
+#: menus.py:17 templates/alsijil/week_view.html:6
 msgid "Current week"
 msgstr "Aktuelle Woche"
 
@@ -43,58 +51,6 @@ msgstr "Stundenthema"
 msgid "Homework"
 msgstr "Hausaufgaben"
 
-#: templates/alsijil/group_week.html:15
-msgid "Select"
-msgstr "Auswählen"
-
-#: templates/alsijil/group_week.html:30
-msgid "Lessons"
-msgstr "Unterrichtsstunden"
-
-#: templates/alsijil/group_week.html:39
-msgid "Period"
-msgstr "Stunde"
-
-#: templates/alsijil/group_week.html:40
-#: templates/alsijil/print/full_register.html:95
-msgid "Subject"
-msgstr "Fach"
-
-#: templates/alsijil/group_week.html:41
-msgid "Teachers"
-msgstr "Lehrkräfte"
-
-#: templates/alsijil/group_week.html:82 templates/alsijil/lesson.html:54
-msgid "Personal notes"
-msgstr "Persönliche Notizen"
-
-#: templates/alsijil/group_week.html:88 templates/alsijil/lesson.html:62
-msgid "Absent"
-msgstr "Abwesend"
-
-#: templates/alsijil/group_week.html:89
-msgid "unexcused"
-msgstr "unentschuldigt"
-
-#: templates/alsijil/group_week.html:92
-msgid "Summed up tardiness"
-msgstr "Summierte Verspätung"
-
-#: templates/alsijil/group_week.html:113
-msgid "No group selected"
-msgstr "Keine Gruppe ausgewählt"
-
-#: templates/alsijil/group_week.html:117
-msgid ""
-"\n"
-"            You must select a group to see the week summary.\n"
-"          "
-msgstr ""
-"\n"
-"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu "
-"sehen.\n"
-"          "
-
 #: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:34
 msgid "Lesson documentation"
 msgstr "Stunden-Dokumentation"
@@ -103,9 +59,17 @@ msgstr "Stunden-Dokumentation"
 msgid "Change history"
 msgstr "Veränderungen"
 
+#: templates/alsijil/lesson.html:54 templates/alsijil/week_view.html:82
+msgid "Personal notes"
+msgstr "Persönliche Notizen"
+
 #: templates/alsijil/lesson.html:61
 msgid "Person"
 msgstr "Person"
+
+#: templates/alsijil/lesson.html:62 templates/alsijil/week_view.html:88
+msgid "Absent"
+msgstr "Abwesend"
 
 #: templates/alsijil/lesson.html:63
 msgid "Tardiness"
@@ -212,9 +176,10 @@ msgstr "Geburtsdatum"
 msgid "Teachers and lessons in group"
 msgstr "Lehrkräfte und Fächer der Gruppe"
 
-#: templates/alsijil/print/full_register.html:96
-msgid "Teacher"
-msgstr "Lehrkraft"
+#: templates/alsijil/print/full_register.html:95
+#: templates/alsijil/week_view.html:40
+msgid "Subject"
+msgstr "Fach"
 
 #: templates/alsijil/print/full_register.html:97
 msgid "Lesson start"
@@ -261,7 +226,52 @@ msgstr "Stunde ist ausgefallen"
 msgid "e"
 msgstr "e"
 
-#: views.py:37
+#: templates/alsijil/week_view.html:15
+msgid "Select"
+msgstr "Auswählen"
+
+#: templates/alsijil/week_view.html:30
+msgid "Lessons"
+msgstr "Unterrichtsstunden"
+
+#: templates/alsijil/week_view.html:39
+msgid "Period"
+msgstr "Stunde"
+
+#: templates/alsijil/week_view.html:41
+msgid "Teachers"
+msgstr "Lehrkräfte"
+
+#: templates/alsijil/week_view.html:89
+msgid "unexcused"
+msgstr "unentschuldigt"
+
+#: templates/alsijil/week_view.html:92
+msgid "Summed up tardiness"
+msgstr "Summierte Verspätung"
+
+#: templates/alsijil/week_view.html:113
+msgid "No group selected"
+msgstr "Keine Gruppe ausgewählt"
+
+#: templates/alsijil/week_view.html:117
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "            You must select a group to see the week summary.\n"
+#| "          "
+msgid ""
+"\n"
+"            You must select a group, a teacher or a room to see the week "
+"summary.\n"
+"          "
+msgstr ""
+"\n"
+"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu "
+"sehen.\n"
+"          "
+
+#: views.py:39
 msgid ""
 "You either selected an invalid lesson or there is currently no lesson in "
 "progress."
@@ -269,7 +279,7 @@ msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
 
-#: views.py:40
+#: views.py:42
 msgid ""
 "You are not allowed to create a lesson documentation for a lesson in the "
 "future."
