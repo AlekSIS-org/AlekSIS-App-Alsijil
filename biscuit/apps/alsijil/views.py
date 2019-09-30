@@ -136,8 +136,11 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
         lesson_periods = lesson_periods.filter(
-            Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
+            Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group))
+    else:
+        lesson_periods = None
 
+    if lesson_periods:
         # Aggregate all personal notes for this group and week
         persons = Person.objects.filter(
             is_active=True
@@ -163,13 +166,10 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             ))
         )
     else:
-        lesson_periods = None
         persons = None
 
     # Add a form to filter the view
     select_form = SelectForm(request.GET or None)
-
-
 
     context['current_head'] = str(wanted_week)
     context['week'] = wanted_week
@@ -184,7 +184,6 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
     week_next = wanted_week + 1
     context['url_prev'] = '%s?%s' % (reverse('week_view_by_week', args=[week_prev.year, week_prev.week]), request.GET.urlencode())
     context['url_next'] = '%s?%s' % (reverse('week_view_by_week', args=[week_next.year, week_next.week]), request.GET.urlencode())
-
 
     return render(request, 'alsijil/week_view.html', context)
 
