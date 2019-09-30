@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
-from biscuit.apps.chronos.models import LessonPeriod, TimePeriod
+from biscuit.apps.chronos.models import LessonPeriod, TimePeriod, Room
 from biscuit.apps.chronos.util import CalendarWeek, current_lesson_periods
 from biscuit.core.models import Group, Person
 
@@ -98,18 +98,7 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
     else:
         wanted_week = CalendarWeek()
 
-    if request.GET.get('group', None):
-        # Use requested group
-        group = Group.objects.get(pk=request.GET['group'])
-    elif hasattr(request, 'user') and hasattr(request.user, 'person'):
-        # Try to select group from owned groups of user
-        group = request.user.person.owner_of.first()
-    else:
-        group = None
-
-    if group:
-        # Get all lesson periods for the selected group
-        lesson_periods = LessonPeriod.objects.annotate(
+    lesson_periods = LessonPeriod.objects.annotate(
             has_documentation=Exists(LessonDocumentation.objects.filter(
                 ~Q(topic__exact=''),
                 lesson_period=OuterRef('pk'),
@@ -124,9 +113,26 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
             'lesson__groups', 'lesson__teachers', 'substitutions'
         ).extra(
             select={'_week': wanted_week.week}
-        ).filter(
-            Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
-        ).distinct()
+        )
+
+    teacher = None
+    group = None
+    room = None
+
+    if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
+        # Incrementally filter lesson periods by GET parameters
+        if 'group' in request.GET and request.GET['group']:
+            group = Group.objects.get(pk=request.GET['group'])
+            lesson_periods = lesson_periods.filter(
+                Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
+        if 'teacher' in request.GET and request.GET['teacher']:
+            teacher = Person.objects.get(pk=request.GET['teacher'])
+            lesson_periods = lesson_periods.filter(
+                Q(substitutions__teachers__pk=int(request.GET['teacher']), substitutions__week=wanted_week.week) | Q(lesson__teachers__pk=int(request.GET['teacher'])))
+        if 'room' in request.GET and request.GET['room']:
+            room = Room.objects.get(pk=request.GET['room'])
+            lesson_periods = lesson_periods.filter(
+                room__pk=int(request.GET['room']))
 
         # Aggregate all personal notes for this group and week
         persons = Person.objects.filter(
@@ -164,6 +170,8 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
     context['current_head'] = str(wanted_week)
     context['week'] = wanted_week
     context['group'] = group
+    context['teacher'] = teacher
+    context['room'] = room
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
     context['select_form'] = select_form
