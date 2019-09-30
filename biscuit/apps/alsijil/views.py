@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
-from biscuit.apps.chronos.models import LessonPeriod, TimePeriod, Room
+from biscuit.apps.chronos.models import LessonPeriod, Room, TimePeriod
 from biscuit.apps.chronos.util import CalendarWeek, current_lesson_periods
 from biscuit.core.models import Group, Person
 

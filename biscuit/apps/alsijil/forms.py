@@ -2,8 +2,8 @@ from django import forms
 from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
 
-from biscuit.core.models import Group, Person
 from biscuit.apps.chronos.models import Room
+from biscuit.core.models import Group, Person
 
 from .models import LessonDocumentation, PersonalNote
 
