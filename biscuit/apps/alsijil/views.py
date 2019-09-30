@@ -125,6 +125,11 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             group = Group.objects.get(pk=request.GET['group'])
             lesson_periods = lesson_periods.filter(
                 Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
+        elif hasattr(request, 'user') and hasattr(request.user, 'person'):
+            # Try to select group from owned groups of user
+            group = request.user.person.owner_of.first()
+            lesson_periods = lesson_periods.filter(
+                Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
         if 'teacher' in request.GET and request.GET['teacher']:
             teacher = Person.objects.get(pk=request.GET['teacher'])
             lesson_periods = lesson_periods.filter(
