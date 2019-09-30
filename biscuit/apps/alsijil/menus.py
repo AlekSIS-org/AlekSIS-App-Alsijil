@@ -15,7 +15,7 @@ MENUS = {
                 },
                 {
                     'name': _('Current week'),
-                    'url': 'group_week',
+                    'url': 'week_view',
                     'validators': ['menu_generator.validators.is_authenticated']
                 }
             ]
