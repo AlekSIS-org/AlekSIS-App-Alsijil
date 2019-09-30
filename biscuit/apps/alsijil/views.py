@@ -135,8 +135,8 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
                 room__pk=int(request.GET['room']))
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
-            lesson_periods = lesson_periods.filter(
-                Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
+        lesson_periods = lesson_periods.filter(
+            Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
 
         # Aggregate all personal notes for this group and week
         persons = Person.objects.filter(
