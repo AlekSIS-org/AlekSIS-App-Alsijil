@@ -133,8 +133,7 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             room = Room.objects.get(pk=request.GET['room'])
             lesson_periods = lesson_periods.filter(
                 room__pk=int(request.GET['room']))
-    elif:
-        if hasattr(request, 'user') and hasattr(request.user, 'person'):
+    elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
             lesson_periods = lesson_periods.filter(
                 Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
