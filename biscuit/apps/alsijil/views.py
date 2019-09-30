@@ -90,7 +90,7 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
 
 
 @login_required
-def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None) -> HttpResponse:
+def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None) -> HttpResponse:
     context = {}
 
     if year and week:
@@ -178,11 +178,11 @@ def group_week(request: HttpRequest, year: Optional[int] = None, week: Optional[
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
-    context['url_prev'] = '%s?%s' % (reverse('group_week_by_week', args=[week_prev.year, week_prev.week]), request.GET.urlencode())
-    context['url_next'] = '%s?%s' % (reverse('group_week_by_week', args=[week_next.year, week_next.week]), request.GET.urlencode())
+    context['url_prev'] = '%s?%s' % (reverse('week_view_by_week', args=[week_prev.year, week_prev.week]), request.GET.urlencode())
+    context['url_next'] = '%s?%s' % (reverse('week_view_by_week', args=[week_next.year, week_next.week]), request.GET.urlencode())
 
 
-    return render(request, 'alsijil/group_week.html', context)
+    return render(request, 'alsijil/week_view.html', context)
 
 
 @login_required
