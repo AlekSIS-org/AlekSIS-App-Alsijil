@@ -129,20 +129,19 @@ th.lessons-day-head {
   transform: rotate(-180deg);
 }
 
-tr.lesson-substituted {
-  background-color: #ffc107;
-}
-
-tr.lesson-cancelled {
-  background-color: #dc3545;
+tr.lesson-cancelled td.subj {
+  text-decoration: line-through;
 }
 
 tr.lesson-cancelled td {
-  text-decoration: line-through:
+  background-color: #dc3545;
 }
-
 tr.lesson-substituted td.lesson-subj {
   text-decoration: line-through;
+}
+
+tr.lesson-substituted td {
+  background-color: #ffc107;
 }
 
 td.lesson-notes {
