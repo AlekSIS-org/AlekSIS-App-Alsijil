@@ -1,17 +1,15 @@
-from collections import OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, F, OuterRef, Q, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
-from django.views.decorators.cache import cache_page
 
-from biscuit.apps.chronos.models import LessonPeriod, Room, TimePeriod
+from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 
