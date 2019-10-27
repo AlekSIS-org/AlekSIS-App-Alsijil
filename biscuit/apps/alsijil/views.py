@@ -163,12 +163,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     group = get_object_or_404(Group, pk=id_)
 
     # Get all lesson periods for the selected group
-    lesson_periods = LessonPeriod.objects.annotate(
-        has_documentation=Exists(LessonDocumentation.objects.filter(
-            ~Q(topic__exact=''),
-            lesson_period=OuterRef('pk'),
-        ))
-    ).within_dates(
+    lesson_periods = LessonPeriod.objects.within_dates(
         group.school.current_term.date_start,
         group.school.current_term.date_end
     ).filter_group(group).distinct()
