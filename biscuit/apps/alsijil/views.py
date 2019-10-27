@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from biscuit.apps.chronos.models import LessonPeriod, Room, TimePeriod
-from biscuit.apps.chronos.util import CalendarWeek, current_lesson_periods
+from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
@@ -29,8 +29,7 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
         wanted_week = CalendarWeek(year=year, week=week)
     else:
         # Determine current lesson by current date and time
-        lesson_period = current_lesson_periods().filter(
-            Q(substitutions__teachers=request.user.person) | Q(lesson__teachers=request.user.person)).first()
+        lesson_period = LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
         wanted_week = CalendarWeek()
 
         if lesson_period:
@@ -104,39 +103,13 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
                 lesson_period=OuterRef('pk'),
                 week=wanted_week.week
             ))
-        ).filter(
-            lesson__date_start__lte=wanted_week[0] + timedelta(days=1) * (F('period__weekday') - 1),
-            lesson__date_end__gte=wanted_week[0] + timedelta(days=1) * (F('period__weekday') - 1)
-        ).select_related(
-            'lesson', 'lesson__subject', 'period', 'room'
-        ).prefetch_related(
-            'lesson__groups', 'lesson__teachers', 'substitutions'
-        ).extra(
-            select={'_week': wanted_week.week}
-        )
-
-    teacher = None
-    group = None
-    room = None
+        ).in_week(wanted_week)
 
     if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
-        # Incrementally filter lesson periods by GET parameters
-        if 'group' in request.GET and request.GET['group']:
-            group = Group.objects.get(pk=request.GET['group'])
-            lesson_periods = lesson_periods.filter(
-                Q(lesson__groups__pk=int(request.GET['group'])) | Q(lesson__groups__parent_groups__pk=int(request.GET['group'])))
-        if 'teacher' in request.GET and request.GET['teacher']:
-            teacher = Person.objects.get(pk=request.GET['teacher'])
-            lesson_periods = lesson_periods.filter(
-                Q(substitutions__teachers__pk=int(request.GET['teacher']), substitutions__week=wanted_week.week) | Q(lesson__teachers__pk=int(request.GET['teacher'])))
-        if 'room' in request.GET and request.GET['room']:
-            room = Room.objects.get(pk=request.GET['room'])
-            lesson_periods = lesson_periods.filter(
-                room__pk=int(request.GET['room']))
+        lesson_periods = lesson_periods.filter_from_query(request.GET)
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
-        lesson_periods = lesson_periods.filter(
-            Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group))
+        lesson_periods = lesson_periods.filter_group(group)
     else:
         lesson_periods = None
 
@@ -173,9 +146,6 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
 
     context['current_head'] = str(wanted_week)
     context['week'] = wanted_week
-    context['group'] = group
-    context['teacher'] = teacher
-    context['room'] = room
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
     context['select_form'] = select_form
@@ -200,16 +170,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             ~Q(topic__exact=''),
             lesson_period=OuterRef('pk'),
         ))
-    ).filter(
-        lesson__date_start__gte=group.school.current_term.date_start,
-        lesson__date_end__lte=group.school.current_term.date_end
-    ).select_related(
-        'lesson', 'lesson__subject', 'period', 'room'
-    ).prefetch_related(
-        'lesson__groups', 'lesson__teachers', 'substitutions', 'documentations'
-    ).filter(
-        Q(lesson__groups=group) | Q(lesson__groups__parent_groups=group)
-    ).distinct()
+    ).within_dates(
+        group.school.current_term.date_start,
+        group.school.current_term.date_end
+    ).filter_group(group).distinct()
 
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
     periods_by_day = {}
