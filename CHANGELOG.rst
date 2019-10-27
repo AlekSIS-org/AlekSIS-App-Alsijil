@@ -1,6 +1,14 @@
 Changelog
 =========
 
+`1.0a2`_
+--------
+
+Bugfixes
+~~~~~~~~
+
+* Fixed minor style issues in register printout
+
 `1.0a1`_
 --------
 
@@ -25,3 +33,4 @@ Minor changes
 * Use bootstrap buttons everywhere
 
 _`1.0a1`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a1
+_`1.0a2`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a2
