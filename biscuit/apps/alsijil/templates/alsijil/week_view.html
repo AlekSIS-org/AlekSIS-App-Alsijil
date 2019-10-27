@@ -22,7 +22,7 @@
     {% endif %}
   </div>
 
-  {% if group or teacher or room %}
+  {% if lesson_periods.count %}
     <div class="row">
       <div class="col-md-7">
         <div class="card">
@@ -115,7 +115,7 @@
       <div class="card-body">
         <p>
           {% blocktrans %}
-            You must select a group, a teacher or a room to see the week summary.
+            There are no lessons for the selected group, teacher, room or time.
           {% endblocktrans %}
         </p>
       </div>
