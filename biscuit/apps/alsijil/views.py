@@ -103,6 +103,7 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             ))
         ).in_week(wanted_week)
 
+    group = None  # FIXME workaround for #38
     if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
         lesson_periods = lesson_periods.filter_from_query(request.GET)
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
