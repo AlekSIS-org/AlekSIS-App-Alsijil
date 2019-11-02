@@ -67,17 +67,23 @@
             <th>{% trans 'First name' %}</th>
             <th>{% trans 'Sex' %}</th>
             <th>{% trans 'Date of birth' %}</th>
+            <th>{% trans 'Absences' %}</th>
+            <th>{% trans 'Unexcused' %}</th>
+            <th>{% trans 'Tard.' %}</th>
           </tr>
         </thead>
 
         <tbody>
-          {% for person in group.members.all %}
+          {% for person in persons %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ person.last_name }}</td>
               <td>{{ person.first_name }}</td>
               <td>{{ person.get_sex_display }}</td>
               <td>{{ person.date_of_birth }}</td>
+              <td>{{ person.absences}}</td>
+              <td>{{ person.unexcused }}</td>
+              <td>{{ person.tardiness }}</td>
             </tr>
           {% endfor %}
         </tbody>
