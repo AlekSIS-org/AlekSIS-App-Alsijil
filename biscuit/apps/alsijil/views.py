@@ -182,6 +182,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
                 periods_by_day.setdefault(day, []).append((lesson_period, documentations, notes, substitution))
 
+    persons = group.members.annotate(
+            absences=Count('personal_notes__absent', filter=Q(
+                personal_notes__absent=True
+            )),
+            unexcused=Count('personal_notes__absent', filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=False
+            )),
+            tardiness=Sum('personal_notes__late')
+        )
+
+    context['persons'] = persons
     context['group'] = group
     context['weeks'] = weeks
     context['periods_by_day'] = periods_by_day
