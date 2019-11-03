@@ -125,8 +125,7 @@ tr.lessons-day-first {
 }
 
 th.lessons-day-head {
-  writing-mode: tb-rl;
-  transform: rotate(-180deg);
+  transform: rotate(-90deg);
 }
 
 tr.lesson-cancelled td.subj {
