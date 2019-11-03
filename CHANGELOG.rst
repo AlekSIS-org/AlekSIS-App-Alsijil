@@ -4,6 +4,16 @@ Changelog
 `1.0a2`_
 --------
 
+New features
+~~~~~~~~~~~~
+
+* Display sum of absences and tardiness in printout
+
+Minor changes
+~~~~~~~~~~~~~
+
+* Allow superusers to create lesson documentations in the future
+
 Bugfixes
 ~~~~~~~~
 
