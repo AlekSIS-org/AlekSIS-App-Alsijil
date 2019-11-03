@@ -35,7 +35,7 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
         else:
             raise Http404(_('You either selected an invalid lesson or there is currently no lesson in progress.'))
 
-    if datetime.combine(wanted_week[lesson_period.period.weekday - 1], lesson_period.period.time_start) > datetime.now():
+    if datetime.combine(wanted_week[lesson_period.period.weekday - 1], lesson_period.period.time_start) > datetime.now() and not request.user.is_superuser:
         raise PermissionDenied(_('You are not allowed to create a lesson documentation for a lesson in the future.'))
 
     context['lesson_period'] = lesson_period
