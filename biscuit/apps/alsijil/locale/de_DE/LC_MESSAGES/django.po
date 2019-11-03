@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-03 20:09+0100\n"
-"PO-Revision-Date: 2019-09-17 19:44+0000\n"
+"PO-Revision-Date: 2019-11-05 16:37+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
@@ -29,7 +29,7 @@ msgstr "Lehrkraft"
 
 #: forms.py:44
 msgid "Room"
-msgstr ""
+msgstr "Raum"
 
 #: menus.py:6 templates/alsijil/print/full_register.html:15
 msgid "Class register"
@@ -173,20 +173,16 @@ msgid "Date of birth"
 msgstr "Geburtsdatum"
 
 #: templates/alsijil/print/full_register.html:70
-#, fuzzy
-#| msgid "Absent"
 msgid "Absences"
-msgstr "Abwesend"
+msgstr "Abwesenheiten"
 
 #: templates/alsijil/print/full_register.html:71
-#, fuzzy
-#| msgid "unexcused"
 msgid "Unexcused"
-msgstr "unentschuldigt"
+msgstr "Unentschuldigt"
 
 #: templates/alsijil/print/full_register.html:72
 msgid "Tard."
-msgstr ""
+msgstr "Verspät."
 
 #: templates/alsijil/print/full_register.html:94
 msgid "Teachers and lessons in group"
@@ -271,11 +267,6 @@ msgid "No group selected"
 msgstr "Keine Gruppe ausgewählt"
 
 #: templates/alsijil/week_view.html:117
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "            You must select a group to see the week summary.\n"
-#| "          "
 msgid ""
 "\n"
 "            There are no lessons for the selected group, teacher, room or "
@@ -283,8 +274,8 @@ msgid ""
 "          "
 msgstr ""
 "\n"
-"            Sie müssen eien Gruppe auswählen, um die Wochenübersicht zu "
-"sehen.\n"
+"            Es gibt keine Stunden für die ausgewählte Gruppe, den Lehrer "
+"oder Raum.\n"
 "          "
 
 #: views.py:36
