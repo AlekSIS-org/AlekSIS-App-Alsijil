@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-30 22:14+0200\n"
+"POT-Creation-Date: 2019-11-03 20:09+0100\n"
 "PO-Revision-Date: 2019-09-17 19:44+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Group"
 msgstr "Gruppe"
 
-#: forms.py:40 templates/alsijil/print/full_register.html:96
+#: forms.py:40 templates/alsijil/print/full_register.html:100
 msgid "Teacher"
 msgstr "Lehrkraft"
 
@@ -31,7 +31,7 @@ msgstr "Lehrkraft"
 msgid "Room"
 msgstr ""
 
-#: menus.py:6 templates/alsijil/print/full_register.html:17
+#: menus.py:6 templates/alsijil/print/full_register.html:15
 msgid "Class register"
 msgstr "Klassenbuch"
 
@@ -43,11 +43,11 @@ msgstr "Aktuelle Unterrichtsstunde"
 msgid "Current week"
 msgstr "Aktuelle Woche"
 
-#: models.py:30 templates/alsijil/print/full_register.html:128
+#: models.py:30 templates/alsijil/print/full_register.html:132
 msgid "Lesson topic"
 msgstr "Stundenthema"
 
-#: models.py:31 templates/alsijil/print/full_register.html:129
+#: models.py:31 templates/alsijil/print/full_register.html:133
 msgid "Homework"
 msgstr "Hausaufgaben"
 
@@ -87,16 +87,16 @@ msgstr "Bemerkungen"
 msgid "Save"
 msgstr "Speichern"
 
-#: templates/alsijil/print/full_register.html:23
-#: templates/alsijil/print/full_register.html:55
+#: templates/alsijil/print/full_register.html:21
+#: templates/alsijil/print/full_register.html:53
 msgid "Owners"
 msgstr "Leiter/-innen"
 
-#: templates/alsijil/print/full_register.html:27
+#: templates/alsijil/print/full_register.html:25
 msgid "Printed on"
 msgstr "Gedruckt am"
 
-#: templates/alsijil/print/full_register.html:35
+#: templates/alsijil/print/full_register.html:33
 msgid ""
 "\n"
 "            This printout is intended for archival purposes. The main copy "
@@ -112,7 +112,7 @@ msgstr ""
 "gespeichert.\n"
 "          "
 
-#: templates/alsijil/print/full_register.html:42
+#: templates/alsijil/print/full_register.html:40
 msgid ""
 "\n"
 "            Copies of the class register, both digital and as printout, "
@@ -130,7 +130,7 @@ msgstr ""
 "            gespeichert werden.\n"
 "          "
 
-#: templates/alsijil/print/full_register.html:49
+#: templates/alsijil/print/full_register.html:47
 msgid ""
 "\n"
 "            The owner of the group and the headteacher confirm the above, "
@@ -144,85 +144,101 @@ msgstr ""
 "            die Richtigkeit des Ausdrucks.\n"
 "          "
 
-#: templates/alsijil/print/full_register.html:56
+#: templates/alsijil/print/full_register.html:54
 msgid "Headteacher"
 msgstr "Schulleitung"
 
-#: templates/alsijil/print/full_register.html:62
+#: templates/alsijil/print/full_register.html:60
 msgid "Persons in group"
 msgstr "Personen in der Gruppe"
 
-#: templates/alsijil/print/full_register.html:67
+#: templates/alsijil/print/full_register.html:65
 msgid "No."
 msgstr "Nr."
 
-#: templates/alsijil/print/full_register.html:68
+#: templates/alsijil/print/full_register.html:66
 msgid "Last name"
 msgstr "Nachname"
 
-#: templates/alsijil/print/full_register.html:69
+#: templates/alsijil/print/full_register.html:67
 msgid "First name"
 msgstr "Vorname"
 
-#: templates/alsijil/print/full_register.html:70
+#: templates/alsijil/print/full_register.html:68
 msgid "Sex"
 msgstr "Geschlecht"
 
-#: templates/alsijil/print/full_register.html:71
+#: templates/alsijil/print/full_register.html:69
 msgid "Date of birth"
 msgstr "Geburtsdatum"
 
-#: templates/alsijil/print/full_register.html:90
+#: templates/alsijil/print/full_register.html:70
+#, fuzzy
+#| msgid "Absent"
+msgid "Absences"
+msgstr "Abwesend"
+
+#: templates/alsijil/print/full_register.html:71
+#, fuzzy
+#| msgid "unexcused"
+msgid "Unexcused"
+msgstr "unentschuldigt"
+
+#: templates/alsijil/print/full_register.html:72
+msgid "Tard."
+msgstr ""
+
+#: templates/alsijil/print/full_register.html:94
 msgid "Teachers and lessons in group"
 msgstr "Lehrkräfte und Fächer der Gruppe"
 
-#: templates/alsijil/print/full_register.html:95
+#: templates/alsijil/print/full_register.html:99
 #: templates/alsijil/week_view.html:40
 msgid "Subject"
 msgstr "Fach"
 
-#: templates/alsijil/print/full_register.html:97
+#: templates/alsijil/print/full_register.html:101
 msgid "Lesson start"
 msgstr "Unterrichtsbeginn"
 
-#: templates/alsijil/print/full_register.html:98
+#: templates/alsijil/print/full_register.html:102
 msgid "Lesson end"
 msgstr "Unterrichtsende"
 
-#: templates/alsijil/print/full_register.html:99
+#: templates/alsijil/print/full_register.html:103
 msgid "Per week"
 msgstr "Pro Woche"
 
-#: templates/alsijil/print/full_register.html:119
+#: templates/alsijil/print/full_register.html:123
 msgid "Lesson documentation for calendar week"
 msgstr "Unterrichtsdokumentation für Kalenderwoche"
 
-#: templates/alsijil/print/full_register.html:125
+#: templates/alsijil/print/full_register.html:129
 msgid "Pe."
 msgstr "Std."
 
-#: templates/alsijil/print/full_register.html:126
+#: templates/alsijil/print/full_register.html:130
 msgid "Subj."
 msgstr "Fa."
 
-#: templates/alsijil/print/full_register.html:127
+#: templates/alsijil/print/full_register.html:131
 msgid "Subs."
 msgstr "Vertr."
 
-#: templates/alsijil/print/full_register.html:130
+#: templates/alsijil/print/full_register.html:134
 msgid "Notes"
 msgstr "Notizen"
 
-#: templates/alsijil/print/full_register.html:131
+#: templates/alsijil/print/full_register.html:135
 msgid "Te."
 msgstr "Lk."
 
-#: templates/alsijil/print/full_register.html:158
+#: templates/alsijil/print/full_register.html:162
 msgid "Lesson cancelled"
 msgstr "Stunde ist ausgefallen"
 
-#: templates/alsijil/print/full_register.html:171
-#: templates/alsijil/print/full_register.html:181
+#: templates/alsijil/print/full_register.html:175
+#: templates/alsijil/print/full_register.html:185
 msgid "e"
 msgstr "e"
 
@@ -262,8 +278,8 @@ msgstr "Keine Gruppe ausgewählt"
 #| "          "
 msgid ""
 "\n"
-"            You must select a group, a teacher or a room to see the week "
-"summary.\n"
+"            There are no lessons for the selected group, teacher, room or "
+"time.\n"
 "          "
 msgstr ""
 "\n"
@@ -271,7 +287,7 @@ msgstr ""
 "sehen.\n"
 "          "
 
-#: views.py:39
+#: views.py:36
 msgid ""
 "You either selected an invalid lesson or there is currently no lesson in "
 "progress."
@@ -279,7 +295,7 @@ msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
 
-#: views.py:42
+#: views.py:39
 msgid ""
 "You are not allowed to create a lesson documentation for a lesson in the "
 "future."
