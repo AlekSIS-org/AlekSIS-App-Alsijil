@@ -1,4 +1,4 @@
-from django.apps import AppConfig
+from biscuit.apps import AppConfig
 
 
 class AlsijilConfig(AppConfig):
