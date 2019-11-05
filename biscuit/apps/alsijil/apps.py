@@ -1,4 +1,4 @@
-from biscuit.apps import AppConfig
+from biscuit.core.util.apps import AppConfig
 
 
 class AlsijilConfig(AppConfig):
