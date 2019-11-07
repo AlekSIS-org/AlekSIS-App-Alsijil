@@ -36,7 +36,7 @@ class SelectForm(forms.Form):
         label=_('Group'), required=False)
     teacher = forms.ModelChoiceField(
         queryset=Person.objects.annotate(lessons_count=Count(
-            'lessons')).filter(lessons_count__gt=0),
+            'lessons_as_teacher')).filter(lessons_count__gt=0),
         label=_('Teacher'), required=False)
     room = forms.ModelChoiceField(
         queryset=Room.objects.annotate(lessons_count=Count(
