@@ -3,26 +3,11 @@ from typing import Optional
 
 from django.db.models import Exists, OuterRef
 
-from biscuit.apps.chronos.models import Lesson, LessonPeriod
+from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 
 from .models import PersonalNote
-
-
-@Person.property
-def lessons_as_participant(self):
-    return Lesson.objects.filter(groups__members=self)
-
-
-@Person.property
-def lesson_periods_as_participant(self):
-    return LessonPeriod.objects.filter(lesson__groups__members=self)
-
-
-@Person.property
-def lesson_periods_as_teacher(self):
-    return LessonPeriod.objects.filter(lesson__teachers=self)
 
 
 @Person.method
