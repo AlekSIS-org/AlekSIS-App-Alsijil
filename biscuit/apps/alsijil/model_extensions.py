@@ -27,8 +27,10 @@ def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True
             person=self,
             lesson_period=lesson_period,
             week=wanted_week.week,
-            absent=absent,
-            excused=excused
+            defaults={
+                'absent': absent,
+                'excused': excused
+            }
         )
 
 
