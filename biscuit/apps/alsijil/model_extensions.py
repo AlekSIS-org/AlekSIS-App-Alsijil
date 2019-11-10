@@ -48,7 +48,7 @@ def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True
 
 
 @LessonPeriod.method
-def personal_notes(self, wanted_week: CalendarWeek):
+def get_personal_notes(self, wanted_week: CalendarWeek):
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
     missing_persons = Person.objects.annotate(
         no_personal_notes=~Exists(PersonalNote.objects.filter(

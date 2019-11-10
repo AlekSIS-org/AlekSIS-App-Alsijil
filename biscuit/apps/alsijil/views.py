@@ -50,7 +50,7 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
 
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons_qs = lesson_period.personal_notes(wanted_week)
+    persons_qs = lesson_period.get_personal_notes(wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix='personal_notes')
 
