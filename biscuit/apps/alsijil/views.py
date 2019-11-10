@@ -14,7 +14,7 @@ from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
-from .models import LessonDocumentation, PersonalNote
+from .models import LessonDocumentation
 
 
 @login_required
@@ -57,8 +57,18 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
     if request.method == 'POST':
         if lesson_documentation_form.is_valid():
             lesson_documentation_form.save()
+
         if personal_note_formset.is_valid():
-            personal_note_formset.save()
+            instances = personal_note_formset.save()
+
+            # Iterate over personal notes and carry changed absences to following lessons
+            for instance in instances:
+                instance.person.mark_absent(
+                    wanted_week[lesson_period.period.weekday],
+                    lesson_period.period.period+1,
+                    instance.absent,
+                    instance.excused
+                )
 
     context['lesson_documentation'] = lesson_documentation
     context['lesson_documentation_form'] = lesson_documentation_form

@@ -1,3 +1,6 @@
+from datetime import date
+from typing import Optional
+
 from django.db.models import Exists, OuterRef
 
 from biscuit.apps.chronos.models import Lesson, LessonPeriod
@@ -20,6 +23,28 @@ def lesson_periods_as_participant(self):
 @Person.property
 def lesson_periods_as_teacher(self):
     return LessonPeriod.objects.filter(lesson__teachers=self)
+
+
+@Person.method
+def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True, excused=False):
+    wanted_week = CalendarWeek.from_date(day)
+
+    # Get all lessons of this person on the specified day
+    lesson_periods = self.lesson_periods_as_participant.on_day(
+        day
+    ).filter(
+        period__period__gte=starting_period
+    )
+
+    # Create and update all personal notes for the discovered lesson periods
+    for lesson_period in lesson_periods:
+        PersonalNote.objects.update_or_create(
+            person=self,
+            lesson_period=lesson_period,
+            week=wanted_week.week,
+            absent=absent,
+            excused=excused
+        )
 
 
 @LessonPeriod.method
