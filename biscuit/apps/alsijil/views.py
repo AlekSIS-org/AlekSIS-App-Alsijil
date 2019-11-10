@@ -48,28 +48,9 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
     lesson_documentation_form = LessonDocumentationForm(
         request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
-    # Find all persons in the associated groups that do not yet have a personal note for this lesson
-    missing_persons = Person.objects.annotate(
-        no_personal_notes=~Exists(PersonalNote.objects.filter(
-            week=wanted_week.week,
-            lesson_period=lesson_period,
-            person__pk=OuterRef('pk')
-        ))
-    ).filter(
-        member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
-        is_active=True,
-        no_personal_notes=True
-    )
-
-    # Create all missing personal notes
-    PersonalNote.objects.bulk_create([
-        PersonalNote(person=person, lesson_period=lesson_period,
-                     week=wanted_week.week) for person in missing_persons  # FIXME Respect year as well
-    ])
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons_qs = PersonalNote.objects.select_related('person').filter(
-        lesson_period=lesson_period, week=wanted_week.week)  # FIXME Respect year as well
+    persons_qs = lesson_period.personal_notes(wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix='personal_notes')
 

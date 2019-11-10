@@ -1,0 +1,47 @@
+from django.db.models import Exists, OuterRef
+
+from biscuit.apps.chronos.models import Lesson, LessonPeriod
+from biscuit.apps.chronos.util import CalendarWeek
+from biscuit.core.models import Group, Person
+
+from .models import PersonalNote
+
+
+@Person.property
+def lessons_as_participant(self):
+    return Lesson.objects.filter(groups__members=self)
+
+
+@Person.property
+def lesson_periods_as_participant(self):
+    return LessonPeriod.objects.filter(lesson__groups__members=self)
+
+
+@Person.property
+def lesson_periods_as_teacher(self):
+    return LessonPeriod.objects.filter(lesson__teachers=self)
+
+
+@LessonPeriod.method
+def personal_notes(self, wanted_week: CalendarWeek):
+    # Find all persons in the associated groups that do not yet have a personal note for this lesson
+    missing_persons = Person.objects.annotate(
+        no_personal_notes=~Exists(PersonalNote.objects.filter(
+            week=wanted_week.week,
+            lesson_period=self,
+            person__pk=OuterRef('pk')
+        ))
+    ).filter(
+        member_of__in=Group.objects.filter(pk__in=self.lesson.groups.all()),
+        is_active=True,
+        no_personal_notes=True
+    )
+
+    # Create all missing personal notes
+    PersonalNote.objects.bulk_create([
+        PersonalNote(person=person, lesson_period=self,
+                     week=wanted_week.week) for person in missing_persons
+    ])
+
+    return PersonalNote.objects.select_related('person').filter(
+        lesson_period=self, week=wanted_week.week)
