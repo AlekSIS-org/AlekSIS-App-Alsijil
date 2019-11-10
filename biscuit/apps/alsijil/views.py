@@ -64,7 +64,7 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
             # Iterate over personal notes and carry changed absences to following lessons
             for instance in instances:
                 instance.person.mark_absent(
-                    wanted_week[lesson_period.period.weekday],
+                    wanted_week[lesson_period.period.weekday-1],
                     lesson_period.period.period+1,
                     instance.absent,
                     instance.excused
