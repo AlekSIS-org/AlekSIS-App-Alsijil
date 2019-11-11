@@ -12,6 +12,19 @@ from .models import PersonalNote
 
 @Person.method
 def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True, excused=False):
+    """ Mark a person absent for all lessons in a day, optionally starting with
+    a selected period number.
+    
+    This function creates `PersonalNote` objects for every `LessonPeriod` the person
+    participates in on the selected day and marks them as absent/excused.
+
+    ..note:: Only available when BiscuIT-App-Alsijil is installed.
+
+    :Date: 2019-11-10
+    :Authors:
+        - Dominik George <dominik.george@teckids.org>
+    """
+
     wanted_week = CalendarWeek.from_date(day)
 
     # Get all lessons of this person on the specified day
@@ -36,6 +49,18 @@ def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True
 
 @LessonPeriod.method
 def get_personal_notes(self, wanted_week: CalendarWeek):
+    """ Get all personal notes for that lesson in a specified week.
+    
+    Returns all linked `PersonalNote` objects, filtered by the given weeek,
+    creating those objects that haven't been created yet.
+    
+    ..note:: Only available when BiscuIT-App-Alsijil is installed.
+
+    :Date: 2019-11-09
+    :Authors:
+        - Dominik George <dominik.george@teckids.org>
+    """
+
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
     missing_persons = Person.objects.annotate(
         no_personal_notes=~Exists(PersonalNote.objects.filter(
