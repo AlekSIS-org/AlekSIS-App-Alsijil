@@ -97,6 +97,10 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
     group = None  # FIXME workaround for #38
     if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
         lesson_periods = lesson_periods.filter_from_query(request.GET)
+        if 'group' in request.GET and request.GET['group']:
+            group = Group.objects.get(pk=request.GET['group'])
+        else:
+            group = None
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
         lesson_periods = lesson_periods.filter_group(group)
@@ -138,6 +142,7 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
     context['week'] = wanted_week
     context['lesson_periods'] = lesson_periods
     context['persons'] = persons
+    context['group'] = group
     context['select_form'] = select_form
 
     week_prev = wanted_week - 1
