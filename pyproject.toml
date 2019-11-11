@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "BiscuIT-App-Alsijil"
-version = "1.0a2"
+version = "1.0a3.dev0"
 packages = [
     { include = "biscuit" }
 ]
@@ -20,7 +20,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-BiscuIT-ng = {version = "^1.0a2", allows-prereleases = true, path = "../../.."}
+BiscuIT-ng = {version = "^1.0a3.dev0", allows-prereleases = true, path = "../../.."}
 BiscuIT-App-Chronos = {version = "^1.0a1.dev0", allows-prereleases = true, path = "../BiscuIT-App-Chronos"}
 
 [build-system]
