@@ -5,6 +5,10 @@ from biscuit.core.mixins import SchoolRelated
 
 
 class PersonalNote(SchoolRelated):
+    """ A personal note about a single person. Used in the class register to note
+    absences, excuses and remarks about a student in a single lesson period.
+    """
+
     person = models.ForeignKey('core.Person', models.CASCADE, related_name='personal_notes')
 
     week = models.IntegerField()
@@ -23,6 +27,10 @@ class PersonalNote(SchoolRelated):
 
 
 class LessonDocumentation(SchoolRelated):
+    """ A documentation on a single lesson period. Non-personal, includes
+    the topic and homework of the lesson.
+    """
+
     week = models.IntegerField()
     lesson_period = models.ForeignKey(
         'chronos.LessonPeriod', models.CASCADE, related_name='documentations')
