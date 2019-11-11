@@ -14,7 +14,7 @@ from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 
 from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
-from .models import LessonDocumentation, PersonalNote
+from .models import LessonDocumentation
 
 
 @login_required
@@ -48,36 +48,27 @@ def lesson(request: HttpRequest, year: Optional[int] = None, week: Optional[int]
     lesson_documentation_form = LessonDocumentationForm(
         request.POST or None, instance=lesson_documentation, prefix='leson_documentation')
 
-    # Find all persons in the associated groups that do not yet have a personal note for this lesson
-    missing_persons = Person.objects.annotate(
-        no_personal_notes=~Exists(PersonalNote.objects.filter(
-            week=wanted_week.week,
-            lesson_period=lesson_period,
-            person__pk=OuterRef('pk')
-        ))
-    ).filter(
-        member_of__in=Group.objects.filter(pk__in=lesson_period.lesson.groups.all()),
-        is_active=True,
-        no_personal_notes=True
-    )
-
-    # Create all missing personal notes
-    PersonalNote.objects.bulk_create([
-        PersonalNote(person=person, lesson_period=lesson_period,
-                     week=wanted_week.week) for person in missing_persons  # FIXME Respect year as well
-    ])
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons_qs = PersonalNote.objects.select_related('person').filter(
-        lesson_period=lesson_period, week=wanted_week.week)  # FIXME Respect year as well
+    persons_qs = lesson_period.get_personal_notes(wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix='personal_notes')
 
     if request.method == 'POST':
         if lesson_documentation_form.is_valid():
             lesson_documentation_form.save()
+
         if personal_note_formset.is_valid():
-            personal_note_formset.save()
+            instances = personal_note_formset.save()
+
+            # Iterate over personal notes and carry changed absences to following lessons
+            for instance in instances:
+                instance.person.mark_absent(
+                    wanted_week[lesson_period.period.weekday-1],
+                    lesson_period.period.period+1,
+                    instance.absent,
+                    instance.excused
+                )
 
     context['lesson_documentation'] = lesson_documentation
     context['lesson_documentation_form'] = lesson_documentation_form
