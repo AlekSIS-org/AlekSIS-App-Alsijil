@@ -8,6 +8,7 @@ New features
 ~~~~~~~~~~~~
 
 * Display sum of absences and tardiness in printout
+* Auto-calculate absences for all following lessons when saving a lesson
 
 Minor changes
 ~~~~~~~~~~~~~
