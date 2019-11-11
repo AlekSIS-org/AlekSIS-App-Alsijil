@@ -96,12 +96,12 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
         wanted_week = CalendarWeek()
 
     lesson_periods = LessonPeriod.objects.annotate(
-            has_documentation=Exists(LessonDocumentation.objects.filter(
-                ~Q(topic__exact=''),
-                lesson_period=OuterRef('pk'),
-                week=wanted_week.week
-            ))
-        ).in_week(wanted_week)
+        has_documentation=Exists(LessonDocumentation.objects.filter(
+            ~Q(topic__exact=''),
+            lesson_period=OuterRef('pk'),
+            week=wanted_week.week
+        ))
+    ).in_week(wanted_week)
 
     group = None  # FIXME workaround for #38
     if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
@@ -183,15 +183,15 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 periods_by_day.setdefault(day, []).append((lesson_period, documentations, notes, substitution))
 
     persons = group.members.annotate(
-            absences=Count('personal_notes__absent', filter=Q(
-                personal_notes__absent=True
-            )),
-            unexcused=Count('personal_notes__absent', filter=Q(
-                personal_notes__absent=True,
-                personal_notes__excused=False
-            )),
-            tardiness=Sum('personal_notes__late')
-        )
+        absences=Count('personal_notes__absent', filter=Q(
+            personal_notes__absent=True
+        )),
+        unexcused=Count('personal_notes__absent', filter=Q(
+            personal_notes__absent=True,
+            personal_notes__excused=False
+        )),
+        tardiness=Sum('personal_notes__late')
+    )
 
     context['persons'] = persons
     context['group'] = group
