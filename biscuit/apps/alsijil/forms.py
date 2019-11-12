@@ -1,6 +1,7 @@
 from django import forms
 from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
+from django_select2.forms import Select2Widget
 
 from biscuit.apps.chronos.models import Room
 from biscuit.core.models import Group, Person
@@ -33,15 +34,15 @@ class PersonalNoteForm(forms.ModelForm):
 class SelectForm(forms.Form):
     group = forms.ModelChoiceField(
         queryset=Group.objects.annotate(lessons_count=Count('lessons')).filter(lessons_count__gt=0),
-        label=_('Group'), required=False)
+        label=_('Group'), required=False, widget=Select2Widget)
     teacher = forms.ModelChoiceField(
         queryset=Person.objects.annotate(lessons_count=Count(
             'lessons_as_teacher')).filter(lessons_count__gt=0),
-        label=_('Teacher'), required=False)
+        label=_('Teacher'), required=False, widget=Select2Widget)
     room = forms.ModelChoiceField(
         queryset=Room.objects.annotate(lessons_count=Count(
             'lesson_periods')).filter(lessons_count__gt=0),
-        label=_('Room'), required=False)
+        label=_('Room'), required=False, widget=Select2Widget)
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
