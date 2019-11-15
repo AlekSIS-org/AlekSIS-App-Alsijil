@@ -103,7 +103,12 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             group = None
     elif hasattr(request, 'user') and hasattr(request.user, 'person'):
         group = request.user.person.owner_of.first()
-        lesson_periods = lesson_periods.filter_group(group)
+        if group:
+            lesson_periods = lesson_periods.filter_group(group)
+        elif request.user.person.lessons_as_teacher.exists():
+            lesson_periods = lesson_periods.filter_teacher(request.user.person)
+        else:
+            lesson_periods = lesson_periods.filter_participant(request.user.person)
     else:
         lesson_periods = None
 
