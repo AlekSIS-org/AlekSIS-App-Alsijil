@@ -165,10 +165,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     group = get_object_or_404(Group, pk=id_)
 
     # Get all lesson periods for the selected group
-    lesson_periods = LessonPeriod.objects.within_dates(
-        group.school.current_term.date_start,
-        group.school.current_term.date_end
-    ).filter_group(group).distinct()
+    lesson_periods = LessonPeriod.objects.filter_group(group).distinct()
 
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
     periods_by_day = {}
