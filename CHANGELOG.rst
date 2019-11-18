@@ -1,6 +1,14 @@
 Changelog
 =========
 
+`1.0a3`_
+--------
+
+Bugfixes
+~~~~~~~~
+
+* Show lesson documentations in printout again.
+
 `1.0a2`_
 --------
 
@@ -45,3 +53,4 @@ Minor changes
 
 _`1.0a1`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a1
 _`1.0a2`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a2
+_`1.0a3`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a3
