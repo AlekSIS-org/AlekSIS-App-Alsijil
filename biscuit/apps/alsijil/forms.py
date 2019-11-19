@@ -50,10 +50,10 @@ PersonalNoteFormSet = forms.modelformset_factory(
     PersonalNote, form=PersonalNoteForm, max_num=0, extra=0)
 
 
-class AbsentExcusedForm(forms.Form):
-    date_start = forms.DateField(label=_('Start date'), widget=forms.SelectDateWidget, initial=datetime.today())
-    date_end = forms.DateField(label=_('End date'), widget=forms.SelectDateWidget, initial=datetime.today())
+class ManageAbsenceForm(forms.Form):
+    date_start = forms.DateField(label=_('Start date'), widget=forms.SelectDateWidget, initial=datetime.today)
+    date_end = forms.DateField(label=_('End date'), widget=forms.SelectDateWidget, initial=datetime.today)
     starting_lesson = forms.IntegerField(label=_('Starting lesson'), initial=0)
     person = forms.ModelChoiceField(label=_('Person'), queryset=Person.objects.all(), widget=Select2Widget)
-    absent = forms.BooleanField(label=_('Absent'))
-    excused = forms.BooleanField(label=_('Excused'))
+    absent = forms.BooleanField(label=_('Absent'), initial=True)
+    excused = forms.BooleanField(label=_('Excused'), initial=True)

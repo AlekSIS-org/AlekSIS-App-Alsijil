@@ -15,7 +15,7 @@ from biscuit.core.models import Group, Person
 from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
-from .forms import AbsentExcusedForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
+from .forms import ManageAbsenceForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation
 
 
@@ -207,28 +207,26 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
 
 @admin_required
-def absences_excuses(request: HttpRequest) -> HttpResponse:
+def manage_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
-    manage_absence_form = AbsentExcusedForm(
-        request.POST or None, initial={'absent': True, 'excused': True})
+    manage_absence_form = ManageAbsenceForm(request.POST or None)
 
     if request.method == 'POST':
         if manage_absence_form.is_valid():
-            # Get person from form
+            # Get data from form
             person = manage_absence_form.cleaned_data['person']
-
-            # Get dates and starting lesson
             start_date = manage_absence_form.cleaned_data['date_start']
             end_date = manage_absence_form.cleaned_data['date_end']
             starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
-
+            absent = manage_absence_form.cleaned_data['absent']
+            excused = manage_absence_form.cleaned_data['excused']
+            
             # Mark person as absent
-            day_list = []
             delta = end_date - start_date
-            for i in range(delta.days+1):
+            for date in range(delta.days+1):
                 day = start_date + timedelta(days=1)
-                person.mark_absent(day, absent=manage_absence_form.cleaned_data['absent'], excused=manage_absence_form.cleaned_data['excused'])
+                person.mark_absent(day, absent=absent, excused=excused)
                 person.save()
 
             messages.success(request, _('The absence has been saved.'))
