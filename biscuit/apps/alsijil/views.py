@@ -221,7 +221,7 @@ def manage_absence(request: HttpRequest) -> HttpResponse:
             starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
             absent = manage_absence_form.cleaned_data['absent']
             excused = manage_absence_form.cleaned_data['excused']
-            remarks = manage_absence_form.cleaned_data=['remarks']
+            remarks = manage_absence_form.cleaned_data['remarks']
 
             # Mark person as absent
             delta = end_date - start_date
