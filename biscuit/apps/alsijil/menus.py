@@ -17,6 +17,11 @@ MENUS = {
                     'name': _('Current week'),
                     'url': 'week_view',
                     'validators': ['menu_generator.validators.is_authenticated']
+                },
+                {
+                    'name': _('Manage absence'),
+                    'url': 'manage_absence',
+                    'validators': ['menu_generator.validators.is_superuser']
                 }
             ]
         }

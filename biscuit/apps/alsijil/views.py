@@ -12,8 +12,9 @@ from django.utils.translation import ugettext as _
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
+from biscuit.core.decorators import admin_required
 
-from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
+from .forms import AbsentExcusedForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation
 
 
@@ -202,3 +203,24 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context['today'] = date.today()
 
     return render(request, 'alsijil/print/full_register.html', context)
+
+
+@admin_required
+def absences_excuses(request: HttpRequest) -> HttpResponse:
+    context = {}
+
+    manage_absence_form = AbsentExcusedForm(
+        request.POST or None, initial={'absent': True, 'excused': True})
+
+    if request.method == 'POST':
+        if manage_absence_form.is_valid():
+            # Get person from form
+            person = Person.objects.get(id=manage_absence_form.cleaned_data['person'])
+
+
+            messages.success(request, _('The absence has been saved.'))
+            return redirect(request, 'index.html')
+
+    context['manage_absence_form'] = manage_absence_form
+
+    return render(request, 'alsijil/manage_absence.html', context)

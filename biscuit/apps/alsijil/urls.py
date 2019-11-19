@@ -11,5 +11,6 @@ urlpatterns = [
     path('week/<int:year>/<int:week>', views.week_view,
          name='week_view_by_week'),
     path('print/group/<int:id_>', views.full_register_group,
-         name='full_register_group')
+         name='full_register_group'),
+    path('absences/new', views.absences_excuses, name='manage_absence'),
 ]
