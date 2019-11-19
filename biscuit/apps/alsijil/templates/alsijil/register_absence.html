@@ -4,12 +4,12 @@
 
 {% block bootstrap4_extra_head %}
   {{ block.super }}
-  {{ manage_absence_form.media.css }}
+  {{ register_absence_form.media.css }}
 {% endblock %}
 
 {% block bootstrap4_extra_script %}
   {{ block.super }}
-  {{ manage_absence_form.media.js }}
+  {{ register_absence_form.media.js }}
 {% endblock %}
 
 {% block bootstrap4_title %}{% blocktrans%}Manage absence{% endblocktrans %} - {{ block.super }}{% endblock %}
@@ -20,7 +20,7 @@
 
   <form method="post">
     {% csrf_token %}
-    {% bootstrap_form manage_absence_form %}
+    {% bootstrap_form register_absence_form %}
     <button type="submit" class="btn btn-dark">
       {% blocktrans %}Save{% endblocktrans %}
     </button>

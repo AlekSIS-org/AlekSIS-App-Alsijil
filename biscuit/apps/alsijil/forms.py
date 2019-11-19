@@ -50,7 +50,7 @@ PersonalNoteFormSet = forms.modelformset_factory(
     PersonalNote, form=PersonalNoteForm, max_num=0, extra=0)
 
 
-class ManageAbsenceForm(forms.Form):
+class RegisterAbsenceForm(forms.Form):
     date_start = forms.DateField(label=_('Start date'), widget=forms.SelectDateWidget, initial=datetime.today)
     date_end = forms.DateField(label=_('End date'), widget=forms.SelectDateWidget, initial=datetime.today)
     starting_lesson = forms.IntegerField(label=_('Starting lesson'), initial=0, min_value=0)

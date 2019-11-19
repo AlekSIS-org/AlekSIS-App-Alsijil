@@ -15,7 +15,7 @@ from biscuit.core.models import Group, Person
 from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
-from .forms import ManageAbsenceForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
+from .forms import RegisterAbsenceFormLessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm
 from .models import LessonDocumentation
 
 
@@ -207,21 +207,21 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
 
 @admin_required
-def manage_absence(request: HttpRequest) -> HttpResponse:
+def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
-    manage_absence_form = ManageAbsenceForm(request.POST or None)
+    register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == 'POST':
-        if manage_absence_form.is_valid():
+        if register_absence_form.is_valid():
             # Get data from form
-            person = manage_absence_form.cleaned_data['person']
-            start_date = manage_absence_form.cleaned_data['date_start']
-            end_date = manage_absence_form.cleaned_data['date_end']
-            starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
-            absent = manage_absence_form.cleaned_data['absent']
-            excused = manage_absence_form.cleaned_data['excused']
-            remarks = manage_absence_form.cleaned_data['remarks']
+            person = register_absence_form.cleaned_data['person']
+            start_date = register_absence_form.cleaned_data['date_start']
+            end_date = register_absence_form.cleaned_data['date_end']
+            starting_lesson = register_absence_form.cleaned_data['starting_lesson']
+            absent = register_absence_form.cleaned_data['absent']
+            excused = register_absence_form.cleaned_data['excused']
+            remarks = register_absence_form.cleaned_data['remarks']
 
             # Mark person as absent
             delta = end_date - start_date
@@ -233,6 +233,6 @@ def manage_absence(request: HttpRequest) -> HttpResponse:
             messages.success(request, _('The absence has been saved.'))
             return redirect('index')
 
-    context['manage_absence_form'] = manage_absence_form
+    context['register_absence_form'] = register_absence_form
 
-    return render(request, 'alsijil/manage_absence.html', context)
+    return render(request, 'alsijil/register_absence.html', context)
