@@ -221,12 +221,13 @@ def manage_absence(request: HttpRequest) -> HttpResponse:
             starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
             absent = manage_absence_form.cleaned_data['absent']
             excused = manage_absence_form.cleaned_data['excused']
-            
+
             # Mark person as absent
             delta = end_date - start_date
-            for date in range(delta.days+1):
+            for i in range(delta.days+1):
+                starting_period = starting_lesson if i == 0 else 0
                 day = start_date + timedelta(days=1)
-                person.mark_absent(day, absent=absent, excused=excused)
+                person.mark_absent(day, starting_period=starting_period, absent=absent, excused=excused)
                 person.save()
 
             messages.success(request, _('The absence has been saved.'))
