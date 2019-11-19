@@ -232,7 +232,7 @@ def absences_excuses(request: HttpRequest) -> HttpResponse:
                 person.save()
 
             messages.success(request, _('The absence has been saved.'))
-            return redirect(request, 'index.html')
+            return redirect('index')
 
     context['manage_absence_form'] = manage_absence_form
 
