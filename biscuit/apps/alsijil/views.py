@@ -224,9 +224,9 @@ def manage_absence(request: HttpRequest) -> HttpResponse:
 
             # Mark person as absent
             delta = end_date - start_date
-            for i in range(delta.days):
+            for i in range(delta.days+1):
                 starting_period = starting_lesson if i == 0 else 0
-                day = start_date + timedelta(days=1)
+                day = start_date + timedelta(days=i)
                 person.mark_absent(day, starting_period=starting_period, absent=absent, excused=excused)
                 person.save()
 
