@@ -228,8 +228,7 @@ def manage_absence(request: HttpRequest) -> HttpResponse:
             for i in range(delta.days+1):
                 starting_period = starting_lesson if i == 0 else 0
                 day = start_date + timedelta(days=i)
-                person.mark_absent(day, starting_period=starting_period, absent=absent, excused=excused, remarks=remarks)
-                person.save()
+                person.mark_absent(day, starting_period, absent, excused, remarks)
 
             messages.success(request, _('The absence has been saved.'))
             return redirect('index')
