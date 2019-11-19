@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
@@ -12,8 +12,10 @@ from django.utils.translation import ugettext as _
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
+from biscuit.core.decorators import admin_required
+from biscuit.core.util import messages
 
-from .forms import LessonDocumentationForm, PersonalNoteFormSet, SelectForm
+from .forms import ManageAbsenceForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation
 
 
@@ -202,3 +204,35 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context['today'] = date.today()
 
     return render(request, 'alsijil/print/full_register.html', context)
+
+
+@admin_required
+def manage_absence(request: HttpRequest) -> HttpResponse:
+    context = {}
+
+    manage_absence_form = ManageAbsenceForm(request.POST or None)
+
+    if request.method == 'POST':
+        if manage_absence_form.is_valid():
+            # Get data from form
+            person = manage_absence_form.cleaned_data['person']
+            start_date = manage_absence_form.cleaned_data['date_start']
+            end_date = manage_absence_form.cleaned_data['date_end']
+            starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
+            absent = manage_absence_form.cleaned_data['absent']
+            excused = manage_absence_form.cleaned_data['excused']
+
+            # Mark person as absent
+            delta = end_date - start_date
+            for i in range(delta.days+1):
+                starting_period = starting_lesson if i == 0 else 0
+                day = start_date + timedelta(days=1)
+                person.mark_absent(day, starting_period=starting_period, absent=absent, excused=excused)
+                person.save()
+
+            messages.success(request, _('The absence has been saved.'))
+            return redirect('index')
+
+    context['manage_absence_form'] = manage_absence_form
+
+    return render(request, 'alsijil/manage_absence.html', context)

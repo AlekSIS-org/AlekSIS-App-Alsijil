@@ -2,6 +2,7 @@ from django import forms
 from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
 from django_select2.forms import Select2Widget
+from datetime import datetime
 
 from biscuit.apps.chronos.models import Room
 from biscuit.core.models import Group, Person
@@ -47,3 +48,12 @@ class SelectForm(forms.Form):
 
 PersonalNoteFormSet = forms.modelformset_factory(
     PersonalNote, form=PersonalNoteForm, max_num=0, extra=0)
+
+
+class ManageAbsenceForm(forms.Form):
+    date_start = forms.DateField(label=_('Start date'), widget=forms.SelectDateWidget, initial=datetime.today)
+    date_end = forms.DateField(label=_('End date'), widget=forms.SelectDateWidget, initial=datetime.today)
+    starting_lesson = forms.IntegerField(label=_('Starting lesson'), initial=0)
+    person = forms.ModelChoiceField(label=_('Person'), queryset=Person.objects.all(), widget=Select2Widget)
+    absent = forms.BooleanField(label=_('Absent'), initial=True)
+    excused = forms.BooleanField(label=_('Excused'), initial=True)

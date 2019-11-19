@@ -4,6 +4,11 @@ Changelog
 `1.0a3`_
 --------
 
+New features
+~~~~~~~~~~~~
+
+* Allow to register absences and excuses centrally
+
 Bugfixes
 ~~~~~~~~
 
