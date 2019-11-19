@@ -13,6 +13,7 @@ from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 from biscuit.core.decorators import admin_required
+from biscuit.core.util import messages
 
 from .forms import AbsentExcusedForm, LessonDocumentationForm, PersonalNoteFormSet, SelectForm
 from .models import LessonDocumentation
@@ -215,8 +216,20 @@ def absences_excuses(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         if manage_absence_form.is_valid():
             # Get person from form
-            person = Person.objects.get(id=manage_absence_form.cleaned_data['person'])
+            person = manage_absence_form.cleaned_data['person']
 
+            # Get dates and starting lesson
+            start_date = manage_absence_form.cleaned_data['date_start']
+            end_date = manage_absence_form.cleaned_data['date_end']
+            starting_lesson = manage_absence_form.cleaned_data['starting_lesson']
+
+            # Mark person as absent
+            day_list = []
+            delta = end_date - start_date
+            for i in range(delta.days+1):
+                day = start_date + timedelta(days=1)
+                person.mark_absent(day, absent=manage_absence_form.cleaned_data['absent'], excused=manage_absence_form.cleaned_data['excused'])
+                person.save()
 
             messages.success(request, _('The absence has been saved.'))
             return redirect(request, 'index.html')
