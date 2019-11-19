@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Optional
 
 from django.db.models import Exists, F, OuterRef
 
@@ -11,7 +10,7 @@ from .models import PersonalNote
 
 
 @Person.method
-def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True, excused=False, remarks=''):
+def mark_absent(self, day: date, starting_period: int = 0, absent: bool = True, bool = False, remarks: str = ''):
     """ Mark a person absent for all lessons in a day, optionally starting with
     a selected period number.
     
