@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, F, OuterRef
 
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
@@ -11,7 +11,7 @@ from .models import PersonalNote
 
 
 @Person.method
-def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True, excused=False):
+def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True, excused=False, remarks=''):
     """ Mark a person absent for all lessons in a day, optionally starting with
     a selected period number.
     
@@ -42,7 +42,8 @@ def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True
             week=wanted_week.week,
             defaults={
                 'absent': absent,
-                'excused': excused
+                'excused': excused,
+                'remarks': F('remarks') + remarks
             }
         )
 

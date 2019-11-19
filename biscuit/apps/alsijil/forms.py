@@ -57,3 +57,4 @@ class ManageAbsenceForm(forms.Form):
     person = forms.ModelChoiceField(label=_('Person'), queryset=Person.objects.all(), widget=Select2Widget)
     absent = forms.BooleanField(label=_('Absent'), initial=True, required=False)
     excused = forms.BooleanField(label=_('Excused'), initial=True, required=False)
+    remarks = forms.CharField(label=_('Remarks'), max_length=30, required=False)
