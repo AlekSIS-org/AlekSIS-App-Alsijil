@@ -36,16 +36,22 @@ def mark_absent(self, day: date, starting_period: Optional[int] = 0, absent=True
 
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
-        PersonalNote.objects.update_or_create(
+        personal_note, created = PersonalNote.objects.update_or_create(
             person=self,
             lesson_period=lesson_period,
             week=wanted_week.week,
             defaults={
                 'absent': absent,
-                'excused': excused,
-                'remarks': F('remarks') + remarks
+                'excused': excused
             }
         )
+
+        if remarks:
+            if personal_note.remarks:
+                personal_note.remarks += '; %s' % remarks
+            else:
+                personal_note.remarks = remarks
+            personal_note.save()
 
 
 @LessonPeriod.method
