@@ -203,7 +203,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         persons = persons.annotate(
             Count(
                 personal_notes__remarks__iregex=personal_note_filter.regex,
-                output_field='personal_notes_with_%s' % personal_notes_filter.identifier
+                output_field='personal_notes_with_%s' % personal_note_filter.identifier
             )
         )
 
