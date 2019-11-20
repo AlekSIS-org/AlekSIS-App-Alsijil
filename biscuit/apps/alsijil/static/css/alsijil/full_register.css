@@ -109,3 +109,15 @@ td.lesson-notes span.lesson-note-late {
 td.lesson-notes span.lesson-note-excused {
   color: #009933;
 }
+
+table.person-info {
+  border: none;
+}
+
+table.person-info td.person-img {
+  text-align: center;
+}
+
+table.person-info td.person-img img {
+  max-height: 30mm;
+}

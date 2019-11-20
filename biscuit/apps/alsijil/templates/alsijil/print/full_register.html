@@ -1,9 +1,11 @@
-{% load staticfiles i18n cropping data_helpers %}
+{% load staticfiles i18n cropping data_helpers font_awesome week_helpers %}
 
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
+
+    {% fa_css %}
 
     <link rel="stylesheet"
       href="{% static 'css/alsijil/paper.css' %}" />
@@ -119,6 +121,124 @@
         </tbody>
       </table>
     </section>
+
+    {% for person in persons %}
+      <section class="sheet padding-10mm">
+        <h2>{% trans 'Personal overview' %}: {{ person.last_name }}, {{ person.first_name }}</h2>
+
+        <h3>{% blocktrans %}Contact details{% endblocktrans %}</h3>
+        <table class="person-info">
+          <tr>
+            <td rowspan="6" class="person-img">
+              {% if person.photo %}
+                <img src="{% cropped_thumbnail person 'photo_cropping' max_size='300x400' %}" alt="{{ person.first_name }} {{ person.last_name }}" />
+              {% else %}
+                <img src="{% static 'img/fallback.png' %}" alt="{{ person.first_name }} {{ person.last_name }}" />
+              {% endif %}
+            </td>
+            <td>{% fa 'user' %}</td>
+            <td>{{ person.first_name }}</td>
+            <td>{{ person.additional_name }}</td>
+            <td>{{ person.last_name }}</td>
+          </tr>
+          <tr>
+            <td>{% fa 'venus-mars' %}</td>
+            <td colspan="3">{{ person.get_sex_display }}</td>
+          </tr>
+          <tr>
+            <td>{% fa 'fa-home' %}</td>
+            <td colspan="2">{{ person.street }} {{ person.housenumber }}</td>
+            <td colspan="2">{{ person.postal_code }} {{ person.place }}</td>
+          </tr>
+          <tr>
+            <td>{% fa 'phone-square' %}</td>
+            <td>{{ person.phone_number }}</td>
+            <td>{{ person.mobile_number }}</td>
+          </tr>
+          <tr>
+            <td>{% fa 'envelope' %}</td>
+            <td colspan="3">{{ person.email }}</td>
+          </tr>
+          <tr>
+            <td>{% fa 'gift' %}</td>
+            <td colspan="3">{{ person.date_of_birth|date }}</td>
+          </tr>
+          {% comment %}
+            <tr>
+            <td>{% fa 'graduation-cap' %}</td>
+            <td>Class</td>
+            <td>Teacher</td>
+            </tr>
+            {% endcomment %}
+        </table>
+
+        {% if personal_note_filters %}
+          <h3>{% trans 'Statistics on remarks' %}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>{% trans 'Description' %}</th>
+                <th>{% trans 'Count' %}</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for note_filter in personal_note_filters %}
+                <tr>
+                  <td>{{ note_filter.description }}</td>
+                  {% with "_personal_notes_with_"|add:note_filter.identifier as identifier %}
+                    <td>{{ person|get_dict:identifier }}</td>
+                  {% endwith %}
+                </tr>
+              {% endfor %}
+            </rbody>
+          </table>
+        {% endif %}
+
+        <h3>{% trans 'Relevant personal notes' %}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>{% trans 'Date' %}</th>
+              <th>{% trans 'Pe.' %}</th>
+              <th>{% trans 'Subj.' %}</th>
+              <th>{% trans 'Te.' %}</th>
+              <th>{% trans 'Absent' %}</th>
+              <th>{% trans 'Tard.' %}</th>
+              <th>{% trans 'Remarks' %}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for note in person.personal_notes.all %}
+              {% if note.absent or note.late or note.remarks %}
+                {% period_to_date note.week note.lesson_period.period as note_date %}
+                <tr>
+                  <td>{{ note_date }}</td>
+                  <td>{{ note.lesson_period.period.period }}</td>
+                  <td>{{ note.lesson_period.get_subject.abbrev }} </td>
+                  <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
+                  <td>
+                    {% if note.absent %}
+                      {% trans 'Yes' %}
+                      {% if note.escused %}
+                        ({% trans 'e' %})
+                      {% endif %}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if note.late %}
+                      {{ note.late }}
+                    {% endif %}
+                  </td>
+                  <td>{{ note.remarks }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endfor %}
 
     {% for week in weeks %}
       <section class="sheet padding-10mm smallprint">

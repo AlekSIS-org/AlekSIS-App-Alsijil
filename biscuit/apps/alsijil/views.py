@@ -201,7 +201,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     personal_note_filters = PersonalNoteFilter.objects.all()
     for personal_note_filter in personal_note_filters:
         persons = persons.annotate(
-            **{'personal_notes_with_%s' % personal_note_filter.identifier: Count(
+            **{'_personal_notes_with_%s' % personal_note_filter.identifier: Count(
                 'personal_notes__remarks',
                 filter=Q(personal_notes__remarks__iregex=personal_note_filter.regex)
             )}
