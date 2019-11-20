@@ -208,6 +208,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         )
 
     context['persons'] = persons
+    context['personal_note_filters'] = personal_note_filters
     context['group'] = group
     context['weeks'] = weeks
     context['periods_by_day'] = periods_by_day
