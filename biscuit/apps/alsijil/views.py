@@ -16,7 +16,7 @@ from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
 from .forms import RegisterAbsenceFormLessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm
-from .models import LessonDocumentation
+from .models import LessonDocumentation, PersonalNoteFilter
 
 
 @login_required
@@ -196,6 +196,16 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         )),
         tardiness=Sum('personal_notes__late')
     )
+
+    # FIXME Move to manager
+    personal_note_filters = PersonalNoteFilter.objects.all()
+    for personal_note_filter in personal_note_filters:
+        persons = persons.annotate(
+            Count(
+                personal_notes__remarks__iregex=personal_note_filter.regex,
+                output_field='personal_notes_with_%s' % personal_notes_filter.identifier
+            )
+        )
 
     context['persons'] = persons
     context['group'] = group
