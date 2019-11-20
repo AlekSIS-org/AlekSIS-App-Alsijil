@@ -4,6 +4,10 @@ from django.utils.translation import ugettext_lazy as _
 from biscuit.core.mixins import SchoolRelated
 
 
+def isidentifier(value: str) -> bool:
+    return value.isidentifier()
+
+
 class PersonalNote(SchoolRelated):
     """ A personal note about a single person. Used in the class register to note
     absences, excuses and remarks about a student in a single lesson period.
@@ -48,7 +52,7 @@ class PersonalNoteFilter(SchoolRelated):
     """ A filter definition that can generate statistics on personal note texts. """
 
     identifier = models.CharField(verbose_name=_('Identifier'), max_length=30,
-                                  validators=[str.isidentifier])
+                                  validators=[isidentifier])
     description = models.CharField(verbose_name=_('Description'), max_length=60, blank=True)
 
     regex = models.CharField(verbose_name=_('Match expression'), max_length=100)
