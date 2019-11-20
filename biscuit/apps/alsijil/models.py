@@ -48,7 +48,7 @@ class PersonalNoteFilter(SchoolRelated):
     """ A filter definition that can generate statistics on personal note texts. """
 
     identifier = models.CharField(verbose_name=_('Identifier'), max_length=30,
-                                  validators=[lambda v: v.isidentifier()])
+                                  validators=[str.isidentifier])
     description = models.CharField(verbose_name=_('Description'), max_length=60, blank=True)
 
     regex = models.CharField(verbose_name=_('Match expression'), max_length=100)
