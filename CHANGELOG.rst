@@ -8,6 +8,8 @@ New features
 ~~~~~~~~~~~~
 
 * Allow to register absences and excuses centrally
+* Statistical evaluation of text snippets in personal notes
+* Add overview per person to register printout.
 
 Bugfixes
 ~~~~~~~~
