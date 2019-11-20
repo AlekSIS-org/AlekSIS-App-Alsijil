@@ -15,7 +15,7 @@ from biscuit.core.models import Group, Person
 from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
-from .forms import RegisterAbsenceFormLessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm
+from .forms import LessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm
 from .models import LessonDocumentation, PersonalNoteFilter
 
 
