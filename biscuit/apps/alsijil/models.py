@@ -55,4 +55,4 @@ class PersonalNoteFilter(SchoolRelated):
 
     class Meta:
         unique_together = [['school', 'identifier'], ['school', 'description'], ['school', 'regex']]
-        ordering = ['short_name']
+        ordering = ['identifier']
