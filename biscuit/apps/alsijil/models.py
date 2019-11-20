@@ -42,3 +42,16 @@ class LessonDocumentation(SchoolRelated):
         unique_together = [['school', 'lesson_period', 'week']]
         ordering = ['lesson_period__lesson__date_start', 'week',
                     'lesson_period__period__weekday', 'lesson_period__period__period']
+
+
+class PersonalNoteFilter(SchoolRelated):
+    """ A filter definition that can generate statistics on personal note texts. """
+
+    short_name = models.CharField(verbose_name=_('Short name'), max_length=30)
+    description = models.CharField(verbose_name=_('Description'), max_length=60, blank=True)
+
+    regex = models.CharField(verbose_name=_('Match expression'), max_length=100)
+
+    class Meta:
+        unique_together = [['school', 'short_name'], ['school', 'description'], ['school', 'regex']]
+        ordering = ['short_name']
