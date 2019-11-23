@@ -9,14 +9,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from django_tables2 import RequestConfig
+
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
 from biscuit.core.models import Group, Person
 from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
-from .forms import LessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm
+from .forms import LessonDocumentationForm, PersonalNoteFormSet, RegisterAbsenceForm, SelectForm, PersonalNoteFilterForm
 from .models import LessonDocumentation, PersonalNoteFilter
+from .tables import PersonalNoteFilterTable
 
 
 @login_required
@@ -247,3 +250,54 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     context['register_absence_form'] = register_absence_form
 
     return render(request, 'alsijil/register_absence.html', context)
+
+
+def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
+    context = {}
+
+    personal_note_filters = PersonalNoteFilter.objects.all()
+
+    # Prepare table
+    personal_note_filters_table = PersonalNoteFilterTable(personal_note_filters)
+    RequestConfig(request).configure(personal_note_filters_table)
+
+    context['personal_note_filters_table'] = personal_note_filters_table
+
+    return render(request, 'alsijil/personal_note_filters.html', context)
+
+
+def edit_personal_note_filter(request: HttpRequest, id: Optional['int'] = None) -> HttpResponse:
+    context = {}
+
+    if id:
+        personal_note_filter = PersonalNoteFilter.objects.get(id=id)
+        context['personal_note_filter'] = personal_note_filter
+        personal_note_filter_form = PersonalNoteFilterForm(
+            request.POST or None, instance=personal_note_filter)
+    else:
+        personal_note_filter_form = PersonalNoteFilterForm(
+            request.POST or None)
+    
+    if request.method == 'POST':
+        if personal_note_filter_form.is_valid():
+            personal_note_filter_form.save(commit=True)
+
+            messages.success(request, _('The filter has been saved'))
+            return redirect('list_personal_note_filters')
+
+    context['personal_note_filter_form'] = personal_note_filter_form
+
+    return render(request, 'alsijil/manage_personal_note_filter.html', context)
+
+@admin_required
+def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
+    context = {}
+
+    personal_note_filter = get_object_or_404(PersonalNoteFilter, pk=id_)
+
+    PersonalNoteFilter.objects.filter(pk=id_).delete()
+    
+    messages.success(request, _('The filter has been deleted.'))
+
+    context['personal_note_filter'] = personal_note_filter
+    return redirect('list_personal_note_filters')
