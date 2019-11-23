@@ -7,7 +7,7 @@ from datetime import datetime
 from biscuit.apps.chronos.models import Room
 from biscuit.core.models import Group, Person
 
-from .models import LessonDocumentation, PersonalNote
+from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -58,3 +58,9 @@ class RegisterAbsenceForm(forms.Form):
     absent = forms.BooleanField(label=_('Absent'), initial=True, required=False)
     excused = forms.BooleanField(label=_('Excused'), initial=True, required=False)
     remarks = forms.CharField(label=_('Remarks'), max_length=30, required=False)
+
+
+class PersonalNoteFilterForm(forms.ModelForm):
+    class Meta:
+        model = PersonalNoteFilter
+        fields = ['identifier', 'description', 'regex']

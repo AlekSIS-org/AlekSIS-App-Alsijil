@@ -22,6 +22,11 @@ MENUS = {
                     'name': _('Register absence'),
                     'url': 'register_absence',
                     'validators': ['menu_generator.validators.is_superuser']
+                },
+                {
+                    'name': _('Personal note filters'),
+                    'url': 'list_personal_note_filters',
+                    'validators': ['menu_generator.validators.is_superuser']
                 }
             ]
         }

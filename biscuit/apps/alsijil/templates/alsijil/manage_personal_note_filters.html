@@ -1,0 +1,38 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load bootstrap4 i18n static font_awesome %}
+
+{% block bootstrap4_extra_head %}
+  {{ block.super }}
+  {{ personal_note_filters_form.media.css }}
+{% endblock %}
+
+{% block bootstrap4_extra_script %}
+  {{ block.super }}
+  {{ personal_note_filters_form.media.js }}
+{% endblock %}
+
+{% block bootstrap4_title %}{% blocktrans%}Manage personal note filters{% endblocktrans %} - {{ block.super }}{% endblock %}
+
+{% block page_title %}{% blocktrans %}Manage personal note filters{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between">
+    <div class="btn-group" role="group" aria-label="Filter actions">
+      {% if personal_note_filters %}
+        <a href="{% url 'delete_personal_note_filters' personal_note_filters.id %}" class="btn btn-danger">
+          {% fa 'trash-o' %}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form personal_note_filters_form %}
+    <button type="submit" class="btn btn-dark">
+      {% blocktrans %}Save{% endblocktrans %}
+    </button>
+  </form>
+
+{% endblock %}
