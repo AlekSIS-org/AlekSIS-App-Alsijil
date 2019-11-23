@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-23 10:04+0100\n"
-"PO-Revision-Date: 2019-11-05 16:37+0000\n"
+"PO-Revision-Date: 2019-11-23 11:07+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
@@ -33,11 +33,11 @@ msgstr "Raum"
 
 #: forms.py:54
 msgid "Start date"
-msgstr ""
+msgstr "Startdatum"
 
 #: forms.py:55
 msgid "End date"
-msgstr ""
+msgstr "Enddatum"
 
 #: forms.py:56
 #, fuzzy
@@ -78,7 +78,7 @@ msgstr "Aktuelle Woche"
 
 #: menus.py:22
 msgid "Register absence"
-msgstr ""
+msgstr "Abwesenheit eintragen"
 
 #: models.py:42 templates/alsijil/print/full_register.html:255
 msgid "Lesson topic"
@@ -90,11 +90,11 @@ msgstr "Hausaufgaben"
 
 #: models.py:54
 msgid "Identifier"
-msgstr ""
+msgstr "Kennung"
 
 #: models.py:56 templates/alsijil/print/full_register.html:181
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #: models.py:58
 msgid "Match expression"
@@ -240,32 +240,28 @@ msgid "Per week"
 msgstr "Pro Woche"
 
 #: templates/alsijil/print/full_register.html:127
-#, fuzzy
-#| msgid "Personal notes"
 msgid "Personal overview"
-msgstr "Persönliche Notizen"
+msgstr "Persönliche Übersicht"
 
 #: templates/alsijil/print/full_register.html:129
 msgid "Contact details"
-msgstr ""
+msgstr "Kontaktdetails"
 
 #: templates/alsijil/print/full_register.html:177
 msgid "Statistics on remarks"
-msgstr ""
+msgstr "Statistiken zu Bemerkungen"
 
 #: templates/alsijil/print/full_register.html:182
 msgid "Count"
-msgstr ""
+msgstr "Anzahl"
 
 #: templates/alsijil/print/full_register.html:199
-#, fuzzy
-#| msgid "Personal notes"
 msgid "Relevant personal notes"
-msgstr "Persönliche Notizen"
+msgstr "Relevante persönliche Notizen"
 
 #: templates/alsijil/print/full_register.html:203
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: templates/alsijil/print/full_register.html:204
 #: templates/alsijil/print/full_register.html:252
@@ -284,7 +280,7 @@ msgstr "Lk."
 
 #: templates/alsijil/print/full_register.html:224
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: templates/alsijil/print/full_register.html:226
 #: templates/alsijil/print/full_register.html:298
@@ -310,7 +306,7 @@ msgstr "Stunde ist ausgefallen"
 
 #: templates/alsijil/register_absence.html:15
 msgid "Manage absence"
-msgstr ""
+msgstr "Abwesenheiten verwalten"
 
 #: templates/alsijil/week_view.html:25
 msgid "Select"
@@ -370,7 +366,7 @@ msgstr ""
 
 #: views.py:244
 msgid "The absence has been saved."
-msgstr ""
+msgstr "Die Abwesenheit wurde gespeichert."
 
 #~ msgid "Week"
 #~ msgstr "Woche"
