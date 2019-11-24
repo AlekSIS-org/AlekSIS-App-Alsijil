@@ -15,6 +15,7 @@ Bugfixes
 ~~~~~~~~
 
 * Show lesson documentations in printout again.
+* Allow pages overflowing in printout
 
 `1.0a2`_
 --------
