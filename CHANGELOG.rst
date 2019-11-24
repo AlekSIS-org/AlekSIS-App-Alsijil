@@ -16,6 +16,7 @@ Bugfixes
 
 * Show lesson documentations in printout again.
 * Allow pages overflowing in printout
+* Show all relevant personal notes in week view.
 
 `1.0a2`_
 --------
