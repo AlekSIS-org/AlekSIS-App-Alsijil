@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-24 22:45+0100\n"
-"PO-Revision-Date: 2019-11-23 11:07+0000\n"
+"PO-Revision-Date: 2019-11-24 21:53+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
@@ -41,7 +41,7 @@ msgstr "Enddatum"
 
 #: forms.py:56
 msgid "From period"
-msgstr ""
+msgstr "Ab Stunde"
 
 #: forms.py:57 templates/alsijil/lesson.html:61
 msgid "Person"
@@ -79,10 +79,8 @@ msgid "Register absence"
 msgstr "Abwesenheit eintragen"
 
 #: menus.py:27
-#, fuzzy
-#| msgid "Personal notes"
 msgid "Personal note filters"
-msgstr "Persönliche Notizen"
+msgstr "Filter für persönliche Notizen"
 
 #: models.py:42 templates/alsijil/print/full_register.html:274
 msgid "Lesson topic"
@@ -102,11 +100,11 @@ msgstr "Beschreibung"
 
 #: models.py:58
 msgid "Match expression"
-msgstr ""
+msgstr "Muster"
 
 #: tables.py:14
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 #: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:34
 msgid "Lesson documentation"
@@ -134,22 +132,18 @@ msgstr "Speichern"
 
 #: templates/alsijil/manage_personal_note_filter.html:15
 #: templates/alsijil/manage_personal_note_filter.html:17
-#, fuzzy
-#| msgid "Relevant personal notes"
 msgid "Manage personal note filter"
-msgstr "Relevante persönliche Notizen"
+msgstr "Filter für persönliche Notizen verwalten"
 
 #: templates/alsijil/manage_personal_note_filters.html:15
 #: templates/alsijil/manage_personal_note_filters.html:17
-#, fuzzy
-#| msgid "Relevant personal notes"
 msgid "Manage personal note filters"
-msgstr "Relevante persönliche Notizen"
+msgstr "Filter für persönliche Notizen verwalten"
 
 #: templates/alsijil/personal_note_filters.html:7
 #: templates/alsijil/personal_note_filters.html:8
 msgid "List of all personal note filters"
-msgstr ""
+msgstr "Liste aller Filter für persönliche Notizen"
 
 #: templates/alsijil/print/full_register.html:25
 #: templates/alsijil/print/full_register.html:57
@@ -290,7 +284,7 @@ msgstr "Anzahl"
 
 #: templates/alsijil/print/full_register.html:199
 msgid "Absences and tardiness"
-msgstr ""
+msgstr "Abwesenheiten und Verspätungen"
 
 #: templates/alsijil/print/full_register.html:218
 msgid "Relevant personal notes"
@@ -407,16 +401,12 @@ msgid "The absence has been saved."
 msgstr "Die Abwesenheit wurde gespeichert."
 
 #: views.py:285
-#, fuzzy
-#| msgid "The absence has been saved."
 msgid "The filter has been saved"
-msgstr "Die Abwesenheit wurde gespeichert."
+msgstr "Der Filter wurde gespeichert"
 
 #: views.py:300
-#, fuzzy
-#| msgid "The absence has been saved."
 msgid "The filter has been deleted."
-msgstr "Die Abwesenheit wurde gespeichert."
+msgstr "Der Filter wurde gespeichert."
 
 #, fuzzy
 #~| msgid "Current lesson"
