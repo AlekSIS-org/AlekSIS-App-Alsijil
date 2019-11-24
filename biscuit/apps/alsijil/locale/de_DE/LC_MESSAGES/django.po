@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-24 22:45+0100\n"
-"PO-Revision-Date: 2019-11-24 21:53+0000\n"
+"PO-Revision-Date: 2019-11-24 21:56+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
 "biscuit-app-alsijil/de/>\n"
@@ -100,7 +100,7 @@ msgstr "Beschreibung"
 
 #: models.py:58
 msgid "Match expression"
-msgstr "Muster"
+msgstr "Suchausdruck"
 
 #: tables.py:14
 msgid "Edit"
