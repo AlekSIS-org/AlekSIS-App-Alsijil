@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "BiscuIT-App-Alsijil"
-version = "1.0a3"
+version = "1.0a4dev0"
 packages = [
     { include = "biscuit" }
 ]
