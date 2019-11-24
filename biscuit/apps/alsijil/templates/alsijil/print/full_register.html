@@ -195,6 +195,25 @@
           </table>
         {% endif %}
 
+        <h3>{% trans 'Absences and tardiness' %}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>{% trans 'Absences' %}</th>
+	      <th>{% trans 'Unexcused' %}</th>
+              <th>{% trans 'Tardiness' %}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>{{ person.absences }}</td>
+              <td>{{ person.unexcused }}</td>
+              <td>{{ person.tardiness </td>
+            </tr>
+          </tbody>
+        </table>
+
         <h3>{% trans 'Relevant personal notes' %}</h3>
         <table>
           <thead>
