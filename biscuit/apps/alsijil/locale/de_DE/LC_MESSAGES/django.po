@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-24 21:08+0100\n"
+"POT-Creation-Date: 2019-11-24 22:45+0100\n"
 "PO-Revision-Date: 2019-11-23 11:07+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
@@ -40,10 +40,8 @@ msgid "End date"
 msgstr "Enddatum"
 
 #: forms.py:56
-#, fuzzy
-#| msgid "Current lesson"
-msgid "Starting lesson"
-msgstr "Aktuelle Unterrichtsstunde"
+msgid "From period"
+msgstr ""
 
 #: forms.py:57 templates/alsijil/lesson.html:61
 msgid "Person"
@@ -419,6 +417,11 @@ msgstr "Die Abwesenheit wurde gespeichert."
 #| msgid "The absence has been saved."
 msgid "The filter has been deleted."
 msgstr "Die Abwesenheit wurde gespeichert."
+
+#, fuzzy
+#~| msgid "Current lesson"
+#~ msgid "Starting lesson"
+#~ msgstr "Aktuelle Unterrichtsstunde"
 
 #~ msgid "Week"
 #~ msgstr "Woche"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-24 21:08+0100\n"
+"POT-Creation-Date: 2019-11-24 22:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgid "End date"
 msgstr ""
 
 #: forms.py:56
-msgid "Starting lesson"
+msgid "From period"
 msgstr ""
 
 #: forms.py:57 templates/alsijil/lesson.html:61
