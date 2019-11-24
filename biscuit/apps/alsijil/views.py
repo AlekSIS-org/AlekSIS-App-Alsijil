@@ -97,7 +97,13 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
             lesson_period=OuterRef('pk'),
             week=wanted_week.week
         ))
-    ).in_week(wanted_week)
+    ).in_week(
+        wanted_week
+    ).select_related(
+        'lesson', 'lesson__subject', 'period', 'room'
+    ).prefetch_related(
+        'lesson__groups', 'lesson__teachers', 'substitutions'
+    )
 
     group = None  # FIXME workaround for #38
     if request.GET.get('group', None) or request.GET.get('teacher', None) or request.GET.get('room', None):
@@ -172,8 +178,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     # Get all lesson periods for the selected group
     lesson_periods = LessonPeriod.objects.filter_group(
         group
-    ).distinct().prefetch_related(
-        'documentations', 'personal_notes'
+    ).distinct().select_related(
+        'lesson', 'lesson__subject', 'period', 'room'
+    ).prefetch_related(
+        'lesson__groups', 'lesson__teachers', 'substitutions', 'documentations', 'personal_notes'
     )
 
     weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
