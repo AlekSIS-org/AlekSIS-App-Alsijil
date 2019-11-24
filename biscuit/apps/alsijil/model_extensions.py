@@ -1,4 +1,4 @@
-From datetime import date
+from datetime import date
 
 from django.db.models import Exists, F, OuterRef
 
