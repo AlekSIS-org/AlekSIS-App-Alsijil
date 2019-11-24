@@ -121,3 +121,12 @@ table.person-info td.person-img {
 table.person-info td.person-img img {
   max-height: 30mm;
 }
+
+.sheet {
+    overflow: visible;
+    height: auto !important;
+}
+
+.sheet * {
+    page-break-inside: avoid;
+}
