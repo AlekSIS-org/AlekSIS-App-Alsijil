@@ -232,7 +232,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
             person = register_absence_form.cleaned_data['person']
             start_date = register_absence_form.cleaned_data['date_start']
             end_date = register_absence_form.cleaned_data['date_end']
-            starting_lesson = register_absence_form.cleaned_data['starting_lesson']
+            from_period = register_absence_form.cleaned_data['from_period']
             absent = register_absence_form.cleaned_data['absent']
             excused = register_absence_form.cleaned_data['excused']
             remarks = register_absence_form.cleaned_data['remarks']
@@ -240,9 +240,9 @@ def register_absence(request: HttpRequest) -> HttpResponse:
             # Mark person as absent
             delta = end_date - start_date
             for i in range(delta.days+1):
-                starting_period = starting_lesson if i == 0 else 0
+                from_period = from_period if i == 0 else 0
                 day = start_date + timedelta(days=i)
-                person.mark_absent(day, starting_period, absent, excused, remarks)
+                person.mark_absent(day, from_period, absent, excused, remarks)
 
             messages.success(request, _('The absence has been saved.'))
             return redirect('index')

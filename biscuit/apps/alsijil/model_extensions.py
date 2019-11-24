@@ -1,4 +1,4 @@
-from datetime import date
+From datetime import date
 
 from django.db.models import Exists, F, OuterRef
 
@@ -10,7 +10,7 @@ from .models import PersonalNote
 
 
 @Person.method
-def mark_absent(self, day: date, starting_period: int = 0, absent: bool = True, bool = False, remarks: str = ''):
+def mark_absent(self, day: date, from_period: int = 0, absent: bool = True, bool = False, remarks: str = ''):
     """ Mark a person absent for all lessons in a day, optionally starting with
     a selected period number.
     
@@ -30,7 +30,7 @@ def mark_absent(self, day: date, starting_period: int = 0, absent: bool = True, 
     lesson_periods = self.lesson_periods_as_participant.on_day(
         day
     ).filter(
-        period__period__gte=starting_period
+        period__period__gte=from_period
     )
 
     # Create and update all personal notes for the discovered lesson periods
