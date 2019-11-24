@@ -122,7 +122,7 @@ def week_view(request: HttpRequest, year: Optional[int] = None, week: Optional[i
         persons = Person.objects.filter(
             is_active=True
         ).filter(
-            member_of__lessons__periods__in=lesson_periods
+            member_of__lessons__lesson_periods__in=lesson_periods
         ).distinct().prefetch_related(
             'personal_notes'
         ).annotate(
