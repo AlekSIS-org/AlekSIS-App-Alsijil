@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-23 10:04+0100\n"
+"POT-Creation-Date: 2019-11-24 21:08+0100\n"
 "PO-Revision-Date: 2019-11-23 11:07+0000\n"
 "Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/biscuit-sis/"
@@ -50,7 +50,7 @@ msgid "Person"
 msgstr "Person"
 
 #: forms.py:58 templates/alsijil/lesson.html:62
-#: templates/alsijil/print/full_register.html:207
+#: templates/alsijil/print/full_register.html:226
 #: templates/alsijil/week_view.html:98
 msgid "Absent"
 msgstr "Abwesend"
@@ -60,7 +60,7 @@ msgid "Excused"
 msgstr "Entschuldigt"
 
 #: forms.py:60 templates/alsijil/lesson.html:65
-#: templates/alsijil/print/full_register.html:209
+#: templates/alsijil/print/full_register.html:228
 msgid "Remarks"
 msgstr "Bemerkungen"
 
@@ -80,11 +80,17 @@ msgstr "Aktuelle Woche"
 msgid "Register absence"
 msgstr "Abwesenheit eintragen"
 
-#: models.py:42 templates/alsijil/print/full_register.html:255
+#: menus.py:27
+#, fuzzy
+#| msgid "Personal notes"
+msgid "Personal note filters"
+msgstr "Persönliche Notizen"
+
+#: models.py:42 templates/alsijil/print/full_register.html:274
 msgid "Lesson topic"
 msgstr "Stundenthema"
 
-#: models.py:43 templates/alsijil/print/full_register.html:256
+#: models.py:43 templates/alsijil/print/full_register.html:275
 msgid "Homework"
 msgstr "Hausaufgaben"
 
@@ -100,6 +106,10 @@ msgstr "Beschreibung"
 msgid "Match expression"
 msgstr ""
 
+#: tables.py:14
+msgid "Edit"
+msgstr ""
+
 #: templates/alsijil/lesson.html:10 templates/alsijil/lesson.html:34
 msgid "Lesson documentation"
 msgstr "Stunden-Dokumentation"
@@ -113,12 +123,35 @@ msgid "Personal notes"
 msgstr "Persönliche Notizen"
 
 #: templates/alsijil/lesson.html:63
+#: templates/alsijil/print/full_register.html:205
 msgid "Tardiness"
 msgstr "Verspätung"
 
-#: templates/alsijil/lesson.html:81 templates/alsijil/register_absence.html:25
+#: templates/alsijil/lesson.html:81
+#: templates/alsijil/manage_personal_note_filter.html:34
+#: templates/alsijil/manage_personal_note_filters.html:34
+#: templates/alsijil/register_absence.html:25
 msgid "Save"
 msgstr "Speichern"
+
+#: templates/alsijil/manage_personal_note_filter.html:15
+#: templates/alsijil/manage_personal_note_filter.html:17
+#, fuzzy
+#| msgid "Relevant personal notes"
+msgid "Manage personal note filter"
+msgstr "Relevante persönliche Notizen"
+
+#: templates/alsijil/manage_personal_note_filters.html:15
+#: templates/alsijil/manage_personal_note_filters.html:17
+#, fuzzy
+#| msgid "Relevant personal notes"
+msgid "Manage personal note filters"
+msgstr "Relevante persönliche Notizen"
+
+#: templates/alsijil/personal_note_filters.html:7
+#: templates/alsijil/personal_note_filters.html:8
+msgid "List of all personal note filters"
+msgstr ""
 
 #: templates/alsijil/print/full_register.html:25
 #: templates/alsijil/print/full_register.html:57
@@ -206,15 +239,17 @@ msgid "Date of birth"
 msgstr "Geburtsdatum"
 
 #: templates/alsijil/print/full_register.html:74
+#: templates/alsijil/print/full_register.html:203
 msgid "Absences"
 msgstr "Abwesenheiten"
 
 #: templates/alsijil/print/full_register.html:75
+#: templates/alsijil/print/full_register.html:204
 msgid "Unexcused"
 msgstr "Unentschuldigt"
 
 #: templates/alsijil/print/full_register.html:76
-#: templates/alsijil/print/full_register.html:208
+#: templates/alsijil/print/full_register.html:227
 msgid "Tard."
 msgstr "Verspät."
 
@@ -256,55 +291,60 @@ msgid "Count"
 msgstr "Anzahl"
 
 #: templates/alsijil/print/full_register.html:199
+msgid "Absences and tardiness"
+msgstr ""
+
+#: templates/alsijil/print/full_register.html:218
 msgid "Relevant personal notes"
 msgstr "Relevante persönliche Notizen"
 
-#: templates/alsijil/print/full_register.html:203
+#: templates/alsijil/print/full_register.html:222
 msgid "Date"
 msgstr "Datum"
 
-#: templates/alsijil/print/full_register.html:204
-#: templates/alsijil/print/full_register.html:252
+#: templates/alsijil/print/full_register.html:223
+#: templates/alsijil/print/full_register.html:271
 msgid "Pe."
 msgstr "Std."
 
-#: templates/alsijil/print/full_register.html:205
-#: templates/alsijil/print/full_register.html:253
+#: templates/alsijil/print/full_register.html:224
+#: templates/alsijil/print/full_register.html:272
 msgid "Subj."
 msgstr "Fa."
 
-#: templates/alsijil/print/full_register.html:206
-#: templates/alsijil/print/full_register.html:258
+#: templates/alsijil/print/full_register.html:225
+#: templates/alsijil/print/full_register.html:277
 msgid "Te."
 msgstr "Lk."
 
-#: templates/alsijil/print/full_register.html:224
+#: templates/alsijil/print/full_register.html:243
 msgid "Yes"
 msgstr "Ja"
 
-#: templates/alsijil/print/full_register.html:226
-#: templates/alsijil/print/full_register.html:298
-#: templates/alsijil/print/full_register.html:308
+#: templates/alsijil/print/full_register.html:245
+#: templates/alsijil/print/full_register.html:317
+#: templates/alsijil/print/full_register.html:327
 msgid "e"
 msgstr "e"
 
-#: templates/alsijil/print/full_register.html:246
+#: templates/alsijil/print/full_register.html:265
 msgid "Lesson documentation for calendar week"
 msgstr "Unterrichtsdokumentation für Kalenderwoche"
 
-#: templates/alsijil/print/full_register.html:254
+#: templates/alsijil/print/full_register.html:273
 msgid "Subs."
 msgstr "Vertr."
 
-#: templates/alsijil/print/full_register.html:257
+#: templates/alsijil/print/full_register.html:276
 msgid "Notes"
 msgstr "Notizen"
 
-#: templates/alsijil/print/full_register.html:285
+#: templates/alsijil/print/full_register.html:304
 msgid "Lesson cancelled"
 msgstr "Stunde ist ausgefallen"
 
 #: templates/alsijil/register_absence.html:15
+#: templates/alsijil/register_absence.html:17
 msgid "Manage absence"
 msgstr "Abwesenheiten verwalten"
 
@@ -348,7 +388,7 @@ msgstr ""
 "oder Raum.\n"
 "          "
 
-#: views.py:38
+#: views.py:41
 msgid ""
 "You either selected an invalid lesson or there is currently no lesson in "
 "progress."
@@ -356,7 +396,7 @@ msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
 
-#: views.py:41
+#: views.py:44
 msgid ""
 "You are not allowed to create a lesson documentation for a lesson in the "
 "future."
@@ -364,8 +404,20 @@ msgstr ""
 "Ihnen ist es nicht erlaubt, eine Eintragung für eine Unterrichtsstunde in "
 "der Zukunft vorzunehmen."
 
-#: views.py:244
+#: views.py:247
 msgid "The absence has been saved."
+msgstr "Die Abwesenheit wurde gespeichert."
+
+#: views.py:285
+#, fuzzy
+#| msgid "The absence has been saved."
+msgid "The filter has been saved"
+msgstr "Die Abwesenheit wurde gespeichert."
+
+#: views.py:300
+#, fuzzy
+#| msgid "The absence has been saved."
+msgid "The filter has been deleted."
 msgstr "Die Abwesenheit wurde gespeichert."
 
 #~ msgid "Week"
