@@ -10,7 +10,7 @@ from .models import PersonalNote
 
 
 @Person.method
-def mark_absent(self, day: date, from_period: int = 0, absent: bool = True, bool = False, remarks: str = ''):
+def mark_absent(self, day: date, from_period: int = 0, absent: bool = True, excused: bool = False, remarks: str = ''):
     """ Mark a person absent for all lessons in a day, optionally starting with
     a selected period number.
     
