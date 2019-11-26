@@ -26,4 +26,4 @@ Please see the LICENCE file accompanying this distribution for the
 full licence text or on the `Europen Union Public Licence`_ website
 (including all other official language versions).
 
-.. _BiscuIT-ng: https://edugit.org/Teckids/BiscuIT/BiscuIT-ng
+.. _BiscuIT-ng: https://edugit.org/BiscuIT/BiscuIT-ng
