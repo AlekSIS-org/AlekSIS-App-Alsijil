@@ -1,0 +1,4 @@
+include LICENCE
+recursive-include biscuit/apps/alsijil/static *
+recursive-include biscuit/apps/alsijil/templates *
+recursive-include biscuit/apps/alsijil/migrations *
