@@ -4,14 +4,14 @@ version = "1.0a4dev0"
 packages = [
     { include = "biscuit" }
 ]
-readme = "README.md"
+readme = "README.rst"
 
 description = "BiscuIT School Information System (SIS) - App Alsijil (Class register)"
-authors = ["BiscuIT Team <biscuit-dev@lists.teckids.org>"]
-license = "MIT"
-homepage = "https://biscuit.edugit.org/"
-repository = "https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil"
-documentation = "https://biscuit.edugit.org/docs/html/"
+authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
+license = "EUPL-1.2"
+homepage = "https://biscuit.edugit.io/"
+repository = "https://edugit.org/BiscuIT/BiscuIT-App-Alsijil"
+documentation = "https://biscuit.edugit.io/BiscuIT-ng/docs/html/"
 classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: Education",
