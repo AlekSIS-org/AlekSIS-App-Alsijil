@@ -20,7 +20,7 @@ Licence
   Copyright © 2019 mirabilos <thorsten.glaser@teckids.org>
   Copyright © 2019 Tom Teichler <tom.teichler@teckids.org>
 
-  Licenced under the EUPL
+  Licensed under the EUPL
 
 Please see the LICENCE file accompanying this distribution for the
 full licence text or on the `Europen Union Public Licence`_ website
