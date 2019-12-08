@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('remarks', models.CharField(blank=True, max_length=200)),
                 ('lesson_period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chronos.LessonPeriod')),
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='personal_notes', to='core.Person')),
-                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
+                ('school', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
                 'ordering': ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period', 'person__last_name', 'person__first_name'],
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 ('topic', models.CharField(blank=True, max_length=200, verbose_name='Lesson topic')),
                 ('homework', models.CharField(blank=True, max_length=200, verbose_name='Homework')),
                 ('lesson_period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documentations', to='chronos.LessonPeriod')),
-                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
+                ('school', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
                 'ordering': ['lesson_period__lesson__date_start', 'week', 'lesson_period__period__weekday', 'lesson_period__period__period'],
