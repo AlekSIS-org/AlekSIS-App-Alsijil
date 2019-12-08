@@ -13,7 +13,7 @@ from django_tables2 import RequestConfig
 
 from biscuit.apps.chronos.models import LessonPeriod
 from biscuit.apps.chronos.util import CalendarWeek
-from biscuit.core.models import Group, Person
+from biscuit.core.models import Group, Person, School
 from biscuit.core.decorators import admin_required
 from biscuit.core.util import messages
 
@@ -176,7 +176,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         'documentations', 'personal_notes'
     )
 
-    weeks = CalendarWeek.weeks_within(group.school.current_term.date_start, group.school.current_term.date_end)
+    weeks = CalendarWeek.weeks_within(School.objects.first().current_term.date_start, School.objects.first().current_term.date_end)
     periods_by_day = {}
     for lesson_period in lesson_periods:
         for week in weeks:
@@ -216,6 +216,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context['weeks'] = weeks
     context['periods_by_day'] = periods_by_day
     context['today'] = date.today()
+    context['school'] School.objects.first()
 
     return render(request, 'alsijil/print/full_register.html', context)
 

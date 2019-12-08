@@ -17,7 +17,7 @@
     <section class="sheet padding-10mm bigprint" id="titlepage">
       <div>
         <h1>{% trans 'Class register' %}</h1>
-        <img src="{% cropped_thumbnail group.school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
+        <img src="{% cropped_thumbnail school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
         <p id="group-desc">
           {{ group.name }}
         </p>
