@@ -30,7 +30,7 @@ class PersonalNote(models.Model):
                     'lesson_period__period__period', 'person__last_name', 'person__first_name']
 
 
-class LessonDocumentation(models.Model, CRUDMixin):
+class LessonDocumentation(CRUDMixin):
     """ A documentation on a single lesson period. Non-personal, includes
     the topic and homework of the lesson.
     """
