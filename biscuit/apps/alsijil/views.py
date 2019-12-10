@@ -216,7 +216,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context['weeks'] = weeks
     context['periods_by_day'] = periods_by_day
     context['today'] = date.today()
-    context['school'] School.objects.first()
+    context['school'] = School.objects.first()
 
     return render(request, 'alsijil/print/full_register.html', context)
 
