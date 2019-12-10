@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('identifier', models.CharField(max_length=30, validators=[biscuit.apps.alsijil.models.isidentifier], verbose_name='Identifier')),
                 ('description', models.CharField(blank=True, max_length=60, verbose_name='Description')),
                 ('regex', models.CharField(max_length=100, verbose_name='Match expression')),
-                ('school', models.ForeignKey(default=biscuit.core.util.core_helpers.get_current_school, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
+                ('school', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='core.School')),
             ],
             options={
                 'ordering': ['identifier'],
