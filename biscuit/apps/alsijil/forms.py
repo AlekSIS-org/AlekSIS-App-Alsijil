@@ -37,17 +37,15 @@ class PersonalNoteForm(forms.ModelForm):
 
 class SelectForm(forms.Form):
     group = forms.ModelChoiceField(
-        queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(
-            lessons_count__gt=0
-        ),
+        queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(lessons_count__gt=0),
         label=_("Group"),
         required=False,
         widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
-        queryset=Person.objects.annotate(
-            lessons_count=Count("lessons_as_teacher")
-        ).filter(lessons_count__gt=0),
+        queryset=Person.objects.annotate(lessons_count=Count("lessons_as_teacher")).filter(
+            lessons_count__gt=0
+        ),
         label=_("Teacher"),
         required=False,
         widget=Select2Widget,

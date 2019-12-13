@@ -43,17 +43,12 @@ def lesson(
         wanted_week = CalendarWeek(year=year, week=week)
     else:
         # Determine current lesson by current date and time
-        lesson_period = (
-            LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
-        )
+        lesson_period = LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
         wanted_week = CalendarWeek()
 
         if lesson_period:
             return redirect(
-                "lesson_by_week_and_period",
-                wanted_week.year,
-                wanted_week.week,
-                lesson_period.pk,
+                "lesson_by_week_and_period", wanted_week.year, wanted_week.week, lesson_period.pk,
             )
         else:
             raise Http404(
@@ -64,16 +59,13 @@ def lesson(
 
     if (
         datetime.combine(
-            wanted_week[lesson_period.period.weekday - 1],
-            lesson_period.period.time_start,
+            wanted_week[lesson_period.period.weekday - 1], lesson_period.period.time_start,
         )
         > datetime.now()
         and not request.user.is_superuser
     ):
         raise PermissionDenied(
-            _(
-                "You are not allowed to create a lesson documentation for a lesson in the future."
-            )
+            _("You are not allowed to create a lesson documentation for a lesson in the future.")
         )
 
     context["lesson_period"] = lesson_period
@@ -85,9 +77,7 @@ def lesson(
         lesson_period=lesson_period, week=wanted_week.week
     )
     lesson_documentation_form = LessonDocumentationForm(
-        request.POST or None,
-        instance=lesson_documentation,
-        prefix="leson_documentation",
+        request.POST or None, instance=lesson_documentation, prefix="leson_documentation",
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
@@ -243,21 +233,12 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         for week in weeks:
             day = week[lesson_period.period.weekday - 1]
 
-            if (
-                lesson_period.lesson.date_start <= day
-                and lesson_period.lesson.date_end >= day
-            ):
+            if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
                 documentations = list(
-                    filter(
-                        lambda d: d.week == week.week,
-                        lesson_period.documentations.all(),
-                    )
+                    filter(lambda d: d.week == week.week, lesson_period.documentations.all(),)
                 )
                 notes = list(
-                    filter(
-                        lambda d: d.week == week.week,
-                        lesson_period.personal_notes.all(),
-                    )
+                    filter(lambda d: d.week == week.week, lesson_period.personal_notes.all(),)
                 )
                 substitution = lesson_period.get_substitution(week.week)
 
@@ -282,9 +263,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 "_personal_notes_with_%s"
                 % personal_note_filter.identifier: Count(
                     "personal_notes__remarks",
-                    filter=Q(
-                        personal_notes__remarks__iregex=personal_note_filter.regex
-                    ),
+                    filter=Q(personal_notes__remarks__iregex=personal_note_filter.regex),
                 )
             }
         )
@@ -346,9 +325,7 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/personal_note_filters.html", context)
 
 
-def edit_personal_note_filter(
-    request: HttpRequest, id: Optional["int"] = None
-) -> HttpResponse:
+def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) -> HttpResponse:
     context = {}
 
     if id:
