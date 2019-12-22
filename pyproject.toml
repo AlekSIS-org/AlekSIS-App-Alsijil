@@ -20,8 +20,8 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-BiscuIT-ng = {version = "^1.0a3.dev0", allows-prereleases = true, path = "../../.."}
-BiscuIT-App-Chronos = {version = "^1.0a1.dev0", allows-prereleases = true, path = "../BiscuIT-App-Chronos"}
+BiscuIT-ng = { path = "../../.." }
+BiscuIT-App-Chronos = { path = "../BiscuIT-App-Chronos" }
 
 [build-system]
 requires = ["poetry>=0.12"]
