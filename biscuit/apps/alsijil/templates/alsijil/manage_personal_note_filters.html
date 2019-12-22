@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load bootstrap4 i18n static font_awesome %}
+{% load bootstrap4 i18n static %}
 
 {% block bootstrap4_extra_head %}
   {{ block.super }}
@@ -21,7 +21,7 @@
     <div class="btn-group" role="group" aria-label="Filter actions">
       {% if personal_note_filters %}
         <a href="{% url 'delete_personal_note_filters' personal_note_filters.id %}" class="btn btn-danger">
-          {% fa 'trash-o' %}
+          <span class="mdi mdi-delete"></span>
         </a>
       {% endif %}
     </div>

@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/turnable.html" %}
-{% load bootstrap4 font_awesome i18n week_helpers %}
+{% load bootstrap4 i18n week_helpers %}
 
 {% block bootstrap4_extra_head %}
   {{ block.super }}
@@ -27,7 +27,7 @@
     </form>
     {% if group %}
       <a class="btn btn-dark" href="{% url 'full_register_group' group.id %}">
-        {% fa 'print' %}
+        <span class="mdi mdi-printer"></span>
       </a>
     {% endif %}
   </div>

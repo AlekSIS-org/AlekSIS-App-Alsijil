@@ -1,16 +1,15 @@
-{% load staticfiles i18n cropping data_helpers font_awesome week_helpers %}
+{% load staticfiles i18n cropping data_helpers week_helpers %}
 
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
-
-    {% fa_css %}
-
     <link rel="stylesheet"
       href="{% static 'css/alsijil/paper.css' %}" />
     <link rel="stylesheet"
       href="{% static 'css/alsijil/full_register.css' %}" />
+    <link rel="stylesheet"
+      href="{% static '@mdi/font/css/materialdesignicons.css' %}" />
   </head>
 
   <body class="A4">
@@ -136,36 +135,36 @@
                 <img src="{% static 'img/fallback.png' %}" alt="{{ person.first_name }} {{ person.last_name }}" />
               {% endif %}
             </td>
-            <td>{% fa 'user' %}</td>
+            <td><span class="mdi mdi-account"></span></td>
             <td>{{ person.first_name }}</td>
             <td>{{ person.additional_name }}</td>
             <td>{{ person.last_name }}</td>
           </tr>
           <tr>
-            <td>{% fa 'venus-mars' %}</td>
+            <td><span class="mdi mdi-gender-male-female"></span></td>
             <td colspan="3">{{ person.get_sex_display }}</td>
           </tr>
           <tr>
-            <td>{% fa 'fa-home' %}</td>
+            <td><span class="mdi mdi-home"></span></td>
             <td colspan="2">{{ person.street }} {{ person.housenumber }}</td>
             <td colspan="2">{{ person.postal_code }} {{ person.place }}</td>
           </tr>
           <tr>
-            <td>{% fa 'phone-square' %}</td>
+            <td><span class="mdi mdi-phone"></span></td>
             <td>{{ person.phone_number }}</td>
             <td>{{ person.mobile_number }}</td>
           </tr>
           <tr>
-            <td>{% fa 'envelope' %}</td>
+            <td><span class="mdi mdi-email"></span></td>
             <td colspan="3">{{ person.email }}</td>
           </tr>
           <tr>
-            <td>{% fa 'gift' %}</td>
+            <td><span class="mdi mdi-gift"></span></td>
             <td colspan="3">{{ person.date_of_birth|date }}</td>
           </tr>
           {% comment %}
             <tr>
-            <td>{% fa 'graduation-cap' %}</td>
+            <td><span class="mdi mdi-school"></span></td>
             <td>Class</td>
             <td>Teacher</td>
             </tr>
