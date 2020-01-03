@@ -6,8 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from django_select2.forms import Select2Widget
 
-from biscuit.apps.chronos.models import Room
-from biscuit.core.models import Group, Person
+from aleksis.apps.chronos.models import Room
+from aleksis.core.models import Group, Person
 
 from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
 

@@ -2,9 +2,9 @@ from datetime import date
 
 from django.db.models import Exists, F, OuterRef
 
-from biscuit.apps.chronos.models import LessonPeriod
-from biscuit.apps.chronos.util import CalendarWeek
-from biscuit.core.models import Group, Person
+from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.util import CalendarWeek
+from aleksis.core.models import Group, Person
 
 from .models import PersonalNote
 
@@ -24,7 +24,7 @@ def mark_absent(
     This function creates `PersonalNote` objects for every `LessonPeriod` the person
     participates in on the selected day and marks them as absent/excused.
 
-    ..note:: Only available when BiscuIT-App-Alsijil is installed.
+    ..note:: Only available when AlekSIS-App-Alsijil is installed.
 
     :Date: 2019-11-10
     :Authors:
@@ -62,7 +62,7 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
     Returns all linked `PersonalNote` objects, filtered by the given weeek,
     creating those objects that haven't been created yet.
     
-    ..note:: Only available when BiscuIT-App-Alsijil is installed.
+    ..note:: Only available when AlekSIS-App-Alsijil is installed.
 
     :Date: 2019-11-09
     :Authors:

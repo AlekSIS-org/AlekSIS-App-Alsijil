@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from biscuit.core.mixins import CRUDMixin
+from aleksis.core.mixins import CRUDMixin
 
 
 def isidentifier(value: str) -> bool:

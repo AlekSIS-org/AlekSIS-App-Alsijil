@@ -3,7 +3,7 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import biscuit.core.util.core_helpers
+import aleksis.core.util.core_helpers
 
 
 class Migration(migrations.Migration):

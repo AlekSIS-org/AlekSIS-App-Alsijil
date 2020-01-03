@@ -1,4 +1,4 @@
-AlekSIS School Information System (SIS) - App Alsijil (class register)
+AlekSIS (School Information System) - App Alsijil (class register)
 ======================================================================
 
 AlekSIS

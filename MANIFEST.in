@@ -1,4 +1,4 @@
 include LICENCE
-recursive-include biscuit/apps/alsijil/static *
-recursive-include biscuit/apps/alsijil/templates *
-recursive-include biscuit/apps/alsijil/migrations *
+recursive-include aleksis/apps/alsijil/static *
+recursive-include aleksis/apps/alsijil/templates *
+recursive-include aleksis/apps/alsijil/migrations *

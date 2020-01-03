@@ -60,6 +60,6 @@ Minor changes
 
 * Use bootstrap buttons everywhere
 
-_`1.0a1`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a1
-_`1.0a2`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a2
-_`1.0a3`: https://edugit.org/Teckids/BiscuIT/BiscuIT-App-Alsijil/-/tags/1.0a3
+_`1.0a1`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a1
+_`1.0a2`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a2
+_`1.0a3`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a3

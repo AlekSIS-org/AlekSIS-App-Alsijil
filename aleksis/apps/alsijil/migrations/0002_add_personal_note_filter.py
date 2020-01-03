@@ -3,8 +3,8 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import biscuit.apps.alsijil.models
-import biscuit.core.util.core_helpers
+import aleksis.apps.alsijil.models
+import aleksis.core.util.core_helpers
 
 
 class Migration(migrations.Migration):
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     "identifier",
                     models.CharField(
                         max_length=30,
-                        validators=[biscuit.apps.alsijil.models.isidentifier],
+                        validators=[aleksis.apps.alsijil.models.isidentifier],
                         verbose_name="Identifier",
                     ),
                 ),
