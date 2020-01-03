@@ -6,7 +6,7 @@ packages = [
 ]
 readme = "README.rst"
 
-description = "AlekSIS (School Information System) - App Alsijil (Class register)"
+description = "AlekSIS (School Information System) — App كتاب السجل (class register and school records)"
 authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
 license = "EUPL-1.2"
 homepage = "https://aleksis.edugit.io/"
