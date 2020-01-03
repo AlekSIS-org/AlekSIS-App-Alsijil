@@ -2,16 +2,16 @@
 name = "BiscuIT-App-Alsijil"
 version = "1.0a4dev0"
 packages = [
-    { include = "biscuit" }
+    { include = "aleksis" }
 ]
 readme = "README.rst"
 
-description = "BiscuIT School Information System (SIS) - App Alsijil (Class register)"
+description = "AlekSIS School Information System (SIS) - App Alsijil (Class register)"
 authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
 license = "EUPL-1.2"
-homepage = "https://biscuit.edugit.io/"
+homepage = "https://aleksis.edugit.io/"
 repository = "https://edugit.org/BiscuIT/BiscuIT-App-Alsijil"
-documentation = "https://biscuit.edugit.io/BiscuIT-ng/docs/html/"
+documentation = "https://aleksis.edugit.io/AlekSIS/docs/html/"
 classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: Education",
@@ -20,7 +20,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-BiscuIT-ng = { path = "../../.." }
+AlekSIS = { path = "../../.." }
 BiscuIT-App-Chronos = { path = "../BiscuIT-App-Chronos" }
 
 [build-system]

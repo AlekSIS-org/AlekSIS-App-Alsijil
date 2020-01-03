@@ -1,10 +1,10 @@
-BiscuIT School Information System (SIS) - App Alsijil (class register)
+AlekSIS School Information System (SIS) - App Alsijil (class register)
 ======================================================================
 
-BiscuIT
+AlekSIS
 -------
 
-This is an application for use with the `BiscuIT-ng`_ platform.
+This is an application for use with the `AlekSIS`_ platform.
 
 Features
 --------
@@ -26,4 +26,4 @@ Please see the LICENCE file accompanying this distribution for the
 full licence text or on the `Europen Union Public Licence`_ website
 (including all other official language versions).
 
-.. _BiscuIT-ng: https://edugit.org/BiscuIT/BiscuIT-ng
+.. _AlekSIS: https://edugit.org/AlekSIS/AlekSIS
