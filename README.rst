@@ -1,5 +1,5 @@
-AlekSIS (School Information System) - App Alsijil (class register)
-======================================================================
+AlekSIS (School Information System) — App كتاب السجل (class register and school records)
+========================================================================================
 
 AlekSIS
 -------
