@@ -20,10 +20,12 @@ Licence
   Copyright © 2019 mirabilos <thorsten.glaser@teckids.org>
   Copyright © 2019 Tom Teichler <tom.teichler@teckids.org>
 
-  Licensed under the EUPL
+  Licenced under the EUPL, version 1.2 or later
 
 Please see the LICENCE file accompanying this distribution for the
-full licence text or on the `Europen Union Public Licence`_ website
+full licence text or on the `European Union Public Licence`_ website
+https://joinup.ec.europa.eu/collection/eupl/guidelines-users-and-developers
 (including all other official language versions).
 
 .. _AlekSIS: https://edugit.org/AlekSIS/AlekSIS
+.. _European Union Public Licence: https://eupl.eu/
