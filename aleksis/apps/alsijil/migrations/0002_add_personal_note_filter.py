@@ -10,7 +10,7 @@ import aleksis.core.util.core_helpers
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0003_school_logo"),
+        ("core", "0002_activity_notification"),
         ("alsijil", "0001_initial"),
     ]
 
