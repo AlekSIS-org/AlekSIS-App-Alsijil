@@ -16,9 +16,9 @@ Licence
 
 ::
 
-  Copyright © 2019 Dominik George <dominik.george@teckids.org>
-  Copyright © 2019 mirabilos <thorsten.glaser@teckids.org>
-  Copyright © 2019 Tom Teichler <tom.teichler@teckids.org>
+  Copyright © 2019, 2020 Dominik George <dominik.george@teckids.org>
+  Copyright © 2019, 2020 mirabilos <thorsten.glaser@teckids.org>
+  Copyright © 2019, 2020 Tom Teichler <tom.teichler@teckids.org>
 
   Licenced under the EUPL, version 1.2 or later
 
