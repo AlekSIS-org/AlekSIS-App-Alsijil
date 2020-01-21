@@ -1,18 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load bootstrap4 i18n static %}
-
-{% block bootstrap4_extra_head %}
-  {{ block.super }}
-  {{ personal_note_filter_form.media.css }}
-{% endblock %}
-
-{% block bootstrap4_extra_script %}
-  {{ block.super }}
-  {{ personal_note_filter_form.media.js }}
-{% endblock %}
-
-{% block bootstrap4_title %}{% blocktrans%}Manage personal note filter{% endblocktrans %} - {{ block.super }}{% endblock %}
+{% load material_form i18n static %}
 
 {% block page_title %}{% blocktrans %}Manage personal note filter{% endblocktrans %}{% endblock %}
 
@@ -21,7 +9,7 @@
     <div class="btn-group" role="group" aria-label="Filter actions">
       {% if personal_note_filter %}
         <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}" class="btn btn-danger">
-          <span class="mdi mdi-delete"></span>
+          <i class="material-icons">trash</i>
         </a>
       {% endif %}
     </div>
@@ -29,10 +17,8 @@
 
   <form method="post">
     {% csrf_token %}
-    {% bootstrap_form personal_note_filter_form %}
-    <button type="submit" class="btn btn-dark">
-      <span class="mdi mdi-content-save"></span>
-    </button>
+    {% form form=personal_note_filter_form %}{% endform %}
+    {% include "core/save_button.html" %}
   </form>
 
 {% endblock %}

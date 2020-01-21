@@ -1,18 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load bootstrap4 i18n static %}
-
-{% block bootstrap4_extra_head %}
-  {{ block.super }}
-  {{ register_absence_form.media.css }}
-{% endblock %}
-
-{% block bootstrap4_extra_script %}
-  {{ block.super }}
-  {{ register_absence_form.media.js }}
-{% endblock %}
-
-{% block bootstrap4_title %}{% blocktrans%}Manage absence{% endblocktrans %} - {{ block.super }}{% endblock %}
+{% load material_form i18n static %}
 
 {% block page_title %}{% blocktrans %}Manage absence{% endblocktrans %}{% endblock %}
 
@@ -20,10 +8,8 @@
 
   <form method="post">
     {% csrf_token %}
-    {% bootstrap_form register_absence_form %}
-    <button type="submit" class="btn btn-dark">
-      <span class="mdi mdi-content-save"></span>
-    </button>
+    {% form form=register_absence_form %}{% endform %}
+    {% include "core/save_button.html" %}
   </form>
 
 {% endblock %}
