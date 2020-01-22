@@ -5,15 +5,11 @@
 {% block page_title %}{% blocktrans %}Manage personal note filter{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between">
-    <div class="btn-group" role="group" aria-label="Filter actions">
-      {% if personal_note_filter %}
-        <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}" class="btn btn-danger">
-          <i class="material-icons">trash</i>
-        </a>
-      {% endif %}
-    </div>
-  </div>
+  {% if personal_note_filter %}
+    <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}" class="waves-effect waves-dark btn red">
+      <i class="material-icons">add</i>{% blocktrans %}Add filter{% endblocktrans %}
+    </a>
+  {% endif %}
 
   <form method="post">
     {% csrf_token %}

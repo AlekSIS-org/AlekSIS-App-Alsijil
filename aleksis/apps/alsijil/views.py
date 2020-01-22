@@ -1,3 +1,4 @@
+from calendarweek import CalendarWeek
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -12,7 +13,6 @@ from django.utils.translation import ugettext as _
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.apps.chronos.util import CalendarWeek
 from aleksis.core.decorators import admin_required
 from aleksis.core.models import Group, Person, School
 from aleksis.core.util import messages

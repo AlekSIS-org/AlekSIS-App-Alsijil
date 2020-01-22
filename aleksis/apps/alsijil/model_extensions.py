@@ -1,9 +1,9 @@
 from datetime import date
+from calendarweek import CalendarWeek
 
 from django.db.models import Exists, F, OuterRef
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.apps.chronos.util import CalendarWeek
 from aleksis.core.models import Group, Person
 
 from .models import PersonalNote
