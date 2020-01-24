@@ -4,11 +4,12 @@
 {% load i18n %}
 {% load render_table from django_tables2 %}
 
+{% block browser_title %}{% blocktrans %}List of all personal note filters{% endblocktrans %}{% endblock %}
 {% block page_title %}{% blocktrans %}List of all personal note filters{% endblocktrans %}{% endblock %}
 
 {% block content %}
-  <a href="{% url 'create_personal_note_filter' %}" class="waves-effect waves-dark btn">
-    <i class="material-icons">add</i>
+  <a href="{% url 'create_personal_note_filter' %}" class="waves-effect waves-dark green btn">
+    <i class="material-icons">add</i>{% blocktrans %}Add filter{% endblock %}
   </a>
 
   {% render_table personal_note_filters_table %}
