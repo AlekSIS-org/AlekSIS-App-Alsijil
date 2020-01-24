@@ -2,6 +2,8 @@
 {% extends "core/base.html" %}
 {% load i18n static %}
 
+{% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
+
 {% block extra_head %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
