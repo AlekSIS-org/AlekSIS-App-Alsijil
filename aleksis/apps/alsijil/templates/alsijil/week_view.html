@@ -32,7 +32,7 @@
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
           <div class="card">
-            <div class="card-content black-text">
+            <div class="card-content">
               <span class="card-title">
                 {{ weekday }}
               </span>
