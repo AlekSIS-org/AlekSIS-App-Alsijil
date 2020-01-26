@@ -5,6 +5,11 @@
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}" />
+{% endblock %}
+
 {% block content %}
  <div class="row">
   <div class="col s10">
@@ -36,7 +41,7 @@
               <span class="card-title">
                 {{ weekday }}
               </span>
-              <table class="striped responsive-table">
+              <table class="striped responsive-table datatable">
                 <thead>
                   <tr>
                     <th>{% blocktrans %}Period{% endblocktrans %}</th>
