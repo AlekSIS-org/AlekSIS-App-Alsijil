@@ -12,14 +12,14 @@
       <ul id="timetable_select_form">
         {% form form=select_form %}{% endform %}
       </ul>
-      <button type="submit" class="btn btn-dark waves-light">
+      <button type="submit" class="btn waves-light">
         {% blocktrans %}Select{% endblocktrans %}
       </button>
     </form>
   </div>
   {% if group %}
     <div class="col s2">
-      <a class="btn btn-dark" href="{% url 'full_register_group' group.id %}">
+      <a class="btn waves-light" href="{% url 'full_register_group' group.id %}">
         <i class="material-icons">printer</i>
       </a>
     </div>
