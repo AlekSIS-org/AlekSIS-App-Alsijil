@@ -48,15 +48,15 @@
                   {% for period in periods %}
                     <tr class="
                       {% if period.has_documentation %}
-                        green lighten-2
+                        success
                       {% else %}
                         {% weekday_to_date week period.period.weekday as current_date %}
                         {% today as today %}
                         {% if current_date < today %}
-                          red lighten-2
+                          error
                         {% else %}
                           {% if period.get_substitution %}
-                            yellow lighten-2
+                            warning
                             {% if period.get_substitution.cancelled %}
                               alsijil-lesson-cancelled
                             {% endif %}
