@@ -9,7 +9,7 @@
 
 {% block content %}
   <a href="{% url 'create_personal_note_filter' %}" class="waves-effect waves-dark green btn">
-    <i class="material-icons">add</i>{% blocktrans %}Add filter{% endblock %}
+    <i class="material-icons">add</i>{% blocktrans %}Add filter{% endblocktrans %}
   </a>
 
   {% render_table personal_note_filters_table %}
