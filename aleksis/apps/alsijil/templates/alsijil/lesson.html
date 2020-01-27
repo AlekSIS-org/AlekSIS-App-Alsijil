@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load i18n static %}
+{% load material_form i18n static %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -34,7 +34,7 @@
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </div>
           {% csrf_token %}
-          {% bootstrap_form lesson_documentation_form %}
+          {% form form=lesson_documentation_form %}{% endform %}
         </div>
       </div>
       <div class="col s4">
