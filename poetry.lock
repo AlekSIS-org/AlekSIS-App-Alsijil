@@ -11,7 +11,6 @@ Django = "^3.0"
 Pillow = "^7.0"
 colour = "^0.1.5"
 django-any-js = "^1.0"
-django-bootstrap4 = "^1.0"
 django-debug-toolbar = "^2.0"
 django-easy-audit = "^1.2rc1"
 django-filter = "^2.2.0"
@@ -207,17 +206,6 @@ version = "1.0.3"
 [package.dependencies]
 django = "*"
 six = "*"
-
-[[package]]
-category = "main"
-description = "Bootstrap support for Django projects"
-name = "django-bootstrap4"
-optional = false
-python-versions = "*"
-version = "1.1.1"
-
-[package.dependencies]
-beautifulsoup4 = "*"
 
 [[package]]
 category = "main"
@@ -917,10 +905,6 @@ django-any-js = [
 django-appconf = [
     {file = "django-appconf-1.0.3.tar.gz", hash = "sha256:35f13ca4d567f132b960e2cd4c832c2d03cb6543452d34e29b7ba10371ba80e3"},
     {file = "django_appconf-1.0.3-py2.py3-none-any.whl", hash = "sha256:c98a7af40062e996b921f5962a1c4f3f0c979fa7885f7be4710cceb90ebe13a6"},
-]
-django-bootstrap4 = [
-    {file = "django-bootstrap4-1.1.1.tar.gz", hash = "sha256:39f97cbce85eb66f6d76be2029bae171bd3863d0c6932b1c2dae7f299c569b90"},
-    {file = "django_bootstrap4-1.1.1-py3-none-any.whl", hash = "sha256:0fcd84f8414a58b43df0b331c00c8b2f1786ae28f75f419b4d33b06fca43e0d1"},
 ]
 django-bulk-update = [
     {file = "django-bulk-update-2.2.0.tar.gz", hash = "sha256:5ab7ce8a65eac26d19143cc189c0f041d5c03b9d1b290ca240dc4f3d6aaeb337"},

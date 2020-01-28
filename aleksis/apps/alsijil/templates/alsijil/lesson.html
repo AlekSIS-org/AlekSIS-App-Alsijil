@@ -1,13 +1,13 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load bootstrap4 i18n static %}
+{% load material_form i18n static %}
 
-{% block bootstrap4_extra_head %}
+{% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
+
+{% block extra_head %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}" />
 {% endblock %}
-
-{% block bootstrap4_title %}{% blocktrans%}Lesson documentation{% endblocktrans %} - {{ block.super }}{% endblock %}
 
 {% block page_title %}
   {{ day }} -
@@ -28,57 +28,51 @@
     {% csrf_token %}
 
     <div class="row">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header bg-light text-dark">
+      <div class="col s8">
+        <div class="card dark-text">
+          <span class="card-title">
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </div>
-          <div class="card-body">
-            {% csrf_token %}
-            {% bootstrap_form lesson_documentation_form %}
-          </div>
+          {% csrf_token %}
+          {% form form=lesson_documentation_form %}{% endform %}
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-header bg-light text-dark">
+      <div class="col s4">
+        <div class="card dark-text">
+          <span class="card-title">
             {% blocktrans %}Change history{% endblocktrans %}
-          </div>
+          </span>
           {% include 'core/crud_events_ul.html' with class_ul='list-group list-group-flush' class_li='list-group-item d-flex justify-content-between align-items-center' obj=lesson_documentation %}
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header bg-light text-dark">
+    <div class="card dark-text">
+      <span class="card-title">
         {% blocktrans %}Personal notes{% endblocktrans %}
-      </div>
-      <div class="card-body">
-        {{ personal_note_formset.management_form }}
+      </span>
+      {{ personal_note_formset.management_form }}
 
-        <table class="table table-striped table-bordered table-hover table-responsive-xl">
+      <table class="striped responsive-table">
+        <tr>
+          <th>{% blocktrans %}Person{% endblocktrans %}</th>
+          <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+          <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+          <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+          <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+        </tr>
+        {% for form in personal_note_formset %}
+          {{ form.id }}
           <tr>
-            <th>{% blocktrans %}Person{% endblocktrans %}</th>
-            <th>{% blocktrans %}Absent{% endblocktrans %}</th>
-            <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
-            <th>{% blocktrans %}Excused{% endblocktrans %}</th>
-            <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+            <td>{{ form.person_name }}</td>
+            <td>{{ form.absent }}</td>
+            <td>{{ form.late }}</td>
+            <td>{{ form.excused }}</td>
+            <td>{{ form.remarks }}</td>
           </tr>
-          {% for form in personal_note_formset %}
-            {{ form.id }}
-            <tr>
-              <td>{{ form.person_name }}</td>
-              <td>{{ form.absent }}</td>
-              <td>{{ form.late }}</td>
-              <td>{{ form.excused }}</td>
-              <td>{{ form.remarks }}</td>
-            </tr>
-          {% endfor %}
-        </table>
-      </div>
+        {% endfor %}
+      </table>
     </div>
-    <button type="submit" class="btn btn-dark">
-      <span class="mdi mdi-content-save"></span>
-    </button>
+    {% include "core/save_button.html" %}
   </form>
 {% endblock %}
