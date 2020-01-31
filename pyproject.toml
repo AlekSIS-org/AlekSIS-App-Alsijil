@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "AlekSIS-App-Alsijil"
-version = "1.0a4dev0"
+version = "2.0a1"
 packages = [
     { include = "aleksis" }
 ]
 readme = "README.rst"
+include = ["CHANGELOG.rst", "LICENCE.rst"]
 
 description = "AlekSIS (School Information System) — App كتاب السجل (class register and school records)"
 authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
@@ -20,9 +21,11 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-AlekSIS = { path = "../../.." }
-AlekSIS-App-Chronos = { path = "../AlekSIS-App-Chronos" }
+#AlekSIS = { path = "../../.." }
+AlekSIS = "2.0a1"
+#AlekSIS-App-Chronos = { path = "../AlekSIS-App-Chronos" }
+AlekSIS-App-Chronos = "2.0a1"
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
