@@ -1,6 +1,21 @@
 Changelog
 =========
 
+`2.0a1`_
+--------
+
+New features
+~~~~~~~~~~~~
+
+* Migrate to materialize.css
+
+Minor changes
+~~~~~~~~
+
+* Use one card per day in week view
+* Remove SchoolRelated and all related uses
+
+
 `1.0a3`_
 --------
 
@@ -63,3 +78,4 @@ Minor changes
 _`1.0a1`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a1
 _`1.0a2`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a2
 _`1.0a3`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a3
+_`2.0a1`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/2.0a1
