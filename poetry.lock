@@ -1,11 +1,10 @@
 [[package]]
 category = "main"
 description = ""
-develop = true
 name = "aleksis"
 optional = false
 python-versions = "^3.7"
-version = "1.0a4.dev0"
+version = "2.0a1"
 
 [package.dependencies]
 Django = "^3.0"
@@ -72,11 +71,10 @@ url = "../../.."
 [[package]]
 category = "main"
 description = ""
-develop = true
 name = "aleksis-app-chronos"
 optional = false
 python-versions = "^3.7"
-version = "1.0a4dev0"
+version = "2.0a1"
 
 [package.dependencies]
 AlekSIS = "*"
@@ -286,7 +284,7 @@ description = "A configurable set of panels that display various debug informati
 name = "django-debug-toolbar"
 optional = false
 python-versions = ">=3.5"
-version = "2.1"
+version = "2.2"
 
 [package.dependencies]
 Django = ">=1.11"
@@ -1043,8 +1041,8 @@ django-constance = [
     {file = "django-constance-2.6.0.tar.gz", hash = "sha256:12d827f9d5552ee39884fb6fb356f231f32b1ab8958acc715e3d1a6ecf913653"},
 ]
 django-debug-toolbar = [
-    {file = "django-debug-toolbar-2.1.tar.gz", hash = "sha256:24c157bc6c0e1648e0a6587511ecb1b007a00a354ce716950bff2de12693e7a8"},
-    {file = "django_debug_toolbar-2.1-py3-none-any.whl", hash = "sha256:77cfba1d6e91b9bc3d36dc7dc74a9bb80be351948db5f880f2562a0cbf20b6c5"},
+    {file = "django-debug-toolbar-2.2.tar.gz", hash = "sha256:eabbefe89881bbe4ca7c980ff102e3c35c8e8ad6eb725041f538988f2f39a943"},
+    {file = "django_debug_toolbar-2.2-py3-none-any.whl", hash = "sha256:ff94725e7aae74b133d0599b9bf89bd4eb8f5d2c964106e61d11750228c8774c"},
 ]
 django-easy-audit = [
     {file = "django-easy-audit-1.2.1rc1.tar.gz", hash = "sha256:a127264dbfef4aac17bfa74439487540ad41e47ff4c067d3d77bfad82fd23bc5"},
