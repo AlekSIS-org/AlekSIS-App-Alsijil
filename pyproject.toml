@@ -11,7 +11,7 @@ description = "AlekSIS (School Information System) — App كتاب السج
 authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
 license = "EUPL-1.2"
 homepage = "https://aleksis.edugit.io/"
-repository = "https://edugit.org/AlekSIS/AlekSIS-App-Alsijil"
+repository = "https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil"
 documentation = "https://aleksis.edugit.io/AlekSIS/docs/html/"
 classifiers = [
     "Environment :: Web Environment",

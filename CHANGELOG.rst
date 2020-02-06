@@ -75,7 +75,7 @@ Minor changes
 
 * Use bootstrap buttons everywhere
 
-_`1.0a1`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a1
-_`1.0a2`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a2
-_`1.0a3`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/1.0a3
-_`2.0a1`: https://edugit.org/Teckids/AlekSIS/AlekSIS-App-Alsijil/-/tags/2.0a1
+_`1.0a1`: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/1.0a1
+_`1.0a2`: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/1.0a2
+_`1.0a3`: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/1.0a3
+_`2.0a1`: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0a1
