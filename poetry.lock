@@ -440,11 +440,10 @@ description = "A pluggable framework for adding two-factor authentication to Dja
 name = "django-otp"
 optional = false
 python-versions = "*"
-version = "0.7.5"
+version = "0.8.1"
 
 [package.dependencies]
 django = ">=1.11"
-six = ">=1.10.0"
 
 [package.extras]
 qrcode = ["qrcode"]
@@ -731,7 +730,7 @@ description = "Python version of Google's common library for parsing, formatting
 name = "phonenumbers"
 optional = false
 python-versions = "*"
-version = "8.11.3"
+version = "8.11.4"
 
 [[package]]
 category = "main"
@@ -923,7 +922,7 @@ description = "Twilio API client and TwiML generator"
 name = "twilio"
 optional = false
 python-versions = "*"
-version = "6.35.3"
+version = "6.35.4"
 
 [package.dependencies]
 PyJWT = ">=1.4.2"
@@ -1087,8 +1086,8 @@ django-middleware-global-request = [
     {file = "django-middleware-global-request-0.1.2.tar.gz", hash = "sha256:f6490759bc9f7dbde4001709554e29ca715daf847f2222914b4e47117dca9313"},
 ]
 django-otp = [
-    {file = "django-otp-0.7.5.tar.gz", hash = "sha256:1f16c2b93fe484706ff16ac6f5e64ecc73dd240318c333e0560384ba548d3837"},
-    {file = "django_otp-0.7.5-py2.py3-none-any.whl", hash = "sha256:cd4975539be478417033561e9832a1a69a583189f680e92a649f412c661f90aa"},
+    {file = "django-otp-0.8.1.tar.gz", hash = "sha256:ad3206e4a6f461c8968a2366a7cccfb340b93294e604b278aa9ab8b26f1017a1"},
+    {file = "django_otp-0.8.1-py3-none-any.whl", hash = "sha256:523a87f8d0c52ce9a9f0a5e248c59dab3e85cdda5bbcd106cf49138a8f3f3209"},
 ]
 django-otp-yubikey = [
     {file = "django-otp-yubikey-0.5.2.tar.gz", hash = "sha256:f0b1881562fb42ee9f12c28d284cbdb90d1f0383f2d53a595373b080a19bc261"},
@@ -1179,8 +1178,8 @@ libsass = [
     {file = "libsass-0.19.4.tar.gz", hash = "sha256:8b5b6d1a7c4ea1d954e0982b04474cc076286493f6af2d0a13c2e950fbe0be95"},
 ]
 phonenumbers = [
-    {file = "phonenumbers-8.11.3-py2.py3-none-any.whl", hash = "sha256:a4a3016c39ca058a0c953eb58cbb8138d8c75472e018f6a2554255049e22679e"},
-    {file = "phonenumbers-8.11.3.tar.gz", hash = "sha256:d73c4f552653d2d7aea7baf47e6b6995215d3e0f23934558e113005a814100e6"},
+    {file = "phonenumbers-8.11.4-py2.py3-none-any.whl", hash = "sha256:9ca4332425ae4f4d1e7925bbf98ef9446755b59a903ae6a63cf4fb19adcd168b"},
+    {file = "phonenumbers-8.11.4.tar.gz", hash = "sha256:685e81ac131fea8dbd71b7769d2ac480c9fe9d5a45838e8546f5de9910670e8e"},
 ]
 pillow = [
     {file = "Pillow-7.0.0-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:5f3546ceb08089cedb9e8ff7e3f6a7042bb5b37c2a95d392fb027c3e53a2da00"},
@@ -1324,7 +1323,7 @@ tqdm = [
     {file = "tqdm-4.42.1.tar.gz", hash = "sha256:251ee8440dbda126b8dfa8a7c028eb3f13704898caaef7caa699b35e119301e2"},
 ]
 twilio = [
-    {file = "twilio-6.35.3.tar.gz", hash = "sha256:4474fa87fde5ea5526e296be782d1b06fc6722f9e4698a503c47b5c2f8b70ea9"},
+    {file = "twilio-6.35.4.tar.gz", hash = "sha256:02ece6926e36c1bd9588d95de0ecbcf42d53b14af178866faec974799a26de4b"},
 ]
 urllib3 = [
     {file = "urllib3-1.25.8-py2.py3-none-any.whl", hash = "sha256:2f3db8b19923a873b3e5256dc9c2dedfa883e33d87c690d9c7913e1f40673cdc"},
