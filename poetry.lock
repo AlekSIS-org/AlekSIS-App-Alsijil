@@ -27,6 +27,7 @@ django-maintenance-mode = "^0.14.0"
 django-material = "^1.6.0"
 django-menu-generator = "^1.0.4"
 django-middleware-global-request = "^0.1.2"
+django-otp = "0.7.5"
 django-polymorphic = "^2.1.2"
 django-pwa = "^1.0.8"
 django-sass-processor = "^0.8"
@@ -440,10 +441,11 @@ description = "A pluggable framework for adding two-factor authentication to Dja
 name = "django-otp"
 optional = false
 python-versions = "*"
-version = "0.8.1"
+version = "0.7.5"
 
 [package.dependencies]
 django = ">=1.11"
+six = ">=1.10.0"
 
 [package.extras]
 qrcode = ["qrcode"]
@@ -1086,8 +1088,8 @@ django-middleware-global-request = [
     {file = "django-middleware-global-request-0.1.2.tar.gz", hash = "sha256:f6490759bc9f7dbde4001709554e29ca715daf847f2222914b4e47117dca9313"},
 ]
 django-otp = [
-    {file = "django-otp-0.8.1.tar.gz", hash = "sha256:ad3206e4a6f461c8968a2366a7cccfb340b93294e604b278aa9ab8b26f1017a1"},
-    {file = "django_otp-0.8.1-py3-none-any.whl", hash = "sha256:523a87f8d0c52ce9a9f0a5e248c59dab3e85cdda5bbcd106cf49138a8f3f3209"},
+    {file = "django-otp-0.7.5.tar.gz", hash = "sha256:1f16c2b93fe484706ff16ac6f5e64ecc73dd240318c333e0560384ba548d3837"},
+    {file = "django_otp-0.7.5-py2.py3-none-any.whl", hash = "sha256:cd4975539be478417033561e9832a1a69a583189f680e92a649f412c661f90aa"},
 ]
 django-otp-yubikey = [
     {file = "django-otp-yubikey-0.5.2.tar.gz", hash = "sha256:f0b1881562fb42ee9f12c28d284cbdb90d1f0383f2d53a595373b080a19bc261"},
