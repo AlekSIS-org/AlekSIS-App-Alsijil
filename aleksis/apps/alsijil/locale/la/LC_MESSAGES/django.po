@@ -3,19 +3,21 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-01 13:20+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2020-07-26 14:08+0000\n"
+"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"Language-Team: Latin <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/la/>\n"
+"Language: la\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.0.1\n"
 
 #: forms.py:41
 msgid "Group"
@@ -43,7 +45,7 @@ msgstr ""
 
 #: forms.py:77 templates/alsijil/lesson.html:58
 msgid "Person"
-msgstr ""
+msgstr "Persona"
 
 #: forms.py:79 templates/alsijil/lesson.html:59
 #: templates/alsijil/print/full_register.html:223
@@ -196,11 +198,11 @@ msgstr ""
 
 #: templates/alsijil/print/full_register.html:67
 msgid "Last name"
-msgstr ""
+msgstr "Secondus nomen"
 
 #: templates/alsijil/print/full_register.html:68
 msgid "First name"
-msgstr ""
+msgstr "Primus nomen"
 
 #: templates/alsijil/print/full_register.html:69
 msgid "Sex"
@@ -272,7 +274,7 @@ msgstr ""
 
 #: templates/alsijil/print/full_register.html:219
 msgid "Date"
-msgstr ""
+msgstr "dies"
 
 #: templates/alsijil/print/full_register.html:220
 #: templates/alsijil/print/full_register.html:268
