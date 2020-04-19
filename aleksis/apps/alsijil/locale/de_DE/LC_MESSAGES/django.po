@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-01 13:20+0200\n"
 "PO-Revision-Date: 2020-07-26 14:08+0000\n"
-"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -107,10 +107,8 @@ msgid "Edit"
 msgstr "Bearbeiten"
 
 #: templates/alsijil/lesson.html:5
-#, fuzzy
-#| msgid "Lessons"
 msgid "Lesson"
-msgstr "Unterrichtsstunden"
+msgstr "Unterrichtsstunde"
 
 #: templates/alsijil/lesson.html:34
 msgid "Lesson documentation"
@@ -135,10 +133,8 @@ msgid "Manage personal note filter"
 msgstr "Filter für persönliche Notizen verwalten"
 
 #: templates/alsijil/manage_personal_note_filter.html:11
-#, fuzzy
-#| msgid "Personal note filters"
 msgid "Delete filter"
-msgstr "Filter für persönliche Notizen"
+msgstr "Filter löschen"
 
 #: templates/alsijil/personal_note_filters.html:7
 #: templates/alsijil/personal_note_filters.html:8
@@ -147,7 +143,7 @@ msgstr "Liste aller Filter für persönliche Notizen"
 
 #: templates/alsijil/personal_note_filters.html:12
 msgid "Add filter"
-msgstr ""
+msgstr "Filter hinzufügen"
 
 #: templates/alsijil/print/full_register.html:22
 #: templates/alsijil/print/full_register.html:54
@@ -345,10 +341,8 @@ msgid "Manage absence"
 msgstr "Abwesenheiten verwalten"
 
 #: templates/alsijil/week_view.html:6
-#, fuzzy
-#| msgid "Week"
 msgid "Week view"
-msgstr "Woche"
+msgstr "Wochenansicht"
 
 #: templates/alsijil/week_view.html:21
 msgid "Select"
