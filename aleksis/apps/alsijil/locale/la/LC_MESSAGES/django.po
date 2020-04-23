@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-01 13:20+0200\n"
 "PO-Revision-Date: 2020-07-26 14:08+0000\n"
-"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"Last-Translator: Julian <leuckerj@gmail.com>\n"
 "Language-Team: Latin <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/la/>\n"
 "Language: la\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: forms.py:41
 msgid "Group"
-msgstr ""
+msgstr "Grex"
 
 #: forms.py:49 templates/alsijil/print/full_register.html:101
 msgid "Teacher"
@@ -96,7 +96,7 @@ msgstr ""
 
 #: models.py:71 templates/alsijil/print/full_register.html:178
 msgid "Description"
-msgstr ""
+msgstr "Descriptio"
 
 #: models.py:74
 msgid "Match expression"
@@ -206,11 +206,11 @@ msgstr "Primus nomen"
 
 #: templates/alsijil/print/full_register.html:69
 msgid "Sex"
-msgstr ""
+msgstr "Genus"
 
 #: templates/alsijil/print/full_register.html:70
 msgid "Date of birth"
-msgstr ""
+msgstr "Dies natalis"
 
 #: templates/alsijil/print/full_register.html:71
 #: templates/alsijil/print/full_register.html:200
