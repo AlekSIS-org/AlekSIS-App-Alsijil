@@ -232,7 +232,7 @@
                 <tr>
                   <td>{{ note_date }}</td>
                   <td>{{ note.lesson_period.period.period }}</td>
-                  <td>{{ note.lesson_period.get_subject.abbrev }} </td>
+                  <td>{{ note.lesson_period.get_subject.short_name }} </td>
                   <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
                   <td>
                     {% if note.absent %}
@@ -293,8 +293,8 @@
                       <th rowspan="{{ periods|length }}" class="lessons-day-head">{{ day }}</th>
                     {% endif %}
                     <td class="lesson-pe">{{ period.period.period }}</td>
-                    <td class="lesson-subj">{{ period.lesson.subject.abbrev }}</td>
-                    <td class="lesson-subs">{{ substitution.subject.abbrev }}</td>
+                    <td class="lesson-subj">{{ period.lesson.subject.short_name }}</td>
+                    <td class="lesson-subs">{{ substitution.subject.short_name }}</td>
                     <td class="lesson-topic">
                       {% if substitution.cancelled %}
                         {% trans 'Lesson cancelled' %}
