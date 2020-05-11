@@ -1,14 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from aleksis.core.mixins import CRUDMixin
+from aleksis.core.mixins import ExtensibleModel
 
 
 def isidentifier(value: str) -> bool:
     return value.isidentifier()
 
 
-class PersonalNote(models.Model):
+class PersonalNote(ExtensibleModel):
     """ A personal note about a single person. Used in the class register to note
     absences, excuses and remarks about a student in a single lesson period.
     """
@@ -38,7 +38,7 @@ class PersonalNote(models.Model):
         ]
 
 
-class LessonDocumentation(CRUDMixin):
+class LessonDocumentation(ExtensibleModel):
     """ A documentation on a single lesson period. Non-personal, includes
     the topic and homework of the lesson.
     """
@@ -61,7 +61,7 @@ class LessonDocumentation(CRUDMixin):
         ]
 
 
-class PersonalNoteFilter(models.Model):
+class PersonalNoteFilter(ExtensibleModel):
     """ A filter definition that can generate statistics on personal note texts. """
 
     identifier = models.CharField(
