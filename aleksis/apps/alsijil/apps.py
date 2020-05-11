@@ -9,7 +9,7 @@ class AlsijilConfig(AppConfig):
         "Repository": "https://edugit.org/AlekSIS/official/AlekSIS-App-Alsijil/",
     }
     licence = "EUPL-1.2+"
-    copyright = (
+    copyright_info = (
         ([2019], "Dominik George", "dominik.george@teckids.org"),
         ([2019], "mirabilos", "thorsten.glaser@teckids.org"),
         ([2019], "Tom Teichler", "tom.teichler@teckids.org"),
