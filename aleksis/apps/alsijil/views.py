@@ -1,4 +1,3 @@
-from calendarweek import CalendarWeek
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -10,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
