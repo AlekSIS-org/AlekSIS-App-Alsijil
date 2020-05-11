@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AlekSIS-App-Alsijil"
-version = "2.0a1"
+version = "2.0a3.dev0"
 packages = [
     { include = "aleksis" }
 ]
@@ -21,8 +21,8 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-AlekSIS = { path = "../../.." }
-AlekSIS-App-Chronos = { path = "../AlekSIS-App-Chronos" }
+AlekSIS = "^2.0a2"
+AlekSIS-App-Chronos = "^2.0a2"
 
 [build-system]
 requires = ["poetry>=1.0"]
