@@ -1,7 +1,6 @@
 from datetime import date, datetime, timedelta
 from typing import Optional
 
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.http import Http404, HttpRequest, HttpResponse
@@ -13,8 +12,7 @@ from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.decorators import admin_required
-from aleksis.core.models import Group, Person, School
+from aleksis.core.models import Group, Person
 from aleksis.core.util import messages
 
 from .forms import (
@@ -28,7 +26,6 @@ from .models import LessonDocumentation, PersonalNoteFilter
 from .tables import PersonalNoteFilterTable
 
 
-@login_required
 def lesson(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -109,7 +106,6 @@ def lesson(
     return render(request, "alsijil/lesson.html", context)
 
 
-@login_required
 def week_view(
     request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None
 ) -> HttpResponse:
@@ -211,7 +207,6 @@ def week_view(
     return render(request, "alsijil/week_view.html", context)
 
 
-@login_required
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -224,10 +219,12 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         .prefetch_related("documentations", "personal_notes")
     )
 
-    weeks = CalendarWeek.weeks_within(
-        School.objects.first().current_term.date_start,
-        School.objects.first().current_term.date_end,
-    )
+#FIXME SchoolTerm missing in core
+#    weeks = CalendarWeek.weeks_within(
+#        SchoolTerm.objects.first().current_term.date_start,
+#        SchoolTerm.objects.first().current_term.date_end,
+#    )
+
     periods_by_day = {}
     for lesson_period in lesson_periods:
         for week in weeks:
@@ -274,12 +271,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
     context["today"] = date.today()
-    context["school"] = School.objects.first()
 
     return render(request, "alsijil/print/full_register.html", context)
 
 
-@admin_required
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
@@ -349,7 +344,6 @@ def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) 
     return render(request, "alsijil/manage_personal_note_filter.html", context)
 
 
-@admin_required
 def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
