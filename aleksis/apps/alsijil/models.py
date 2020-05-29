@@ -27,6 +27,8 @@ class PersonalNote(ExtensibleModel):
     remarks = models.CharField(max_length=200, blank=True)
 
     class Meta:
+        verbose_name = _("Personal note")
+        verbose_name_plural = _("Personal notes")
         unique_together = [["lesson_period", "week", "person"]]
         ordering = [
             "lesson_period__lesson__date_start",
@@ -52,6 +54,8 @@ class LessonDocumentation(ExtensibleModel):
     homework = models.CharField(verbose_name=_("Homework"), max_length=200, blank=True)
 
     class Meta:
+        verbose_name = _("Lesson documentation")
+        verbose_name_plural = _("Lesson documentations")
         unique_together = [["lesson_period", "week"]]
         ordering = [
             "lesson_period__lesson__date_start",
@@ -74,4 +78,6 @@ class PersonalNoteFilter(ExtensibleModel):
     regex = models.CharField(verbose_name=_("Match expression"), max_length=100, unique=True)
 
     class Meta:
+        verbose_name = _("Personal note filter")
+        verbose_name_plural = _("Personal note filters")
         ordering = ["identifier"]
