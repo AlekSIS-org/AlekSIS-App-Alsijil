@@ -8,7 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import Select2Widget
 
-from aleksis.apps.chronos.models import Room
+from material import Row, Layout
+
 from aleksis.core.models import Group, Person
 
 from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
@@ -32,12 +33,15 @@ class PersonalNoteForm(forms.ModelForm):
         self.fields["person_name"].widget.attrs.update(
             {"class": "alsijil-lesson-personal-note-name"}
         )
+        self.fields["person_name"].widget = forms.HiddenInput()
 
         if self.instance and getattr(self.instance, "person", None):
             self.fields["person_name"].initial = str(self.instance.person)
 
 
 class SelectForm(forms.Form):
+    layout = Layout(Row("group", "teacher"))
+
     group = forms.ModelChoiceField(
         queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(lessons_count__gt=0),
         label=_("Group"),
@@ -78,10 +82,10 @@ PersonalNoteFormSet = forms.modelformset_factory(
 
 class RegisterAbsenceForm(forms.Form):
     date_start = forms.DateField(
-        label=_("Start date"), widget=forms.SelectDateWidget, initial=datetime.today
+        label=_("Start date"), initial=datetime.today
     )
     date_end = forms.DateField(
-        label=_("End date"), widget=forms.SelectDateWidget, initial=datetime.today
+        label=_("End date"), initial=datetime.today
     )
     from_period = forms.IntegerField(label=_("From period"), initial=0, min_value=0)
     person = forms.ModelChoiceField(
