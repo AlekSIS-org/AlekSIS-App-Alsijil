@@ -7,31 +7,32 @@
 
 {% block extra_head %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}"/>
 {% endblock %}
 
 {% block content %}
- <div class="row">
-  <div class="col s10">
-    <form method="get">
-      <ul id="timetable_select_form">
+  <div class="row">
+    <div class="col s10">
+      <form method="post" action="">
+        {% csrf_token %}
         {% form form=select_form %}{% endform %}
-      </ul>
-      <button type="submit" class="btn waves-effect waves-light">
-        {% blocktrans %}Select{% endblocktrans %}
-      </button>
-    </form>
-  </div>
-  {% if group %}
-    <div class="col s2">
-      <a class="btn waves-effect waves-light" href="{% url 'full_register_group' group.id %}">
-        <i class="material-icons">printer</i>
-      </a>
+        <button type="submit" class="btn waves-effect waves-light">
+          {% blocktrans %}Select{% endblocktrans %}
+        </button>
+      </form>
     </div>
-  {% endif %}
- </div>
+    {% if group %}
+      <div class="col s2">
+        <a class="btn waves-effect waves-light right" href="{% url 'full_register_group' group.id %}">
+          <i class="material-icons center">print</i>
+        </a>
+      </div>
+    {% endif %}
+  </div>
 
-  {% if lesson_periods.count %}
+  <h4>{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
+
+  {% if lesson_periods %}
     <div class="row">
       <div class="col s7">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
@@ -43,15 +44,15 @@
               </span>
               <table class="striped responsive-table datatable">
                 <thead>
-                  <tr>
-                    <th>{% blocktrans %}Period{% endblocktrans %}</th>
-                    <th>{% blocktrans %}Subject{% endblocktrans %}</th>
-                    <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
-                  </tr>
+                <tr>
+                  <th>{% blocktrans %}Period{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Subject{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
+                </tr>
                 </thead>
                 <tbody>
-                  {% for period in periods %}
-                    <tr class="
+                {% for period in periods %}
+                  <tr class="
                       {% if period.has_documentation %}
                         success
                       {% else %}
@@ -69,15 +70,15 @@
                         {% endif %}
                       {% endif %}
                     ">
-                      <td>{{ period.period.period }}</td>
-                      <td>
-                        <a href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                          {{ period.get_subject.name }}
-                        </a>
-                      </td>
-                      <td>{{ period.get_teacher_names }}</td>
-                    </tr>
-                  {% endfor %}
+                    <td>{{ period.period.period }}</td>
+                    <td>
+                      <a href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                        {{ period.get_subject.name }}
+                      </a>
+                    </td>
+                    <td>{{ period.get_teacher_names }}</td>
+                  </tr>
+                {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -93,20 +94,22 @@
             {% for person in persons %}
               <h5 class="card-title">{{ person.full_name }}</h5>
               <p class="card-text">
-                {% trans "Absent" %}: {{ person.absences }}
-                ({{ person.unexcused }} {% trans "unexcused" %})
+                {% trans "Absent" %}: {{ person.absences_count }}
+                ({{ person.unexcused_count }} {% trans "unexcused" %})
               </p>
               <p class="card-text">
-                {% trans "Summed up tardiness" %}: {{ person.tardiness }}
+                {% trans "Summed up tardiness" %}: {{ person.tardiness_sum }}'
               </p>
               {% for note in person.personal_notes|only_week:week %}
                 {% if note.remarks %}
-                  <blockquote class="blockquote mb-0">
+                  <blockquote>
                     {{ note.remarks }}
-                    <footer class="blockquote-footer">
-                      {% weekday_to_date week note.lesson_period.period.weekday as note_date %}
-                      {{ note_date }}, {{ note.lesson_period.lesson.subject.name }}
-                    </footer>
+                    {% weekday_to_date week note.lesson_period.period.weekday as note_date %}
+                    <em class="right">
+                      <a href="{% url 'lesson_by_week_and_period' week.year week.week note.lesson_period.id %}">
+                        {{ note_date }}, {{ note.lesson_period.get_subject.name }}
+                      </a>
+                    </em>
                   </blockquote>
                 {% endif %}
               {% endfor %}
@@ -123,10 +126,22 @@
         </span>
         <p>
           {% blocktrans %}
-            There are no lessons for the selected group, teacher, room or time.
+            There are no lessons for the selected group, teacher or time.
           {% endblocktrans %}
         </p>
       </div>
     </div>
   {% endif %}
+
+  <script>
+    $(document).ready(function () {
+      $("#id_group").change(function () {
+        $("#id_teacher").val("").formSelect();
+      });
+      $("#id_teacher").change(function () {
+        $("#id_group").val("").formSelect();
+      });
+    });
+
+  </script>
 {% endblock %}
