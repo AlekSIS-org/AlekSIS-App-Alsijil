@@ -7,9 +7,12 @@
 
 {% block content %}
   {% if personal_note_filter %}
-    <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}" class="waves-effect waves-dark btn red">
-      <i class="material-icons">delete</i>{% blocktrans %}Delete filter{% endblocktrans %}
-    </a>
+    <p>
+      <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}"
+         class="waves-effect waves-light btn red">
+        <i class="material-icons left">delete</i>{% blocktrans %}Delete filter{% endblocktrans %}
+      </a>
+    </p>
   {% endif %}
 
   <form method="post">
