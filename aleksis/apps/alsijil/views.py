@@ -184,7 +184,7 @@ def week_view(
                 unexcused_count=Count(
                     "personal_notes__absent",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
@@ -193,7 +193,7 @@ def week_view(
                 tardiness_sum=Sum(
                     "personal_notes__late",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                     ),
                 ),
