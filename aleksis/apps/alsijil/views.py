@@ -263,7 +263,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
 
     persons = group.members.annotate(
-        absences=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
+        absences_count=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
