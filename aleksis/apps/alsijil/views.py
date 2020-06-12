@@ -234,8 +234,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     # Get all lesson periods for the selected group
     lesson_periods = (
         LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related("documentations", "personal_notes")
+            .distinct()
+            .prefetch_related("documentations", "personal_notes")
     )
 
     weeks = CalendarWeek.weeks_within(
