@@ -14,7 +14,9 @@
     <section class="sheet padding-10mm bigprint" id="titlepage">
       <div>
         <h1>{% trans 'Class register' %}</h1>
-        <img src="{% cropped_thumbnail school 'logo_cropping' max_size='600x600' %}" id="school-logo" />
+        {% static "img/aleksis-banner.svg" as aleksis_banner %}
+        <img src="{% firstof request.site.preferences.theme__logo.url aleksis_banner %}"
+             alt="{{ request.site.preferences.general__title }} – Logo" class="max-size-600 center">
         <p id="group-desc">
           {{ group.name }}
         </p>
