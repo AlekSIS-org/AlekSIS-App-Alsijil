@@ -14,7 +14,7 @@ from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.models import Group, Person
+from aleksis.core.models import Group, Person, SchoolYear
 from aleksis.core.util import messages
 
 from .forms import (
@@ -238,11 +238,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         .prefetch_related("documentations", "personal_notes")
     )
 
-#FIXME SchoolTerm missing in core
-#    weeks = CalendarWeek.weeks_within(
-#        SchoolTerm.objects.first().current_term.date_start,
-#        SchoolTerm.objects.first().current_term.date_end,
-#    )
+    weeks = CalendarWeek.weeks_within(
+        SchoolYear.current.date_start,
+        SchoolYear.current.date_end,
+    )
 
     periods_by_day = {}
     for lesson_period in lesson_periods:
