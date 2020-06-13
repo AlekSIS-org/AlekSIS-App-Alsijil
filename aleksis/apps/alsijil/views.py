@@ -106,7 +106,7 @@ def lesson(
     context["lesson_documentation_form"] = lesson_documentation_form
     context["personal_note_formset"] = personal_note_formset
 
-    return render(request, "alsijil/lesson.html", context)
+    return render(request, "alsijil/class_register/lesson.html", context)
 
 
 @login_required
@@ -208,7 +208,7 @@ def week_view(
         request.GET.urlencode(),
     )
 
-    return render(request, "alsijil/week_view.html", context)
+    return render(request, "alsijil/class_register/week_view.html", context)
 
 
 @login_required
@@ -308,7 +308,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
 
     context["register_absence_form"] = register_absence_form
 
-    return render(request, "alsijil/register_absence.html", context)
+    return render(request, "alsijil/absences/register.html", context)
 
 
 def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
@@ -322,7 +322,7 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
 
     context["personal_note_filters_table"] = personal_note_filters_table
 
-    return render(request, "alsijil/personal_note_filters.html", context)
+    return render(request, "alsijil/personal_note_filter/list.html", context)
 
 
 def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) -> HttpResponse:
@@ -346,7 +346,7 @@ def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) 
 
     context["personal_note_filter_form"] = personal_note_filter_form
 
-    return render(request, "alsijil/manage_personal_note_filter.html", context)
+    return render(request, "alsijil/personal_note_filter/manage.html", context)
 
 
 @admin_required
