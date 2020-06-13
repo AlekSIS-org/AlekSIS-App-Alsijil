@@ -14,7 +14,7 @@ from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.models import Group, Person
+from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 
 from .forms import (
@@ -234,22 +234,26 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     # Get all lesson periods for the selected group
     lesson_periods = (
         LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related("documentations", "personal_notes")
+            .distinct()
+            .prefetch_related("documentations", "personal_notes")
     )
 
-#FIXME SchoolTerm missing in core
-#    weeks = CalendarWeek.weeks_within(
-#        SchoolTerm.objects.first().current_term.date_start,
-#        SchoolTerm.objects.first().current_term.date_end,
-#    )
+    current_school_term = SchoolTerm.current
+
+    if not current_school_term:
+        return HttpResponseNotFound(_("There is no current school term."))
+
+    weeks = CalendarWeek.weeks_within(
+        current_school_term.date_start,
+        current_school_term.date_end,
+    )
 
     periods_by_day = {}
     for lesson_period in lesson_periods:
         for week in weeks:
             day = week[lesson_period.period.weekday - 1]
 
-            if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
+            if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
                 documentations = list(
                     filter(lambda d: d.week == week.week, lesson_period.documentations.all(),)
                 )
@@ -263,7 +267,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
 
     persons = group.members.annotate(
-        absences=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
+        absences_count=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
