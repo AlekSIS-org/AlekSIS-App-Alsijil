@@ -81,3 +81,12 @@ class PersonalNoteFilter(ExtensibleModel):
         verbose_name = _("Personal note filter")
         verbose_name_plural = _("Personal note filters")
         ordering = ["identifier"]
+
+class AlsijilGlobalPermissions(ExtensibleModel):
+    class Meta:
+        managed = False
+        permissions = (
+            ("view_week", _("Can view week overview")),
+            ("register_absence", _("Can register absence")),
+            ("list_personal_note_filters", _("Can list all personal note filters")),
+        )

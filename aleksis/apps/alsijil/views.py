@@ -12,11 +12,12 @@ from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
+from rules.contrib.views import permission_required
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person, SchoolYear
 from aleksis.core.util import messages
-
+from aleksis.core.util.core_helpers import objectgetter_optional
 from .forms import (
     LessonDocumentationForm,
     PersonalNoteFilterForm,
@@ -26,8 +27,10 @@ from .forms import (
 )
 from .models import LessonDocumentation, PersonalNoteFilter
 from .tables import PersonalNoteFilterTable
+from .util.alsijil_helpers import get_lesson_period_by_pk, get_lesson_periods_by_pk
 
 
+@permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
 def lesson(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -36,15 +39,9 @@ def lesson(
 ) -> HttpResponse:
     context = {}
 
-    if year and week and period_id:
-        # Get a specific lesson period if provided in URL
-        lesson_period = LessonPeriod.objects.get(pk=period_id)
-        wanted_week = CalendarWeek(year=year, week=week)
-    else:
-        # Determine current lesson by current date and time
-        lesson_period = LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
-        wanted_week = CalendarWeek()
+    lesson_period, wanted_week = get_lesson_period_by_pk(request, year, week, period_id)
 
+    if not (year and week and period_id):
         if lesson_period:
             return redirect(
                 "lesson_by_week_and_period", wanted_week.year, wanted_week.week, lesson_period.pk,
@@ -108,46 +105,13 @@ def lesson(
     return render(request, "alsijil/lesson.html", context)
 
 
+@permission_required("alsijil.view_week", fn=get_lesson_periods_by_pk)
 def week_view(
     request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None, type_: Optional[str] = None, id_: Optional[int] = None
 ) -> HttpResponse:
     context = {}
 
-    if year and week:
-        wanted_week = CalendarWeek(year=year, week=week)
-    else:
-        wanted_week = CalendarWeek()
-
-    lesson_periods = LessonPeriod.objects.annotate(
-        has_documentation=Exists(
-            LessonDocumentation.objects.filter(
-                ~Q(topic__exact=""), lesson_period=OuterRef("pk"), week=wanted_week.week
-            )
-        )
-    ).in_week(wanted_week)
-
-    group = None
-    if type_ and id_:
-        instance = get_el_by_pk(request, type_, id_)
-
-        if isinstance(instance, HttpResponseNotFound):
-            return HttpResponseNotFound()
-
-        type_ = TimetableType.from_string(type_)
-
-        if type_ == TimetableType.GROUP:
-            group = instance
-
-        lesson_periods = lesson_periods.filter_from_type(type_, instance)
-    elif hasattr(request, "user") and hasattr(request.user, "person"):
-        instance = request.user.person
-        if request.user.person.lessons_as_teacher.exists():
-            lesson_periods = lesson_periods.filter_teacher(request.user.person)
-            type_ = TimetableType.TEACHER
-        else:
-            lesson_periods = lesson_periods.filter_participant(request.user.person)
-    else:
-        lesson_periods = None
+    lesson_periods, wanted_week, type_, instance = get_lesson_periods_by_pk(request, year, week, type_, id_)
 
     # Add a form to filter the view
     if type_:
@@ -163,6 +127,11 @@ def week_view(
             else:
                 return redirect("week_view_by_week", wanted_week.year, wanted_week.week,
                                 select_form.cleaned_data["type_"].value, select_form.cleaned_data["instance"].pk)
+
+    if type_ == TimetableType.GROUP:
+        group = instance
+    else:
+        group = None
 
     if lesson_periods:
         # Aggregate all personal notes for this group and week
@@ -226,6 +195,7 @@ def week_view(
     return render(request, "alsijil/week_view.html", context)
 
 
+@permission_required("alsijil.full_register_group", fn=objectgetter_optional(Group, None, False))
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -293,6 +263,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     return render(request, "alsijil/print/full_register.html", context)
 
 
+@permission_required("alsijil.register_absence")
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
@@ -324,6 +295,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/register_absence.html", context)
 
 
+@permission_required("alsijil.list_personal_note_filters")
 def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
     context = {}
 
@@ -338,6 +310,7 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/personal_note_filters.html", context)
 
 
+@permission_required("alsijil.edit_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
 def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) -> HttpResponse:
     context = {}
 
@@ -362,6 +335,7 @@ def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) 
     return render(request, "alsijil/manage_personal_note_filter.html", context)
 
 
+@permission_required("alsijil.delete_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
 def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
