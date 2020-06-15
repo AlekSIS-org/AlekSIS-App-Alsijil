@@ -1,3 +1,11 @@
 .alsijil-lesson-cancelled {
     text-decoration: line-through;
 }
+
+@media only screen and (max-width : 992px) {
+    table.responsive-table.alsijil-table th,
+    table.responsive-table.alsijil-table td {
+      margin: 0;
+      vertical-align: top;
+      height: 109px;}
+}
