@@ -19,7 +19,7 @@
         </a>
       </div>
     {% endif %}
-    <div class="col s12 m10 pull-m2 l11 pull-l1">
+    <div class="col s12 {% if group %}m10 pull-m2 l11 pull-l1 {% endif %}">
       <form method="post" action="">
         {% csrf_token %}
         {% form form=select_form %}{% endform %}
