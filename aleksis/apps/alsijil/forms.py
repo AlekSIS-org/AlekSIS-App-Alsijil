@@ -82,7 +82,8 @@ PersonalNoteFormSet = forms.modelformset_factory(
 
 class RegisterAbsenceForm(forms.Form):
     layout = Layout(Row("date_start", "date_end"),
-                    Row("from_period", "absent", "excused"),
+                    Row("from_period"),
+                    Row("absent", "excused"),
                     Row("person"),
                     Row("remarks")
                     )
