@@ -21,6 +21,10 @@
   {% for teacher in lesson_period.get_teachers.all %}
     {{ teacher.short_name }}
   {% endfor %}
+
+  <span class="right">
+    {% include "alsijil/partials/lesson_status_icon.html" with period=lesson_period css_class="medium" %}
+  </span>
 {% endblock %}
 
 {% block content %}
