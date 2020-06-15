@@ -23,14 +23,12 @@
     {% csrf_token %}
     {% form form=personal_note_filter_form %}{% endform %}
     {% include "core/partials/save_button.html" %}
-  </form>
-  {% if personal_note_filter %}
-    <p>
+    {% if personal_note_filter %}
       <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}"
          class="waves-effect waves-light btn red">
         <i class="material-icons left">delete</i>{% blocktrans %}Delete filter{% endblocktrans %}
       </a>
-    </p>
-  {% endif %}
+    {% endif %}
+  </form>
 
 {% endblock %}
