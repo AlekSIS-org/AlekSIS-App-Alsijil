@@ -39,8 +39,9 @@
         {% for weekday, periods in periods_by_day %}
           <div class="card">
             <div class="card-content">
+              {% weekday_to_date week periods.0.period.weekday as current_date %}
               <span class="card-title">
-                {{ weekday }}
+                {{ weekday }}, {{ current_date }}
               </span>
               <table class="striped datatable">
                 <thead>
@@ -72,7 +73,7 @@
                     ">
                     <td class="tr-link">
                       <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                        {{ period.period.period }}
+                        {{ period.period.period }}.
                       </a>
                     </td>
                     <td>
