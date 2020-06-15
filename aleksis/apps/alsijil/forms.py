@@ -103,6 +103,8 @@ class RegisterAbsenceForm(forms.Form):
 
 
 class PersonalNoteFilterForm(forms.ModelForm):
+    layout = Layout(Row("identifier", "description"), Row("regex"))
+
     class Meta:
         model = PersonalNoteFilter
         fields = ["identifier", "description", "regex"]
