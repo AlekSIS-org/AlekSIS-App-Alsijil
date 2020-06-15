@@ -1,20 +1,20 @@
-from calendarweek import CalendarWeek
 from datetime import date, datetime, timedelta
 from typing import Optional
 
-from django.contrib.auth.decorators import login_required
+from aleksis.apps.chronos.managers import TimetableType
+from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, OuterRef, Q, Sum
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.decorators import admin_required
-from aleksis.core.models import Group, Person, School
+from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 
 from .forms import (
@@ -28,7 +28,6 @@ from .models import LessonDocumentation, PersonalNoteFilter
 from .tables import PersonalNoteFilterTable
 
 
-@login_required
 def lesson(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -77,7 +76,7 @@ def lesson(
         lesson_period=lesson_period, week=wanted_week.week
     )
     lesson_documentation_form = LessonDocumentationForm(
-        request.POST or None, instance=lesson_documentation, prefix="leson_documentation",
+        request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
@@ -109,9 +108,8 @@ def lesson(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
-@login_required
 def week_view(
-    request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None
+    request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None, type_: Optional[str] = None, id_: Optional[int] = None
 ) -> HttpResponse:
     context = {}
 
@@ -128,57 +126,74 @@ def week_view(
         )
     ).in_week(wanted_week)
 
-    group = None  # FIXME workaround for #38
-    if (
-        request.GET.get("group", None)
-        or request.GET.get("teacher", None)
-        or request.GET.get("room", None)
-    ):
-        lesson_periods = lesson_periods.filter_from_query(request.GET)
-        if "group" in request.GET and request.GET["group"]:
-            group = Group.objects.get(pk=request.GET["group"])
-        else:
-            group = None
+    group = None
+    if type_ and id_:
+        instance = get_el_by_pk(request, type_, id_)
+
+        if isinstance(instance, HttpResponseNotFound):
+            return HttpResponseNotFound()
+
+        type_ = TimetableType.from_string(type_)
+
+        if type_ == TimetableType.GROUP:
+            group = instance
+
+        lesson_periods = lesson_periods.filter_from_type(type_, instance)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
-        group = request.user.person.owner_of.first()
-        if group:
-            lesson_periods = lesson_periods.filter_group(group)
-        elif request.user.person.lessons_as_teacher.exists():
+        instance = request.user.person
+        if request.user.person.lessons_as_teacher.exists():
             lesson_periods = lesson_periods.filter_teacher(request.user.person)
+            type_ = TimetableType.TEACHER
         else:
             lesson_periods = lesson_periods.filter_participant(request.user.person)
     else:
         lesson_periods = None
 
+    # Add a form to filter the view
+    if type_:
+        initial = {type_.value: instance}
+    else:
+        initial = {}
+    select_form = SelectForm(request.POST or None, initial=initial)
+
+    if request.method == "POST":
+        if select_form.is_valid():
+            if "type_" not in select_form.cleaned_data:
+                return redirect("week_view_by_week", wanted_week.year, wanted_week.week)
+            else:
+                return redirect("week_view_by_week", wanted_week.year, wanted_week.week,
+                                select_form.cleaned_data["type_"].value, select_form.cleaned_data["instance"].pk)
+
     if lesson_periods:
         # Aggregate all personal notes for this group and week
+        lesson_periods_pk = lesson_periods.values_list("pk", flat=True)
         persons = (
             Person.objects.filter(is_active=True)
-            .filter(member_of__lessons__lesson_periods__in=lesson_periods)
+            .filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
             .distinct()
             .prefetch_related("personal_notes")
             .annotate(
-                absences=Count(
+                absences_count=Count(
                     "personal_notes__absent",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
                 ),
-                unexcused=Count(
+                unexcused_count=Count(
                     "personal_notes__absent",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
                     ),
                 ),
-                tardiness=Sum(
+                tardiness_sum=Sum(
                     "personal_notes__late",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                     ),
                 ),
@@ -187,15 +202,15 @@ def week_view(
     else:
         persons = None
 
-    # Add a form to filter the view
-    select_form = SelectForm(request.GET or None)
+    # Resort lesson periods manually because an union queryset doesn't support order_by
+    lesson_periods = sorted(lesson_periods, key=lambda x: (x.period.weekday, x.period.period))
 
-    context["current_head"] = str(wanted_week)
     context["week"] = wanted_week
     context["lesson_periods"] = lesson_periods
     context["persons"] = persons
     context["group"] = group
     context["select_form"] = select_form
+    context["instance"] = instance
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
@@ -211,7 +226,6 @@ def week_view(
     return render(request, "alsijil/class_register/week_view.html", context)
 
 
-@login_required
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -220,20 +234,26 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     # Get all lesson periods for the selected group
     lesson_periods = (
         LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related("documentations", "personal_notes")
+            .distinct()
+            .prefetch_related("documentations", "personal_notes")
     )
 
+    current_school_term = SchoolTerm.current
+
+    if not current_school_term:
+        return HttpResponseNotFound(_("There is no current school term."))
+
     weeks = CalendarWeek.weeks_within(
-        School.objects.first().current_term.date_start,
-        School.objects.first().current_term.date_end,
+        current_school_term.date_start,
+        current_school_term.date_end,
     )
+
     periods_by_day = {}
     for lesson_period in lesson_periods:
         for week in weeks:
             day = week[lesson_period.period.weekday - 1]
 
-            if lesson_period.lesson.date_start <= day and lesson_period.lesson.date_end >= day:
+            if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
                 documentations = list(
                     filter(lambda d: d.week == week.week, lesson_period.documentations.all(),)
                 )
@@ -247,7 +267,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
 
     persons = group.members.annotate(
-        absences=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
+        absences_count=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
@@ -274,12 +294,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
     context["today"] = date.today()
-    context["school"] = School.objects.first()
 
     return render(request, "alsijil/print/full_register.html", context)
 
 
-@admin_required
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
@@ -349,7 +367,6 @@ def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) 
     return render(request, "alsijil/personal_note_filter/manage.html", context)
 
 
-@admin_required
 def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 

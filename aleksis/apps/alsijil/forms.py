@@ -1,6 +1,8 @@
 from datetime import datetime
 
+from aleksis.apps.chronos.managers import TimetableType
 from django import forms
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
@@ -50,15 +52,24 @@ class SelectForm(forms.Form):
         required=False,
         widget=Select2Widget,
     )
-    room = forms.ModelChoiceField(
-        queryset=Room.objects.annotate(lessons_count=Count("lesson_periods")).filter(
-            lessons_count__gt=0
-        ),
-        label=_("Room"),
-        required=False,
-        widget=Select2Widget,
-    )
 
+    def clean(self) -> dict:
+        data = super().clean()
+
+        if data.get("group") and not data.get("teacher") :
+            type_ = TimetableType.GROUP
+            instance = data["group"]
+        elif data.get("teacher") and not data.get("group"):
+            type_ = TimetableType.TEACHER
+            instance = data["teacher"]
+        elif not data.get("teacher") and not data.get("group"):
+            return data
+        else:
+            raise ValidationError(_("You can't select a group and a teacher both."))
+
+        data["type_"] = type_
+        data["instance"] = instance
+        return data
 
 PersonalNoteFormSet = forms.modelformset_factory(
     PersonalNote, form=PersonalNoteForm, max_num=0, extra=0
