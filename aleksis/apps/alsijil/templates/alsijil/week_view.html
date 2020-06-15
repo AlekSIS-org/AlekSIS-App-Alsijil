@@ -12,7 +12,14 @@
 
 {% block content %}
   <div class="row">
-    <div class="col s10">
+    {% if group %}
+      <div class="col s12 m2 push-m10 l1 push-l11">
+        <a class="col s12 btn waves-effect waves-light right" href="{% url 'full_register_group' group.id %}">
+          <i class="material-icons center">print</i>
+        </a>
+      </div>
+    {% endif %}
+    <div class="col s12 m10 pull-m2 l11 pull-l1">
       <form method="post" action="">
         {% csrf_token %}
         {% form form=select_form %}{% endform %}
@@ -21,13 +28,6 @@
         </button>
       </form>
     </div>
-    {% if group %}
-      <div class="col s2">
-        <a class="btn waves-effect waves-light right" href="{% url 'full_register_group' group.id %}">
-          <i class="material-icons center">print</i>
-        </a>
-      </div>
-    {% endif %}
   </div>
 
   <h4>{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
