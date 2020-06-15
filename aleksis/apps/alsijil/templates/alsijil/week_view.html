@@ -39,8 +39,9 @@
         {% for weekday, periods in periods_by_day %}
           <div class="card">
             <div class="card-content">
+              {% weekday_to_date week periods.0.period.weekday as current_date %}
               <span class="card-title">
-                {{ weekday }}
+                {{ weekday }}, {{ current_date }}
               </span>
               <table class="striped responsive-table datatable">
                 <thead>
