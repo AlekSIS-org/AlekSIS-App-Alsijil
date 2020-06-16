@@ -2,20 +2,33 @@
 {% extends "core/base.html" %}
 {% load material_form i18n static %}
 
-{% block browser_title %}{% blocktrans %}Manage personal note filter{% endblocktrans %}{% endblock %}
-{% block page_title %}{% blocktrans %}Manage personal note filter{% endblocktrans %}{% endblock %}
+{% block browser_title %}
+  {% if personal_note_filter %}
+    {% trans "Update personal note filter" %}
+  {% else %}
+    {% trans "Create personal note filter" %}
+  {% endif %}
+{% endblock %}
+{% block page_title %}
+  {% if personal_note_filter %}
+    {% trans "Update personal note filter" %}
+  {% else %}
+    {% trans "Create personal note filter" %}
+  {% endif %}
+{% endblock %}
+
 
 {% block content %}
-  {% if personal_note_filter %}
-    <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}" class="waves-effect waves-dark btn red">
-      <i class="material-icons">delete</i>{% blocktrans %}Delete filter{% endblocktrans %}
-    </a>
-  {% endif %}
-
   <form method="post">
     {% csrf_token %}
     {% form form=personal_note_filter_form %}{% endform %}
-    {% include "core/save_button.html" %}
+    {% include "core/partials/save_button.html" %}
+    {% if personal_note_filter %}
+      <a href="{% url 'delete_personal_note_filter' personal_note_filter.id %}"
+         class="waves-effect waves-light btn red">
+        <i class="material-icons left">delete</i>{% blocktrans %}Delete filter{% endblocktrans %}
+      </a>
+    {% endif %}
   </form>
 
 {% endblock %}
