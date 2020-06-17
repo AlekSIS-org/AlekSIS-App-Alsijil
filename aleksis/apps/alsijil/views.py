@@ -15,7 +15,7 @@ from django_tables2 import RequestConfig
 from rules.contrib.views import permission_required
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.models import Group, Person, SchoolYear
+from aleksis.core.models import Group, Person
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import objectgetter_optional
 from .forms import (
@@ -27,7 +27,7 @@ from .forms import (
 )
 from .models import LessonDocumentation, PersonalNoteFilter
 from .tables import PersonalNoteFilterTable
-from .util.alsijil_helpers import get_lesson_period_by_pk, get_lesson_periods_by_pk
+from .util.alsijil_helpers import get_lesson_period_by_pk, get_instance_by_pk
 
 
 @permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
@@ -39,7 +39,14 @@ def lesson(
 ) -> HttpResponse:
     context = {}
 
-    lesson_period, wanted_week = get_lesson_period_by_pk(request, year, week, period_id)
+    lesson_period = get_lesson_period_by_pk(request, year, week, period_id)
+
+    if period_id:
+        wanted_week = CalendarWeek(year=year, week=week)
+    elif hasattr(request, "user") and hasattr(request.user, "person"):
+        wanted_week = CalendarWeek()
+    else:
+        wanted_week = None
 
     if not (year and week and period_id):
         if lesson_period:
@@ -77,16 +84,19 @@ def lesson(
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons_qs = lesson_period.get_personal_notes(wanted_week)
+    persons = Person.objects
+    if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
+        persons = persons.filter(pk=request.user.pk)
+    persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix="personal_notes"
     )
 
     if request.method == "POST":
-        if lesson_documentation_form.is_valid():
+        if lesson_documentation_form.is_valid() and request.user.has_perm("alsijil.edit_lessondocumentation", lesson_period):
             lesson_documentation_form.save()
 
-        if personal_note_formset.is_valid():
+        if personal_note_formset.is_valid() and request.user.has_perm("alsijil.edit_personalnote", lesson_period):
             instances = personal_note_formset.save()
 
             # Iterate over personal notes and carry changed absences to following lessons
@@ -105,13 +115,45 @@ def lesson(
     return render(request, "alsijil/lesson.html", context)
 
 
-@permission_required("alsijil.view_week", fn=get_lesson_periods_by_pk)
+@permission_required("alsijil.view_week", fn=get_instance_by_pk)
 def week_view(
     request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None, type_: Optional[str] = None, id_: Optional[int] = None
 ) -> HttpResponse:
     context = {}
 
-    lesson_periods, wanted_week, type_, instance = get_lesson_periods_by_pk(request, year, week, type_, id_)
+    instance = get_instance_by_pk(request, year, week, type_, id_)
+
+    lesson_periods = LessonPeriod.objects
+
+    if type_ and id_:
+        if isinstance(instance, HttpResponseNotFound):
+            return HttpResponseNotFound()
+
+        type_ = TimetableType.from_string(type_)
+
+        lesson_periods = lesson_periods.filter_from_type(type_, instance)
+    elif hasattr(request, "user") and hasattr(request.user, "person"):
+        if request.user.person.lessons_as_teacher.exists():
+            lesson_periods = lesson_periods.filter_teacher(request.user.person)
+            type_ = TimetableType.TEACHER
+        else:
+            lesson_periods = lesson_periods.filter_participant(request.user.person)
+    else:
+        lesson_periods = None
+
+
+    if year and week:
+        wanted_week = CalendarWeek(year=year, week=week)
+    else:
+        wanted_week = CalendarWeek()
+
+    lesson_periods = lesson_periods.annotate(
+        has_documentation=Exists(
+            LessonDocumentation.objects.filter(
+                ~Q(topic__exact=""), lesson_period=OuterRef("pk"), week=wanted_week.week
+            )
+        )
+    ).in_week(wanted_week)
 
     # Add a form to filter the view
     if type_:
@@ -136,9 +178,14 @@ def week_view(
     if lesson_periods:
         # Aggregate all personal notes for this group and week
         lesson_periods_pk = lesson_periods.values_list("pk", flat=True)
-        persons = (
-            Person.objects.filter(is_active=True)
-            .filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
+
+
+        persons = Person.objects.filter(is_active=True)
+
+        if not request.user.has_perm("alsijil.view_week_personalnote", instance):
+            persons = persons.filter(pk=request.user.pk)
+
+        persons = (persons.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
             .distinct()
             .prefetch_related("personal_notes")
             .annotate(
@@ -195,7 +242,7 @@ def week_view(
     return render(request, "alsijil/week_view.html", context)
 
 
-@permission_required("alsijil.full_register_group", fn=objectgetter_optional(Group, None, False))
+@permission_required("alsijil.view_full_register", fn=objectgetter_optional(Group, None, False))
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -270,7 +317,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST":
-        if register_absence_form.is_valid():
+        if register_absence_form.is_valid() and request.user.has_perm("alsijil.register_absence", register_absence_form.cleaned_data["person"]):
             # Get data from form
             person = register_absence_form.cleaned_data["person"]
             start_date = register_absence_form.cleaned_data["date_start"]
@@ -295,7 +342,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/register_absence.html", context)
 
 
-@permission_required("alsijil.list_personal_note_filters")
+@permission_required("alsijil.view_personal_note_filters")
 def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
     context = {}
 

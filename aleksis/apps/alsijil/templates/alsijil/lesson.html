@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load material_form i18n static %}
+{% load material_form i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -34,9 +34,33 @@
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </div>
           {% csrf_token %}
-          {% form form=lesson_documentation_form %}{% endform %}
+          {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
+          {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
+          {% if can_edit_lesson_documentation %}
+            {% form form=lesson_documentation_form %}{% endform %}
+          {% elif can_view_lesson_documentation %}
+            <table>
+              <tr>
+                <th>
+                  {% trans "Lesson topic" %}
+                </th>
+                <td>
+                  {{ lesson_documentation.topic }}
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  {% trans "Homework" %}
+                </th>
+                <td>
+                  {{ lesson_documentation.homework }}
+                </td>
+              </tr>
+            </table>
+          {% endif %}
         </div>
       </div>
+      {% if can_view_lesson_documentation %}
       <div class="col s4">
         <div class="card dark-text">
           <span class="card-title">
@@ -45,12 +69,14 @@
           {% include 'core/crud_events_ul.html' with class_ul='list-group list-group-flush' class_li='list-group-item d-flex justify-content-between align-items-center' obj=lesson_documentation %}
         </div>
       </div>
+      {% endif %}
     </div>
 
     <div class="card dark-text">
       <span class="card-title">
         {% blocktrans %}Personal notes{% endblocktrans %}
       </span>
+      {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
       {{ personal_note_formset.management_form }}
 
       <table class="striped responsive-table">
@@ -62,17 +88,29 @@
           <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
         </tr>
         {% for form in personal_note_formset %}
-          {{ form.id }}
-          <tr>
-            <td>{{ form.person_name }}</td>
-            <td>{{ form.absent }}</td>
-            <td>{{ form.late }}</td>
-            <td>{{ form.excused }}</td>
-            <td>{{ form.remarks }}</td>
-          </tr>
+          {% if can_edit_personalnote %}
+            {{ form.id }}
+            <tr>
+              <td>{{ form.person_name }}</td>
+              <td>{{ form.absent }}</td>
+              <td>{{ form.late }}</td>
+              <td>{{ form.excused }}</td>
+              <td>{{ form.remarks }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td>{{ form.person_name.value }}</td>
+              <td>{{ form.absent.value }}</td>
+              <td>{{ form.late.value }}</td>
+              <td>{{ form.excused.value }}</td>
+              <td>{{ form.remarks.value }}</td>
+            </tr>
+          {% endif %}
         {% endfor %}
       </table>
     </div>
-    {% include "core/save_button.html" %}
+    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+      {% include "core/save_button.html" %}
+    {% endif %}
   </form>
 {% endblock %}
