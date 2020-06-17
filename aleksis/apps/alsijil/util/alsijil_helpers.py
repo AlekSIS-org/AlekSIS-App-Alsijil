@@ -18,6 +18,7 @@ def get_lesson_period_by_pk(
     week: Optional[int] = None,
     period_id: Optional[int] = None,
 ):
+    """Get LessonPeriod object either by given object_id or by time and current person."""
     if period_id:
         lesson_period = LessonPeriod.objects.get(pk=period_id)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
@@ -37,6 +38,7 @@ def get_instance_by_pk(
     type_: Optional[str] = None,
     id_: Optional[int] = None,
 ):
+    """Get Instance object by given type and id or the current person."""
     if type_ and id_:
         return get_el_by_pk(request, type_, id_)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
