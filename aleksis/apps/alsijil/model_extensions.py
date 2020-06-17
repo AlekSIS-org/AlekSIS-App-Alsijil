@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.db.models import Exists, F, OuterRef, QuerySet
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
