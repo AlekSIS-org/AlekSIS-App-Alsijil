@@ -15,7 +15,7 @@ from django_tables2 import RequestConfig
 from rules.contrib.views import permission_required
 
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.core.models import Group, Person
+from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import objectgetter_optional
 from .forms import (
@@ -112,7 +112,7 @@ def lesson(
     context["lesson_documentation_form"] = lesson_documentation_form
     context["personal_note_formset"] = personal_note_formset
 
-    return render(request, "alsijil/lesson.html", context)
+    return render(request, "alsijil/class_register/lesson.html", context)
 
 
 @permission_required("alsijil.view_week", fn=get_instance_by_pk)
@@ -239,7 +239,7 @@ def week_view(
         request.GET.urlencode(),
     )
 
-    return render(request, "alsijil/week_view.html", context)
+    return render(request, "alsijil/class_register/week_view.html", context)
 
 
 @permission_required("alsijil.view_full_register", fn=objectgetter_optional(Group, None, False))
@@ -255,9 +255,14 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             .prefetch_related("documentations", "personal_notes")
     )
 
+    current_school_term = SchoolTerm.current
+
+    if not current_school_term:
+        return HttpResponseNotFound(_("There is no current school term."))
+
     weeks = CalendarWeek.weeks_within(
-        SchoolYear.current.date_start,
-        SchoolYear.current.date_end,
+        current_school_term.date_start,
+        current_school_term.date_end,
     )
 
     periods_by_day = {}
@@ -339,7 +344,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
 
     context["register_absence_form"] = register_absence_form
 
-    return render(request, "alsijil/register_absence.html", context)
+    return render(request, "alsijil/absences/register.html", context)
 
 
 @permission_required("alsijil.view_personal_note_filters")
@@ -354,7 +359,7 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
 
     context["personal_note_filters_table"] = personal_note_filters_table
 
-    return render(request, "alsijil/personal_note_filters.html", context)
+    return render(request, "alsijil/personal_note_filter/list.html", context)
 
 
 @permission_required("alsijil.edit_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
@@ -379,7 +384,7 @@ def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) 
 
     context["personal_note_filter_form"] = personal_note_filter_form
 
-    return render(request, "alsijil/manage_personal_note_filter.html", context)
+    return render(request, "alsijil/personal_note_filter/manage.html", context)
 
 
 @permission_required("alsijil.delete_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
