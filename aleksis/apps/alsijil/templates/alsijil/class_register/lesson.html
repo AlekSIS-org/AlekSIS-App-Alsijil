@@ -24,6 +24,10 @@
 {% endblock %}
 
 {% block content %}
+  {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
+  {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
+  {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
+
   <form method="post">
     <div class="row">
       <div class="col s12">
@@ -41,8 +45,7 @@
           <span class="card-title">
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </span>
-            {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
-            {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
+
             {% if can_edit_lesson_documentation %}
               {% form form=lesson_documentation_form %}{% endform %}
             {% elif can_view_lesson_documentation %}
@@ -90,7 +93,6 @@
       <span class="card-title">
         {% blocktrans %}Personal notes{% endblocktrans %}
       </span>
-            {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
             {% form form=personal_note_formset.management_form %}{% endform %}
 
             <table class="striped responsive-table alsijil-table">
