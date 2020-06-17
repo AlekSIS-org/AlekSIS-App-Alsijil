@@ -103,5 +103,5 @@ Group.add_permission("edit_personalnote_group", _("Can edit all personal notes o
 Group.add_permission("view_lessondocumentation_group", _("Can view all lesson documentation of a group"))
 Group.add_permission("edit_lessondocumentation_group", _("Can edit all lesson documentation of a group"))
 Group.add_permission("view_full_register_group", _("Can view full register of a group"))
-Group.add_permission("register_absence_group", _("Can register a absence for all members of a group"))
-Person.add_permission("register_absence_person", _("Can register a absence for a person"))
+Group.add_permission("register_absence_group", _("Can register an absence for all members of a group"))
+Person.add_permission("register_absence_person", _("Can register an absence for a person"))
