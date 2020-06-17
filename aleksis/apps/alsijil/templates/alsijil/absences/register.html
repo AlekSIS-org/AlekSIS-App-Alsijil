@@ -10,7 +10,7 @@
   <form method="post">
     {% csrf_token %}
     {% form form=register_absence_form %}{% endform %}
-    {% include "core/save_button.html" %}
+    {% include "core/partials/save_button.html" %}
   </form>
 
 {% endblock %}
