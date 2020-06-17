@@ -12,7 +12,14 @@
 
 {% block content %}
   <div class="row">
-    <div class="col s10">
+    {% if group %}
+      <div class="col s12 m2 push-m10 l1 push-l11">
+        <a class="col s12 btn waves-effect waves-light right" href="{% url 'full_register_group' group.id %}">
+          <i class="material-icons center">print</i>
+        </a>
+      </div>
+    {% endif %}
+    <div class="col s12 {% if group %}m10 pull-m2 l11 pull-l1 {% endif %}">
       <form method="post" action="">
         {% csrf_token %}
         {% form form=select_form %}{% endform %}
@@ -21,28 +28,22 @@
         </button>
       </form>
     </div>
-    {% if group %}
-      <div class="col s2">
-        <a class="btn waves-effect waves-light right" href="{% url 'full_register_group' group.id %}">
-          <i class="material-icons center">print</i>
-        </a>
-      </div>
-    {% endif %}
   </div>
 
   <h4>{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
 
   {% if lesson_periods %}
     <div class="row">
-      <div class="col s7">
+      <div class="col s12 m7">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
           <div class="card">
             <div class="card-content">
+              {% weekday_to_date week periods.0.period.weekday as current_date %}
               <span class="card-title">
-                {{ weekday }}
+                {{ weekday }}, {{ current_date }}
               </span>
-              <table class="striped responsive-table datatable">
+              <table class="striped datatable">
                 <thead>
                 <tr>
                   <th></th>
@@ -57,13 +58,21 @@
                     <td class="center-align">
                       {% include "alsijil/partials/lesson_status_icon.html" with period=period %}
                     </td>
-                    <td>{{ period.period.period }}</td>
+                    <td class="tr-link">
+                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                        {{ period.period.period }}.
+                      </a>
+                    </td>
                     <td>
-                      <a href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
                         {{ period.get_subject.name }}
                       </a>
                     </td>
-                    <td>{{ period.get_teacher_names }}</td>
+                    <td>
+                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                        {{ period.get_teacher_names }}
+                      </a>
+                    </td>
                   </tr>
                 {% endfor %}
                 </tbody>
@@ -72,7 +81,7 @@
           </div>
         {% endfor %}
       </div>
-      <div class="col s5">
+      <div class="col s12 m5">
         <div class="card">
           <div class="card-content">
             <span class="card-title">

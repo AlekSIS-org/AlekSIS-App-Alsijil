@@ -81,6 +81,12 @@ PersonalNoteFormSet = forms.modelformset_factory(
 
 
 class RegisterAbsenceForm(forms.Form):
+    layout = Layout(Row("date_start", "date_end"),
+                    Row("from_period"),
+                    Row("absent", "excused"),
+                    Row("person"),
+                    Row("remarks")
+                    )
     date_start = forms.DateField(
         label=_("Start date"), initial=datetime.today
     )
@@ -97,6 +103,8 @@ class RegisterAbsenceForm(forms.Form):
 
 
 class PersonalNoteFilterForm(forms.ModelForm):
+    layout = Layout(Row("identifier", "description"), Row("regex"))
+
     class Meta:
         model = PersonalNoteFilter
         fields = ["identifier", "description", "regex"]
