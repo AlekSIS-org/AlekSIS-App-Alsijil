@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load material_form i18n static %}
+{% load material_form i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -31,7 +31,8 @@
       </div>
     </div>
     {% csrf_token %}
-
+    {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
+    {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
     <div class="row">
       <div class="col s12 m12 l6 xl8">
         <div class="card">
@@ -39,8 +40,28 @@
           <span class="card-title">
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </span>
-
-            {% form form=lesson_documentation_form %}{% endform %}
+            {% if can_edit_lesson_documentation %}
+              {% form form=lesson_documentation_form %}{% endform %}
+            {% elif can_view_lesson_documentation %}
+              <table>
+                <tr>
+                  <th>
+                    {% trans "Lesson topic" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.topic }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Homework" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.homework }}
+                  </td>
+                </tr>
+              </table>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -63,6 +84,7 @@
       <span class="card-title">
         {% blocktrans %}Personal notes{% endblocktrans %}
       </span>
+      {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
             {% form form=personal_note_formset.management_form %}{% endform %}
 
             <table class="striped responsive-table alsijil-table">
@@ -77,38 +99,73 @@
               </thead>
               <tbody>
               {% for form in personal_note_formset %}
-                <tr>
-                  {{ form.id }}
-                  <td>{{ form.person_name }}{{ form.person_name.value }}</td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.absent }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.late }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Tardiness (in m)" %}
+                {% if can_edit_personalnote %}
+                  <tr>
+                    {{ form.id }}
+                    <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.absent }}
+                        <span></span>
                       </label>
-                    </div>
-                  </td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.excused }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.remarks }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Remarks" %}
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.late }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Tardiness (in m)" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.excused }}
+                        <span></span>
                       </label>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.remarks }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Remarks" %}
+                        </label>
+                      </div>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    {{ form.id }}
+                    <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.absent }}
+                        <span></span>
+                      </label>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.late }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Tardiness (in m)" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.excused }}
+                        <span></span>
+                      </label>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.remarks }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Remarks" %}
+                        </label>
+                      </div>
+                    </td>
+                  </tr>
+                {% endif %}
               {% endfor %}
               </tbody>
             </table>
@@ -117,10 +174,12 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
+    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+      <div class="row">
+        <div class="col s12">
+          {% include "core/partials/save_button.html" %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </form>
 {% endblock %}
