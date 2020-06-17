@@ -1,3 +1,9 @@
 table.datatable a {
   color: inherit !important;
 }
+
+table a.tr-link {
+  display: block;
+  width: inherit;
+  height: inherit;
+}
