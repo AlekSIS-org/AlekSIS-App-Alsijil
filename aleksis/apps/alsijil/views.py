@@ -4,7 +4,7 @@ from typing import Optional
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Q, Sum
+from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -166,36 +166,40 @@ def week_view(
 
     if lesson_periods:
         # Aggregate all personal notes for this group and week
-        lesson_periods_pk = lesson_periods.values_list("pk", flat=True)
         persons = (
             Person.objects.filter(is_active=True)
-            .filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
+            .filter(member_of__lessons__lesson_periods__in=lesson_periods)
             .distinct()
             .prefetch_related("personal_notes")
             .annotate(
                 absences_count=Count(
-                    "personal_notes__absent",
+                    "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
+                    distinct=True,
                 ),
                 unexcused_count=Count(
-                    "personal_notes__absent",
+                    "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
                     ),
+                    distinct=True,
                 ),
-                tardiness_sum=Sum(
-                    "personal_notes__late",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                tardiness_sum=Subquery(
+                    Person.objects.filter(
+                        pk=OuterRef("pk"),
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
-                    ),
+                    )
+                    .distinct()
+                    .annotate(tardiness_sum=Sum("personal_notes__late"))
+                    .values("tardiness_sum")
                 ),
             )
         )
