@@ -121,9 +121,14 @@ def week_view(
 ) -> HttpResponse:
     context = {}
 
+    if year and week:
+        wanted_week = CalendarWeek(year=year, week=week)
+    else:
+        wanted_week = CalendarWeek()
+
     instance = get_instance_by_pk(request, year, week, type_, id_)
 
-    lesson_periods = LessonPeriod.objects
+    lesson_periods = LessonPeriod.objects.in_week(wanted_week)
 
     if type_ and id_:
         if isinstance(instance, HttpResponseNotFound):
@@ -141,19 +146,13 @@ def week_view(
     else:
         lesson_periods = None
 
-
-    if year and week:
-        wanted_week = CalendarWeek(year=year, week=week)
-    else:
-        wanted_week = CalendarWeek()
-
     lesson_periods = lesson_periods.annotate(
         has_documentation=Exists(
             LessonDocumentation.objects.filter(
                 ~Q(topic__exact=""), lesson_period=OuterRef("pk"), week=wanted_week.week
             )
         )
-    ).in_week(wanted_week)
+    )
 
     # Add a form to filter the view
     if type_:
