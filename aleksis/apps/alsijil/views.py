@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,10 +14,10 @@ from rules.contrib.views import permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import objectgetter_optional
+
 from .forms import (
     LessonDocumentationForm,
     PersonalNoteFilterForm,
@@ -27,7 +27,7 @@ from .forms import (
 )
 from .models import LessonDocumentation, PersonalNoteFilter
 from .tables import PersonalNoteFilterTable
-from .util.alsijil_helpers import get_lesson_period_by_pk, get_instance_by_pk
+from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
 
 
 @permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
@@ -102,10 +102,14 @@ def lesson(
     )
 
     if request.method == "POST":
-        if lesson_documentation_form.is_valid() and request.user.has_perm("alsijil.edit_lessondocumentation", lesson_period):
+        if lesson_documentation_form.is_valid() and request.user.has_perm(
+            "alsijil.edit_lessondocumentation", lesson_period
+        ):
             lesson_documentation_form.save()
 
-        if personal_note_formset.is_valid() and request.user.has_perm("alsijil.edit_personalnote", lesson_period):
+        if personal_note_formset.is_valid() and request.user.has_perm(
+            "alsijil.edit_personalnote", lesson_period
+        ):
             instances = personal_note_formset.save()
 
             # Iterate over personal notes and carry changed absences to following lessons
@@ -196,13 +200,13 @@ def week_view(
         # Aggregate all personal notes for this group and week
         lesson_periods_pk = lesson_periods.values_list("pk", flat=True)
 
-
         persons = Person.objects.filter(is_active=True)
 
         if not request.user.has_perm("alsijil.view_week_personalnote", instance):
             persons = persons.filter(pk=request.user.pk)
 
-        persons = (persons.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
+        persons = (
+            persons.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
             .distinct()
             .prefetch_related("personal_notes")
             .annotate(
@@ -266,7 +270,9 @@ def week_view(
     return render(request, "alsijil/class_register/week_view.html", context)
 
 
-@permission_required("alsijil.view_full_register", fn=objectgetter_optional(Group, None, False))
+@permission_required(
+    "alsijil.view_full_register", fn=objectgetter_optional(Group, None, False)
+)
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -355,7 +361,9 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST":
-        if register_absence_form.is_valid() and request.user.has_perm("alsijil.register_absence", register_absence_form.cleaned_data["person"]):
+        if register_absence_form.is_valid() and request.user.has_perm(
+            "alsijil.register_absence", register_absence_form.cleaned_data["person"]
+        ):
             # Get data from form
             person = register_absence_form.cleaned_data["person"]
             start_date = register_absence_form.cleaned_data["date_start"]
@@ -395,7 +403,10 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/personal_note_filter/list.html", context)
 
 
-@permission_required("alsijil.edit_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
+@permission_required(
+    "alsijil.edit_personal_note_filter",
+    fn=objectgetter_optional(PersonalNoteFilter, None, False),
+)
 def edit_personal_note_filter(
     request: HttpRequest, id_: Optional["int"] = None
 ) -> HttpResponse:
@@ -422,7 +433,10 @@ def edit_personal_note_filter(
     return render(request, "alsijil/personal_note_filter/manage.html", context)
 
 
-@permission_required("alsijil.delete_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
+@permission_required(
+    "alsijil.delete_personal_note_filter",
+    fn=objectgetter_optional(PersonalNoteFilter, None, False),
+)
 def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 

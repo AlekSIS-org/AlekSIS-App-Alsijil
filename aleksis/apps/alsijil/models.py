@@ -92,6 +92,7 @@ class PersonalNoteFilter(ExtensibleModel):
         verbose_name_plural = _("Personal note filters")
         ordering = ["identifier"]
 
+
 class AlsijilGlobalPermissions(ExtensibleModel):
     class Meta:
         managed = False

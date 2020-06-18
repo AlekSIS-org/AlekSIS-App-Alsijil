@@ -1,15 +1,9 @@
 from typing import Optional
 
-from django.db.models import Count, Exists, OuterRef, Q, Sum
-from django.http import HttpRequest, HttpResponseNotFound
-from django.shortcuts import get_object_or_404
+from django.http import HttpRequest
 
-from calendarweek import CalendarWeek
-
-from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
-from ..models import LessonDocumentation
 
 
 def get_lesson_period_by_pk(
@@ -23,9 +17,17 @@ def get_lesson_period_by_pk(
         lesson_period = LessonPeriod.objects.get(pk=period_id)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
-            lesson_period = LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
+            lesson_period = (
+                LessonPeriod.objects.at_time()
+                .filter_teacher(request.user.person)
+                .first()
+            )
         else:
-            lesson_period = LessonPeriod.objects.at_time().filter_participant(request.user.person).first()
+            lesson_period = (
+                LessonPeriod.objects.at_time()
+                .filter_participant(request.user.person)
+                .first()
+            )
     else:
         lesson_period = None
     return lesson_period

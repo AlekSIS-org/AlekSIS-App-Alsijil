@@ -93,12 +93,29 @@ def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
         lesson_period=self, week=wanted_week.week
     )
 
-# Dynamically add extra permissions to Group and Person models in core, requires migration afterwards
-Group.add_permission("view_week_class_register_group", _("Can view week overview of group class register"))
-Group.add_permission("view_personalnote_group", _("Can view all personal notes of a group"))
-Group.add_permission("edit_personalnote_group", _("Can edit all personal notes of a group"))
-Group.add_permission("view_lessondocumentation_group", _("Can view all lesson documentation of a group"))
-Group.add_permission("edit_lessondocumentation_group", _("Can edit all lesson documentation of a group"))
+
+# Dynamically add extra permissions to Group and Person models in core
+# Note: requires migrate afterwards
+Group.add_permission(
+    "view_week_class_register_group",
+    _("Can view week overview of group class register"),
+)
+Group.add_permission(
+    "view_personalnote_group", _("Can view all personal notes of a group")
+)
+Group.add_permission(
+    "edit_personalnote_group", _("Can edit all personal notes of a group")
+)
+Group.add_permission(
+    "view_lessondocumentation_group", _("Can view all lesson documentation of a group")
+)
+Group.add_permission(
+    "edit_lessondocumentation_group", _("Can edit all lesson documentation of a group")
+)
 Group.add_permission("view_full_register_group", _("Can view full register of a group"))
-Group.add_permission("register_absence_group", _("Can register an absence for all members of a group"))
-Person.add_permission("register_absence_person", _("Can register an absence for a person"))
+Group.add_permission(
+    "register_absence_group", _("Can register an absence for all members of a group")
+)
+Person.add_permission(
+    "register_absence_person", _("Can register an absence for a person")
+)
