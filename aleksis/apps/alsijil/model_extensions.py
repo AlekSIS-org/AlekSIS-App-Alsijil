@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.db.models import Exists, F, OuterRef, QuerySet
+from django.db.models import Exists, OuterRef, QuerySet
 from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
@@ -20,9 +20,8 @@ def mark_absent(
     excused: bool = False,
     remarks: str = "",
 ):
-    """ Mark a person absent for all lessons in a day, optionally starting with
-    a selected period number.
-    
+    """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
+
     This function creates `PersonalNote` objects for every `LessonPeriod` the person
     participates in on the selected day and marks them as absent/excused.
 
@@ -32,7 +31,6 @@ def mark_absent(
     :Authors:
         - Dominik George <dominik.george@teckids.org>
     """
-
     wanted_week = CalendarWeek.from_date(day)
 
     # Get all lessons of this person on the specified day
@@ -59,18 +57,17 @@ def mark_absent(
 
 @LessonPeriod.method
 def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
-    """ Get all personal notes for that lesson in a specified week.
-    
+    """Get all personal notes for that lesson in a specified week.
+
     Returns all linked `PersonalNote` objects, filtered by the given weeek,
     creating those objects that haven't been created yet.
-    
+
     ..note:: Only available when AlekSIS-App-Alsijil is installed.
 
     :Date: 2019-11-09
     :Authors:
         - Dominik George <dominik.george@teckids.org>
     """
-
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
     missing_persons = persons.annotate(
         no_personal_notes=~Exists(

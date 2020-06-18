@@ -1,10 +1,8 @@
 from datetime import date, datetime, timedelta
 from typing import Optional
 
-from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Q, Sum
+from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,7 +12,9 @@ from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 from rules.contrib.views import permission_required
 
+from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import objectgetter_optional
@@ -51,24 +51,31 @@ def lesson(
     if not (year and week and period_id):
         if lesson_period:
             return redirect(
-                "lesson_by_week_and_period", wanted_week.year, wanted_week.week, lesson_period.pk,
+                "lesson_by_week_and_period",
+                wanted_week.year,
+                wanted_week.week,
+                lesson_period.pk,
             )
         else:
             raise Http404(
                 _(
-                    "You either selected an invalid lesson or there is currently no lesson in progress."
+                    "You either selected an invalid lesson or "
+                    "there is currently no lesson in progress."
                 )
             )
 
     if (
         datetime.combine(
-            wanted_week[lesson_period.period.weekday - 1], lesson_period.period.time_start,
+            wanted_week[lesson_period.period.weekday - 1],
+            lesson_period.period.time_start,
         )
         > datetime.now()
         and not request.user.is_superuser
     ):
         raise PermissionDenied(
-            _("You are not allowed to create a lesson documentation for a lesson in the future.")
+            _(
+                "You are not allowed to create a lesson documentation for a lesson in the future."
+            )
         )
 
     context["lesson_period"] = lesson_period
@@ -80,7 +87,9 @@ def lesson(
         lesson_period=lesson_period, week=wanted_week.week
     )
     lesson_documentation_form = LessonDocumentationForm(
-        request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
+        request.POST or None,
+        instance=lesson_documentation,
+        prefix="lesson_documentation",
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
@@ -117,7 +126,11 @@ def lesson(
 
 @permission_required("alsijil.view_week", fn=get_instance_by_pk)
 def week_view(
-    request: HttpRequest, year: Optional[int] = None, week: Optional[int] = None, type_: Optional[str] = None, id_: Optional[int] = None
+    request: HttpRequest,
+    year: Optional[int] = None,
+    week: Optional[int] = None,
+    type_: Optional[str] = None,
+    id_: Optional[int] = None,
 ) -> HttpResponse:
     context = {}
 
@@ -166,8 +179,13 @@ def week_view(
             if "type_" not in select_form.cleaned_data:
                 return redirect("week_view_by_week", wanted_week.year, wanted_week.week)
             else:
-                return redirect("week_view_by_week", wanted_week.year, wanted_week.week,
-                                select_form.cleaned_data["type_"].value, select_form.cleaned_data["instance"].pk)
+                return redirect(
+                    "week_view_by_week",
+                    wanted_week.year,
+                    wanted_week.week,
+                    select_form.cleaned_data["type_"].value,
+                    select_form.cleaned_data["instance"].pk,
+                )
 
     if type_ == TimetableType.GROUP:
         group = instance
@@ -189,28 +207,33 @@ def week_view(
             .prefetch_related("personal_notes")
             .annotate(
                 absences_count=Count(
-                    "personal_notes__absent",
+                    "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
+                    distinct=True,
                 ),
                 unexcused_count=Count(
-                    "personal_notes__absent",
+                    "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
                     ),
+                    distinct=True,
                 ),
-                tardiness_sum=Sum(
-                    "personal_notes__late",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
+                tardiness_sum=Subquery(
+                    Person.objects.filter(
+                        pk=OuterRef("pk"),
+                        personal_notes__lesson_period__in=lesson_periods,
                         personal_notes__week=wanted_week.week,
-                    ),
+                    )
+                    .distinct()
+                    .annotate(tardiness_sum=Sum("personal_notes__late"))
+                    .values("tardiness_sum")
                 ),
             )
         )
@@ -218,7 +241,9 @@ def week_view(
         persons = None
 
     # Resort lesson periods manually because an union queryset doesn't support order_by
-    lesson_periods = sorted(lesson_periods, key=lambda x: (x.period.weekday, x.period.period))
+    lesson_periods = sorted(
+        lesson_periods, key=lambda x: (x.period.weekday, x.period.period)
+    )
 
     context["week"] = wanted_week
     context["lesson_periods"] = lesson_periods
@@ -250,8 +275,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     # Get all lesson periods for the selected group
     lesson_periods = (
         LessonPeriod.objects.filter_group(group)
-            .distinct()
-            .prefetch_related("documentations", "personal_notes")
+        .distinct()
+        .prefetch_related("documentations", "personal_notes")
     )
 
     current_school_term = SchoolTerm.current
@@ -260,8 +285,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         return HttpResponseNotFound(_("There is no current school term."))
 
     weeks = CalendarWeek.weeks_within(
-        current_school_term.date_start,
-        current_school_term.date_end,
+        current_school_term.date_start, current_school_term.date_end,
     )
 
     periods_by_day = {}
@@ -271,10 +295,16 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
             if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
                 documentations = list(
-                    filter(lambda d: d.week == week.week, lesson_period.documentations.all(),)
+                    filter(
+                        lambda d: d.week == week.week,
+                        lesson_period.documentations.all(),
+                    )
                 )
                 notes = list(
-                    filter(lambda d: d.week == week.week, lesson_period.personal_notes.all(),)
+                    filter(
+                        lambda d: d.week == week.week,
+                        lesson_period.personal_notes.all(),
+                    )
                 )
                 substitution = lesson_period.get_substitution(week.week)
 
@@ -283,7 +313,9 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
 
     persons = group.members.annotate(
-        absences_count=Count("personal_notes__absent", filter=Q(personal_notes__absent=True)),
+        absences_count=Count(
+            "personal_notes__absent", filter=Q(personal_notes__absent=True)
+        ),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
@@ -299,7 +331,9 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 "_personal_notes_with_%s"
                 % personal_note_filter.identifier: Count(
                     "personal_notes__remarks",
-                    filter=Q(personal_notes__remarks__iregex=personal_note_filter.regex),
+                    filter=Q(
+                        personal_notes__remarks__iregex=personal_note_filter.regex
+                    ),
                 )
             }
         )
@@ -362,7 +396,9 @@ def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
 
 
 @permission_required("alsijil.edit_personal_note_filter", fn=objectgetter_optional(PersonalNoteFilter, None, False))
-def edit_personal_note_filter(request: HttpRequest, id: Optional["int"] = None) -> HttpResponse:
+def edit_personal_note_filter(
+    request: HttpRequest, id_: Optional["int"] = None
+) -> HttpResponse:
     context = {}
 
     if id:

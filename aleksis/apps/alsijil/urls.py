@@ -12,13 +12,29 @@ urlpatterns = [
     path("week", views.week_view, name="week_view"),
     path("week/<int:year>/<int:week>", views.week_view, name="week_view_by_week"),
     path("week/<str:type_>/<int:id_>/", views.week_view, name="week_view"),
-    path("week/<int:year>/<int:week>/<str:type_>/<int:id_>/", views.week_view, name="week_view_by_week"),
-    path("print/group/<int:id_>", views.full_register_group, name="full_register_group"),
-    path("absence/new", views.register_absence, name="register_absence"),
-    path("filters/list", views.list_personal_note_filters, name="list_personal_note_filters",),
-    path("filters/create", views.edit_personal_note_filter, name="create_personal_note_filter",),
     path(
-        "filters/edit/<int:id>", views.edit_personal_note_filter, name="edit_personal_note_filter",
+        "week/<int:year>/<int:week>/<str:type_>/<int:id_>/",
+        views.week_view,
+        name="week_view_by_week",
+    ),
+    path(
+        "print/group/<int:id_>", views.full_register_group, name="full_register_group"
+    ),
+    path("absence/new", views.register_absence, name="register_absence"),
+    path(
+        "filters/list",
+        views.list_personal_note_filters,
+        name="list_personal_note_filters",
+    ),
+    path(
+        "filters/create",
+        views.edit_personal_note_filter,
+        name="create_personal_note_filter",
+    ),
+    path(
+        "filters/edit/<int:id_>",
+        views.edit_personal_note_filter,
+        name="edit_personal_note_filter",
     ),
     path(
         "filters/delete/<int:id_>",

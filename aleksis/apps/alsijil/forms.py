@@ -1,15 +1,14 @@
 from datetime import datetime
 
-from aleksis.apps.chronos.managers import TimetableType
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import Select2Widget
+from material import Layout, Row
 
-from material import Row, Layout
-
+from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
 from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
@@ -43,15 +42,17 @@ class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
 
     group = forms.ModelChoiceField(
-        queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(lessons_count__gt=0),
+        queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(
+            lessons_count__gt=0
+        ),
         label=_("Group"),
         required=False,
         widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
-        queryset=Person.objects.annotate(lessons_count=Count("lessons_as_teacher")).filter(
-            lessons_count__gt=0
-        ),
+        queryset=Person.objects.annotate(
+            lessons_count=Count("lessons_as_teacher")
+        ).filter(lessons_count__gt=0),
         label=_("Teacher"),
         required=False,
         widget=Select2Widget,
@@ -60,7 +61,7 @@ class SelectForm(forms.Form):
     def clean(self) -> dict:
         data = super().clean()
 
-        if data.get("group") and not data.get("teacher") :
+        if data.get("group") and not data.get("teacher"):
             type_ = TimetableType.GROUP
             instance = data["group"]
         elif data.get("teacher") and not data.get("group"):
@@ -75,24 +76,22 @@ class SelectForm(forms.Form):
         data["instance"] = instance
         return data
 
+
 PersonalNoteFormSet = forms.modelformset_factory(
     PersonalNote, form=PersonalNoteForm, max_num=0, extra=0
 )
 
 
 class RegisterAbsenceForm(forms.Form):
-    layout = Layout(Row("date_start", "date_end"),
-                    Row("from_period"),
-                    Row("absent", "excused"),
-                    Row("person"),
-                    Row("remarks")
-                    )
-    date_start = forms.DateField(
-        label=_("Start date"), initial=datetime.today
+    layout = Layout(
+        Row("date_start", "date_end"),
+        Row("from_period"),
+        Row("absent", "excused"),
+        Row("person"),
+        Row("remarks"),
     )
-    date_end = forms.DateField(
-        label=_("End date"), initial=datetime.today
-    )
+    date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
+    date_end = forms.DateField(label=_("End date"), initial=datetime.today)
     from_period = forms.IntegerField(label=_("From period"), initial=0, min_value=0)
     person = forms.ModelChoiceField(
         label=_("Person"), queryset=Person.objects.all(), widget=Select2Widget
