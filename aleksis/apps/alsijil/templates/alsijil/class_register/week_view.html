@@ -46,6 +46,7 @@
               <table class="striped datatable">
                 <thead>
                 <tr>
+                  <th></th>
                   <th>{% blocktrans %}Period{% endblocktrans %}</th>
                   <th>{% blocktrans %}Subject{% endblocktrans %}</th>
                   <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
@@ -53,24 +54,10 @@
                 </thead>
                 <tbody>
                 {% for period in periods %}
-                  <tr class="
-                      {% if period.has_documentation %}
-                        success
-                      {% else %}
-                        {% weekday_to_date week period.period.weekday as current_date %}
-                        {% today as today %}
-                        {% if current_date < today %}
-                          error
-                        {% else %}
-                          {% if period.get_substitution %}
-                            warning
-                            {% if period.get_substitution.cancelled %}
-                              alsijil-lesson-cancelled
-                            {% endif %}
-                          {% endif %}
-                        {% endif %}
-                      {% endif %}
-                    ">
+                  <tr>
+                    <td class="center-align">
+                      {% include "alsijil/partials/lesson_status_icon.html" with period=period %}
+                    </td>
                     <td class="tr-link">
                       <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
                         {{ period.period.period }}.
