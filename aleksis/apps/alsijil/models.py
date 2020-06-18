@@ -9,11 +9,15 @@ def isidentifier(value: str) -> bool:
 
 
 class PersonalNote(ExtensibleModel):
-    """ A personal note about a single person. Used in the class register to note
-    absences, excuses and remarks about a student in a single lesson period.
+    """A personal note about a single person.
+
+    Used in the class register to note absences, excuses
+    and remarks about a student in a single lesson period.
     """
 
-    person = models.ForeignKey("core.Person", models.CASCADE, related_name="personal_notes")
+    person = models.ForeignKey(
+        "core.Person", models.CASCADE, related_name="personal_notes"
+    )
 
     week = models.IntegerField()
     lesson_period = models.ForeignKey(
@@ -41,8 +45,9 @@ class PersonalNote(ExtensibleModel):
 
 
 class LessonDocumentation(ExtensibleModel):
-    """ A documentation on a single lesson period. Non-personal, includes
-    the topic and homework of the lesson.
+    """A documentation on a single lesson period.
+
+    Non-personal, includes the topic and homework of the lesson.
     """
 
     week = models.IntegerField()
@@ -66,16 +71,21 @@ class LessonDocumentation(ExtensibleModel):
 
 
 class PersonalNoteFilter(ExtensibleModel):
-    """ A filter definition that can generate statistics on personal note texts. """
+    """A filter definition that can generate statistics on personal note texts."""
 
     identifier = models.CharField(
-        verbose_name=_("Identifier"), max_length=30, validators=[isidentifier], unique=True,
+        verbose_name=_("Identifier"),
+        max_length=30,
+        validators=[isidentifier],
+        unique=True,
     )
     description = models.CharField(
         verbose_name=_("Description"), max_length=60, blank=True, unique=True
     )
 
-    regex = models.CharField(verbose_name=_("Match expression"), max_length=100, unique=True)
+    regex = models.CharField(
+        verbose_name=_("Match expression"), max_length=100, unique=True
+    )
 
     class Meta:
         verbose_name = _("Personal note filter")
