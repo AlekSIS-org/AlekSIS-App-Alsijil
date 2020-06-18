@@ -37,7 +37,6 @@
       </div>
     </div>
     {% csrf_token %}
-
     <div class="row">
       <div class="col s12 m12 l6 xl8">
         <div class="card">
@@ -107,9 +106,8 @@
               </thead>
               <tbody>
               {% for form in personal_note_formset %}
-                <tr>
-                  {% if can_edit_personalnote %}
-
+                {% if can_edit_personalnote %}
+                  <tr>
                     {{ form.id }}
                     <td>{{ form.person_name }}{{ form.person_name.value }}</td>
                     <td class="center-align">
@@ -158,12 +156,12 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col s12">
-        {% if can_edit_lesson_documentation or can_edit_personalnote %}
+    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+      <div class="row">
+        <div class="col s12">
           {% include "core/partials/save_button.html" %}
-        {% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </form>
 {% endblock %}
