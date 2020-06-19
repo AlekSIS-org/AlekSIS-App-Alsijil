@@ -24,7 +24,7 @@ view_lesson_predicate = has_person & (
     | is_lesson_teacher
     | is_lesson_participant
     | is_lesson_parent_group_owner
-    | has_lesson_group_object_perm("alsijil.view_lesson")
+    | has_lesson_group_object_perm("core.view_week_class_register_group")
 )
 add_perm("alsijil.view_lesson", view_lesson_predicate)
 
@@ -76,7 +76,7 @@ add_perm("alsijil.view_week", view_week_predicate)
 # View week personal notes
 view_week_personal_notes_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
-    | has_object_perm("alsijil.view_personalnote")
+    | has_object_perm("core.view_personalnote_group")
     | is_group_owner
 )
 add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)

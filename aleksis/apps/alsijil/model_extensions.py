@@ -101,6 +101,10 @@ Group.add_permission(
     _("Can view week overview of group class register"),
 )
 Group.add_permission(
+    "view_lesson_class_register_group",
+    _("Can view lesson overview of group class register"),
+)
+Group.add_permission(
     "view_personalnote_group", _("Can view all personal notes of a group")
 )
 Group.add_permission(
