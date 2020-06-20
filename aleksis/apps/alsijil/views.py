@@ -196,7 +196,7 @@ def week_view(
 
     if lesson_periods:
         # Aggregate all personal notes for this group and week
-        lesson_periods_pk = lesson_periods.values_list("pk", flat=True)
+        lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
 
         persons = Person.objects.filter(is_active=True)
 
@@ -211,7 +211,7 @@ def week_view(
                 absences_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
@@ -220,7 +220,7 @@ def week_view(
                 unexcused_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
@@ -230,7 +230,7 @@ def week_view(
                 tardiness_sum=Subquery(
                     Person.objects.filter(
                         pk=OuterRef("pk"),
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                     )
                     .distinct()
