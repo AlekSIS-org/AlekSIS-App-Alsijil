@@ -1,143 +1,80 @@
-@page {
-  size: A4;
+table.small-print {
+    font-size: 10pt;
 }
 
-body {
-  font-family: Arial, Helvetica, san-serif;
-  font-size: 10pt;
+#signatures {
+    padding-top: 3em;
 }
 
-section.sheet.smallprint {
-  font-size: 8pt;
+#signatures .signature {
+    display: inline-block;
+    width: 12em;
+    border-top: 1px solid;
+    margin-right: 20px;
 }
 
-section.sheet.bigprint {
-  font-size: 12pt;
+tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-span.signature-line {
-  display: inline-block;
-  width: 10em;
-  border-bottom: 1px solid;
-}
-
-#titlepage {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-}
-
-#titlepage h1 {
-  text-align: center;
-}
-
-#titlepage img#school-logo {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 50%;
-}
-
-#titlepage p#group-desc {
-  font-weight: bold;
-  font-size: 150%;
-  text-align: center;
-}
-
-#titlepage p#printed-info {
-  text-align: center;
-}
-
-#titlepage p#group-owners {
-  font-size: 130%;
-  text-align: center;
-}
-
-#titlepage p#signatures {
-  padding-top: 2em;
-}
-
-table {
-  width: 100%;
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-
-th, td {
-  border: 1px solid black;
-}
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
+td, th {
+    padding: 1px;
 }
 
 tr.lessons-day-first {
-  border-top: 2px solid;
+    border-top: 3px solid rgba(0, 0, 0, 0.3);
 }
 
 th.lessons-day-head {
-  transform: rotate(-90deg);
+    text-align: center;
+    transform: rotate(-90deg);
 }
 
 tr.lesson-cancelled td.subj {
-  text-decoration: line-through;
+    text-decoration: line-through;
 }
 
 tr.lesson-cancelled td {
-  background-color: #dc3545;
+    background-color: #EF9A9A;
 }
+
 tr.lesson-substituted td.lesson-subj {
-  text-decoration: line-through;
+    text-decoration: line-through;
 }
 
 tr.lesson-substituted td {
-  background-color: #ffc107;
+    background-color: #ffb74d;
 }
 
 td.lesson-notes {
-  font-size: 80%;
+    font-size: 80%;
 }
 
 td.lesson-notes span.lesson-note-absent {
-  color: #cc0000;
+    color: #cc0000;
 }
 
 td.lesson-notes span.lesson-note-late {
-  color: #ff9933;
+    color: #ff9933;
 }
 
 td.lesson-notes span.lesson-note-excused {
-  color: #009933;
+    color: #009933;
 }
 
 table.person-info {
-  border: none;
+    border: none;
 }
 
 table.person-info td.person-img {
-  text-align: center;
+    text-align: center;
 }
 
 table.person-info td.person-img img {
-  max-height: 30mm;
-}
-
-.sheet {
-    overflow: visible;
-    height: auto !important;
-}
-
-.sheet * {
-    page-break-inside: avoid;
+    max-height: 30mm;
 }
 
 img.max-size-600 {
-  max-width: 600px;
-  max-height: 600px;
-}
-
-img.center{
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
+    max-width: 600px;
+    max-height: 600px;
 }
