@@ -38,8 +38,8 @@ def lesson(
 
     if year and week and period_id:
         # Get a specific lesson period if provided in URL
-        lesson_period = LessonPeriod.objects.get(pk=period_id)
         wanted_week = CalendarWeek(year=year, week=week)
+        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(pk=period_id)
     else:
         # Determine current lesson by current date and time
         lesson_period = (

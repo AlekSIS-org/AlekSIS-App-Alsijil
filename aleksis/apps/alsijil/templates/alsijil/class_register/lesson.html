@@ -28,6 +28,26 @@
 {% endblock %}
 
 {% block content %}
+  <div class="row">
+    <div class="col s12">
+      {% with prev_lesson=lesson_period.prev %}
+        <a class="btn-flat left waves-effect waves-light"
+           href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+          <i class="material-icons left">arrow_back</i>
+          {% trans "Previous lesson" %}
+        </a>
+      {% endwith %}
+
+      {% with next_lesson=lesson_period.next %}
+        <a class="btn-flat right waves-effect waves-light"
+           href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+          <i class="material-icons right">arrow_forward</i>
+          {% trans "Next lesson" %}
+        </a>
+      {% endwith %}
+    </div>
+  </div>
+
   <form method="post">
     <div class="row">
       <div class="col s12">
