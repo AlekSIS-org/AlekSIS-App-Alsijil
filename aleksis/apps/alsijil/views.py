@@ -64,7 +64,7 @@ def lesson(
 
     if (
         datetime.combine(
-            wanted_week[lesson_period.period.weekday - 1],
+            wanted_week[lesson_period.period.weekday],
             lesson_period.period.time_start,
         )
         > datetime.now()
@@ -78,7 +78,7 @@ def lesson(
 
     context["lesson_period"] = lesson_period
     context["week"] = wanted_week
-    context["day"] = wanted_week[lesson_period.period.weekday - 1]
+    context["day"] = wanted_week[lesson_period.period.weekday]
 
     # Create or get lesson documentation object; can be empty when first opening lesson
     lesson_documentation, created = LessonDocumentation.objects.get_or_create(
@@ -106,7 +106,7 @@ def lesson(
             # Iterate over personal notes and carry changed absences to following lessons
             for instance in instances:
                 instance.person.mark_absent(
-                    wanted_week[lesson_period.period.weekday - 1],
+                    wanted_week[lesson_period.period.weekday],
                     lesson_period.period.period + 1,
                     instance.absent,
                     instance.excused,
@@ -276,7 +276,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     periods_by_day = {}
     for lesson_period in lesson_periods:
         for week in weeks:
-            day = week[lesson_period.period.weekday - 1]
+            day = week[lesson_period.period.weekday]
 
             if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
                 documentations = list(
