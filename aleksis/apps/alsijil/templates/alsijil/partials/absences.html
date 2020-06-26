@@ -1,0 +1,6 @@
+{% load i18n %}
+{% for note in notes %}
+  <span class="{% if note.excused %}green-text{% else %}red-text{% endif %}">{{ note.person }}
+    {% if note.excused %}{% trans "(e)" %}{% else %}{% trans "(u)" %}{% endif %}{% if not forloop.last %},{% endif %}
+  </span>
+{% endfor %}

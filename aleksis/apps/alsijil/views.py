@@ -81,9 +81,7 @@ def lesson(
     context["day"] = wanted_week[lesson_period.period.weekday]
 
     # Create or get lesson documentation object; can be empty when first opening lesson
-    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
-        lesson_period=lesson_period, week=wanted_week.week
-    )
+    lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
     lesson_documentation_form = LessonDocumentationForm(
         request.POST or None,
         instance=lesson_documentation,

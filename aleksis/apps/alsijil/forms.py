@@ -19,6 +19,11 @@ class LessonDocumentationForm(forms.ModelForm):
         model = LessonDocumentation
         fields = ["topic", "homework"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["homework"].label = _("Homework for the next lesson")
+
 
 class PersonalNoteForm(forms.ModelForm):
     class Meta:

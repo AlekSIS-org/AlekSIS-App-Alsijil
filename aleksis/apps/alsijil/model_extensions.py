@@ -1,13 +1,14 @@
 from datetime import date
+from typing import Optional, Union
 
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, QuerySet
 
 from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
 
-from .models import PersonalNote
+from .models import LessonDocumentation, PersonalNote
 
 
 @Person.method
@@ -91,3 +92,61 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
     return PersonalNote.objects.select_related("person").filter(
         lesson_period=self, week=wanted_week.week
     )
+
+
+@LessonPeriod.method
+def get_lesson_documentation(
+    self, week: Optional[CalendarWeek] = None
+) -> Union[LessonDocumentation, None]:
+    """Get lesson documentation object for this lesson."""
+    if not week:
+        week = self.week
+    try:
+        return LessonDocumentation.objects.get(lesson_period=self, week=week.week)
+    except LessonDocumentation.DoesNotExist:
+        return None
+
+
+@LessonPeriod.method
+def get_or_create_lesson_documentation(
+    self, week: Optional[CalendarWeek] = None
+) -> LessonDocumentation:
+    """Get or create lesson documentation object for this lesson."""
+    if not week:
+        week = self.week
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+        lesson_period=self, week=week.week
+    )
+    return lesson_documentation
+
+
+@LessonPeriod.method
+def get_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of absent persons for this lesson."""
+    if not week:
+        week = self.week
+    return self.personal_notes.filter(week=week.week, absent=True)
+
+
+@LessonPeriod.method
+def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of excused absent persons for this lesson."""
+    if not week:
+        week = self.week
+    return self.personal_notes.filter(week=week.week, absent=True, excused=True)
+
+
+@LessonPeriod.method
+def get_unexcused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of unexcused absent persons for this lesson."""
+    if not week:
+        week = self.week
+    return self.personal_notes.filter(week=week.week, absent=True, excused=False)
+
+
+@LessonPeriod.method
+def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of late persons for this lesson."""
+    if not week:
+        week = self.week
+    return self.personal_notes.filter(week=week.week, late__gt=0)
