@@ -16,7 +16,7 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a teacher
     in the lesson linked to the given LessonPeriod.
     """
-    return user.person in obj.lesson.teachers
+    return user.person in obj.lesson.teachers.all()
 
 
 @predicate
