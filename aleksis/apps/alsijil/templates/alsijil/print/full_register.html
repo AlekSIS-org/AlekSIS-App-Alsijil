@@ -1,285 +1,316 @@
+{% extends "core/base_print.html" %}
+
 {% load static i18n cropping data_helpers week_helpers %}
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet"
-      href="{% static 'css/alsijil/paper.css' %}" />
-    <link rel="stylesheet"
-      href="{% static 'css/alsijil/full_register.css' %}" />
-  </head>
+{% block page_title %}
+  {% trans "Class register:" %} {{ group.name }}
+{% endblock %}
 
-  <body class="A4">
-    <section class="sheet padding-10mm bigprint" id="titlepage">
-      <div>
-        <h1>{% trans 'Class register' %}</h1>
-        {% static "img/aleksis-banner.svg" as aleksis_banner %}
-        <img src="{% firstof request.site.preferences.theme__logo.url aleksis_banner %}"
-             alt="{{ request.site.preferences.general__title }} – Logo" class="max-size-600 center">
-        <p id="group-desc">
-          {{ group.name }}
-        </p>
-        <p id="group-owners">
-          {% trans 'Owners' %}:
-          {{ group.owners.all|join:', ' }}
-        </p>
-        <p id="printed-info">
-          {% trans 'Printed on' %} {{ today }}
-        </p>
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/alsijil/full_register.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+  <div class="center-align">
+    <h1>{% trans 'Class register' %}</h1>
+    {% static "img/aleksis-banner.svg" as aleksis_banner %}
+    <img src="{% firstof request.site.preferences.theme__logo.url aleksis_banner %}"
+         alt="{{ request.site.preferences.general__title }} – Logo" class="max-size-600 center">
+    <h4 id="group-desc">
+      {{ group.name }}
+    </h4>
+    <p id="group-owners" class="flow-text">
+      {% trans 'Owners' %}:
+      {{ group.owners.all|join:', ' }}
+    </p>
+    <p id="printed-info">
+      {% trans 'Printed on' %} {{ today }}
+    </p>
+  </div>
+  <div>
+    <hr/>
+  </div>
+  <div>
+    <p>
+      {% blocktrans %}
+        This printout is intended for archival purposes. The main copy of
+        the class register is stored in the AlekSIS School Information
+        System.
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans %}
+        Copies of the class register, both digital and as printout, must
+        only be kept inside the school and/or on devices authorised by the
+        school.
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans %}
+        The owner of the group and the headteacher confirm the above, as
+        well as the correctness of this printout.
+      {% endblocktrans %}
+    </p>
+    <div id="signatures">
+      <div class="signature">
+        {% trans 'Owners' %}
       </div>
-      <div>
-        <hr />
+      <div class="signature">
+        {% trans 'Headteacher' %}
       </div>
-      <div>
-        <p>
-          {% blocktrans %}
-            This printout is intended for archival purposes. The main copy of
-            the class register is stored in the AlekSIS School Information
-            System.
-          {% endblocktrans %}
-        </p>
-        <p>
-          {% blocktrans %}
-            Copies of the class register, both digital and as printout, must
-            only be kept inside the school and/or on devices authorised by the
-            school.
-          {% endblocktrans %}
-        </p>
-        <p>
-          {% blocktrans %}
-            The owner of the group and the headteacher confirm the above, as
-            well as the correctness of this printout.
-          {% endblocktrans %}
-        </p>
-        <p id="signatures">
-          <span class="signature-line"></span> ({% trans 'Owners' %}),
-          <span class="signature-line"></span> ({% trans 'Headteacher' %})
-        </p>
-      </div>
-    </section>
+    </div>
+  </div>
 
-    <section class="sheet padding-10mm" id="persons-overview">
-      <h2>{% trans 'Persons in group' %} {{ group.name }}</h2>
+  <div class="page-break">&nbsp;</div>
 
-      <table id="persons">
-        <thead>
-          <tr>
-            <th>{% trans 'No.' %}</th>
-            <th>{% trans 'Last name' %}</th>
-            <th>{% trans 'First name' %}</th>
-            <th>{% trans 'Sex' %}</th>
-            <th>{% trans 'Date of birth' %}</th>
-            <th>{% trans 'Absences' %}</th>
-            <th>{% trans 'Unexcused' %}</th>
-            <th>{% trans 'Tard.' %}</th>
-          </tr>
-        </thead>
+  <h4>{% trans 'Persons in group' %} {{ group.name }}</h4>
 
-        <tbody>
-          {% for person in persons %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ person.last_name }}</td>
-              <td>{{ person.first_name }}</td>
-              <td>{{ person.get_sex_display }}</td>
-              <td>{{ person.date_of_birth }}</td>
-              <td>{{ person.absences_count}}</td>
-              <td>{{ person.unexcused }}</td>
-              <td>{{ person.tardiness }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
+  <table id="persons">
+    <thead>
+    <tr>
+      <th>{% trans 'No.' %}</th>
+      <th>{% trans 'Last name' %}</th>
+      <th>{% trans 'First name' %}</th>
+      <th>{% trans 'Sex' %}</th>
+      <th>{% trans 'Date of birth' %}</th>
+      <th>{% trans 'Absences' %}</th>
+      <th>{% trans 'Unexcused' %}</th>
+      <th>{% trans 'Tard.' %}</th>
+    </tr>
+    </thead>
 
-    <section class="sheet padding-10mm" id="lessons-overview">
-      <h2>{% trans 'Teachers and lessons in group' %} {{ group.name }}</h2>
-
-      <table id="lessons">
-        <thead>
-          <tr>
-            <th>{% trans 'Subject' %}</th>
-            <th>{% trans 'Teacher' %}</th>
-            <th>{% trans 'Lesson start' %}</th>
-            <th>{% trans 'Lesson end' %}</th>
-            <th>{% trans 'Per week' %}</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for lesson in group.lessons.all %}
-            <tr>
-              <td>{{ lesson.subject.name }}</td>
-              <td>{{ lesson.teachers.all|join:', ' }}</td>
-              <td>{{ lesson.date_start }}</td>
-              <td>{{ lesson.date_end }}</td>
-              <td>{{ lesson.lesson_periods.count }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-
+    <tbody>
     {% for person in persons %}
-      <section class="sheet padding-10mm">
-        <h2>{% trans 'Personal overview' %}: {{ person.last_name }}, {{ person.first_name }}</h2>
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ person.last_name }}</td>
+        <td>{{ person.first_name }}</td>
+        <td>{{ person.get_sex_display }}</td>
+        <td>{{ person.date_of_birth }}</td>
+        <td>{{ person.absences_count }}</td>
+        <td>{{ person.unexcused }}</td>
+        <td>{{ person.tardiness }}'</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
 
-        <h3>{% blocktrans %}Contact details{% endblocktrans %}</h3>
-        <table class="person-info">
+  <div class="page-break">&nbsp;</div>
+
+  {% if group.lessons.all %}
+    <h4>{% trans 'Teachers and lessons in group' %} {{ group.name }}</h4>
+
+    <table id="lessons">
+      <thead>
+      <tr>
+        <th>{% trans 'Subject' %}</th>
+        <th>{% trans 'Teacher' %}</th>
+        <th>{% trans 'Lesson start' %}</th>
+        <th>{% trans 'Lesson end' %}</th>
+        <th>{% trans 'Per week' %}</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for lesson in group.lessons.all %}
+        <tr>
+          <td>{{ lesson.subject.name }}</td>
+          <td>{{ lesson.teachers.all|join:', ' }}</td>
+          <td>{{ lesson.date_start }}</td>
+          <td>{{ lesson.date_end }}</td>
+          <td>{{ lesson.lesson_periods.count }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="page-break">&nbsp;</div>
+
+  {% endif %}
+
+  {% if group.child_groups.all %}
+    <h4>{% trans 'Teachers and lessons in child groups' %}</h4>
+
+    <table id="lessons">
+      <thead>
+      <tr>
+        <th>{% trans 'Group' %}</th>
+        <th>{% trans 'Subject' %}</th>
+        <th>{% trans 'Teacher' %}</th>
+        <th>{% trans 'Lesson start' %}</th>
+        <th>{% trans 'Lesson end' %}</th>
+        <th>{% trans 'Per week' %}</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for child_group in group.child_groups.all %}
+        {% for lesson in child_group.lessons.all %}
           <tr>
-            <td rowspan="6" class="person-img">
-              {% if person.photo %}
-                <img src="{% cropped_thumbnail person 'photo_cropping' max_size='300x400' %}" alt="{{ person.first_name }} {{ person.last_name }}" />
-              {% else %}
-                <img src="{% static 'img/fallback.png' %}" alt="{{ person.first_name }} {{ person.last_name }}" />
+            <td>{{ child_group.name }}</td>
+            <td>{{ lesson.subject.name }}</td>
+            <td>{{ lesson.teachers.all|join:', ' }}</td>
+            <td>{{ lesson.date_start }}</td>
+            <td>{{ lesson.date_end }}</td>
+            <td>{{ lesson.lesson_periods.count }}</td>
+          </tr>
+        {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="page-break">&nbsp;</div>
+  {% endif %}
+
+  {% for person in persons %}
+    <h4>{% trans 'Personal overview' %}: {{ person.last_name }}, {{ person.first_name }}</h4>
+
+    <h5>{% blocktrans %}Contact details{% endblocktrans %}</h5>
+    <table class="person-info">
+      <tr>
+        <td rowspan="6" class="person-img">
+          {% if person.photo %}
+            <img src="{% cropped_thumbnail person 'photo_cropping' max_size='300x400' %}"
+                 alt="{{ person.first_name }} {{ person.last_name }}"/>
+          {% else %}
+            <img src="{% static 'img/fallback.png' %}" alt="{{ person.first_name }} {{ person.last_name }}"/>
+          {% endif %}
+        </td>
+        <td><i class="material-icons">person</i></td>
+        <td colspan="2">{{ person.first_name }} {{ person.additional_name }} {{ person.last_name }}</td>
+      </tr>
+      <tr>
+        <td><i class="material-icons">face</i></td>
+        <td colspan="2">{{ person.get_sex_display }}</td>
+      </tr>
+      <tr>
+        <td><i class="material-icons">home</i></td>
+        <td>{{ person.street }} {{ person.housenumber }}</td>
+        <td>{{ person.postal_code }} {{ person.place }}</td>
+      </tr>
+      <tr>
+        <td><i class="material-icons">phone</i></td>
+        <td>{{ person.phone_number }}</td>
+        <td>{{ person.mobile_number }}</td>
+      </tr>
+      <tr>
+        <td><i class="material-icons">email</i></td>
+        <td colspan="2">{{ person.email }}</td>
+      </tr>
+      <tr>
+        <td><i class="material-icons">cake</i></td>
+        <td colspan="2">{{ person.date_of_birth|date }}</td>
+      </tr>
+    </table>
+
+    {% if personal_note_filters %}
+      <h5>{% trans 'Statistics on remarks' %}</h5>
+      <table>
+        <thead>
+        <tr>
+          <th>{% trans 'Description' %}</th>
+          <th>{% trans 'Count' %}</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for note_filter in personal_note_filters %}
+          <tr>
+            <td>{{ note_filter.description }}</td>
+            {% with "_personal_notes_with_"|add:note_filter.identifier as identifier %}
+              <td>{{ person|get_dict:identifier }}</td>
+            {% endwith %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+    <h5>{% trans 'Absences and tardiness' %}</h5>
+    <table>
+      <thead>
+      <tr>
+        <th>{% trans 'Absences' %}</th>
+        <th>{% trans 'Unexcused' %}</th>
+        <th>{% trans 'Tardiness' %}</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr>
+        <td>{{ person.absences_count }}</td>
+        <td>{{ person.unexcused }}</td>
+        <td>{{ person.tardiness }}'</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h5>{% trans 'Relevant personal notes' %}</h5>
+    <table class="small-print">
+      <thead>
+      <tr>
+        <th>{% trans 'Date' %}</th>
+        <th>{% trans 'Pe.' %}</th>
+        <th>{% trans 'Subj.' %}</th>
+        <th>{% trans 'Te.' %}</th>
+        <th>{% trans 'Absent' %}</th>
+        <th>{% trans 'Tard.' %}</th>
+        <th>{% trans 'Remarks' %}</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for note in person.personal_notes.all %}
+        {% if note.absent or note.late or note.remarks %}
+          {% period_to_date note.week note.lesson_period.period as note_date %}
+          <tr>
+            <td>{{ note_date }}</td>
+            <td>{{ note.lesson_period.period.period }}</td>
+            <td>{{ note.lesson_period.get_subject.short_name }} </td>
+            <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
+            <td>
+              {% if note.absent %}
+                {% trans 'Yes' %}
+                {% if note.escused %}
+                  ({% trans 'e' %})
+                {% endif %}
               {% endif %}
             </td>
-            <td><i class="material-icons">person</i></td>
-            <td>{{ person.first_name }}</td>
-            <td>{{ person.additional_name }}</td>
-            <td>{{ person.last_name }}</td>
-          </tr>
-          <tr>
-            <td><i class="material-icons">face</i></td>
-            <td colspan="3">{{ person.get_sex_display }}</td>
-          </tr>
-          <tr>
-            <td><i class="material-icons">home</i></td>
-            <td colspan="2">{{ person.street }} {{ person.housenumber }}</td>
-            <td colspan="2">{{ person.postal_code }} {{ person.place }}</td>
-          </tr>
-          <tr>
-            <td><i class="material-icons">phone</i></td>
-            <td>{{ person.phone_number }}</td>
-            <td>{{ person.mobile_number }}</td>
-          </tr>
-          <tr>
-            <td><i class="material-icons">email</i></td>
-            <td colspan="3">{{ person.email }}</td>
-          </tr>
-          <tr>
-            <td><i class="material-icons">gift</i></td>
-            <td colspan="3">{{ person.date_of_birth|date }}</td>
-          </tr>
-          {% comment %}
-            <tr>
-            <td><i class="material-icons">school</i></td>
-            <td>Class</td>
-            <td>Teacher</td>
-            </tr>
-            {% endcomment %}
-        </table>
-
-        {% if personal_note_filters %}
-          <h3>{% trans 'Statistics on remarks' %}</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>{% trans 'Description' %}</th>
-                <th>{% trans 'Count' %}</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {% for note_filter in personal_note_filters %}
-                <tr>
-                  <td>{{ note_filter.description }}</td>
-                  {% with "_personal_notes_with_"|add:note_filter.identifier as identifier %}
-                    <td>{{ person|get_dict:identifier }}</td>
-                  {% endwith %}
-                </tr>
-              {% endfor %}
-            </rbody>
-          </table>
-        {% endif %}
-
-        <h3>{% trans 'Absences and tardiness' %}</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>{% trans 'Absences' %}</th>
-	      <th>{% trans 'Unexcused' %}</th>
-              <th>{% trans 'Tardiness' %}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>{{ person.absences_count }}</td>
-              <td>{{ person.unexcused }}</td>
-              <td>{{ person.tardiness }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3>{% trans 'Relevant personal notes' %}</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>{% trans 'Date' %}</th>
-              <th>{% trans 'Pe.' %}</th>
-              <th>{% trans 'Subj.' %}</th>
-              <th>{% trans 'Te.' %}</th>
-              <th>{% trans 'Absent' %}</th>
-              <th>{% trans 'Tard.' %}</th>
-              <th>{% trans 'Remarks' %}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% for note in person.personal_notes.all %}
-              {% if note.absent or note.late or note.remarks %}
-                {% period_to_date note.week note.lesson_period.period as note_date %}
-                <tr>
-                  <td>{{ note_date }}</td>
-                  <td>{{ note.lesson_period.period.period }}</td>
-                  <td>{{ note.lesson_period.get_subject.short_name }} </td>
-                  <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
-                  <td>
-                    {% if note.absent %}
-                      {% trans 'Yes' %}
-                      {% if note.escused %}
-                        ({% trans 'e' %})
-                      {% endif %}
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if note.late %}
-                      {{ note.late }}
-                    {% endif %}
-                  </td>
-                  <td>{{ note.remarks }}</td>
-                </tr>
+            <td>
+              {% if note.late %}
+                {{ note.late }}'
               {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </section>
-    {% endfor %}
+            </td>
+            <td>{{ note.remarks }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
 
-    {% for week in weeks %}
-      <section class="sheet padding-10mm smallprint">
-        <h2>{% trans 'Lesson documentation for calendar week' %} {{ week.week }}</h2>
+    <div class="page-break">&nbsp;</div>
 
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>{% trans 'Pe.' %}</th>
-              <th>{% trans 'Subj.' %}</th>
-              <th>{% trans 'Subs.' %}</th>
-              <th>{% trans 'Lesson topic' %}</th>
-              <th>{% trans 'Homework' %}</th>
-              <th>{% trans 'Notes' %}</th>
-              <th>{% trans 'Te.' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for day in week %}
-              {% with periods_by_day|get_dict:day as periods %}
-                {% for period, documentations, notes, substitution in periods %}
-                  <tr class="
+  {% endfor %}
+
+  {% for week in weeks %}
+    <h4>{% trans 'Lesson documentation for week' %} {{ week.week }}</h4>
+
+    <table class="small-print">
+      <thead>
+      <tr>
+        <th></th>
+        <th>{% trans 'Pe.' %}</th>
+        <th>{% trans 'Subj.' %}</th>
+        <th>{% trans 'Lesson topic' %}</th>
+        <th>{% trans 'Homework' %}</th>
+        <th>{% trans 'Notes' %}</th>
+        <th>{% trans 'Te.' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for day in week %}
+        {% with periods_by_day|get_dict:day as periods %}
+          {% for period, documentations, notes, substitution in periods %}
+            <tr class="
                     {% if substitution %}
                       {% if substitution.cancelled %}
                         lesson-cancelled
@@ -291,55 +322,62 @@
                       lessons-day-first
                     {% endif %}
                   ">
-                    {% if forloop.first %}
-                      <th rowspan="{{ periods|length }}" class="lessons-day-head">{{ day }}</th>
-                    {% endif %}
-                    <td class="lesson-pe">{{ period.period.period }}</td>
-                    <td class="lesson-subj">{{ period.lesson.subject.short_name }}</td>
-                    <td class="lesson-subs">{{ substitution.subject.short_name }}</td>
-                    <td class="lesson-topic">
-                      {% if substitution.cancelled %}
-                        {% trans 'Lesson cancelled' %}
-                      {% else %}
-                        {{ documentations.0.topic }}
-                      {% endif %}
-                    </td>
-                    <td class="lesson-homework">{{ documentations.0.homework }}</td>
-                    <td class="lesson-notes">
-                      {% for note in notes %}
-                        {% if note.absent %}
-                          <span class="lesson-note-absent">
-                            {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                            {% if note.excused %}
-                              <span class="lesson-note-excused">
+              {% if forloop.first %}
+                <th rowspan="{{ periods|length }}" class="lessons-day-head">{{ day }}</th>
+              {% endif %}
+              <td class="lesson-pe">{{ period.period.period }}</td>
+              <td class="lesson-subj">
+                {% if substitution %}
+                  {% include "chronos/partials/subs/subject.html" with type="substitution" el=substitution %}
+                {% else %}
+                  {% include "chronos/partials/subject.html" with subject=period.lesson.subject %}
+                {% endif %}
+              </td>
+              <td class="lesson-topic">
+                {% if substitution.cancelled %}
+                  {% trans 'Lesson cancelled' %}
+                {% else %}
+                  {{ documentations.0.topic }}
+                {% endif %}
+              </td>
+              <td class="lesson-homework">{{ documentations.0.homework }}</td>
+              <td class="lesson-notes">
+                {% for note in notes %}
+                  {% if note.absent %}
+                    <span class="lesson-note-absent">
+                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                      {% if note.excused %}
+                        <span class="lesson-note-excused">
                                ({% trans 'e' %})
                               </span>
-                            {% endif %}
-                        {% endif %}
-                        {% if note.late %}
-                          <span class="lesson-note-late">
-                            {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                            ({{ note.late }}′)
-                            {% if note.excused %}
-                              <span class="lesson-note-excused">
+                      {% endif %}
+                      </span>
+                  {% endif %}
+                  {% if note.late %}
+                    <span class="lesson-note-late">
+                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                      ({{ note.late }}′)
+                      {% if note.excused %}
+                        <span class="lesson-note-excused">
                                ({% trans 'e' %})
                               </span>
-                            {% endif %}
-                        {% endif %}
-                      {% endfor %}
-                    </td>
-                    <td class="lesson-te">
-                      {% if documentations.0.topic %}
-                        {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}
                       {% endif %}
-                    </td>
-                  </tr>
+                      </span>
+                  {% endif %}
                 {% endfor %}
-              {% endwith %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </section>
-    {% endfor %}
-  </body>
-</html>
+              </td>
+              <td class="lesson-te">
+                {% if documentations.0.topic %}
+                  {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% endwith %}
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="page-break">&nbsp;</div>
+  {% endfor %}
+{% endblock %}

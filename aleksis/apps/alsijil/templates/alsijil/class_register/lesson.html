@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load material_form i18n static rules %}
+{% load week_helpers material_form i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -28,9 +28,31 @@
 {% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
   {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
   {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
   {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
+=======
+  <div class="row">
+    <div class="col s12">
+      {% with prev_lesson=lesson_period.prev %}
+        <a class="btn-flat left waves-effect waves-light"
+           href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+          <i class="material-icons left">arrow_back</i>
+          {% trans "Previous lesson" %}
+        </a>
+      {% endwith %}
+
+      {% with next_lesson=lesson_period.next %}
+        <a class="btn-flat right waves-effect waves-light"
+           href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+          <i class="material-icons right">arrow_forward</i>
+          {% trans "Next lesson" %}
+        </a>
+      {% endwith %}
+    </div>
+  </div>
+>>>>>>> master
 
   <form method="post">
     <div class="row">
@@ -43,6 +65,53 @@
     {% csrf_token %}
     <div class="row">
       <div class="col s12 m12 l6 xl8">
+        {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
+            {% if prev_doc %}
+              {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
+
+              <div class="card">
+                <div class="card-content">
+                  <span class="card-title">
+                    {% blocktrans %}Overview: Previous lesson{% endblocktrans %} ({{ prev_date }},
+                    {% blocktrans with period=prev_lesson.period.period %}{{ period }}. period{% endblocktrans %})
+                  </span>
+
+                  <table>
+                    {% if prev_doc.topic %}
+                      <tr>
+                        <th class="collection-item">{% trans "Lesson topic of previous lesson:" %}</th>
+                        <td>{{ prev_doc.topic }}</td>
+                      </tr>
+                    {% endif %}
+
+                    {% if prev_doc.homework %}
+                      <tr>
+                        <th class="collection-item">{% trans "Homework for this lesson:" %}</th>
+                        <td>{{ prev_doc.homework }}</td>
+                      </tr>
+                    {% endif %}
+
+                    {% if absences %}
+                      <tr>
+                        <th>{% trans "Absent persons:" %}</th>
+                        <td>{% include "alsijil/partials/absences.html" with notes=absences %}</td>
+                      </tr>
+                    {% endif %}
+
+                    {% if tardinesses %}
+                      <tr>
+                        <th>{% trans "Late persons:" %}</th>
+                        <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
+                      </tr>
+                    {% endif %}
+                  </table>
+                </div>
+              </div>
+            {% endif %}
+          {% endwith %}
+        {% endwith %}
+
         <div class="card">
           <div class="card-content">
           <span class="card-title">
