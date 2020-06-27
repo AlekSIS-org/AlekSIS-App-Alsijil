@@ -28,11 +28,10 @@
 {% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
   {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
   {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
   {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
-=======
+
   <div class="row">
     <div class="col s12">
       {% with prev_lesson=lesson_period.prev %}
@@ -52,7 +51,6 @@
       {% endwith %}
     </div>
   </div>
->>>>>>> master
 
   <form method="post">
     <div class="row">

@@ -85,7 +85,7 @@ add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 register_absence_predicate = has_person & (
     has_global_perm("alsijil.register_absence")
     | has_person_group_object_perm("core.register_absence_group")
-    | has_global_perm("core.register_absence_person")
+    | has_object_perm("core.register_absence_person")
     | is_person_group_owner
 )
 add_perm("alsijil.register_absence", register_absence_predicate)
