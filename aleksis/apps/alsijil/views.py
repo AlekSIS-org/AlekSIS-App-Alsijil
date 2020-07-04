@@ -381,8 +381,8 @@ def edit_personal_note_filter(
 ) -> HttpResponse:
     context = {}
 
-    if id:
-        personal_note_filter = PersonalNoteFilter.objects.get(id=id)
+    if id_:
+        personal_note_filter = PersonalNoteFilter.objects.get(id=id_)
         context["personal_note_filter"] = personal_note_filter
         personal_note_filter_form = PersonalNoteFilterForm(
             request.POST or None, instance=personal_note_filter
