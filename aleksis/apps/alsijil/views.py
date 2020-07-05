@@ -276,7 +276,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         for week in weeks:
             day = week[lesson_period.period.weekday]
 
-            if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
+            if lesson_period.lesson.validity.date_start <= day <= lesson_period.lesson.validity.date_end:
                 documentations = list(
                     filter(
                         lambda d: d.week == week.week,

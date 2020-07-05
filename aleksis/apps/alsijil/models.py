@@ -35,7 +35,7 @@ class PersonalNote(ExtensibleModel):
         verbose_name_plural = _("Personal notes")
         unique_together = [["lesson_period", "week", "person"]]
         ordering = [
-            "lesson_period__lesson__date_start",
+            "lesson_period__lesson__validity__date_start",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
@@ -63,7 +63,7 @@ class LessonDocumentation(ExtensibleModel):
         verbose_name_plural = _("Lesson documentations")
         unique_together = [["lesson_period", "week"]]
         ordering = [
-            "lesson_period__lesson__date_start",
+            "lesson_period__lesson__validity__date_start",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
