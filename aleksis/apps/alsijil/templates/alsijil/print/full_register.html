@@ -1,6 +1,6 @@
 {% extends "core/base_print.html" %}
 
-{% load static i18n cropping data_helpers week_helpers %}
+{% load static i18n data_helpers week_helpers %}
 
 {% block page_title %}
   {% trans "Class register:" %} {{ group.name }}
@@ -169,8 +169,7 @@
       <tr>
         <td rowspan="6" class="person-img">
           {% if person.photo %}
-            <img src="{% cropped_thumbnail person 'photo_cropping' max_size='300x400' %}"
-                 alt="{{ person.first_name }} {{ person.last_name }}"/>
+            <img src="{{ person.photo.url }}" alt="{{ person.first_name }} {{ person.last_name }}"/>
           {% else %}
             <img src="{% static 'img/fallback.png' %}" alt="{{ person.first_name }} {{ person.last_name }}"/>
           {% endif %}
