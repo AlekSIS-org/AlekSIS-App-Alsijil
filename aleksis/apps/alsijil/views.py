@@ -12,7 +12,7 @@ from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
@@ -98,17 +98,19 @@ def lesson(
         if lesson_documentation_form.is_valid():
             lesson_documentation_form.save()
 
-        if personal_note_formset.is_valid():
-            instances = personal_note_formset.save()
+        substitution = lesson_period.get_substitution()
+        if not getattr(substitution, "cancelled", False):
+            if personal_note_formset.is_valid():
+                instances = personal_note_formset.save()
 
-            # Iterate over personal notes and carry changed absences to following lessons
-            for instance in instances:
-                instance.person.mark_absent(
-                    wanted_week[lesson_period.period.weekday],
-                    lesson_period.period.period + 1,
-                    instance.absent,
-                    instance.excused,
-                )
+                # Iterate over personal notes and carry changed absences to following lessons
+                for instance in instances:
+                    instance.person.mark_absent(
+                        wanted_week[lesson_period.period.weekday],
+                        lesson_period.period.period + 1,
+                        instance.absent,
+                        instance.excused,
+                    )
 
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form
@@ -297,7 +299,13 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     persons = group.members.annotate(
         absences_count=Count(
-            "personal_notes__absent", filter=Q(personal_notes__absent=True)
+            "personal_notes__absent", filter=Q(personal_notes__absent=True) & ~Q(personal_notes__lesson_period__substitutions=Subquery(
+                    LessonSubstitution.objects.filter(
+                        lesson_period__pk=OuterRef("personal_notes__lesson_period__pk"),
+                        cancelled=True,
+                        week=OuterRef("personal_notes__week"),
+                    ).values("pk")
+            ))
         ),
         unexcused=Count(
             "personal_notes__absent",
