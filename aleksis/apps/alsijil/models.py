@@ -57,6 +57,7 @@ class LessonDocumentation(ExtensibleModel):
 
     topic = models.CharField(verbose_name=_("Lesson topic"), max_length=200, blank=True)
     homework = models.CharField(verbose_name=_("Homework"), max_length=200, blank=True)
+    group_note = models.CharField(verbose_name=_("Group note"), max_length=200, blank=True)
 
     class Meta:
         verbose_name = _("Lesson documentation")
