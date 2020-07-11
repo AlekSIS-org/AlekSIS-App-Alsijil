@@ -313,12 +313,33 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         absences_count=Count(
             "personal_notes__absent", filter=Q(personal_notes__absent=True)
         ),
+        excused=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=True,
+                personal_notes__excuse_type__isnull=True,
+            ),
+        ),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
         ),
         tardiness=Sum("personal_notes__late"),
     )
+
+    for excuse_type in ExcuseType.objects.all():
+        persons = persons.annotate(
+            **{
+                excuse_type.count_label: Count(
+                    "personal_notes__absent",
+                    filter=Q(
+                        personal_notes__absent=True,
+                        personal_notes__excuse_type=excuse_type,
+                    ),
+                )
+            }
+        )
 
     # FIXME Move to manager
     personal_note_filters = PersonalNoteFilter.objects.all()
@@ -337,6 +358,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     context["persons"] = persons
     context["personal_note_filters"] = personal_note_filters
+    context["excuse_types"] = ExcuseType.objects.all()
     context["group"] = group
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
