@@ -28,7 +28,7 @@ class LessonDocumentationForm(forms.ModelForm):
 class PersonalNoteForm(forms.ModelForm):
     class Meta:
         model = PersonalNote
-        fields = ["absent", "late", "excused", "remarks"]
+        fields = ["absent", "late", "excused", "excuse_type", "remarks"]
 
     person_name = forms.CharField(disabled=True)
 

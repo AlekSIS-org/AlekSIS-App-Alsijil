@@ -102,6 +102,8 @@ def lesson(
         if lesson_documentation_form.is_valid():
             lesson_documentation_form.save()
 
+            messages.success(request, _("The lesson documentation has been saved."))
+
         if personal_note_formset.is_valid():
             instances = personal_note_formset.save()
 
@@ -112,7 +114,15 @@ def lesson(
                     lesson_period.period.period + 1,
                     instance.absent,
                     instance.excused,
+                    instance.excuse_type,
                 )
+
+            messages.success(request, _("The personal notes have been saved."))
+
+            # Regenerate form here to ensure that programmatically changed data will be shown correctly
+            personal_note_formset = PersonalNoteFormSet(
+                None, queryset=persons_qs, prefix="personal_notes"
+            )
 
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form

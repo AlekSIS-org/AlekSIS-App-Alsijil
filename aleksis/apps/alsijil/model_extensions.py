@@ -8,7 +8,7 @@ from calendarweek import CalendarWeek
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
 
-from .models import LessonDocumentation, PersonalNote
+from .models import ExcuseType, LessonDocumentation, PersonalNote
 
 
 @Person.method
@@ -18,6 +18,7 @@ def mark_absent(
     from_period: int = 0,
     absent: bool = True,
     excused: bool = False,
+    excuse_type: Optional[ExcuseType] = None,
     remarks: str = "",
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
@@ -44,7 +45,7 @@ def mark_absent(
             person=self,
             lesson_period=lesson_period,
             week=wanted_week.week,
-            defaults={"absent": absent, "excused": excused},
+            defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type},
         )
 
         if remarks:
