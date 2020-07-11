@@ -41,4 +41,20 @@ urlpatterns = [
         views.delete_personal_note_filter,
         name="delete_personal_note_filter",
     ),
+    path("excuse_types/", views.ExcuseTypeListView.as_view(), name="excuse_types"),
+    path(
+        "excuse_types/create/",
+        views.ExcuseTypeCreateView.as_view(),
+        name="create_excuse_type",
+    ),
+    path(
+        "excuse_types/<int:pk>/edit/",
+        views.ExcuseTypeEditView.as_view(),
+        name="edit_excuse_type",
+    ),
+    path(
+        "excuse_types/<int:pk>/delete/",
+        views.ExcuseTypeDeleteView.as_view(),
+        name="delete_excuse_type",
+    ),
 ]

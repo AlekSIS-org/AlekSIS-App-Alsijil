@@ -5,27 +5,31 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
+from reversion.views import RevisionMixin
+from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 
 from .forms import (
+    ExcuseTypeForm,
     LessonDocumentationForm,
     PersonalNoteFilterForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import LessonDocumentation, PersonalNoteFilter
-from .tables import PersonalNoteFilterTable
+from .models import ExcuseType, LessonDocumentation, PersonalNoteFilter
+from .tables import ExcuseTypeTable, PersonalNoteFilterTable
 
 
 def lesson(
@@ -413,3 +417,44 @@ def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
 
     context["personal_note_filter"] = personal_note_filter
     return redirect("list_personal_note_filters")
+
+
+class ExcuseTypeListView(SingleTableView, PermissionRequiredMixin):
+    """Table of all excuse types."""
+
+    model = ExcuseType
+    table_class = ExcuseTypeTable
+    permission_required = "core.view_excusetype"
+    template_name = "alsijil/excuse_type/list.html"
+
+
+class ExcuseTypeCreateView(AdvancedCreateView, PermissionRequiredMixin):
+    """Create view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.create_excusetype"
+    template_name = "alsijil/excuse_type/create.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been created.")
+
+
+class ExcuseTypeEditView(AdvancedEditView, PermissionRequiredMixin):
+    """Edit view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.edit_excusetype"
+    template_name = "alsijil/excuse_type/edit.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been saved.")
+
+
+class ExcuseTypeDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+    """Delete view for excuse types"""
+
+    model = ExcuseType
+    permission_required = "core.delete_excusetype"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been deleted.")

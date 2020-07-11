@@ -17,3 +17,23 @@ class PersonalNoteFilterTable(tables.Table):
         text=_("Edit"),
         attrs={"a": {"class": "btn-flat waves-effect waves-orange"}},
     )
+
+
+class ExcuseTypeTable(tables.Table):
+    class Meta:
+        attrs = {"class": "highlight"}
+
+    name = tables.LinkColumn("edit_excuse_type", args=[A("id")])
+    short_name = tables.Column()
+    edit = tables.LinkColumn(
+        "edit_excuse_type",
+        args=[A("id")],
+        text=_("Edit"),
+        attrs={"a": {"class": "btn-flat waves-effect waves-orange orange-text"}},
+    )
+    delete = tables.LinkColumn(
+        "delete_excuse_type",
+        args=[A("id")],
+        text=_("Delete"),
+        attrs={"a": {"class": "btn-flat waves-effect waves-red red-text"}},
+    )
