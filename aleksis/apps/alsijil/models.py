@@ -17,6 +17,13 @@ class ExcuseType(ExtensibleModel):
     short_name = models.CharField(max_length=255, unique=True, verbose_name=_("Short name"))
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
+    def __str__(self):
+        return f"{self.name} ({self.short_name})"
+
+    @property
+    def count_label(self):
+        return f"{self.short_name}_count"
+
     class Meta:
         ordering = ["name"]
         verbose_name = _("Excuse type")
@@ -45,6 +52,11 @@ class PersonalNote(ExtensibleModel):
     excuse_type = models.ForeignKey(ExcuseType, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Excuse type"))
 
     remarks = models.CharField(max_length=200, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.excuse_type:
+            self.excused = True
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Personal note")
