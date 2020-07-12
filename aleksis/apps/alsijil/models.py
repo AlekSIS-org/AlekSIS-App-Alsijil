@@ -30,6 +30,10 @@ class PersonalNote(ExtensibleModel):
 
     remarks = models.CharField(max_length=200, blank=True)
 
+    extra_marks = models.ManyToManyField(
+        "ExtraMark", null=True, blank=True, verbose_name=_("Extra marks")
+    )
+
     class Meta:
         verbose_name = _("Personal note")
         verbose_name_plural = _("Personal notes")
@@ -91,3 +95,27 @@ class PersonalNoteFilter(ExtensibleModel):
         verbose_name = _("Personal note filter")
         verbose_name_plural = _("Personal note filters")
         ordering = ["identifier"]
+
+
+class ExtraMark(ExtensibleModel):
+    """A model for extra marks.
+
+    Can be used for lesson-based counting of things (like forgotten homework).
+    """
+
+    short_name = models.CharField(
+        max_length=255, unique=True, verbose_name=_("Short name")
+    )
+    name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
+
+    def __str__(self):
+        return f"{self.name} ({self.short_name})"
+
+    @property
+    def count_label(self):
+        return f"{self.short_name}_count"
+
+    class Meta:
+        ordering = ["short_name"]
+        verbose_name = _("Extra mark")
+        verbose_name_plural = _("Extra marks")
