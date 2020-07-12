@@ -64,6 +64,40 @@
 
   <div class="page-break">&nbsp;</div>
 
+  <h4>{% trans "Abbreviations" %}</h4>
+
+  <h5>{% trans "General" %}</h5>
+
+  <ul class="collection">
+    <li class="collection-item">
+      <strong>(a)</strong> {% trans "Absent" %}
+    </li>
+    <li class="collection-item">
+      <strong>(b)</strong> {% trans "Late" %}
+    </li>
+    <li class="collection-item">
+      <strong>(u)</strong> {% trans "Unexcused" %}
+    </li>
+    <li class="collection-item">
+      <strong>(e)</strong> {% trans "Excused" %}
+    </li>
+  </ul>
+
+  {% if excuse_types %}
+    <h5>{% trans "Custom excuse types" %}</h5>
+
+    <ul class="collection">
+      {% for excuse_type in excuse_types %}
+        <li class="collection-item">
+          <strong>({{ excuse_type.short_name }})</strong> {{ excuse_type.name }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <div class="page-break">&nbsp;</div>
+
+
   <h4>{% trans 'Persons in group' %} {{ group.name }}</h4>
 
   <table id="persons">
