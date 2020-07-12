@@ -47,10 +47,7 @@ class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
 
     group = forms.ModelChoiceField(
-        queryset=None,
-        label=_("Group"),
-        required=False,
-        widget=Select2Widget,
+        queryset=None, label=_("Group"), required=False, widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
         queryset=Person.objects.annotate(
@@ -81,8 +78,10 @@ class SelectForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["group"].queryset = Group.objects.for_current_school_term_or_all().annotate(lessons_count=Count("lessons")).filter(
-            lessons_count__gt=0
+        self.fields["group"].queryset = (
+            Group.objects.for_current_school_term_or_all()
+            .annotate(lessons_count=Count("lessons"))
+            .filter(lessons_count__gt=0)
         )
 
 

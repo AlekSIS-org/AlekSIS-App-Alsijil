@@ -43,7 +43,9 @@ def lesson(
     if year and week and period_id:
         # Get a specific lesson period if provided in URL
         wanted_week = CalendarWeek(year=year, week=week)
-        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(pk=period_id)
+        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(
+            pk=period_id
+        )
     else:
         # Determine current lesson by current date and time
         lesson_period = (
@@ -68,8 +70,7 @@ def lesson(
 
     if (
         datetime.combine(
-            wanted_week[lesson_period.period.weekday],
-            lesson_period.period.time_start,
+            wanted_week[lesson_period.period.weekday], lesson_period.period.time_start,
         )
         > datetime.now()
         and not request.user.is_superuser
@@ -290,7 +291,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         for week in weeks:
             day = week[lesson_period.period.weekday]
 
-            if lesson_period.lesson.validity.date_start <= day <= lesson_period.lesson.validity.date_end:
+            if (
+                lesson_period.lesson.validity.date_start
+                <= day
+                <= lesson_period.lesson.validity.date_end
+            ):
                 documentations = list(
                     filter(
                         lambda d: d.week == week.week,

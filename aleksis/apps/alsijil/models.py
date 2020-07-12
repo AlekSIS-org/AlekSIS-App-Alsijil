@@ -14,7 +14,9 @@ class ExcuseType(ExtensibleModel):
     Can be used to count different types of absences separately.
     """
 
-    short_name = models.CharField(max_length=255, unique=True, verbose_name=_("Short name"))
+    short_name = models.CharField(
+        max_length=255, unique=True, verbose_name=_("Short name")
+    )
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
     def __str__(self):
@@ -49,7 +51,13 @@ class PersonalNote(ExtensibleModel):
     absent = models.BooleanField(default=False)
     late = models.IntegerField(default=0)
     excused = models.BooleanField(default=False)
-    excuse_type = models.ForeignKey(ExcuseType, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Excuse type"))
+    excuse_type = models.ForeignKey(
+        ExcuseType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Excuse type"),
+    )
 
     remarks = models.CharField(max_length=200, blank=True)
 
