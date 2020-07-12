@@ -5,27 +5,31 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
+from reversion.views import RevisionMixin
+from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 
 from .forms import (
+    ExtraMarkForm,
     LessonDocumentationForm,
     PersonalNoteFilterForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import LessonDocumentation, PersonalNoteFilter
-from .tables import PersonalNoteFilterTable
+from .models import ExtraMark, LessonDocumentation, PersonalNoteFilter
+from .tables import ExtraMarkTable, PersonalNoteFilterTable
 
 
 def lesson(
@@ -418,3 +422,44 @@ def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
 
     context["personal_note_filter"] = personal_note_filter
     return redirect("list_personal_note_filters")
+
+
+class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
+    """Table of all extra marks."""
+
+    model = ExtraMark
+    table_class = ExtraMarkTable
+    permission_required = "core.view_extramark"
+    template_name = "alsijil/extra_mark/list.html"
+
+
+class ExtraMarkCreateView(AdvancedCreateView, PermissionRequiredMixin):
+    """Create view for extra marks."""
+
+    model = ExtraMark
+    form_class = ExtraMarkForm
+    permission_required = "core.create_extramark"
+    template_name = "alsijil/extra_mark/create.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been created.")
+
+
+class ExtraMarkEditView(AdvancedEditView, PermissionRequiredMixin):
+    """Edit view for extra marks."""
+
+    model = ExtraMark
+    form_class = ExtraMarkForm
+    permission_required = "core.edit_extramark"
+    template_name = "alsijil/extra_mark/edit.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been saved.")
+
+
+class ExtraMarkDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+    """Delete view for extra marks"""
+
+    model = ExtraMark
+    permission_required = "core.delete_extramark"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been deleted.")

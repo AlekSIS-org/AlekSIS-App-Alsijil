@@ -11,7 +11,7 @@ from material import Layout, Row
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
-from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
+from .models import ExtraMark, LessonDocumentation, PersonalNote, PersonalNoteFilter
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -116,3 +116,11 @@ class PersonalNoteFilterForm(forms.ModelForm):
     class Meta:
         model = PersonalNoteFilter
         fields = ["identifier", "description", "regex"]
+
+
+class ExtraMarkForm(forms.ModelForm):
+    layout = Layout("short_name", "name")
+
+    class Meta:
+        model = ExtraMark
+        fields = ["short_name", "name"]

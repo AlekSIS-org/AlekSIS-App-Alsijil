@@ -36,6 +36,12 @@ MENUS = {
                     "icon": "filter_list",
                     "validators": ["menu_generator.validators.is_superuser"],
                 },
+                {
+                    "name": _("Extra marks"),
+                    "url": "extra_marks",
+                    "icon": "label",
+                    "validators": ["menu_generator.validators.is_superuser"],
+                },
             ],
         }
     ]

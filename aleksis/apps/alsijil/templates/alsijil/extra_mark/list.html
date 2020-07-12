@@ -1,0 +1,18 @@
+{# -*- engine:django -*- #}
+
+{% extends "core/base.html" %}
+
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block browser_title %}{% blocktrans %}Extra marks{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans %}Extra marks{% endblocktrans %}{% endblock %}
+
+{% block content %}
+  <a class="btn green waves-effect waves-light" href="{% url 'create_extra_mark' %}">
+    <i class="material-icons left">add</i>
+    {% trans "Create extra mark" %}
+  </a>
+
+  {% render_table table %}
+{% endblock %}
