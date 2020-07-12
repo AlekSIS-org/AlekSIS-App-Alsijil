@@ -184,16 +184,25 @@ def week_view(
 
     if lesson_periods:
         # Aggregate all personal notes for this group and week
-        persons = (
-            Person.objects.filter(is_active=True)
-            .filter(member_of__lessons__lesson_periods__in=lesson_periods)
-            .distinct()
+        lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
+
+        persons_qs = Person.objects.filter(is_active=True)
+
+        if group:
+            persons_qs = persons_qs.filter(member_of=group)
+        else:
+            persons_qs = persons_qs.filter(
+                member_of__lessons__lesson_periods__in=lesson_periods_pk
+            )
+
+        persons_qs = (
+            persons_qs.distinct()
             .prefetch_related("personal_notes")
             .annotate(
                 absences_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
@@ -202,7 +211,7 @@ def week_view(
                 unexcused_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
@@ -212,7 +221,7 @@ def week_view(
                 tardiness_sum=Subquery(
                     Person.objects.filter(
                         pk=OuterRef("pk"),
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                     )
                     .distinct()
@@ -221,6 +230,17 @@ def week_view(
                 ),
             )
         )
+
+        persons = []
+        for person in persons_qs:
+            persons.append(
+                {
+                    "person": person,
+                    "personal_notes": person.personal_notes.filter(
+                        week=wanted_week.week, lesson_period__in=lesson_periods_pk
+                    ),
+                }
+            )
     else:
         persons = None
 
