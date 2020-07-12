@@ -14,6 +14,8 @@
 
   <div class="center-align">
     <h1>{% trans 'Class register' %}</h1>
+    <h5>{{ school_term }}</h5>
+    <p>({{ school_term.date_start }}–{{ school_term.date_end }})</p>
     {% static "img/aleksis-banner.svg" as aleksis_banner %}
     <img src="{% firstof request.site.preferences.theme__logo.url aleksis_banner %}"
          alt="{{ request.site.preferences.general__title }} – Logo" class="max-size-600 center">
@@ -117,8 +119,8 @@
         <tr>
           <td>{{ lesson.subject.name }}</td>
           <td>{{ lesson.teachers.all|join:', ' }}</td>
-          <td>{{ lesson.date_start }}</td>
-          <td>{{ lesson.date_end }}</td>
+          <td>{{ lesson.validity.date_start }}</td>
+          <td>{{ lesson.validity.date_end }}</td>
           <td>{{ lesson.lesson_periods.count }}</td>
         </tr>
       {% endfor %}
@@ -150,8 +152,8 @@
             <td>{{ child_group.name }}</td>
             <td>{{ lesson.subject.name }}</td>
             <td>{{ lesson.teachers.all|join:', ' }}</td>
-            <td>{{ lesson.date_start }}</td>
-            <td>{{ lesson.date_end }}</td>
+            <td>{{ lesson.validity.date_start }}</td>
+            <td>{{ lesson.validity.date_end }}</td>
             <td>{{ lesson.lesson_periods.count }}</td>
           </tr>
         {% endfor %}
