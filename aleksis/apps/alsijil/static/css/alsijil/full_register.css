@@ -1,4 +1,4 @@
-table.small-print {
+table.small-print, td.small-print, th.small-print {
     font-size: 10pt;
 }
 
@@ -25,7 +25,7 @@ tr.lessons-day-first {
     border-top: 3px solid rgba(0, 0, 0, 0.3);
 }
 
-th.lessons-day-head {
+th.lessons-day-head, td.rotate, th.rotate {
     text-align: center;
     transform: rotate(-90deg);
 }
