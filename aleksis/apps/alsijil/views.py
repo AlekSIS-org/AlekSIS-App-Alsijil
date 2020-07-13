@@ -346,6 +346,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
+    context["school_term"] = current_school_term
     context["persons"] = persons
     context["personal_note_filters"] = personal_note_filters
     context["group"] = group
