@@ -60,7 +60,7 @@
     <div class="row">
       <div class="col s12 m12 l6 xl8">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% if prev_doc %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
@@ -99,6 +99,18 @@
                         <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
                       </tr>
                     {% endif %}
+
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+
                   </table>
                 </div>
               </div>
