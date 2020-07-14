@@ -77,6 +77,9 @@
       <th>{% trans 'Absences' %}</th>
       <th>{% trans 'Unexcused' %}</th>
       <th>{% trans 'Tard.' %}</th>
+      {% for extra_mark in extra_marks %}
+        <th>{{ extra_mark.short_name }}</th>
+      {% endfor %}
     </tr>
     </thead>
 
@@ -91,6 +94,9 @@
         <td>{{ person.absences_count }}</td>
         <td>{{ person.unexcused }}</td>
         <td>{{ person.tardiness }}'</td>
+        {% for extra_mark in extra_marks %}
+          <td>{{ person|get_dict:extra_mark.count_label }}</td>
+        {% endfor %}
       </tr>
     {% endfor %}
     </tbody>
@@ -243,6 +249,18 @@
       </tbody>
     </table>
 
+    {% if extra_marks %}
+      <h5>{% trans 'Extra marks' %}</h5>
+      <table>
+        {% for extra_mark in extra_marks %}
+          <tr>
+            <th>{{ extra_mark.name }}</th>
+            <td>{{ person|get_dict:extra_mark.count_label }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
     <h5>{% trans 'Relevant personal notes' %}</h5>
     <table class="small-print">
       <thead>
@@ -253,13 +271,13 @@
         <th>{% trans 'Te.' %}</th>
         <th>{% trans 'Absent' %}</th>
         <th>{% trans 'Tard.' %}</th>
-        <th>{% trans 'Remarks' %}</th>
+        <th colspan="2">{% trans 'Remarks' %}</th>
       </tr>
       </thead>
 
       <tbody>
       {% for note in person.personal_notes.all %}
-        {% if note.absent or note.late or note.remarks %}
+        {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
           {% period_to_date note.week note.lesson_period.period as note_date %}
           <tr>
             <td>{{ note_date }}</td>
@@ -278,6 +296,11 @@
               {% if note.late %}
                 {{ note.late }}'
               {% endif %}
+            </td>
+            <td>
+              {% for extra_mark in note.extra_marks.all %}
+                {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
+              {% endfor %}
             </td>
             <td>{{ note.remarks }}</td>
           </tr>
@@ -363,6 +386,12 @@
                       {% endif %}
                       </span>
                   {% endif %}
+                  {% for extra_mark in note.extra_marks.all %}
+                    <span>
+                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                      ({{ extra_mark.short_name }})
+                    </span>
+                  {% endfor %}
                 {% endfor %}
               </td>
               <td class="lesson-te">

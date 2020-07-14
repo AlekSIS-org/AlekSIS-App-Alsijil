@@ -332,6 +332,15 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         tardiness=Sum("personal_notes__late"),
     )
 
+    for extra_mark in ExtraMark.objects.all():
+        persons = persons.annotate(
+            **{
+                extra_mark.count_label: Count(
+                    "personal_notes", filter=Q(personal_notes__extra_marks=extra_mark,),
+                )
+            }
+        )
+
     # FIXME Move to manager
     personal_note_filters = PersonalNoteFilter.objects.all()
     for personal_note_filter in personal_note_filters:
@@ -347,6 +356,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
+    context["extra_marks"] = ExtraMark.objects.all()
     context["persons"] = persons
     context["personal_note_filters"] = personal_note_filters
     context["group"] = group
