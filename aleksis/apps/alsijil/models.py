@@ -109,7 +109,7 @@ class ExtraMark(ExtensibleModel):
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
     def __str__(self):
-        return f"{self.name} ({self.short_name})"
+        return f"{self.name}"
 
     @property
     def count_label(self):
