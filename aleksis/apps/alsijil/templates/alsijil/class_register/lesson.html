@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers %}
+{% load week_helpers material_form_internal %}
 {% load material_form i18n static %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
@@ -144,6 +144,7 @@
                 <th>{% blocktrans %}Absent{% endblocktrans %}</th>
                 <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                 <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
                 <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
               </tr>
               </thead>
@@ -171,6 +172,19 @@
                       {{ form.excused }}
                       <span></span>
                     </label>
+                  </td>
+                  <td>
+                    {% for group, items in form.extra_marks|select_options %}
+                      {% for choice, value, selected in items %}
+                        <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                          <input type="checkbox"
+                                 {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                  {% if selected %} checked="checked"{% endif %}
+                                 name="{{ form.extra_marks.html_name }}">
+                          <span>{{ choice }}</span>
+                        </label>
+                      {% endfor %}
+                    {% endfor %}
                   </td>
                   <td>
                     <div class="input-field">
