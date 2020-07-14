@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("sites", "0002_alter_domain_unique"),
-        ("alsijil", "0001_initial"),
+        ("alsijil", "0002_excuse_type"),
     ]
 
     operations = [
