@@ -97,6 +97,18 @@
     </ul>
   {% endif %}
 
+  {% if extra_marks %}
+    <h5>{% trans "Available extra marks" %}</h5>
+
+    <ul class="collection">
+      {% for extra_mark in extra_marks %}
+        <li class="collection-item">
+          <strong>{{ extra_mark.short_name }}</strong> {{ extra_mark.name }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
   <div class="page-break">&nbsp;</div>
 
 
