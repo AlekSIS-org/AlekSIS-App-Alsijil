@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/base.html" %}
-{% load material_form i18n week_helpers static %}
+{% load material_form i18n week_helpers static data_helpers %}
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
@@ -96,6 +96,11 @@
               <p class="card-text">
                 {% trans "Summed up tardiness" %}: {{ person.tardiness_sum }}'
               </p>
+              {% for extra_mark in extra_marks %}
+                <p class="card-text">
+                  {{ extra_mark.name }}: {{ person|get_dict:extra_mark.count_label }}
+                </p>
+              {% endfor %}
               {% for note in person.personal_notes|only_week:week %}
                 {% if note.remarks %}
                   <blockquote>

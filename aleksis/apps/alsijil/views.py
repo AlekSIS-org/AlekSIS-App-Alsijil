@@ -226,6 +226,22 @@ def week_view(
                 ),
             )
         )
+
+        for extra_mark in ExtraMark.objects.all():
+            persons = persons.annotate(
+                **{
+                    extra_mark.count_label: Count(
+                        "personal_notes",
+                        filter=Q(
+                            personal_notes__lesson_period__in=lesson_periods,
+                            personal_notes__week=wanted_week.week,
+                            personal_notes__extra_marks=extra_mark,
+                        ),
+                        distinct=True,
+                    )
+                }
+            )
+
     else:
         persons = None
 
@@ -234,6 +250,7 @@ def week_view(
         lesson_periods, key=lambda x: (x.period.weekday, x.period.period)
     )
 
+    context["extra_marks"] = ExtraMark.objects.all()
     context["week"] = wanted_week
     context["lesson_periods"] = lesson_periods
     context["persons"] = persons
