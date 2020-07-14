@@ -156,6 +156,7 @@
                 <th>{% blocktrans %}Absent{% endblocktrans %}</th>
                 <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                 <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
                 <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
                 <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
               </tr>
@@ -184,6 +185,14 @@
                       {{ form.excused }}
                       <span></span>
                     </label>
+                  </td>
+                  <td>
+                    <div class="input-field">
+                      {{ form.excuse_type }}
+                      <label for="{{ form.excuse_type.id_for_label }}">
+                        {% trans "Excuse type" %}
+                      </label>
+                    </div>
                   </td>
                   <td>
                     {% for group, items in form.extra_marks|select_options %}

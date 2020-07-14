@@ -11,7 +11,13 @@ from material import Layout, Row
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
-from .models import ExtraMark, LessonDocumentation, PersonalNote, PersonalNoteFilter
+from .models import (
+    ExcuseType,
+    ExtraMark,
+    LessonDocumentation,
+    PersonalNote,
+    PersonalNoteFilter,
+)
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -28,7 +34,7 @@ class LessonDocumentationForm(forms.ModelForm):
 class PersonalNoteForm(forms.ModelForm):
     class Meta:
         model = PersonalNote
-        fields = ["absent", "late", "excused", "extra_marks", "remarks"]
+        fields = ["absent", "late", "excused", "excuse_type", "extra_marks", "remarks"]
 
     person_name = forms.CharField(disabled=True)
 
@@ -47,10 +53,7 @@ class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
 
     group = forms.ModelChoiceField(
-        queryset=None,
-        label=_("Group"),
-        required=False,
-        widget=Select2Widget,
+        queryset=None, label=_("Group"), required=False, widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
         queryset=Person.objects.annotate(
@@ -81,8 +84,10 @@ class SelectForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["group"].queryset = Group.objects.for_current_school_term_or_all().annotate(lessons_count=Count("lessons")).filter(
-            lessons_count__gt=0
+        self.fields["group"].queryset = (
+            Group.objects.for_current_school_term_or_all()
+            .annotate(lessons_count=Count("lessons"))
+            .filter(lessons_count__gt=0)
         )
 
 
@@ -123,4 +128,12 @@ class ExtraMarkForm(forms.ModelForm):
 
     class Meta:
         model = ExtraMark
+        fields = ["short_name", "name"]
+
+
+class ExcuseTypeForm(forms.ModelForm):
+    layout = Layout("short_name", "name")
+
+    class Meta:
+        model = ExcuseType
         fields = ["short_name", "name"]

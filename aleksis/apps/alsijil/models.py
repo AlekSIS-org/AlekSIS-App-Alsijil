@@ -8,6 +8,30 @@ def isidentifier(value: str) -> bool:
     return value.isidentifier()
 
 
+class ExcuseType(ExtensibleModel):
+    """An type of excuse.
+
+    Can be used to count different types of absences separately.
+    """
+
+    short_name = models.CharField(
+        max_length=255, unique=True, verbose_name=_("Short name")
+    )
+    name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
+
+    def __str__(self):
+        return f"{self.name} ({self.short_name})"
+
+    @property
+    def count_label(self):
+        return f"{self.short_name}_count"
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("Excuse type")
+        verbose_name_plural = _("Excuse types")
+
+
 class PersonalNote(ExtensibleModel):
     """A personal note about a single person.
 
@@ -27,12 +51,24 @@ class PersonalNote(ExtensibleModel):
     absent = models.BooleanField(default=False)
     late = models.IntegerField(default=0)
     excused = models.BooleanField(default=False)
+    excuse_type = models.ForeignKey(
+        ExcuseType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Excuse type"),
+    )
 
     remarks = models.CharField(max_length=200, blank=True)
 
     extra_marks = models.ManyToManyField(
         "ExtraMark", null=True, blank=True, verbose_name=_("Extra marks")
     )
+
+    def save(self, *args, **kwargs):
+        if self.excuse_type:
+            self.excused = True
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Personal note")

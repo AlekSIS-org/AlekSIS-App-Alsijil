@@ -21,6 +21,7 @@ from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 
 from .forms import (
+    ExcuseTypeForm,
     ExtraMarkForm,
     LessonDocumentationForm,
     PersonalNoteFilterForm,
@@ -28,8 +29,8 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExtraMark, LessonDocumentation, PersonalNoteFilter
-from .tables import ExtraMarkTable, PersonalNoteFilterTable
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNoteFilter
+from .tables import ExcuseTypeTable, ExtraMarkTable, PersonalNoteFilterTable
 
 
 def lesson(
@@ -103,6 +104,8 @@ def lesson(
         if lesson_documentation_form.is_valid():
             lesson_documentation_form.save()
 
+            messages.success(request, _("The lesson documentation has been saved."))
+
         if personal_note_formset.is_valid():
             instances = personal_note_formset.save()
 
@@ -113,7 +116,15 @@ def lesson(
                     lesson_period.period.period + 1,
                     instance.absent,
                     instance.excused,
+                    instance.excuse_type,
                 )
+
+            messages.success(request, _("The personal notes have been saved."))
+
+            # Regenerate form here to ensure that programmatically changed data will be shown correctly
+            personal_note_formset = PersonalNoteFormSet(
+                None, queryset=persons_qs, prefix="personal_notes"
+            )
 
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form
@@ -189,16 +200,25 @@ def week_view(
 
     if lesson_periods:
         # Aggregate all personal notes for this group and week
-        persons = (
-            Person.objects.filter(is_active=True)
-            .filter(member_of__lessons__lesson_periods__in=lesson_periods)
-            .distinct()
+        lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
+
+        persons_qs = Person.objects.filter(is_active=True)
+
+        if group:
+            persons_qs = persons_qs.filter(member_of=group)
+        else:
+            persons_qs = persons_qs.filter(
+                member_of__lessons__lesson_periods__in=lesson_periods_pk
+            )
+
+        persons_qs = (
+            persons_qs.distinct()
             .prefetch_related("personal_notes")
             .annotate(
                 absences_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                     ),
@@ -207,7 +227,7 @@ def week_view(
                 unexcused_count=Count(
                     "personal_notes",
                     filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
@@ -217,7 +237,7 @@ def week_view(
                 tardiness_sum=Subquery(
                     Person.objects.filter(
                         pk=OuterRef("pk"),
-                        personal_notes__lesson_period__in=lesson_periods,
+                        personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
                     )
                     .distinct()
@@ -228,12 +248,12 @@ def week_view(
         )
 
         for extra_mark in ExtraMark.objects.all():
-            persons = persons.annotate(
+            persons_qs = persons_qs.annotate(
                 **{
                     extra_mark.count_label: Count(
                         "personal_notes",
                         filter=Q(
-                            personal_notes__lesson_period__in=lesson_periods,
+                            personal_notes__lesson_period__in=lesson_periods_pk,
                             personal_notes__week=wanted_week.week,
                             personal_notes__extra_marks=extra_mark,
                         ),
@@ -242,6 +262,16 @@ def week_view(
                 }
             )
 
+        persons = []
+        for person in persons_qs:
+            persons.append(
+                {
+                    "person": person,
+                    "personal_notes": person.personal_notes.filter(
+                        week=wanted_week.week, lesson_period__in=lesson_periods_pk
+                    ),
+                }
+            )
     else:
         persons = None
 
@@ -325,6 +355,14 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         absences_count=Count(
             "personal_notes__absent", filter=Q(personal_notes__absent=True)
         ),
+        excused=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=True,
+                personal_notes__excuse_type__isnull=True,
+            ),
+        ),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
@@ -337,6 +375,19 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             **{
                 extra_mark.count_label: Count(
                     "personal_notes", filter=Q(personal_notes__extra_marks=extra_mark,),
+                )
+            }
+        )
+
+    for excuse_type in ExcuseType.objects.all():
+        persons = persons.annotate(
+            **{
+                excuse_type.count_label: Count(
+                    "personal_notes__absent",
+                    filter=Q(
+                        personal_notes__absent=True,
+                        personal_notes__excuse_type=excuse_type,
+                    ),
                 )
             }
         )
@@ -356,9 +407,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
-    context["extra_marks"] = ExtraMark.objects.all()
+    context["school_term"] = current_school_term
     context["persons"] = persons
     context["personal_note_filters"] = personal_note_filters
+    context["excuse_types"] = ExcuseType.objects.all()
+    context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
@@ -490,3 +543,44 @@ class ExtraMarkDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionM
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been deleted.")
+
+
+class ExcuseTypeListView(SingleTableView, PermissionRequiredMixin):
+    """Table of all excuse types."""
+
+    model = ExcuseType
+    table_class = ExcuseTypeTable
+    permission_required = "core.view_excusetype"
+    template_name = "alsijil/excuse_type/list.html"
+
+
+class ExcuseTypeCreateView(AdvancedCreateView, PermissionRequiredMixin):
+    """Create view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.create_excusetype"
+    template_name = "alsijil/excuse_type/create.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been created.")
+
+
+class ExcuseTypeEditView(AdvancedEditView, PermissionRequiredMixin):
+    """Edit view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.edit_excusetype"
+    template_name = "alsijil/excuse_type/edit.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been saved.")
+
+
+class ExcuseTypeDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+    """Delete view for excuse types"""
+
+    model = ExcuseType
+    permission_required = "core.delete_excusetype"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been deleted.")
