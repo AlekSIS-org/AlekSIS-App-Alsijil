@@ -341,6 +341,7 @@
               </td>
               <td class="lesson-homework">{{ documentations.0.homework }}</td>
               <td class="lesson-notes">
+                {{ documentations.0.group_note }}
                 {% for note in notes %}
                   {% if note.absent %}
                     <span class="lesson-note-absent">
