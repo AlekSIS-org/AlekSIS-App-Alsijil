@@ -16,25 +16,45 @@ MENUS = {
                     "name": _("Current lesson"),
                     "url": "lesson",
                     "icon": "alarm",
-                    "validators": ["menu_generator.validators.is_authenticated"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_lesson_menu",
+                        ),
+                    ],
                 },
                 {
                     "name": _("Current week"),
                     "url": "week_view",
                     "icon": "view_week",
-                    "validators": ["menu_generator.validators.is_authenticated"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_week_menu",
+                        ),
+                    ],
                 },
                 {
                     "name": _("Register absence"),
                     "url": "register_absence",
                     "icon": "rate_review",
-                    "validators": ["menu_generator.validators.is_superuser"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_register_absence",
+                        ),
+                    ],
                 },
                 {
                     "name": _("Personal note filters"),
                     "url": "list_personal_note_filters",
                     "icon": "filter_list",
-                    "validators": ["menu_generator.validators.is_superuser"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_personal_note_filters",
+                        ),
+                    ],
                 },
             ],
         }
