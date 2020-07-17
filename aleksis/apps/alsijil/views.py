@@ -396,7 +396,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
-    register_absence_form = RegisterAbsenceForm(request.POST or None)
+    register_absence_form = RegisterAbsenceForm(request.POST or None, request=request)
 
     if request.method == "POST":
         if register_absence_form.is_valid():

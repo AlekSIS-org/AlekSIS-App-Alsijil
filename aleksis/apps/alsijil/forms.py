@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django_select2.forms import Select2Widget
 from material import Layout, Row
 
+from aleksis.core.util.core_helpers import queryset_rules_filter
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
@@ -107,6 +108,12 @@ class RegisterAbsenceForm(forms.Form):
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
     excused = forms.BooleanField(label=_("Excused"), initial=True, required=False)
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+        self.fields["person"].queryset = queryset_rules_filter(self.request, Person.objects.all(),
+                                                               "core.register_absence")
 
 
 class PersonalNoteFilterForm(forms.ModelForm):
