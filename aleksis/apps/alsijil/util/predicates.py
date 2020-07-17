@@ -71,7 +71,6 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     return obj.member_of.filter(owners=user.person).exists()
 
 
-@predicate
 def has_person_group_object_perm(perm: str):
     """Predicate builder for permissions on a set of member groups.
 
