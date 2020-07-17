@@ -16,7 +16,9 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a teacher
     in the lesson linked to the given LessonPeriod.
     """
-    return user.person in obj.lesson.teachers.all()
+    if hasattr(obj, "lesson"):
+        return user.person in obj.lesson.teachers.all()
+    return True
 
 
 @predicate
@@ -26,7 +28,9 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a member in
     the groups linked to the given LessonPeriod.
     """
-    return obj.lesson.groups.filter(members=user.person).exists()
+    if hasattr(obj, "lesson"):
+        return obj.lesson.groups.filter(members=user.person).exists()
+    return True
 
 
 @predicate
@@ -37,7 +41,9 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is the owner of
     any parent groups of any groups of the given LessonPeriods lesson.
     """
-    return obj.lesson.groups.filter(parent_groups__owners=user.person).exists()
+    if hasattr(obj, "lesson"):
+        return obj.lesson.groups.filter(parent_groups__owners=user.person).exists()
+    return True
 
 
 @predicate
@@ -106,9 +112,11 @@ def has_lesson_group_object_perm(perm: str):
 
     @predicate(name)
     def fn(user: User, obj: LessonPeriod) -> bool:
-        for group in obj.lesson.groups.all():
-            if check_object_permission(user, perm, group):
-                return True
-        return False
+        if hasattr(obj, "lesson"):
+            for group in obj.lesson.groups.all():
+                if check_object_permission(user, perm, group):
+                    return True
+            return False
+        return True
 
     return fn
