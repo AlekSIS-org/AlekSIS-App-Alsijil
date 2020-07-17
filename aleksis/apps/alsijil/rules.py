@@ -122,14 +122,14 @@ add_perm("alsijil.view_personal_note_filters", view_personal_note_filters_predic
 
 # Edit personal note filter
 edit_personal_note_filter_predicate = has_person & (
-    has_global_perm("alsijil.change_personal_note_filter")
-    | has_object_perm("alsijil.change_personal_note_filter")
+    has_global_perm("alsijil.change_personalnotefilter")
+    | has_object_perm("alsijil.change_personalnotefilter")
 )
 add_perm("alsijil.edit_personal_note_filter", edit_personal_note_filter_predicate)
 
 # Delete personal note filter
 delete_personal_note_filter_predicate = has_person & (
-    has_global_perm("alsijil.delete_personal_note_filter")
-    | has_object_perm("alsijil.delete_personal_note_filter")
+    has_global_perm("alsijil.delete_personalnotefilter")
+    | has_object_perm("alsijil.delete_personalnotefilter")
 )
 add_perm("alsijil.delete_personal_note_filter", delete_personal_note_filter_predicate)
