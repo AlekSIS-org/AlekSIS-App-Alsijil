@@ -68,7 +68,7 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     Checks whether the person linked to the user is
     the owner of any group of the given person.
     """
-    return obj.filter(member_of__owners=user.person).exists()
+    return obj.member_of.filter(owners=user.person).exists()
 
 
 @predicate
