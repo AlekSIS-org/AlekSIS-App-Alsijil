@@ -24,13 +24,12 @@ from .forms import (
     ExcuseTypeForm,
     ExtraMarkForm,
     LessonDocumentationForm,
-    PersonalNoteFilterForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNoteFilter
-from .tables import ExcuseTypeTable, ExtraMarkTable, PersonalNoteFilterTable
+from .models import ExcuseType, ExtraMark, LessonDocumentation
+from .tables import ExcuseTypeTable, ExtraMarkTable
 
 
 def lesson(
@@ -392,24 +391,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
-    # FIXME Move to manager
-    personal_note_filters = PersonalNoteFilter.objects.all()
-    for personal_note_filter in personal_note_filters:
-        persons = persons.annotate(
-            **{
-                "_personal_notes_with_%s"
-                % personal_note_filter.identifier: Count(
-                    "personal_notes__remarks",
-                    filter=Q(
-                        personal_notes__remarks__iregex=personal_note_filter.regex
-                    ),
-                )
-            }
-        )
-
     context["school_term"] = current_school_term
     context["persons"] = persons
-    context["personal_note_filters"] = personal_note_filters
     context["excuse_types"] = ExcuseType.objects.all()
     context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
@@ -449,59 +432,6 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     context["register_absence_form"] = register_absence_form
 
     return render(request, "alsijil/absences/register.html", context)
-
-
-def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
-    context = {}
-
-    personal_note_filters = PersonalNoteFilter.objects.all()
-
-    # Prepare table
-    personal_note_filters_table = PersonalNoteFilterTable(personal_note_filters)
-    RequestConfig(request).configure(personal_note_filters_table)
-
-    context["personal_note_filters_table"] = personal_note_filters_table
-
-    return render(request, "alsijil/personal_note_filter/list.html", context)
-
-
-def edit_personal_note_filter(
-    request: HttpRequest, id_: Optional["int"] = None
-) -> HttpResponse:
-    context = {}
-
-    if id_:
-        personal_note_filter = PersonalNoteFilter.objects.get(id=id_)
-        context["personal_note_filter"] = personal_note_filter
-        personal_note_filter_form = PersonalNoteFilterForm(
-            request.POST or None, instance=personal_note_filter
-        )
-    else:
-        personal_note_filter_form = PersonalNoteFilterForm(request.POST or None)
-
-    if request.method == "POST":
-        if personal_note_filter_form.is_valid():
-            personal_note_filter_form.save(commit=True)
-
-            messages.success(request, _("The filter has been saved"))
-            return redirect("list_personal_note_filters")
-
-    context["personal_note_filter_form"] = personal_note_filter_form
-
-    return render(request, "alsijil/personal_note_filter/manage.html", context)
-
-
-def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
-    context = {}
-
-    personal_note_filter = get_object_or_404(PersonalNoteFilter, pk=id_)
-
-    PersonalNoteFilter.objects.filter(pk=id_).delete()
-
-    messages.success(request, _("The filter has been deleted."))
-
-    context["personal_note_filter"] = personal_note_filter
-    return redirect("list_personal_note_filters")
 
 
 class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):

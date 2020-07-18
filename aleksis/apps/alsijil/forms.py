@@ -11,13 +11,7 @@ from material import Layout, Row
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
-from .models import (
-    ExcuseType,
-    ExtraMark,
-    LessonDocumentation,
-    PersonalNote,
-    PersonalNoteFilter,
-)
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -113,14 +107,6 @@ class RegisterAbsenceForm(forms.Form):
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
     excused = forms.BooleanField(label=_("Excused"), initial=True, required=False)
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
-
-
-class PersonalNoteFilterForm(forms.ModelForm):
-    layout = Layout(Row("identifier", "description"), Row("regex"))
-
-    class Meta:
-        model = PersonalNoteFilter
-        fields = ["identifier", "description", "regex"]
 
 
 class ExtraMarkForm(forms.ModelForm):

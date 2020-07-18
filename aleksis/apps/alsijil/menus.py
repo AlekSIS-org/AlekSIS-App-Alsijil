@@ -31,12 +31,6 @@ MENUS = {
                     "validators": ["menu_generator.validators.is_superuser"],
                 },
                 {
-                    "name": _("Personal note filters"),
-                    "url": "list_personal_note_filters",
-                    "icon": "filter_list",
-                    "validators": ["menu_generator.validators.is_superuser"],
-                },
-                {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",

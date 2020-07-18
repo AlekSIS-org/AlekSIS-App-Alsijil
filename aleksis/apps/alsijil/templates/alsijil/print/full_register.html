@@ -263,29 +263,6 @@
       </tr>
     </table>
 
-    {% if personal_note_filters %}
-      <h5>{% trans 'Statistics on remarks' %}</h5>
-      <table>
-        <thead>
-        <tr>
-          <th>{% trans 'Description' %}</th>
-          <th>{% trans 'Count' %}</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for note_filter in personal_note_filters %}
-          <tr>
-            <td>{{ note_filter.description }}</td>
-            {% with "_personal_notes_with_"|add:note_filter.identifier as identifier %}
-              <td>{{ person|get_dict:identifier }}</td>
-            {% endwith %}
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    {% endif %}
-
     <h5>{% trans 'Absences and tardiness' %}</h5>
     <table>
       <tr>
