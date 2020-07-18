@@ -14,6 +14,8 @@
 
   <div class="center-align">
     <h1>{% trans 'Class register' %}</h1>
+    <h5>{{ school_term }}</h5>
+    <p>({{ school_term.date_start }}–{{ school_term.date_end }})</p>
     {% static "img/aleksis-banner.svg" as aleksis_banner %}
     <img src="{% firstof request.site.preferences.theme__logo.url aleksis_banner %}"
          alt="{{ request.site.preferences.general__title }} – Logo" class="max-size-600 center">
@@ -64,6 +66,40 @@
 
   <div class="page-break">&nbsp;</div>
 
+  <h4>{% trans "Abbreviations" %}</h4>
+
+  <h5>{% trans "General" %}</h5>
+
+  <ul class="collection">
+    <li class="collection-item">
+      <strong>(a)</strong> {% trans "Absent" %}
+    </li>
+    <li class="collection-item">
+      <strong>(b)</strong> {% trans "Late" %}
+    </li>
+    <li class="collection-item">
+      <strong>(u)</strong> {% trans "Unexcused" %}
+    </li>
+    <li class="collection-item">
+      <strong>(e)</strong> {% trans "Excused" %}
+    </li>
+  </ul>
+
+  {% if excuse_types %}
+    <h5>{% trans "Custom excuse types" %}</h5>
+
+    <ul class="collection">
+      {% for excuse_type in excuse_types %}
+        <li class="collection-item">
+          <strong>({{ excuse_type.short_name }})</strong> {{ excuse_type.name }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <div class="page-break">&nbsp;</div>
+
+
   <h4>{% trans 'Persons in group' %} {{ group.name }}</h4>
 
   <table id="persons">
@@ -74,9 +110,13 @@
       <th>{% trans 'First name' %}</th>
       <th>{% trans 'Sex' %}</th>
       <th>{% trans 'Date of birth' %}</th>
-      <th>{% trans 'Absences' %}</th>
-      <th>{% trans 'Unexcused' %}</th>
-      <th>{% trans 'Tard.' %}</th>
+      <th>{% trans '(a)' %}</th>
+      <th>{% trans "(e)" %}</th>
+      {% for excuse_type in excuse_types %}
+        <th>({{ excuse_type.short_name }})</th>
+      {% endfor %}
+      <th>{% trans '(u)' %}</th>
+      <th>{% trans '(b)' %}</th>
     </tr>
     </thead>
 
@@ -89,6 +129,10 @@
         <td>{{ person.get_sex_display }}</td>
         <td>{{ person.date_of_birth }}</td>
         <td>{{ person.absences_count }}</td>
+        <td>{{ person.excused }}</td>
+        {% for excuse_type in excuse_types %}
+          <td>{{ person|get_dict:excuse_type.count_label }}</td>
+        {% endfor %}
         <td>{{ person.unexcused }}</td>
         <td>{{ person.tardiness }}'</td>
       </tr>
@@ -117,8 +161,8 @@
         <tr>
           <td>{{ lesson.subject.name }}</td>
           <td>{{ lesson.teachers.all|join:', ' }}</td>
-          <td>{{ lesson.date_start }}</td>
-          <td>{{ lesson.date_end }}</td>
+          <td>{{ lesson.validity.date_start }}</td>
+          <td>{{ lesson.validity.date_end }}</td>
           <td>{{ lesson.lesson_periods.count }}</td>
         </tr>
       {% endfor %}
@@ -150,8 +194,8 @@
             <td>{{ child_group.name }}</td>
             <td>{{ lesson.subject.name }}</td>
             <td>{{ lesson.teachers.all|join:', ' }}</td>
-            <td>{{ lesson.date_start }}</td>
-            <td>{{ lesson.date_end }}</td>
+            <td>{{ lesson.validity.date_start }}</td>
+            <td>{{ lesson.validity.date_end }}</td>
             <td>{{ lesson.lesson_periods.count }}</td>
           </tr>
         {% endfor %}
@@ -226,21 +270,28 @@
 
     <h5>{% trans 'Absences and tardiness' %}</h5>
     <table>
-      <thead>
       <tr>
-        <th>{% trans 'Absences' %}</th>
-        <th>{% trans 'Unexcused' %}</th>
-        <th>{% trans 'Tardiness' %}</th>
-      </tr>
-      </thead>
-
-      <tbody>
-      <tr>
+        <th colspan="2">{% trans 'Absences' %}</th>
         <td>{{ person.absences_count }}</td>
+      </tr>
+      <tr>
+        <td rowspan="{{ excuse_types.count|add:2 }}" style="width: 16mm;"
+            class="rotate small-print">{% trans "thereof" %}</td>
+        <th>{% trans 'Excused' %}</th>
+        <td>{{ person.excused }}</td>
+      </tr>
+      {% for excuse_type in excuse_types %}
+        <th>{{ excuse_type.name }}</th>
+        <td>{{ person|get_dict:excuse_type.count_label }}</td>
+      {% endfor %}
+      <tr>
+        <th>{% trans 'Unexcused' %}</th>
         <td>{{ person.unexcused }}</td>
+      </tr>
+      <tr>
+        <th colspan="2">{% trans 'Tardiness' %}</th>
         <td>{{ person.tardiness }}'</td>
       </tr>
-      </tbody>
     </table>
 
     <h5>{% trans 'Relevant personal notes' %}</h5>
@@ -269,8 +320,12 @@
             <td>
               {% if note.absent %}
                 {% trans 'Yes' %}
-                {% if note.escused %}
-                  ({% trans 'e' %})
+                {% if note.excused %}
+                  {% if note.excuse_type %}
+                    ({{ note.excuse_type.short_name }})
+                  {% else %}
+                    ({% trans 'e' %})
+                  {% endif %}
                 {% endif %}
               {% endif %}
             </td>
@@ -347,8 +402,12 @@
                       {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
                       {% if note.excused %}
                         <span class="lesson-note-excused">
-                               ({% trans 'e' %})
-                              </span>
+                          {% if note.excuse_type %}
+                            ({{ note.excuse_type.short_name }})
+                          {% else %}
+                            ({% trans 'e' %})
+                          {% endif %}
+                        </span>
                       {% endif %}
                       </span>
                   {% endif %}
@@ -358,8 +417,12 @@
                       ({{ note.late }}′)
                       {% if note.excused %}
                         <span class="lesson-note-excused">
-                               ({% trans 'e' %})
-                              </span>
+                          {% if note.excuse_type %}
+                            ({{ note.excuse_type.short_name }})
+                          {% else %}
+                            ({% trans 'e' %})
+                          {% endif %}
+                        </span>
                       {% endif %}
                       </span>
                   {% endif %}

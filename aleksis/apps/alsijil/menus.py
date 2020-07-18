@@ -36,6 +36,12 @@ MENUS = {
                     "icon": "filter_list",
                     "validators": ["menu_generator.validators.is_superuser"],
                 },
+                {
+                    "name": _("Excuse types"),
+                    "url": "excuse_types",
+                    "icon": "label",
+                    "validators": ["menu_generator.validators.is_superuser"],
+                },
             ],
         }
     ]

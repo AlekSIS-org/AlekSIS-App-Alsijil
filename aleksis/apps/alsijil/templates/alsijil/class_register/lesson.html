@@ -133,9 +133,9 @@
         <div class="col s12">
           <div class="card">
             <div class="card-content">
-              <span class="card-title">
-                {% blocktrans %}Personal notes{% endblocktrans %}
-              </span>
+      <span class="card-title">
+        {% blocktrans %}Personal notes{% endblocktrans %}
+      </span>
               {% form form=personal_note_formset.management_form %}{% endform %}
 
               <table class="striped responsive-table alsijil-table">
@@ -145,9 +145,12 @@
                   <th>{% blocktrans %}Absent{% endblocktrans %}</th>
                   <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                   <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
                   <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
                 </tr>
                 </thead>
+                <tbody>
+                {% for form in personal_note_formset %}
                 <tbody>
                 {% for form in personal_note_formset %}
                   <tr>
@@ -172,6 +175,14 @@
                         {{ form.excused }}
                         <span></span>
                       </label>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.excuse_type }}
+                        <label for="{{ form.excuse_type.id_for_label }}">
+                          {% trans "Excuse type" %}
+                        </label>
+                      </div>
                     </td>
                     <td>
                       <div class="input-field">
