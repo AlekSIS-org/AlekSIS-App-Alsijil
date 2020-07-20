@@ -88,15 +88,15 @@
               {% blocktrans %}Personal notes{% endblocktrans %}
             </span>
             {% for person in persons %}
-              <h5 class="card-title">{{ person.full_name }}</h5>
+              <h5 class="card-title">{{ person.person.full_name }}</h5>
               <p class="card-text">
-                {% trans "Absent" %}: {{ person.absences_count }}
-                ({{ person.unexcused_count }} {% trans "unexcused" %})
+                {% trans "Absent" %}: {{ person.person.absences_count }}
+                ({{ person.person.unexcused_count }} {% trans "unexcused" %})
               </p>
               <p class="card-text">
-                {% trans "Summed up tardiness" %}: {{ person.tardiness_sum }}'
+                {% trans "Summed up tardiness" %}: {{ person.person.tardiness_sum }}'
               </p>
-              {% for note in person.personal_notes|only_week:week %}
+              {% for note in person.personal_notes %}
                 {% if note.remarks %}
                   <blockquote>
                     {{ note.remarks }}
@@ -118,11 +118,11 @@
     <div class="card red darken-1">
       <div class="card-content white-text">
         <span class="card-title">
-          {% blocktrans %}No group selected{% endblocktrans %}
+          {% blocktrans %}No lessons available{% endblocktrans %}
         </span>
         <p>
           {% blocktrans %}
-            There are no lessons for the selected group, teacher or time.
+            There are no lessons for the selected group or teacher in this week.
           {% endblocktrans %}
         </p>
       </div>

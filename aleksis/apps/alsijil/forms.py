@@ -11,13 +11,13 @@ from material import Layout, Row
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
-from .models import LessonDocumentation, PersonalNote, PersonalNoteFilter
+from .models import ExcuseType, LessonDocumentation, PersonalNote, PersonalNoteFilter
 
 
 class LessonDocumentationForm(forms.ModelForm):
     class Meta:
         model = LessonDocumentation
-        fields = ["topic", "homework"]
+        fields = ["topic", "homework", "group_note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,7 +28,7 @@ class LessonDocumentationForm(forms.ModelForm):
 class PersonalNoteForm(forms.ModelForm):
     class Meta:
         model = PersonalNote
-        fields = ["absent", "late", "excused", "remarks"]
+        fields = ["absent", "late", "excused", "excuse_type", "remarks"]
 
     person_name = forms.CharField(disabled=True)
 
@@ -47,12 +47,7 @@ class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
 
     group = forms.ModelChoiceField(
-        queryset=Group.objects.annotate(lessons_count=Count("lessons")).filter(
-            lessons_count__gt=0
-        ),
-        label=_("Group"),
-        required=False,
-        widget=Select2Widget,
+        queryset=None, label=_("Group"), required=False, widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
         queryset=Person.objects.annotate(
@@ -80,6 +75,14 @@ class SelectForm(forms.Form):
         data["type_"] = type_
         data["instance"] = instance
         return data
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["group"].queryset = (
+            Group.objects.for_current_school_term_or_all()
+            .annotate(lessons_count=Count("lessons"))
+            .filter(lessons_count__gt=0)
+        )
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
@@ -112,3 +115,11 @@ class PersonalNoteFilterForm(forms.ModelForm):
     class Meta:
         model = PersonalNoteFilter
         fields = ["identifier", "description", "regex"]
+
+
+class ExcuseTypeForm(forms.ModelForm):
+    layout = Layout("short_name", "name")
+
+    class Meta:
+        model = ExcuseType
+        fields = ["short_name", "name"]

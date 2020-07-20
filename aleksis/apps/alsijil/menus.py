@@ -56,6 +56,12 @@ MENUS = {
                         ),
                     ],
                 },
+                {
+                    "name": _("Excuse types"),
+                    "url": "excuse_types",
+                    "icon": "label",
+                    "validators": ["menu_generator.validators.is_superuser"],
+                },
             ],
         }
     ]

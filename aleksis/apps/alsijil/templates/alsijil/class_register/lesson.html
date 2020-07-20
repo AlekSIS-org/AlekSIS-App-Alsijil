@@ -1,6 +1,7 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers material_form i18n static rules %}
+{% load week_helpers %}
+{% load material_form i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -61,6 +62,7 @@
       </div>
     </div>
     {% csrf_token %}
+
     <div class="row">
       <div class="col s12 m12 l6 xl8">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
@@ -87,6 +89,13 @@
                       <tr>
                         <th class="collection-item">{% trans "Homework for this lesson:" %}</th>
                         <td>{{ prev_doc.homework }}</td>
+                      </tr>
+                    {% endif %}
+
+                    {% if prev_doc.group_note %}
+                      <tr>
+                        <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
+                        <td>{{ prev_doc.group_note }}</td>
                       </tr>
                     {% endif %}
 
@@ -172,6 +181,7 @@
                 <th>{% blocktrans %}Absent{% endblocktrans %}</th>
                 <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                 <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
                 <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
               </tr>
               </thead>
@@ -203,22 +213,31 @@
                     </td>
                     <td>
                       <div class="input-field">
+                        {{ form.excuse_type }}
+                        <label for="{{ form.excuse_type.id_for_label }}">
+                          {% trans "Excuse type" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-field">
                         {{ form.remarks }}
                         <label for="{{ form.absent.id_for_label }}">
                           {% trans "Remarks" %}
                         </label>
                       </div>
                     </td>
-                    </tr>
-                  {% else %}
-                    <tr>
-                      <td>{{ form.person_name.value }}</td>
-                      <td>{{ form.absent.value }}</td>
-                      <td>{{ form.late.value }}</td>
-                      <td>{{ form.excused.value }}</td>
-                      <td>{{ form.remarks.value }}</td>
-                    </tr>
-                  {% endif %}
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td>{{ form.person_name.value }}</td>
+                    <td>{{ form.absent.value }}</td>
+                    <td>{{ form.late.value }}</td>
+                    <td>{{ form.excused.value }}</td>
+                    <td>{{ form.excuse_type.value }}</td>
+                    <td>{{ form.remarks.value }}</td>
+                  </tr>
+                {% endif %}
               {% endfor %}
               </tbody>
             </table>

@@ -2,31 +2,36 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
 from rules.contrib.views import permission_required
+from reversion.views import RevisionMixin
+from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import objectgetter_optional
 
 from .forms import (
+    ExcuseTypeForm,
     LessonDocumentationForm,
     PersonalNoteFilterForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import LessonDocumentation, PersonalNoteFilter
-from .tables import PersonalNoteFilterTable
+from .models import ExcuseType, LessonDocumentation, PersonalNoteFilter
+from .tables import ExcuseTypeTable, PersonalNoteFilterTable
 from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
 
 
@@ -66,8 +71,7 @@ def lesson(
 
     if (
         datetime.combine(
-            wanted_week[lesson_period.period.weekday],
-            lesson_period.period.time_start,
+            wanted_week[lesson_period.period.weekday], lesson_period.period.time_start,
         )
         > datetime.now()
         and not request.user.is_superuser
@@ -105,6 +109,8 @@ def lesson(
         ):
             lesson_documentation_form.save()
 
+            messages.success(request, _("The lesson documentation has been saved."))
+
         if personal_note_formset.is_valid() and request.user.has_perm(
             "alsijil.edit_personalnote", lesson_period
         ):
@@ -117,7 +123,15 @@ def lesson(
                     lesson_period.period.period + 1,
                     instance.absent,
                     instance.excused,
+                    instance.excuse_type,
                 )
+
+            messages.success(request, _("The personal notes have been saved."))
+
+            # Regenerate form here to ensure that programmatically changed data will be shown correctly
+            personal_note_formset = PersonalNoteFormSet(
+                None, queryset=persons_qs, prefix="personal_notes"
+            )
 
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form
@@ -196,14 +210,19 @@ def week_view(
         # Aggregate all personal notes for this group and week
         lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
 
-        persons = Person.objects.filter(is_active=True)
+        persons_qs = Person.objects.filter(is_active=True)
 
         if not request.user.has_perm("alsijil.view_week_personalnote", instance):
-            persons = persons.filter(pk=request.user.pk)
+            persons_qs = persons_qs.filter(pk=request.user.pk)
+        elif group:
+            persons_qs = persons_qs.filter(member_of=group)
+        else:
+            persons_qs = persons_qs.filter(
+                member_of__lessons__lesson_periods__in=lesson_periods_pk
+            )
 
-        persons = (
-            persons.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
-            .distinct()
+        persons_qs = (
+            persons_qs.distinct()
             .prefetch_related("personal_notes")
             .annotate(
                 absences_count=Count(
@@ -237,6 +256,17 @@ def week_view(
                 ),
             )
         )
+
+        persons = []
+        for person in persons_qs:
+            persons.append(
+                {
+                    "person": person,
+                    "personal_notes": person.personal_notes.filter(
+                        week=wanted_week.week, lesson_period__in=lesson_periods_pk
+                    ),
+                }
+            )
     else:
         persons = None
 
@@ -295,7 +325,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         for week in weeks:
             day = week[lesson_period.period.weekday]
 
-            if lesson_period.lesson.date_start <= day <= lesson_period.lesson.date_end:
+            if (
+                lesson_period.lesson.validity.date_start
+                <= day
+                <= lesson_period.lesson.validity.date_end
+            ):
                 documentations = list(
                     filter(
                         lambda d: d.week == week.week,
@@ -318,12 +352,33 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         absences_count=Count(
             "personal_notes__absent", filter=Q(personal_notes__absent=True)
         ),
+        excused=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=True,
+                personal_notes__excuse_type__isnull=True,
+            ),
+        ),
         unexcused=Count(
             "personal_notes__absent",
             filter=Q(personal_notes__absent=True, personal_notes__excused=False),
         ),
         tardiness=Sum("personal_notes__late"),
     )
+
+    for excuse_type in ExcuseType.objects.all():
+        persons = persons.annotate(
+            **{
+                excuse_type.count_label: Count(
+                    "personal_notes__absent",
+                    filter=Q(
+                        personal_notes__absent=True,
+                        personal_notes__excuse_type=excuse_type,
+                    ),
+                )
+            }
+        )
 
     # FIXME Move to manager
     personal_note_filters = PersonalNoteFilter.objects.all()
@@ -340,8 +395,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
+    context["school_term"] = current_school_term
     context["persons"] = persons
     context["personal_note_filters"] = personal_note_filters
+    context["excuse_types"] = ExcuseType.objects.all()
     context["group"] = group
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
@@ -408,8 +465,8 @@ def edit_personal_note_filter(
 ) -> HttpResponse:
     context = {}
 
-    if id:
-        personal_note_filter = PersonalNoteFilter.objects.get(id=id)
+    if id_:
+        personal_note_filter = PersonalNoteFilter.objects.get(id=id_)
         context["personal_note_filter"] = personal_note_filter
         personal_note_filter_form = PersonalNoteFilterForm(
             request.POST or None, instance=personal_note_filter
@@ -444,3 +501,44 @@ def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
 
     context["personal_note_filter"] = personal_note_filter
     return redirect("list_personal_note_filters")
+
+
+class ExcuseTypeListView(SingleTableView, PermissionRequiredMixin):
+    """Table of all excuse types."""
+
+    model = ExcuseType
+    table_class = ExcuseTypeTable
+    permission_required = "core.view_excusetype"
+    template_name = "alsijil/excuse_type/list.html"
+
+
+class ExcuseTypeCreateView(AdvancedCreateView, PermissionRequiredMixin):
+    """Create view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.create_excusetype"
+    template_name = "alsijil/excuse_type/create.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been created.")
+
+
+class ExcuseTypeEditView(AdvancedEditView, PermissionRequiredMixin):
+    """Edit view for excuse types."""
+
+    model = ExcuseType
+    form_class = ExcuseTypeForm
+    permission_required = "core.edit_excusetype"
+    template_name = "alsijil/excuse_type/edit.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been saved.")
+
+
+class ExcuseTypeDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+    """Delete view for excuse types"""
+
+    model = ExcuseType
+    permission_required = "core.delete_excusetype"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("excuse_types")
+    success_message = _("The excuse type has been deleted.")
