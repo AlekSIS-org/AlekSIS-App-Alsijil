@@ -133,3 +133,19 @@ delete_personal_note_filter_predicate = has_person & (
     | has_object_perm("alsijil.delete_personalnotefilter")
 )
 add_perm("alsijil.delete_personal_note_filter", delete_personal_note_filter_predicate)
+
+# View excuse type list
+view_excusetypes_predicate = has_person & has_global_perm("alsijil.view_excusetype")
+add_perm("alsijil.view_excusetypes", view_excusetypes_predicate)
+
+# Add excuse type
+add_excusetype_predicate = has_person & has_global_perm("alsijil.add_excusetype")
+add_perm("alsijil.add_excusetype", add_excusetype_predicate)
+
+# Edit excuse type
+edit_excusetype_predicate = has_person & has_global_perm("alsijil.change_excusetype")
+add_perm("alsijil.edit_excusetype", edit_excusetype_predicate)
+
+# Delete excuse type
+delete_excusetype_predicate = has_person & has_global_perm("alsijil.delete_excusetype")
+add_perm("alsijil.delete_excusetype", delete_excusetype_predicate)

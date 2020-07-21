@@ -60,7 +60,12 @@ MENUS = {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",
-                    "validators": ["menu_generator.validators.is_superuser"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_excusetypes",
+                        ),
+                    ],
                 },
             ],
         }

@@ -503,42 +503,42 @@ def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
     return redirect("list_personal_note_filters")
 
 
-class ExcuseTypeListView(SingleTableView, PermissionRequiredMixin):
+class ExcuseTypeListView(PermissionRequiredMixin, SingleTableView):
     """Table of all excuse types."""
 
     model = ExcuseType
     table_class = ExcuseTypeTable
-    permission_required = "core.view_excusetype"
+    permission_required = "alsijil.view_excusetype"
     template_name = "alsijil/excuse_type/list.html"
 
 
-class ExcuseTypeCreateView(AdvancedCreateView, PermissionRequiredMixin):
+class ExcuseTypeCreateView(PermissionRequiredMixin, AdvancedCreateView):
     """Create view for excuse types."""
 
     model = ExcuseType
     form_class = ExcuseTypeForm
-    permission_required = "core.create_excusetype"
+    permission_required = "alsijil.add_excusetype"
     template_name = "alsijil/excuse_type/create.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been created.")
 
 
-class ExcuseTypeEditView(AdvancedEditView, PermissionRequiredMixin):
+class ExcuseTypeEditView(PermissionRequiredMixin, AdvancedEditView):
     """Edit view for excuse types."""
 
     model = ExcuseType
     form_class = ExcuseTypeForm
-    permission_required = "core.edit_excusetype"
+    permission_required = "alsijil.edit_excusetype"
     template_name = "alsijil/excuse_type/edit.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been saved.")
 
 
-class ExcuseTypeDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
     """Delete view for excuse types"""
 
     model = ExcuseType
-    permission_required = "core.delete_excusetype"
+    permission_required = "alsijil.delete_excusetype"
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
