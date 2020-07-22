@@ -397,7 +397,7 @@
               <td class="lesson-homework">{{ documentations.0.homework }}</td>
               <td class="lesson-notes">
                 {% for note in notes %}
-                  {% if note.person in group.members.all %}
+                  {% if group in note.groups_of_person.all %}
                     {% if note.absent %}
                       <span class="lesson-note-absent">
                         {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
