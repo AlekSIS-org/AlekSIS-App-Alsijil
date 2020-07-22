@@ -14,10 +14,10 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     """Predicate for teachers of a lesson.
 
     Checks whether the person linked to the user is a teacher
-    in the lesson linked to the given LessonPeriod.
+    in the lesson or the substitution linked to the given LessonPeriod.
     """
     if hasattr(obj, "lesson"):
-        return user.person in obj.lesson.teachers.all()
+        return user.person in obj.lesson.teachers.all() or user.person in obj.substitutions.teachers.all()
     return True
 
 
