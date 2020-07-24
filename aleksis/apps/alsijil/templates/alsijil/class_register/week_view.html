@@ -11,6 +11,10 @@
 {% endblock %}
 
 {% block content %}
+  <script type="text/javascript" src="{% static "js/helper.js" %}"></script>
+  {{ week_select|json_script:"week_select" }}
+  {{ week_select|pprint }}
+  <script type="text/javascript" src="{% static "js/chronos/week_select.js" %}"></script>
   <div class="row">
     {% if group %}
       <div class="col s12 m2 push-m10 l1 push-l11">
@@ -30,7 +34,11 @@
     </div>
   </div>
 
-  <h4>{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
+
+  <div class="row">
+    <h4 class="col s12 m6">{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
+    {% include "chronos/partials/week_select.html" with wanted_week=week %}
+  </div>
 
   {% if lesson_periods %}
     <div class="row">
