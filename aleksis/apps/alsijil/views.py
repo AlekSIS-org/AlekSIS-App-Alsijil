@@ -16,6 +16,7 @@ from rules.contrib.views import PermissionRequiredMixin
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.apps.chronos.util.date import get_weeks_for_year
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
@@ -265,6 +266,7 @@ def week_view(
     )
 
     context["week"] = wanted_week
+    context["weeks"] = get_weeks_for_year(year=wanted_week.year)
     context["lesson_periods"] = lesson_periods
     context["persons"] = persons
     context["group"] = group
@@ -273,6 +275,10 @@ def week_view(
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
+    context["week_select"] = {
+        "year": wanted_week.year,
+        "dest": reverse("week_view", ),  # args=[wanted_week.year, wanted_week.week]),
+    }
     context["url_prev"] = "%s?%s" % (
         reverse("week_view_by_week", args=[week_prev.year, week_prev.week]),
         request.GET.urlencode(),
@@ -282,6 +288,7 @@ def week_view(
         request.GET.urlencode(),
     )
 
+    print("NICE")
     return render(request, "alsijil/class_register/week_view.html", context)
 
 
