@@ -10,7 +10,7 @@ urlpatterns = [
         name="lesson_by_week_and_period",
     ),
     path("week/", views.week_view, name="week_view"),
-    path("week/<int:year>/<int:week>", views.week_view, name="week_view_by_week"),
+    path("week/<int:year>/<int:week>/", views.week_view, name="week_view_by_week"),
     path("week/<str:type_>/<int:id_>/", views.week_view, name="week_view"),
     path(
         "week/<int:year>/<int:week>/<str:type_>/<int:id_>/",
