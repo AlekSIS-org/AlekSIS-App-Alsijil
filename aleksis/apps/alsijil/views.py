@@ -265,6 +265,11 @@ def week_view(
         lesson_periods, key=lambda x: (x.period.weekday, x.period.period)
     )
 
+    def append_if_all(iterable, *args):
+        if all(args):
+            for a in args:
+                iterable.append(a)
+
     context["week"] = wanted_week
     context["weeks"] = get_weeks_for_year(year=wanted_week.year)
     context["lesson_periods"] = lesson_periods
@@ -275,18 +280,24 @@ def week_view(
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
+    args_prev = [week_prev.year, week_prev.week]
+    args_next = [week_next.year, week_next.week]
+    args_dest = [wanted_week.year, wanted_week.week]
+    append_if_all(args_prev, type_, id_)
+    append_if_all(args_next, type_, id_)
+    append_if_all(args_dest, type_, id_)
+
     context["week_select"] = {
         "year": wanted_week.year,
-        "dest": reverse("week_view", ),  # args=[wanted_week.year, wanted_week.week]),
+        "dest": reverse("week_view_by_week", args=args_dest).replace(
+            str(wanted_week.year), "year"
+        ).replace(
+            str(wanted_week.week), "cw"
+        ),
     }
-    context["url_prev"] = "%s?%s" % (
-        reverse("week_view_by_week", args=[week_prev.year, week_prev.week]),
-        request.GET.urlencode(),
-    )
-    context["url_next"] = "%s?%s" % (
-        reverse("week_view_by_week", args=[week_next.year, week_next.week]),
-        request.GET.urlencode(),
-    )
+
+    context["url_prev"] = reverse("week_view_by_week", args=args_prev)
+    context["url_next"] = reverse("week_view_by_week", args=args_next)
 
     print("NICE")
     return render(request, "alsijil/class_register/week_view.html", context)
