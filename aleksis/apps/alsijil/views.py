@@ -299,7 +299,6 @@ def week_view(
     context["url_prev"] = reverse("week_view_by_week", args=args_prev)
     context["url_next"] = reverse("week_view_by_week", args=args_next)
 
-    print("NICE")
     return render(request, "alsijil/class_register/week_view.html", context)
 
 

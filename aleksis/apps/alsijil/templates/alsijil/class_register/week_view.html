@@ -13,7 +13,6 @@
 {% block content %}
   <script type="text/javascript" src="{% static "js/helper.js" %}"></script>
   {{ week_select|json_script:"week_select" }}
-  {{ week_select|pprint }}
   <script type="text/javascript" src="{% static "js/chronos/week_select.js" %}"></script>
   <div class="row">
     {% if group %}
