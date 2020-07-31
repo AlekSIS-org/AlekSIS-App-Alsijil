@@ -17,7 +17,7 @@ from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 class LessonDocumentationForm(forms.ModelForm):
     class Meta:
         model = LessonDocumentation
-        fields = ["topic", "homework"]
+        fields = ["topic", "homework", "group_note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

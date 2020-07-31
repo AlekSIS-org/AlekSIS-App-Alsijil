@@ -317,37 +317,39 @@
 
       <tbody>
       {% for note in person.personal_notes.all %}
-        {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
-          {% period_to_date note.week note.lesson_period.period as note_date %}
-          <tr>
-            <td>{{ note_date }}</td>
-            <td>{{ note.lesson_period.period.period }}</td>
-            <td>{{ note.lesson_period.get_subject.short_name }} </td>
-            <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
-            <td>
-              {% if note.absent %}
-                {% trans 'Yes' %}
-                {% if note.excused %}
-                  {% if note.excuse_type %}
-                    ({{ note.excuse_type.short_name }})
-                  {% else %}
-                    ({% trans 'e' %})
+        {% if note.lesson_period in lesson_periods %}
+          {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
+            {% period_to_date note.week note.lesson_period.period as note_date %}
+            <tr>
+              <td>{{ note_date }}</td>
+              <td>{{ note.lesson_period.period.period }}</td>
+              <td>{{ note.lesson_period.get_subject.short_name }} </td>
+              <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
+              <td>
+                {% if note.absent %}
+                  {% trans 'Yes' %}
+                  {% if note.excused %}
+                    {% if note.excuse_type %}
+                      ({{ note.excuse_type.short_name }})
+                    {% else %}
+                      ({% trans 'e' %})
+                    {% endif %}
                   {% endif %}
                 {% endif %}
-              {% endif %}
-            </td>
-            <td>
-              {% if note.late %}
-                {{ note.late }}'
-              {% endif %}
-            </td>
-            <td>
-              {% for extra_mark in note.extra_marks.all %}
-                {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
-              {% endfor %}
-            </td>
-            <td>{{ note.remarks }}</td>
-          </tr>
+              </td>
+              <td>
+                {% if note.late %}
+                  {{ note.late }}'
+                {% endif %}
+              </td>
+              <td>
+                {% for extra_mark in note.extra_marks.all %}
+                  {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+              </td>
+              <td>{{ note.remarks }}</td>
+            </tr>
+          {% endif %}
         {% endif %}
       {% endfor %}
       </tbody>
@@ -408,6 +410,7 @@
               </td>
               <td class="lesson-homework">{{ documentations.0.homework }}</td>
               <td class="lesson-notes">
+                {{ documentations.0.group_note }}
                 {% for note in notes %}
                   {% if note.absent %}
                     <span class="lesson-note-absent">

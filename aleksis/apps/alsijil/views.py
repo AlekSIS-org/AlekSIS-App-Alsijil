@@ -16,6 +16,7 @@ from rules.contrib.views import PermissionRequiredMixin
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
@@ -46,6 +47,14 @@ def lesson(
         lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(
             pk=period_id
         )
+
+        date_of_lesson = week_weekday_to_date(wanted_week, lesson_period.period.weekday)
+
+        if (
+            date_of_lesson < lesson_period.lesson.validity.date_start
+            or date_of_lesson > lesson_period.lesson.validity.date_end
+        ):
+            return HttpResponseNotFound()
     else:
         # Determine current lesson by current date and time
         lesson_period = (
@@ -306,17 +315,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     group = get_object_or_404(Group, pk=id_)
 
-    # Get all lesson periods for the selected group
-    lesson_periods = (
-        LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related("documentations", "personal_notes")
-    )
-
     current_school_term = SchoolTerm.current
 
     if not current_school_term:
         return HttpResponseNotFound(_("There is no current school term."))
+
+    # Get all lesson periods for the selected group
+    lesson_periods = (
+        LessonPeriod.objects.filter_group(group)
+        .filter(lesson__validity__school_term=current_school_term)
+        .distinct()
+        .prefetch_related("documentations", "personal_notes")
+    )
 
     weeks = CalendarWeek.weeks_within(
         current_school_term.date_start, current_school_term.date_end,
@@ -352,7 +362,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     persons = group.members.annotate(
         absences_count=Count(
-            "personal_notes__absent", filter=Q(personal_notes__absent=True)
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            ),
         ),
         excused=Count(
             "personal_notes__absent",
@@ -360,11 +374,16 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 personal_notes__absent=True,
                 personal_notes__excused=True,
                 personal_notes__excuse_type__isnull=True,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
             ),
         ),
         unexcused=Count(
             "personal_notes__absent",
-            filter=Q(personal_notes__absent=True, personal_notes__excused=False),
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=False,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            ),
         ),
         tardiness=Sum("personal_notes__late"),
     )
@@ -373,7 +392,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         persons = persons.annotate(
             **{
                 extra_mark.count_label: Count(
-                    "personal_notes", filter=Q(personal_notes__extra_marks=extra_mark,),
+                    "personal_notes", filter=Q(personal_notes__extra_marks=extra_mark,personal_notes__lesson_period__lesson__validity__school_term=current_school_term),
                 )
             }
         )
@@ -386,6 +405,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     filter=Q(
                         personal_notes__absent=True,
                         personal_notes__excuse_type=excuse_type,
+                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
                     ),
                 )
             }
@@ -398,6 +418,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["group"] = group
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
+    context["lesson_periods"] = lesson_periods
     context["today"] = date.today()
 
     return render(request, "alsijil/print/full_register.html", context)

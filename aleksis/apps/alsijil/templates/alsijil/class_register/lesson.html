@@ -50,15 +50,25 @@
   </div>
 
   <form method="post">
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    <p>{% include "core/partials/save_button.html" %}</p>
     {% csrf_token %}
 
     <div class="row">
-      <div class="col s12 m12 l6 xl8">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab">
+            <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
+          </li>
+          <li class="tab">
+            <a href="#personal-notes">{% trans "Personal notes" %}</a>
+          </li>
+          <li class="tab">
+            <a href="#version-history">{% trans "Change history" %}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
           {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% if prev_doc %}
@@ -83,6 +93,13 @@
                       <tr>
                         <th class="collection-item">{% trans "Homework for this lesson:" %}</th>
                         <td>{{ prev_doc.homework }}</td>
+                      </tr>
+                    {% endif %}
+
+                    {% if prev_doc.group_note %}
+                      <tr>
+                        <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
+                        <td>{{ prev_doc.group_note }}</td>
                       </tr>
                     {% endif %}
 
@@ -128,20 +145,8 @@
           </div>
         </div>
       </div>
-      <div class="col s12 m12 l6 xl4">
-        <div class="card">
-          <div class="card-content">
-          <span class="card-title">
-            {% blocktrans %}Change history{% endblocktrans %}
-          </span>
-            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col s12">
+      <div class="col s12" id="personal-notes">
         <div class="card">
           <div class="card-content">
       <span class="card-title">
@@ -222,12 +227,18 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
+      <div class="col s12" id="version-history">
+        <div class="card">
+          <div class="card-content">
+          <span class="card-title">
+            {% blocktrans %}Change history{% endblocktrans %}
+          </span>
+            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+          </div>
+        </div>
       </div>
     </div>
+
+    <p>{% include "core/partials/save_button.html" %}</p>
   </form>
 {% endblock %}
