@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers %}
+{% load week_helpers material_form_internal %}
 {% load material_form i18n static %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
@@ -70,7 +70,7 @@
 
       <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% if prev_doc %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
@@ -116,6 +116,18 @@
                         <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
                       </tr>
                     {% endif %}
+
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+
                   </table>
                 </div>
               </div>
@@ -150,6 +162,7 @@
                 <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                 <th>{% blocktrans %}Excused{% endblocktrans %}</th>
                 <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
+                <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
                 <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
               </tr>
               </thead>
@@ -185,6 +198,19 @@
                         {% trans "Excuse type" %}
                       </label>
                     </div>
+                  </td>
+                  <td>
+                    {% for group, items in form.extra_marks|select_options %}
+                      {% for choice, value, selected in items %}
+                        <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                          <input type="checkbox"
+                                 {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                  {% if selected %} checked="checked"{% endif %}
+                                 name="{{ form.extra_marks.html_name }}">
+                          <span>{{ choice }}</span>
+                        </label>
+                      {% endfor %}
+                    {% endfor %}
                   </td>
                   <td>
                     <div class="input-field">
