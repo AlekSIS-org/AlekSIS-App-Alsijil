@@ -412,34 +412,36 @@
               <td class="lesson-notes">
                 {{ documentations.0.group_note }}
                 {% for note in notes %}
-                  {% if note.absent %}
-                    <span class="lesson-note-absent">
-                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                      {% if note.excused %}
-                        <span class="lesson-note-excused">
-                          {% if note.excuse_type %}
-                            ({{ note.excuse_type.short_name }})
-                          {% else %}
-                            ({% trans 'e' %})
-                          {% endif %}
-                        </span>
-                      {% endif %}
+                  {% if group in note.groups_of_person.all %}
+                    {% if note.absent %}
+                      <span class="lesson-note-absent">
+                        {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                        {% if note.excused %}
+                          <span class="lesson-note-excused">
+                            {% if note.excuse_type %}
+                              ({{ note.excuse_type.short_name }})
+                            {% else %}
+                              ({% trans 'e' %})
+                            {% endif %}
+                          </span>
+                        {% endif %}
                       </span>
-                  {% endif %}
-                  {% if note.late %}
-                    <span class="lesson-note-late">
-                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                      ({{ note.late }}′)
-                      {% if note.excused %}
-                        <span class="lesson-note-excused">
-                          {% if note.excuse_type %}
-                            ({{ note.excuse_type.short_name }})
-                          {% else %}
-                            ({% trans 'e' %})
-                          {% endif %}
-                        </span>
-                      {% endif %}
+                    {% endif %}
+                    {% if note.late %}
+                      <span class="lesson-note-late">
+                        {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                        ({{ note.late }}′)
+                        {% if note.excused %}
+                          <span class="lesson-note-excused">
+                            {% if note.excuse_type %}
+                              ({{ note.excuse_type.short_name }})
+                            {% else %}
+                              ({% trans 'e' %})
+                            {% endif %}
+                          </span>
+                        {% endif %}
                       </span>
+                    {% endif %}
                   {% endif %}
                   {% for extra_mark in note.extra_marks.all %}
                     <span>

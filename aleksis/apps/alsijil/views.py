@@ -360,7 +360,10 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, documentations, notes, substitution)
                 )
 
-    persons = group.members.annotate(
+    persons = Person.objects.filter(
+        personal_notes__groups_of_person=group,
+        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+    ).annotate(
         absences_count=Count(
             "personal_notes__absent",
             filter=Q(

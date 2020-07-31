@@ -42,6 +42,7 @@ class PersonalNote(ExtensibleModel):
     person = models.ForeignKey(
         "core.Person", models.CASCADE, related_name="personal_notes"
     )
+    groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField()
     lesson_period = models.ForeignKey(
