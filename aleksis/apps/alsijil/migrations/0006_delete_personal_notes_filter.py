@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("alsijil", "0003_extra_mark"),
+        ("alsijil", "0005_groups_of_person"),
     ]
 
     operations = [

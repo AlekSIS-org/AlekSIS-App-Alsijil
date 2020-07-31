@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0003_drop_image_cropping"),
-        ("alsijil", "0002_excuse_type"),
+        ("alsijil", "0004_group_notes"),
     ]
 
     operations = [
