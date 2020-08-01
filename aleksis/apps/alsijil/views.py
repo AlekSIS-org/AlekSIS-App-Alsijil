@@ -371,7 +371,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             filter=Q(
                 personal_notes__absent=True,
                 personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-            )
+            ),
         ),
         excused=Count(
             "personal_notes__absent",
