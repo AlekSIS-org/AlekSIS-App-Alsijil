@@ -372,15 +372,6 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 personal_notes__absent=True,
                 personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
             )
-            & ~Q(
-                personal_notes__lesson_period__substitutions=Subquery(
-                    LessonSubstitution.objects.filter(
-                        lesson_period__pk=OuterRef("personal_notes__lesson_period__pk"),
-                        cancelled=True,
-                        week=OuterRef("personal_notes__week"),
-                    ).values("pk")
-                )
-            ),
         ),
         excused=Count(
             "personal_notes__absent",
