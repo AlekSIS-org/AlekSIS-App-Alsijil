@@ -395,7 +395,11 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         persons = persons.annotate(
             **{
                 extra_mark.count_label: Count(
-                    "personal_notes", filter=Q(personal_notes__extra_marks=extra_mark,personal_notes__lesson_period__lesson__validity__school_term=current_school_term),
+                    "personal_notes",
+                    filter=Q(
+                        personal_notes__extra_marks=extra_mark,
+                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+                    ),
                 )
             }
         )
