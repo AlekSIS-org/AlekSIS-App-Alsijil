@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('alsijil', '0003_extra_mark'),
+        ("alsijil", "0003_extra_mark"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lessondocumentation',
-            name='group_note',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Group note'),
+            model_name="lessondocumentation",
+            name="group_note",
+            field=models.CharField(
+                blank=True, max_length=200, verbose_name="Group note"
+            ),
         ),
     ]
