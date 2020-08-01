@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers %}
+{% load week_helpers material_form_internal %}
 {% load material_form i18n static %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
@@ -50,17 +50,29 @@
   </div>
 
   <form method="post">
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    <p>{% include "core/partials/save_button.html" %}</p>
     {% csrf_token %}
 
     <div class="row">
-      <div class="col s12 m12 l6 xl8">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab">
+            <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
+          </li>
+          {% if not lesson_period.get_substitution.cancelled %}
+            <li class="tab">
+              <a href="#personal-notes">{% trans "Personal notes" %}</a>
+            </li>
+          {% endif %}
+          <li class="tab">
+            <a href="#version-history">{% trans "Change history" %}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% if prev_doc %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
@@ -86,6 +98,13 @@
                       </tr>
                     {% endif %}
 
+                    {% if prev_doc.group_note %}
+                      <tr>
+                        <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
+                        <td>{{ prev_doc.group_note }}</td>
+                      </tr>
+                    {% endif %}
+
                     {% if absences %}
                       <tr>
                         <th>{% trans "Absent persons:" %}</th>
@@ -99,6 +118,18 @@
                         <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
                       </tr>
                     {% endif %}
+
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+
                   </table>
                 </div>
               </div>
@@ -116,21 +147,9 @@
           </div>
         </div>
       </div>
-      <div class="col s12 m12 l6 xl4">
-        <div class="card">
-          <div class="card-content">
-          <span class="card-title">
-            {% blocktrans %}Change history{% endblocktrans %}
-          </span>
-            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
-          </div>
-        </div>
-      </div>
-    </div>
 
-    {% if not lesson_period.get_substitution.cancelled %}
-      <div class="row">
-        <div class="col s12">
+      {% if not lesson_period.get_substitution.cancelled %}
+        <div class="col s12" id="personal-notes">
           <div class="card">
             <div class="card-content">
       <span class="card-title">
@@ -146,6 +165,8 @@
                   <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
                   <th>{% blocktrans %}Excused{% endblocktrans %}</th>
                   <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
+
                   <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
                 </tr>
                 </thead>
@@ -183,6 +204,27 @@
                       </div>
                     </td>
                     <td>
+                      {% for group, items in form.extra_marks|select_options %}
+                        {% for choice, value, selected in items %}
+                          <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                            <input type="checkbox"
+                                   {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                    {% if selected %} checked="checked"{% endif %}
+                                   name="{{ form.extra_marks.html_name }}">
+                            <span>{{ choice }}</span>
+                          </label>
+                        {% endfor %}
+                      {% endfor %}
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.remarks }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Remarks" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td>
                       <div class="input-field">
                         {{ form.remarks }}
                         <label for="{{ form.absent.id_for_label }}">
@@ -197,13 +239,21 @@
             </div>
           </div>
         </div>
-      </div>
-    {% endif %}
 
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
+      {% endif %}
+
+      <div class="col s12" id="version-history">
+        <div class="card">
+          <div class="card-content">
+          <span class="card-title">
+            {% blocktrans %}Change history{% endblocktrans %}
+          </span>
+            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+          </div>
+        </div>
       </div>
     </div>
+
+    <p>{% include "core/partials/save_button.html" %}</p>
   </form>
 {% endblock %}
