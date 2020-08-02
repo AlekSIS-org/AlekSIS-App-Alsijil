@@ -14,12 +14,13 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
+from aleksis.core.util.core_helpers import get_site_preferences
 
 from .forms import (
     ExcuseTypeForm,
@@ -114,18 +115,23 @@ def lesson(
 
             messages.success(request, _("The lesson documentation has been saved."))
 
-        if personal_note_formset.is_valid():
-            instances = personal_note_formset.save()
+        substitution = lesson_period.get_substitution()
+        if (
+            not getattr(substitution, "cancelled", False)
+            or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
+        ):
+            if personal_note_formset.is_valid():
+                instances = personal_note_formset.save()
 
-            # Iterate over personal notes and carry changed absences to following lessons
-            for instance in instances:
-                instance.person.mark_absent(
-                    wanted_week[lesson_period.period.weekday],
-                    lesson_period.period.period + 1,
-                    instance.absent,
-                    instance.excused,
-                    instance.excuse_type,
-                )
+                # Iterate over personal notes and carry changed absences to following lessons
+                for instance in instances:
+                    instance.person.mark_absent(
+                        wanted_week[lesson_period.period.weekday],
+                        lesson_period.period.period + 1,
+                        instance.absent,
+                        instance.excused,
+                        instance.excuse_type,
+                    )
 
             messages.success(request, _("The personal notes have been saved."))
 
