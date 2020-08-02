@@ -20,6 +20,7 @@ from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
+from aleksis.core.util.core_helpers import get_site_preferences
 
 from .forms import (
     ExcuseTypeForm,
@@ -115,7 +116,10 @@ def lesson(
             messages.success(request, _("The lesson documentation has been saved."))
 
         substitution = lesson_period.get_substitution()
-        if not getattr(substitution, "cancelled", False):
+        if (
+            not getattr(substitution, "cancelled", False)
+            or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
+        ):
             if personal_note_formset.is_valid():
                 instances = personal_note_formset.save()
 

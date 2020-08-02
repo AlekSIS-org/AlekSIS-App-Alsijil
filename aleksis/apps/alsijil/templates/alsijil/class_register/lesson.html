@@ -59,7 +59,7 @@
           <li class="tab">
             <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
           </li>
-          {% if not lesson_period.get_substitution.cancelled %}
+          {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
             <li class="tab">
               <a href="#personal-notes">{% trans "Personal notes" %}</a>
             </li>
@@ -148,7 +148,7 @@
         </div>
       </div>
 
-      {% if not lesson_period.get_substitution.cancelled %}
+      {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
         <div class="col s12" id="personal-notes">
           <div class="card">
             <div class="card-content">
