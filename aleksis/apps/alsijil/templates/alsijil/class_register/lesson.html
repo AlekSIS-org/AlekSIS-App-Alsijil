@@ -79,7 +79,8 @@
       <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
           {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
-            {% if prev_doc %}
+            {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+            {% if prev_doc and can_view_prev_lesson_documentation %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
               <div class="card">
@@ -169,6 +170,14 @@
                     {{ lesson_documentation.homework }}
                   </td>
                 </tr>
+                <tr>
+                  <th>
+                    {% trans "Group note" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.group_note }}
+                  </td>
+                </tr>
               </table>
             {% endif %}
           </div>
@@ -179,10 +188,12 @@
         <div class="col s12" id="personal-notes">
           <div class="card">
             <div class="card-content">
-      <span class="card-title">
-        {% blocktrans %}Personal notes{% endblocktrans %}
-      </span>
-              {% form form=personal_note_formset.management_form %}{% endform %}
+              <span class="card-title">
+                {% blocktrans %}Personal notes{% endblocktrans %}
+              </span>
+              {% if can_edit_personalnote %}
+                {% form form=personal_note_formset.management_form %}{% endform %}
+              {% endif %}
 
               <table class="striped responsive-table alsijil-table">
                 <thead>
@@ -251,14 +262,6 @@
                           </label>
                         </div>
                       </td>
-                      <td>
-                        <div class="input-field">
-                          {{ form.remarks }}
-                          <label for="{{ form.absent.id_for_label }}">
-                            {% trans "Remarks" %}
-                          </label>
-                        </div>
-                      </td>
                     </tr>
                   {% else %}
                     <tr>
@@ -267,6 +270,11 @@
                       <td>{{ form.late.value }}</td>
                       <td>{{ form.excused.value }}</td>
                       <td>{{ form.excuse_type.value }}</td>
+                      <td>
+                        {% for extra_mark in form.extra_marks.value %}
+                          {{ extra_mark }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                      </td>
                       <td>{{ form.remarks.value }}</td>
                     </tr>
                   {% endif %}
