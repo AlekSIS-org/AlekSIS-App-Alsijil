@@ -97,6 +97,18 @@
     </ul>
   {% endif %}
 
+  {% if extra_marks %}
+    <h5>{% trans "Available extra marks" %}</h5>
+
+    <ul class="collection">
+      {% for extra_mark in extra_marks %}
+        <li class="collection-item">
+          <strong>{{ extra_mark.short_name }}</strong> {{ extra_mark.name }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
   <div class="page-break">&nbsp;</div>
 
 
@@ -117,6 +129,9 @@
       {% endfor %}
       <th>{% trans '(u)' %}</th>
       <th>{% trans '(b)' %}</th>
+      {% for extra_mark in extra_marks %}
+        <th>{{ extra_mark.short_name }}</th>
+      {% endfor %}
     </tr>
     </thead>
 
@@ -135,6 +150,9 @@
         {% endfor %}
         <td>{{ person.unexcused }}</td>
         <td>{{ person.tardiness }}'</td>
+        {% for extra_mark in extra_marks %}
+          <td>{{ person|get_dict:extra_mark.count_label }}</td>
+        {% endfor %}
       </tr>
     {% endfor %}
     </tbody>
@@ -245,29 +263,6 @@
       </tr>
     </table>
 
-    {% if personal_note_filters %}
-      <h5>{% trans 'Statistics on remarks' %}</h5>
-      <table>
-        <thead>
-        <tr>
-          <th>{% trans 'Description' %}</th>
-          <th>{% trans 'Count' %}</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for note_filter in personal_note_filters %}
-          <tr>
-            <td>{{ note_filter.description }}</td>
-            {% with "_personal_notes_with_"|add:note_filter.identifier as identifier %}
-              <td>{{ person|get_dict:identifier }}</td>
-            {% endwith %}
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    {% endif %}
-
     <h5>{% trans 'Absences and tardiness' %}</h5>
     <table>
       <tr>
@@ -294,6 +289,18 @@
       </tr>
     </table>
 
+    {% if extra_marks %}
+      <h5>{% trans 'Extra marks' %}</h5>
+      <table>
+        {% for extra_mark in extra_marks %}
+          <tr>
+            <th>{{ extra_mark.name }}</th>
+            <td>{{ person|get_dict:extra_mark.count_label }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
     <h5>{% trans 'Relevant personal notes' %}</h5>
     <table class="small-print">
       <thead>
@@ -304,38 +311,45 @@
         <th>{% trans 'Te.' %}</th>
         <th>{% trans 'Absent' %}</th>
         <th>{% trans 'Tard.' %}</th>
-        <th>{% trans 'Remarks' %}</th>
+        <th colspan="2">{% trans 'Remarks' %}</th>
       </tr>
       </thead>
 
       <tbody>
       {% for note in person.personal_notes.all %}
-        {% if note.absent or note.late or note.remarks %}
-          {% period_to_date note.week note.lesson_period.period as note_date %}
-          <tr>
-            <td>{{ note_date }}</td>
-            <td>{{ note.lesson_period.period.period }}</td>
-            <td>{{ note.lesson_period.get_subject.short_name }} </td>
-            <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
-            <td>
-              {% if note.absent %}
-                {% trans 'Yes' %}
-                {% if note.excused %}
-                  {% if note.excuse_type %}
-                    ({{ note.excuse_type.short_name }})
-                  {% else %}
-                    ({% trans 'e' %})
+        {% if note.lesson_period in lesson_periods %}
+          {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
+            {% period_to_date note.week note.lesson_period.period as note_date %}
+            <tr>
+              <td>{{ note_date }}</td>
+              <td>{{ note.lesson_period.period.period }}</td>
+              <td>{{ note.lesson_period.get_subject.short_name }} </td>
+              <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
+              <td>
+                {% if note.absent %}
+                  {% trans 'Yes' %}
+                  {% if note.excused %}
+                    {% if note.excuse_type %}
+                      ({{ note.excuse_type.short_name }})
+                    {% else %}
+                      ({% trans 'e' %})
+                    {% endif %}
                   {% endif %}
                 {% endif %}
-              {% endif %}
-            </td>
-            <td>
-              {% if note.late %}
-                {{ note.late }}'
-              {% endif %}
-            </td>
-            <td>{{ note.remarks }}</td>
-          </tr>
+              </td>
+              <td>
+                {% if note.late %}
+                  {{ note.late }}'
+                {% endif %}
+              </td>
+              <td>
+                {% for extra_mark in note.extra_marks.all %}
+                  {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+              </td>
+              <td>{{ note.remarks }}</td>
+            </tr>
+          {% endif %}
         {% endif %}
       {% endfor %}
       </tbody>
@@ -398,35 +412,43 @@
               <td class="lesson-notes">
                 {{ documentations.0.group_note }}
                 {% for note in notes %}
-                  {% if note.absent %}
-                    <span class="lesson-note-absent">
-                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                      {% if note.excused %}
-                        <span class="lesson-note-excused">
-                          {% if note.excuse_type %}
-                            ({{ note.excuse_type.short_name }})
-                          {% else %}
-                            ({% trans 'e' %})
-                          {% endif %}
-                        </span>
-                      {% endif %}
+                  {% if group in note.groups_of_person.all %}
+                    {% if note.absent %}
+                      <span class="lesson-note-absent">
+                        {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                        {% if note.excused %}
+                          <span class="lesson-note-excused">
+                            {% if note.excuse_type %}
+                              ({{ note.excuse_type.short_name }})
+                            {% else %}
+                              ({% trans 'e' %})
+                            {% endif %}
+                          </span>
+                        {% endif %}
                       </span>
-                  {% endif %}
-                  {% if note.late %}
-                    <span class="lesson-note-late">
-                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
-                      ({{ note.late }}′)
-                      {% if note.excused %}
-                        <span class="lesson-note-excused">
-                          {% if note.excuse_type %}
-                            ({{ note.excuse_type.short_name }})
-                          {% else %}
-                            ({% trans 'e' %})
-                          {% endif %}
-                        </span>
-                      {% endif %}
+                    {% endif %}
+                    {% if note.late %}
+                      <span class="lesson-note-late">
+                        {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                        ({{ note.late }}′)
+                        {% if note.excused %}
+                          <span class="lesson-note-excused">
+                            {% if note.excuse_type %}
+                              ({{ note.excuse_type.short_name }})
+                            {% else %}
+                              ({% trans 'e' %})
+                            {% endif %}
+                          </span>
+                        {% endif %}
                       </span>
+                    {% endif %}
                   {% endif %}
+                  {% for extra_mark in note.extra_marks.all %}
+                    <span>
+                      {{ note.person.last_name }}, {{ note.person.first_name|slice:"0:1" }}.
+                      ({{ extra_mark.short_name }})
+                    </span>
+                  {% endfor %}
                 {% endfor %}
               </td>
               <td class="lesson-te">

@@ -1,3 +1,11 @@
+.alsijil-check-box {
+    margin-right: 10px;
+}
+
+.alsijil-check-box [type="checkbox"] {
+    padding-left: 30px;
+}
+
 .alsijil-lesson-cancelled {
     text-decoration: line-through;
 }

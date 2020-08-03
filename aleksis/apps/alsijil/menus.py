@@ -46,17 +46,6 @@ MENUS = {
                     ],
                 },
                 {
-                    "name": _("Personal note filters"),
-                    "url": "list_personal_note_filters",
-                    "icon": "filter_list",
-                    "validators": [
-                        (
-                            "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_personal_note_filters",
-                        ),
-                    ],
-                },
-                {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",
@@ -66,6 +55,12 @@ MENUS = {
                             "alsijil.view_excusetypes",
                         ),
                     ],
+                },
+                {
+                    "name": _("Extra marks"),
+                    "url": "extra_marks",
+                    "icon": "label",
+                    "validators": ["menu_generator.validators.is_superuser"],
                 },
             ],
         }

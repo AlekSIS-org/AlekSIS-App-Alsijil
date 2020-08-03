@@ -42,6 +42,7 @@ class PersonalNote(ExtensibleModel):
     person = models.ForeignKey(
         "core.Person", models.CASCADE, related_name="personal_notes"
     )
+    groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField()
     lesson_period = models.ForeignKey(
@@ -60,6 +61,10 @@ class PersonalNote(ExtensibleModel):
     )
 
     remarks = models.CharField(max_length=200, blank=True)
+
+    extra_marks = models.ManyToManyField(
+        "ExtraMark", null=True, blank=True, verbose_name=_("Extra marks")
+    )
 
     def save(self, *args, **kwargs):
         if self.excuse_type:
@@ -93,7 +98,9 @@ class LessonDocumentation(ExtensibleModel):
 
     topic = models.CharField(verbose_name=_("Lesson topic"), max_length=200, blank=True)
     homework = models.CharField(verbose_name=_("Homework"), max_length=200, blank=True)
-    group_note = models.CharField(verbose_name=_("Group note"), max_length=200, blank=True)
+    group_note = models.CharField(
+        verbose_name=_("Group note"), max_length=200, blank=True
+    )
 
     class Meta:
         verbose_name = _("Lesson documentation")
@@ -107,27 +114,28 @@ class LessonDocumentation(ExtensibleModel):
         ]
 
 
-class PersonalNoteFilter(ExtensibleModel):
-    """A filter definition that can generate statistics on personal note texts."""
+class ExtraMark(ExtensibleModel):
+    """A model for extra marks.
 
-    identifier = models.CharField(
-        verbose_name=_("Identifier"),
-        max_length=30,
-        validators=[isidentifier],
-        unique=True,
-    )
-    description = models.CharField(
-        verbose_name=_("Description"), max_length=60, blank=True, unique=True
-    )
+    Can be used for lesson-based counting of things (like forgotten homework).
+    """
 
-    regex = models.CharField(
-        verbose_name=_("Match expression"), max_length=100, unique=True
+    short_name = models.CharField(
+        max_length=255, unique=True, verbose_name=_("Short name")
     )
+    name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
+
+    def __str__(self):
+        return f"{self.name}"
+
+    @property
+    def count_label(self):
+        return f"{self.short_name}_count"
 
     class Meta:
-        verbose_name = _("Personal note filter")
-        verbose_name_plural = _("Personal note filters")
-        ordering = ["identifier"]
+        ordering = ["short_name"]
+        verbose_name = _("Extra mark")
+        verbose_name_plural = _("Extra marks")
 
 
 class AlsijilGlobalPermissions(ExtensibleModel):

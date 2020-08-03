@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 from django.db.models import Exists, OuterRef, QuerySet
 from django.utils.translation import gettext as _
@@ -9,7 +9,7 @@ from calendarweek import CalendarWeek
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
 
-from .models import ExcuseType, LessonDocumentation, PersonalNote
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
 @Person.method
@@ -182,3 +182,20 @@ def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     if not week:
         week = self.week
     return self.personal_notes.filter(week=week.week, late__gt=0)
+
+
+@LessonPeriod.method
+def get_extra_marks(
+    self, week: Optional[CalendarWeek] = None
+) -> Dict[ExtraMark, QuerySet]:
+    """Get all statistics on extra marks for this lesson."""
+    if not week:
+        week = self.week
+
+    stats = {}
+    for extra_mark in ExtraMark.objects.all():
+        qs = self.personal_notes.filter(week=week.week, extra_marks=extra_mark)
+        if qs:
+            stats[extra_mark] = qs
+
+    return stats
