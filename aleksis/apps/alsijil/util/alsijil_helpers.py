@@ -1,7 +1,8 @@
 from typing import Optional
 
-from calendarweek import CalendarWeek
 from django.http import HttpRequest
+
+from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
@@ -16,7 +17,9 @@ def get_lesson_period_by_pk(
     """Get LessonPeriod object either by given object_id or by time and current person."""
     wanted_week = CalendarWeek(year=year, week=week)
     if period_id:
-        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(pk=period_id)
+        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(
+            pk=period_id
+        )
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
             lesson_period = (

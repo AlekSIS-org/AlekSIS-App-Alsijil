@@ -126,6 +126,7 @@ Person.add_permission(
     "register_absence_person", _("Can register an absence for a person")
 )
 
+
 @LessonPeriod.method
 def get_lesson_documentation(
     self, week: Optional[CalendarWeek] = None

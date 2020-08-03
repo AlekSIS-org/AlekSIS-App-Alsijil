@@ -10,9 +10,8 @@ from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig, SingleTableView
-from rules.contrib.views import permission_required
 from reversion.views import RevisionMixin
-from rules.contrib.views import PermissionRequiredMixin
+from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
@@ -21,8 +20,7 @@ from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
-from aleksis.core.util.core_helpers import get_site_preferences
-from aleksis.core.util.core_helpers import objectgetter_optional
+from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
     ExcuseTypeForm,
@@ -34,8 +32,6 @@ from .forms import (
 )
 from .models import ExcuseType, ExtraMark, LessonDocumentation
 from .tables import ExcuseTypeTable, ExtraMarkTable
-from .models import ExcuseType, LessonDocumentation
-from .tables import ExcuseTypeTable
 from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
 
 
