@@ -9,7 +9,6 @@ from aleksis.core.util.predicates import (
     is_current_person,
 )
 
-from .models import PersonalNoteFilter
 from .util.predicates import (
     has_lesson_group_object_perm,
     has_person_group_object_perm,
@@ -112,27 +111,6 @@ view_full_register_predicate = has_person & (
     | is_group_owner
 )
 add_perm("alsijil.view_full_register", view_full_register_predicate)
-
-# View all personal note filters
-view_personal_note_filters_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnotefilter")
-    | has_any_object("alsijil.view_personalnotefilter", PersonalNoteFilter)
-)
-add_perm("alsijil.view_personal_note_filters", view_personal_note_filters_predicate)
-
-# Edit personal note filter
-edit_personal_note_filter_predicate = has_person & (
-    has_global_perm("alsijil.change_personalnotefilter")
-    | has_object_perm("alsijil.change_personalnotefilter")
-)
-add_perm("alsijil.edit_personal_note_filter", edit_personal_note_filter_predicate)
-
-# Delete personal note filter
-delete_personal_note_filter_predicate = has_person & (
-    has_global_perm("alsijil.delete_personalnotefilter")
-    | has_object_perm("alsijil.delete_personalnotefilter")
-)
-add_perm("alsijil.delete_personal_note_filter", delete_personal_note_filter_predicate)
 
 # View excuse type list
 view_excusetypes_predicate = has_person & has_global_perm("alsijil.view_excusetype")

@@ -34,8 +34,8 @@ from .forms import (
 )
 from .models import ExcuseType, ExtraMark, LessonDocumentation
 from .tables import ExcuseTypeTable, ExtraMarkTable
-from .models import ExcuseType, LessonDocumentation, PersonalNoteFilter
-from .tables import ExcuseTypeTable, PersonalNoteFilterTable
+from .models import ExcuseType, LessonDocumentation
+from .tables import ExcuseTypeTable
 from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
 
 
