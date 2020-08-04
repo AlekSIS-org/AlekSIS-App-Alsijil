@@ -19,7 +19,7 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     if hasattr(obj, "lesson"):
         return (
             user.person in obj.lesson.teachers.all()
-            or user.person in obj.substitutions.teachers.all()
+            or user.person in Person.objects.filter(lesson_substitutions__lesson_period=obj, lesson_substitutions__week=obj._week)
         )
     return True
 
