@@ -226,7 +226,7 @@ def week_view(
         persons_qs = Person.objects.filter(is_active=True)
 
         if not request.user.has_perm("alsijil.view_week_personalnote", instance):
-            persons_qs = persons_qs.filter(pk=request.user.pk)
+            persons_qs = persons_qs.filter(pk=request.user.person.pk)
         elif group:
             persons_qs = persons_qs.filter(member_of=group)
         else:
