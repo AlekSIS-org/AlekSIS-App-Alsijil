@@ -2,21 +2,21 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
-from django_tables2 import RequestConfig, SingleTableView
+from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
+from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
-from aleksis.apps.chronos.util.date import week_weekday_to_date
+from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
@@ -305,6 +305,7 @@ def week_view(
 
     context["extra_marks"] = ExtraMark.objects.all()
     context["week"] = wanted_week
+    context["weeks"] = get_weeks_for_year(year=wanted_week.year)
     context["lesson_periods"] = lesson_periods
     context["persons"] = persons
     context["group"] = group
@@ -313,14 +314,21 @@ def week_view(
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
-    context["url_prev"] = "%s?%s" % (
-        reverse("week_view_by_week", args=[week_prev.year, week_prev.week]),
-        request.GET.urlencode(),
-    )
-    context["url_next"] = "%s?%s" % (
-        reverse("week_view_by_week", args=[week_next.year, week_next.week]),
-        request.GET.urlencode(),
-    )
+    args_prev = [week_prev.year, week_prev.week]
+    args_next = [week_next.year, week_next.week]
+    args_dest = []
+    if type_ and id_:
+        args_prev += [type_.value, id_]
+        args_next += [type_.value, id_]
+        args_dest += [type_.value, id_]
+
+    context["week_select"] = {
+        "year": wanted_week.year,
+        "dest": reverse("week_view_placeholders", args=args_dest),
+    }
+
+    context["url_prev"] = reverse("week_view_by_week", args=args_prev)
+    context["url_next"] = reverse("week_view_by_week", args=args_next)
 
     return render(request, "alsijil/class_register/week_view.html", context)
 
