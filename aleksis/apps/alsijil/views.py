@@ -13,7 +13,6 @@ from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
-from aleksis.apps.alsijil.util import append_if_all
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
@@ -308,16 +307,15 @@ def week_view(
     week_next = wanted_week + 1
     args_prev = [week_prev.year, week_prev.week]
     args_next = [week_next.year, week_next.week]
-    args_dest = [wanted_week.year, wanted_week.week]
-    append_if_all(args_prev, type_, id_)
-    append_if_all(args_next, type_, id_)
-    append_if_all(args_dest, type_, id_)
+    args_dest = []
+    if type_ and id_:
+        args_prev += [type_.value, id_]
+        args_next += [type_.value, id_]
+        args_dest += [type_.value, id_]
 
     context["week_select"] = {
         "year": wanted_week.year,
-        "dest": reverse("week_view_by_week", args=args_dest)
-        .replace(str(wanted_week.year), "year")
-        .replace(str(wanted_week.week), "cw"),
+        "dest": reverse("week_view_placeholders", args=args_dest),
     }
 
     context["url_prev"] = reverse("week_view_by_week", args=args_prev)

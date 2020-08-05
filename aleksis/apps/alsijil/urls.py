@@ -11,7 +11,13 @@ urlpatterns = [
     ),
     path("week/", views.week_view, name="week_view"),
     path("week/<int:year>/<int:week>/", views.week_view, name="week_view_by_week"),
+    path("week/year/cw/", views.week_view, name="week_view_placeholders"),
     path("week/<str:type_>/<int:id_>/", views.week_view, name="week_view"),
+    path(
+        "week/year/cw/<str:type_>/<int:id_>/",
+        views.week_view,
+        name="week_view_placeholders",
+    ),
     path(
         "week/<int:year>/<int:week>/<str:type_>/<int:id_>/",
         views.week_view,
