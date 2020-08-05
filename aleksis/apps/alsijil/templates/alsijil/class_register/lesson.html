@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers %}
+{% load week_helpers material_form_internal %}
 {% load material_form i18n static %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
@@ -50,17 +50,29 @@
   </div>
 
   <form method="post">
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    <p>{% include "core/partials/save_button.html" %}</p>
     {% csrf_token %}
 
     <div class="row">
-      <div class="col s12 m12 l6 xl8">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab">
+            <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
+          </li>
+          {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+            <li class="tab">
+              <a href="#personal-notes">{% trans "Personal notes" %}</a>
+            </li>
+          {% endif %}
+          <li class="tab">
+            <a href="#version-history">{% trans "Change history" %}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% if prev_doc %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
@@ -106,6 +118,18 @@
                         <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
                       </tr>
                     {% endif %}
+
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+
                   </table>
                 </div>
               </div>
@@ -123,7 +147,102 @@
           </div>
         </div>
       </div>
-      <div class="col s12 m12 l6 xl4">
+
+      {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+        <div class="col s12" id="personal-notes">
+          <div class="card">
+            <div class="card-content">
+      <span class="card-title">
+        {% blocktrans %}Personal notes{% endblocktrans %}
+      </span>
+              {% form form=personal_note_formset.management_form %}{% endform %}
+
+              <table class="striped responsive-table alsijil-table">
+                <thead>
+                <tr>
+                  <th>{% blocktrans %}Person{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
+
+                  <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in personal_note_formset %}
+                  <tr>
+                    {{ form.id }}
+                    <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.absent }}
+                        <span></span>
+                      </label>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.late }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Tardiness (in m)" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td class="center-align">
+                      <label>
+                        {{ form.excused }}
+                        <span></span>
+                      </label>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.excuse_type }}
+                        <label for="{{ form.excuse_type.id_for_label }}">
+                          {% trans "Excuse type" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td>
+                      {% for group, items in form.extra_marks|select_options %}
+                        {% for choice, value, selected in items %}
+                          <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                            <input type="checkbox"
+                                   {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                    {% if selected %} checked="checked"{% endif %}
+                                   name="{{ form.extra_marks.html_name }}">
+                            <span>{{ choice }}</span>
+                          </label>
+                        {% endfor %}
+                      {% endfor %}
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.remarks }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Remarks" %}
+                        </label>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-field">
+                        {{ form.remarks }}
+                        <label for="{{ form.absent.id_for_label }}">
+                          {% trans "Remarks" %}
+                        </label>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      {% endif %}
+
+      <div class="col s12" id="version-history">
         <div class="card">
           <div class="card-content">
           <span class="card-title">
@@ -135,80 +254,6 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col s12">
-        <div class="card">
-          <div class="card-content">
-      <span class="card-title">
-        {% blocktrans %}Personal notes{% endblocktrans %}
-      </span>
-            {% form form=personal_note_formset.management_form %}{% endform %}
-
-            <table class="striped responsive-table alsijil-table">
-              <thead>
-              <tr>
-                <th>{% blocktrans %}Person{% endblocktrans %}</th>
-                <th>{% blocktrans %}Absent{% endblocktrans %}</th>
-                <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
-                <th>{% blocktrans %}Excused{% endblocktrans %}</th>
-                <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
-                <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
-              </tr>
-              </thead>
-              <tbody>
-              {% for form in personal_note_formset %}
-                <tr>
-                  {{ form.id }}
-                  <td>{{ form.person_name }}{{ form.person_name.value }}</td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.absent }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.late }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Tardiness (in m)" %}
-                      </label>
-                    </div>
-                  </td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.excused }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.excuse_type }}
-                      <label for="{{ form.excuse_type.id_for_label }}">
-                        {% trans "Excuse type" %}
-                      </label>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.remarks }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Remarks" %}
-                      </label>
-                    </div>
-                  </td>
-                </tr>
-              {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    <p>{% include "core/partials/save_button.html" %}</p>
   </form>
 {% endblock %}

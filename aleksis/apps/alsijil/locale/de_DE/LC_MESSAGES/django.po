@@ -7,62 +7,72 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-01 13:20+0200\n"
-"PO-Revision-Date: 2019-11-24 21:56+0000\n"
-"Last-Translator: Tom Teichler <tom.teichler@teckids.org>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis-sis/"
+"POT-Creation-Date: 2020-08-03 20:03+0200\n"
+"PO-Revision-Date: 2020-08-03 18:41+0000\n"
+"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 4.0.1\n"
 
-#: forms.py:41
+#: forms.py:25
+msgid "Homework for the next lesson"
+msgstr "Hausaufgabe zur nächsten Stunde"
+
+#: forms.py:50 templates/alsijil/print/full_register.html:199
 msgid "Group"
 msgstr "Gruppe"
 
-#: forms.py:49 templates/alsijil/print/full_register.html:101
+#: forms.py:56 templates/alsijil/print/full_register.html:170
+#: templates/alsijil/print/full_register.html:201
 msgid "Teacher"
 msgstr "Lehrkraft"
 
-#: forms.py:57
-msgid "Room"
-msgstr "Raum"
+#: forms.py:73
+msgid "You can't select a group and a teacher both."
+msgstr "Es kann nur entweder eine Gruppe oder eine Lehrkraft ausgewählt werden."
 
-#: forms.py:70
+#: forms.py:101
 msgid "Start date"
 msgstr "Startdatum"
 
-#: forms.py:73
+#: forms.py:102
 msgid "End date"
 msgstr "Enddatum"
 
-#: forms.py:75
+#: forms.py:103
 msgid "From period"
 msgstr "Ab Stunde"
 
-#: forms.py:77 templates/alsijil/lesson.html:58
+#: forms.py:105 templates/alsijil/class_register/lesson.html:163
 msgid "Person"
 msgstr "Person"
 
-#: forms.py:79 templates/alsijil/lesson.html:59
-#: templates/alsijil/print/full_register.html:223
-#: templates/alsijil/week_view.html:96
+#: forms.py:107 templates/alsijil/class_register/lesson.html:164
+#: templates/alsijil/class_register/week_view.html:109
+#: templates/alsijil/print/full_register.html:75
+#: templates/alsijil/print/full_register.html:312
 msgid "Absent"
 msgstr "Abwesend"
 
-#: forms.py:80 templates/alsijil/lesson.html:61
+#: forms.py:108 templates/alsijil/class_register/lesson.html:166
+#: templates/alsijil/print/full_register.html:84
+#: templates/alsijil/print/full_register.html:275
 msgid "Excused"
 msgstr "Entschuldigt"
 
-#: forms.py:81 templates/alsijil/lesson.html:62
-#: templates/alsijil/print/full_register.html:225
+#: forms.py:109 templates/alsijil/class_register/lesson.html:170
+#: templates/alsijil/class_register/lesson.html:223
+#: templates/alsijil/class_register/lesson.html:231
+#: templates/alsijil/print/full_register.html:314
 msgid "Remarks"
 msgstr "Bemerkungen"
 
-#: menus.py:6 templates/alsijil/print/full_register.html:16
+#: menus.py:6 preferences.py:8 templates/alsijil/print/full_register.html:16
 msgid "Class register"
 msgstr "Klassenbuch"
 
@@ -78,341 +88,558 @@ msgstr "Aktuelle Woche"
 msgid "Register absence"
 msgstr "Abwesenheit eintragen"
 
-#: menus.py:34
-msgid "Personal note filters"
-msgstr "Filter für persönliche Notizen"
+#: menus.py:34 models.py:32 templates/alsijil/excuse_type/list.html:8
+#: templates/alsijil/excuse_type/list.html:9
+msgid "Excuse types"
+msgstr "Entschuldigungsarten"
 
-#: models.py:51 templates/alsijil/print/full_register.html:271
-msgid "Lesson topic"
-msgstr "Stundenthema"
+#: menus.py:40 models.py:66 models.py:138
+#: templates/alsijil/class_register/lesson.html:168
+#: templates/alsijil/extra_mark/list.html:8
+#: templates/alsijil/extra_mark/list.html:9
+#: templates/alsijil/print/full_register.html:293
+msgid "Extra marks"
+msgstr "Zusätzliche Markierungen"
 
-#: models.py:52 templates/alsijil/print/full_register.html:272
-msgid "Homework"
-msgstr "Hausaufgaben"
+#: models.py:18 models.py:124
+msgid "Short name"
+msgstr "Kurzname"
 
-#: models.py:68
-msgid "Identifier"
-msgstr "Kennung"
+#: models.py:20 models.py:126
+msgid "Name"
+msgstr "Name"
 
-#: models.py:71 templates/alsijil/print/full_register.html:178
-msgid "Description"
-msgstr "Beschreibung"
+#: models.py:31 models.py:60 templates/alsijil/class_register/lesson.html:167
+#: templates/alsijil/class_register/lesson.html:202
+msgid "Excuse type"
+msgstr "Entschuldigungsart"
 
-#: models.py:74
-msgid "Match expression"
-msgstr "Suchausdruck"
+#: models.py:75
+msgid "Personal note"
+msgstr "Persönliche Notiz"
 
-#: tables.py:14
-msgid "Edit"
-msgstr "Bearbeiten"
-
-#: templates/alsijil/lesson.html:5
-#, fuzzy
-#| msgid "Lessons"
-msgid "Lesson"
-msgstr "Unterrichtsstunden"
-
-#: templates/alsijil/lesson.html:34
-msgid "Lesson documentation"
-msgstr "Stunden-Dokumentation"
-
-#: templates/alsijil/lesson.html:43
-msgid "Change history"
-msgstr "Veränderungen"
-
-#: templates/alsijil/lesson.html:52 templates/alsijil/week_view.html:91
+#: models.py:76 templates/alsijil/class_register/lesson.html:64
+#: templates/alsijil/class_register/lesson.html:156
+#: templates/alsijil/class_register/week_view.html:104
 msgid "Personal notes"
 msgstr "Persönliche Notizen"
 
-#: templates/alsijil/lesson.html:60
-#: templates/alsijil/print/full_register.html:202
-msgid "Tardiness"
-msgstr "Verspätung"
+#: models.py:99 templates/alsijil/class_register/week_view.html:56
+#: templates/alsijil/print/full_register.html:371
+msgid "Lesson topic"
+msgstr "Stundenthema"
 
-#: templates/alsijil/manage_personal_note_filter.html:5
-#: templates/alsijil/manage_personal_note_filter.html:6
-msgid "Manage personal note filter"
-msgstr "Filter für persönliche Notizen verwalten"
+#: models.py:100 templates/alsijil/print/full_register.html:372
+msgid "Homework"
+msgstr "Hausaufgaben"
 
-#: templates/alsijil/manage_personal_note_filter.html:11
-#, fuzzy
-#| msgid "Personal note filters"
-msgid "Delete filter"
-msgstr "Filter für persönliche Notizen"
+#: models.py:102
+msgid "Group note"
+msgstr "Gruppennotiz"
 
-#: templates/alsijil/personal_note_filters.html:7
-#: templates/alsijil/personal_note_filters.html:8
-msgid "List of all personal note filters"
-msgstr "Liste aller Filter für persönliche Notizen"
+#: models.py:106 templates/alsijil/class_register/lesson.html:60
+#: templates/alsijil/class_register/lesson.html:143
+msgid "Lesson documentation"
+msgstr "Stunden-Dokumentation"
 
-#: templates/alsijil/personal_note_filters.html:12
-msgid "Add filter"
+#: models.py:107
+msgid "Lesson documentations"
+msgstr "Stunden-Dokumentationen"
+
+#: models.py:137
+msgid "Extra mark"
+msgstr "Zusätzliche Markierung"
+
+#: preferences.py:16
+msgid "Block adding personal notes for cancelled lessons"
 msgstr ""
+"Blockiere das Hinzufügen von persönlichen Notizen für ausgefallene Stunden"
 
-#: templates/alsijil/print/full_register.html:22
-#: templates/alsijil/print/full_register.html:54
-msgid "Owners"
-msgstr "Leiter/-innen"
+#: tables.py:16 tables.py:36
+msgid "Edit"
+msgstr "Bearbeiten"
 
-#: templates/alsijil/print/full_register.html:26
-msgid "Printed on"
-msgstr "Gedruckt am"
+#: tables.py:22 tables.py:42
+msgid "Delete"
+msgstr "Löschen"
 
-#: templates/alsijil/print/full_register.html:34
-msgid ""
-"\n"
-"            This printout is intended for archival purposes. The main copy "
-"of\n"
-"            the class register is stored in the AlekSIS School Information\n"
-"            System.\n"
-"          "
-msgstr ""
-"\n"
-"            Dieser Ausdruck ist für Archivierungszwecke gedacht. Die "
-"Hauptkopie\n"
-"            des Klassenbusches ist im AlekSIS-Schul-Informations-System "
-"gespeichert.\n"
-"          "
-
-#: templates/alsijil/print/full_register.html:41
-msgid ""
-"\n"
-"            Copies of the class register, both digital and as printout, "
-"must\n"
-"            only be kept inside the school and/or on devices authorised by "
-"the\n"
-"            school.\n"
-"          "
-msgstr ""
-"\n"
-"            Kopien des Klassenbuches, sowohl digital als auch als Ausdruck, "
-"dürfen\n"
-"            ausschließlich in der Schule und/oder auf vonder Schule "
-"autorisierten Geräten\n"
-"            gespeichert werden.\n"
-"          "
-
-#: templates/alsijil/print/full_register.html:48
-msgid ""
-"\n"
-"            The owner of the group and the headteacher confirm the above, "
-"as\n"
-"            well as the correctness of this printout.\n"
-"          "
-msgstr ""
-"\n"
-"            Die Leitung der Gruppe sowie die Schulleitung bestätigen die "
-"obigen Hinweise sowie\n"
-"            die Richtigkeit des Ausdrucks.\n"
-"          "
-
-#: templates/alsijil/print/full_register.html:55
-msgid "Headteacher"
-msgstr "Schulleitung"
-
-#: templates/alsijil/print/full_register.html:61
-msgid "Persons in group"
-msgstr "Personen in der Gruppe"
-
-#: templates/alsijil/print/full_register.html:66
-msgid "No."
-msgstr "Nr."
-
-#: templates/alsijil/print/full_register.html:67
-msgid "Last name"
-msgstr "Nachname"
-
-#: templates/alsijil/print/full_register.html:68
-msgid "First name"
-msgstr "Vorname"
-
-#: templates/alsijil/print/full_register.html:69
-msgid "Sex"
-msgstr "Geschlecht"
-
-#: templates/alsijil/print/full_register.html:70
-msgid "Date of birth"
-msgstr "Geburtsdatum"
-
-#: templates/alsijil/print/full_register.html:71
-#: templates/alsijil/print/full_register.html:200
-msgid "Absences"
-msgstr "Abwesenheiten"
-
-#: templates/alsijil/print/full_register.html:72
-#: templates/alsijil/print/full_register.html:201
-msgid "Unexcused"
-msgstr "Unentschuldigt"
-
-#: templates/alsijil/print/full_register.html:73
-#: templates/alsijil/print/full_register.html:224
-msgid "Tard."
-msgstr "Verspät."
-
-#: templates/alsijil/print/full_register.html:95
-msgid "Teachers and lessons in group"
-msgstr "Lehrkräfte und Fächer der Gruppe"
-
-#: templates/alsijil/print/full_register.html:100
-#: templates/alsijil/week_view.html:48
-msgid "Subject"
-msgstr "Fach"
-
-#: templates/alsijil/print/full_register.html:102
-msgid "Lesson start"
-msgstr "Unterrichtsbeginn"
-
-#: templates/alsijil/print/full_register.html:103
-msgid "Lesson end"
-msgstr "Unterrichtsende"
-
-#: templates/alsijil/print/full_register.html:104
-msgid "Per week"
-msgstr "Pro Woche"
-
-#: templates/alsijil/print/full_register.html:124
-msgid "Personal overview"
-msgstr "Persönliche Übersicht"
-
-#: templates/alsijil/print/full_register.html:126
-msgid "Contact details"
-msgstr "Kontaktdetails"
-
-#: templates/alsijil/print/full_register.html:174
-msgid "Statistics on remarks"
-msgstr "Statistiken zu Bemerkungen"
-
-#: templates/alsijil/print/full_register.html:179
-msgid "Count"
-msgstr "Anzahl"
-
-#: templates/alsijil/print/full_register.html:196
-msgid "Absences and tardiness"
-msgstr "Abwesenheiten und Verspätungen"
-
-#: templates/alsijil/print/full_register.html:215
-msgid "Relevant personal notes"
-msgstr "Relevante persönliche Notizen"
-
-#: templates/alsijil/print/full_register.html:219
-msgid "Date"
-msgstr "Datum"
-
-#: templates/alsijil/print/full_register.html:220
-#: templates/alsijil/print/full_register.html:268
-msgid "Pe."
-msgstr "Std."
-
-#: templates/alsijil/print/full_register.html:221
-#: templates/alsijil/print/full_register.html:269
-msgid "Subj."
-msgstr "Fa."
-
-#: templates/alsijil/print/full_register.html:222
-#: templates/alsijil/print/full_register.html:274
-msgid "Te."
-msgstr "Lk."
-
-#: templates/alsijil/print/full_register.html:240
-msgid "Yes"
-msgstr "Ja"
-
-#: templates/alsijil/print/full_register.html:242
-#: templates/alsijil/print/full_register.html:314
-#: templates/alsijil/print/full_register.html:324
-msgid "e"
-msgstr "e"
-
-#: templates/alsijil/print/full_register.html:262
-msgid "Lesson documentation for calendar week"
-msgstr "Unterrichtsdokumentation für Kalenderwoche"
-
-#: templates/alsijil/print/full_register.html:270
-msgid "Subs."
-msgstr "Vertr."
-
-#: templates/alsijil/print/full_register.html:273
-msgid "Notes"
-msgstr "Notizen"
-
-#: templates/alsijil/print/full_register.html:301
-msgid "Lesson cancelled"
-msgstr "Stunde ist ausgefallen"
-
-#: templates/alsijil/register_absence.html:5
-#: templates/alsijil/register_absence.html:6
+#: templates/alsijil/absences/register.html:5
+#: templates/alsijil/absences/register.html:6
 msgid "Manage absence"
 msgstr "Abwesenheiten verwalten"
 
-#: templates/alsijil/week_view.html:6
-#, fuzzy
-#| msgid "Week"
-msgid "Week view"
-msgstr "Woche"
+#: templates/alsijil/class_register/lesson.html:6
+msgid "Lesson"
+msgstr "Unterrichtsstunde"
 
-#: templates/alsijil/week_view.html:21
+#: templates/alsijil/class_register/lesson.html:14
+#: templates/alsijil/class_register/lesson.html:83
+#, python-format
+msgid "%(period)s. period"
+msgstr "%(period)s. Stunde"
+
+#: templates/alsijil/class_register/lesson.html:38
+msgid "Previous lesson"
+msgstr "Vorherige Unterrichtsstunde"
+
+#: templates/alsijil/class_register/lesson.html:46
+msgid "Next lesson"
+msgstr "Nächste Unterrichtsstunde"
+
+#: templates/alsijil/class_register/lesson.html:68
+#: templates/alsijil/class_register/lesson.html:249
+msgid "Change history"
+msgstr "Veränderungen"
+
+#: templates/alsijil/class_register/lesson.html:82
+msgid "Overview: Previous lesson"
+msgstr "Übersicht: Vorherige Stunde"
+
+#: templates/alsijil/class_register/lesson.html:89
+msgid "Lesson topic of previous lesson:"
+msgstr "Stundenthema der vorherigen Stunde:"
+
+#: templates/alsijil/class_register/lesson.html:96
+msgid "Homework for this lesson:"
+msgstr "Hausaufgaben zu dieser Stunde:"
+
+#: templates/alsijil/class_register/lesson.html:103
+msgid "Group notes for previous lesson:"
+msgstr "Gruppennotizen für die vorherige Stunde:"
+
+#: templates/alsijil/class_register/lesson.html:110
+msgid "Absent persons:"
+msgstr "Abwesende Personen:"
+
+#: templates/alsijil/class_register/lesson.html:117
+msgid "Late persons:"
+msgstr "Verspätete Personen:"
+
+#: templates/alsijil/class_register/lesson.html:165
+#: templates/alsijil/print/full_register.html:287
+msgid "Tardiness"
+msgstr "Verspätung"
+
+#: templates/alsijil/class_register/lesson.html:188
+msgid "Tardiness (in m)"
+msgstr "Verspätung (in m)"
+
+#: templates/alsijil/class_register/week_view.html:6
+msgid "Week view"
+msgstr "Wochenansicht"
+
+#: templates/alsijil/class_register/week_view.html:27
 msgid "Select"
 msgstr "Auswählen"
 
-#: templates/alsijil/week_view.html:47
+#: templates/alsijil/class_register/week_view.html:33
+#, python-format
+msgid "CW %(week)s: %(instance)s"
+msgstr "KW %(week)s: %(instance)s"
+
+#: templates/alsijil/class_register/week_view.html:50
 msgid "Period"
 msgstr "Stunde"
 
-#: templates/alsijil/week_view.html:49
+#: templates/alsijil/class_register/week_view.html:52
+msgid "Groups"
+msgstr "Gruppen"
+
+#: templates/alsijil/class_register/week_view.html:54
+#: templates/alsijil/print/full_register.html:169
+#: templates/alsijil/print/full_register.html:200
+msgid "Subject"
+msgstr "Fach"
+
+#: templates/alsijil/class_register/week_view.html:55
 msgid "Teachers"
 msgstr "Lehrkräfte"
 
-#: templates/alsijil/week_view.html:97
+#: templates/alsijil/class_register/week_view.html:110
 msgid "unexcused"
 msgstr "unentschuldigt"
 
-#: templates/alsijil/week_view.html:100
+#: templates/alsijil/class_register/week_view.html:113
 msgid "Summed up tardiness"
 msgstr "Summierte Verspätung"
 
-#: templates/alsijil/week_view.html:122
-msgid "No group selected"
-msgstr "Keine Gruppe ausgewählt"
+#: templates/alsijil/class_register/week_view.html:142
+msgid "No lessons available"
+msgstr "Keine Stunden verfügbar"
 
-#: templates/alsijil/week_view.html:125
+#: templates/alsijil/class_register/week_view.html:145
 msgid ""
 "\n"
-"            There are no lessons for the selected group, teacher, room or "
-"time.\n"
+"            There are no lessons for the selected group or teacher in this week.\n"
 "          "
 msgstr ""
 "\n"
-"            Es gibt keine Stunden für die ausgewählte Gruppe, den Lehrer "
-"oder Raum.\n"
+"            Es gibt keine Stunden für die ausgewählte Gruppe oder Lehrkraft in dieser Woche.\n"
 "          "
 
-#: views.py:56
+#: templates/alsijil/excuse_type/create.html:6
+#: templates/alsijil/excuse_type/create.html:7
+#: templates/alsijil/excuse_type/list.html:16
+msgid "Create excuse type"
+msgstr "Entschuldigungsart erstellen"
+
+#: templates/alsijil/excuse_type/edit.html:6
+#: templates/alsijil/excuse_type/edit.html:7
+msgid "Edit excuse type"
+msgstr "Entschuldigungsart bearbeiten"
+
+#: templates/alsijil/excuse_type/warning.html:5
 msgid ""
-"You either selected an invalid lesson or there is currently no lesson in "
-"progress."
+"\n"
+"      This function should only be used to define alternatives to the default excuse which also will be counted extra.\n"
+"      Don't use this to create a default excuse or if you don't divide between different types of excuse.\n"
+"    "
+msgstr ""
+"\n"
+"      Diese Funktion sollte nur benutzt werden, um Alternativen zur normalen Entschuldigung, welche von sich aus extra gezählt wird, zu definieren.\n"
+"Benutzen Sie diese Funktion nicht, um eine Entschuldigungsart für normale Entschuldigungen zu erstellen oder wenn Sie nicht zwischen verschiedenen Entschuldigungsarten unterscheiden möchten.\n"
+"    "
+
+#: templates/alsijil/extra_mark/create.html:6
+#: templates/alsijil/extra_mark/create.html:7
+#: templates/alsijil/extra_mark/list.html:14
+msgid "Create extra mark"
+msgstr "Zusätzliche Markierung erstellen"
+
+#: templates/alsijil/extra_mark/edit.html:6
+#: templates/alsijil/extra_mark/edit.html:7
+msgid "Edit extra mark"
+msgstr "Zusätzliche Markierung bearbeiten"
+
+#: templates/alsijil/partials/absences.html:4
+#: templates/alsijil/print/full_register.html:126
+msgid "(e)"
+msgstr "(e)"
+
+#: templates/alsijil/partials/absences.html:4
+#: templates/alsijil/print/full_register.html:130
+msgid "(u)"
+msgstr "(u)"
+
+#: templates/alsijil/partials/lesson_status_icon.html:6
+msgid "Data complete"
+msgstr "Daten vollständig"
+
+#: templates/alsijil/partials/lesson_status_icon.html:12
+#: templates/alsijil/print/full_register.html:406
+msgid "Lesson cancelled"
+msgstr "Stunde ist ausgefallen"
+
+#: templates/alsijil/partials/lesson_status_icon.html:14
+msgid "Missing data"
+msgstr "Fehlende Daten"
+
+#: templates/alsijil/partials/lesson_status_icon.html:16
+msgid "Pending"
+msgstr "Findet gerade statt"
+
+#: templates/alsijil/partials/lesson_status_icon.html:18
+msgid "Substitution"
+msgstr "Vertretung"
+
+#: templates/alsijil/print/full_register.html:6
+msgid "Class register:"
+msgstr "Klassenbuch:"
+
+#: templates/alsijil/print/full_register.html:26
+#: templates/alsijil/print/full_register.html:59
+msgid "Owners"
+msgstr "Leiter/-innen"
+
+#: templates/alsijil/print/full_register.html:30
+msgid "Printed on"
+msgstr "Gedruckt am"
+
+#: templates/alsijil/print/full_register.html:38
+msgid ""
+"\n"
+"        This printout is intended for archival purposes. The main copy of\n"
+"        the class register is stored in the AlekSIS School Information\n"
+"        System.\n"
+"      "
+msgstr ""
+"\n"
+"        Dieser Ausdruck ist für Archivierungszwecke gedacht. Die Hauptkopie\n"
+"            des Klassenbuches ist im AlekSIS-Schul-Informations-System gespeichert.\n"
+"      "
+
+#: templates/alsijil/print/full_register.html:45
+msgid ""
+"\n"
+"        Copies of the class register, both digital and as printout, must\n"
+"        only be kept inside the school and/or on devices authorised by the\n"
+"        school.\n"
+"      "
+msgstr ""
+"\n"
+"        Kopien des Klassenbuches, sowohl digital als auch als Ausdruck, dürfen\n"
+"            ausschließlich in der Schule und/oder auf von der Schule autorisierten Geräten\n"
+"            gespeichert werden.\n"
+"      "
+
+#: templates/alsijil/print/full_register.html:52
+msgid ""
+"\n"
+"        The owner of the group and the headteacher confirm the above, as\n"
+"        well as the correctness of this printout.\n"
+"      "
+msgstr ""
+"\n"
+"        Die Leitung der Gruppe sowie die Schulleitung bestätigen die obigen Hinweise sowie\n"
+"            die Richtigkeit des Ausdrucks.\n"
+"      "
+
+#: templates/alsijil/print/full_register.html:62
+msgid "Headteacher"
+msgstr "Schulleitung"
+
+#: templates/alsijil/print/full_register.html:69
+msgid "Abbreviations"
+msgstr "Abkürzungen"
+
+#: templates/alsijil/print/full_register.html:71
+msgid "General"
+msgstr "Allgemein"
+
+#: templates/alsijil/print/full_register.html:78
+msgid "Late"
+msgstr "Verspätet"
+
+#: templates/alsijil/print/full_register.html:81
+#: templates/alsijil/print/full_register.html:283
+msgid "Unexcused"
+msgstr "Unentschuldigt"
+
+#: templates/alsijil/print/full_register.html:89
+msgid "Custom excuse types"
+msgstr "Benutzerdefinierte Entschuldigunsarten"
+
+#: templates/alsijil/print/full_register.html:101
+msgid "Available extra marks"
+msgstr "Verfügbare zusätzliche Markierungen"
+
+#: templates/alsijil/print/full_register.html:115
+msgid "Persons in group"
+msgstr "Personen in der Gruppe"
+
+#: templates/alsijil/print/full_register.html:120
+msgid "No."
+msgstr "Nr."
+
+#: templates/alsijil/print/full_register.html:121
+msgid "Last name"
+msgstr "Nachname"
+
+#: templates/alsijil/print/full_register.html:122
+msgid "First name"
+msgstr "Vorname"
+
+#: templates/alsijil/print/full_register.html:123
+msgid "Sex"
+msgstr "Geschlecht"
+
+#: templates/alsijil/print/full_register.html:124
+msgid "Date of birth"
+msgstr "Geburtsdatum"
+
+#: templates/alsijil/print/full_register.html:125
+msgid "(a)"
+msgstr "(a)"
+
+#: templates/alsijil/print/full_register.html:131
+msgid "(b)"
+msgstr "(b)"
+
+#: templates/alsijil/print/full_register.html:164
+msgid "Teachers and lessons in group"
+msgstr "Lehrkräfte und Fächer der Gruppe"
+
+#: templates/alsijil/print/full_register.html:171
+#: templates/alsijil/print/full_register.html:202
+msgid "Lesson start"
+msgstr "Unterrichtsbeginn"
+
+#: templates/alsijil/print/full_register.html:172
+#: templates/alsijil/print/full_register.html:203
+msgid "Lesson end"
+msgstr "Unterrichtsende"
+
+#: templates/alsijil/print/full_register.html:173
+#: templates/alsijil/print/full_register.html:204
+msgid "Per week"
+msgstr "Pro Woche"
+
+#: templates/alsijil/print/full_register.html:194
+msgid "Teachers and lessons in child groups"
+msgstr "Lehrkräfte und Fächer von Untergruppen"
+
+#: templates/alsijil/print/full_register.html:227
+msgid "Personal overview"
+msgstr "Persönliche Übersicht"
+
+#: templates/alsijil/print/full_register.html:229
+msgid "Contact details"
+msgstr "Kontaktdetails"
+
+#: templates/alsijil/print/full_register.html:266
+msgid "Absences and tardiness"
+msgstr "Abwesenheiten und Verspätungen"
+
+#: templates/alsijil/print/full_register.html:269
+msgid "Absences"
+msgstr "Absenzen"
+
+#: templates/alsijil/print/full_register.html:274
+msgid "thereof"
+msgstr "davon"
+
+#: templates/alsijil/print/full_register.html:304
+msgid "Relevant personal notes"
+msgstr "Relevante persönliche Notizen"
+
+#: templates/alsijil/print/full_register.html:308
+msgid "Date"
+msgstr "Datum"
+
+#: templates/alsijil/print/full_register.html:309
+#: templates/alsijil/print/full_register.html:369
+msgid "Pe."
+msgstr "Std."
+
+#: templates/alsijil/print/full_register.html:310
+#: templates/alsijil/print/full_register.html:370
+msgid "Subj."
+msgstr "Fa."
+
+#: templates/alsijil/print/full_register.html:311
+#: templates/alsijil/print/full_register.html:374
+msgid "Te."
+msgstr "Lk."
+
+#: templates/alsijil/print/full_register.html:313
+msgid "Tard."
+msgstr "Verspät."
+
+#: templates/alsijil/print/full_register.html:330
+msgid "Yes"
+msgstr "Ja"
+
+#: templates/alsijil/print/full_register.html:335
+#: templates/alsijil/print/full_register.html:424
+#: templates/alsijil/print/full_register.html:439
+msgid "e"
+msgstr "e"
+
+#: templates/alsijil/print/full_register.html:363
+msgid "Lesson documentation for week"
+msgstr "Unterrichtsdokumentation für Woche"
+
+#: templates/alsijil/print/full_register.html:373
+msgid "Notes"
+msgstr "Notizen"
+
+#: views.py:76
+msgid "You either selected an invalid lesson or there is currently no lesson in progress."
 msgstr ""
 "Sie haben eine ungültige Stunde ausgewählt oder es\n"
 "      läuft momentan keine Stunde."
 
-#: views.py:68
-msgid ""
-"You are not allowed to create a lesson documentation for a lesson in the "
-"future."
-msgstr ""
-"Ihnen ist es nicht erlaubt, eine Eintragung für eine Unterrichtsstunde in "
-"der Zukunft vorzunehmen."
+#: views.py:90
+msgid "You are not allowed to create a lesson documentation for a lesson in the future."
+msgstr "Ihnen ist es nicht erlaubt, eine Eintragung für eine Unterrichtsstunde in der Zukunft vorzunehmen."
 
-#: views.py:306
+#: views.py:116
+msgid "The lesson documentation has been saved."
+msgstr "Die Stunden-Dokumentation wurde gespeichert."
+
+#: views.py:136
+msgid "The personal notes have been saved."
+msgstr "Die persönlichen Notizen wurden gespeichert."
+
+#: views.py:327
+msgid "There is no current school term."
+msgstr "Es gibt aktuell kein Schuljahr."
+
+#: views.py:463
 msgid "The absence has been saved."
 msgstr "Die Abwesenheit wurde gespeichert."
 
-#: views.py:344
-msgid "The filter has been saved"
-msgstr "Der Filter wurde gespeichert"
+#: views.py:488
+msgid "The extra mark has been created."
+msgstr "Die zusätzliche Markierung wurde erstellt."
 
-#: views.py:360
-msgid "The filter has been deleted."
-msgstr "Der Filter wurde gespeichert."
+#: views.py:499
+msgid "The extra mark has been saved."
+msgstr "Die zusätzliche Markierung wurde gespeichert."
+
+#: views.py:509
+msgid "The extra mark has been deleted."
+msgstr "Die zusätzliche Markierung wurde gelöscht."
+
+#: views.py:529
+msgid "The excuse type has been created."
+msgstr "Die Entschuldigungsart wurde erstellt."
+
+#: views.py:540
+msgid "The excuse type has been saved."
+msgstr "Die Entschuldigunsart wurde gespeichert."
+
+#: views.py:550
+msgid "The excuse type has been deleted."
+msgstr "Die Entschuldigungsart wurde gelöscht."
+
+#~ msgid "Personal note filters"
+#~ msgstr "Filter für persönliche Notizen"
+
+#~ msgid "Identifier"
+#~ msgstr "Kennung"
+
+#~ msgid "Description"
+#~ msgstr "Beschreibung"
+
+#~ msgid "Match expression"
+#~ msgstr "Suchausdruck"
+
+#~ msgid "Personal note filter"
+#~ msgstr "Filter für persönliche Notizen"
+
+#~ msgid "All personal note filters"
+#~ msgstr "Alle Filter für persönliche Notizen"
+
+#~ msgid "Add filter"
+#~ msgstr "Filter hinzufügen"
+
+#~ msgid "Update personal note filter"
+#~ msgstr "Filter für persönliche Notizen aktualisieren"
+
+#~ msgid "Create personal note filter"
+#~ msgstr "Filter für persönliche Notizen erstellen"
+
+#~ msgid "Delete filter"
+#~ msgstr "Filter löschen"
+
+#~ msgid "Statistics on remarks"
+#~ msgstr "Statistiken zu Bemerkungen"
+
+#~ msgid "Count"
+#~ msgstr "Anzahl"
+
+#~ msgid "Room"
+#~ msgstr "Raum"
+
+#~ msgid "List of all personal note filters"
+#~ msgstr "Liste aller Filter für persönliche Notizen"
+
+#~ msgid "Subs."
+#~ msgstr "Vertr."
+
+#~ msgid "No group selected"
+#~ msgstr "Keine Gruppe ausgewählt"
 
 #~ msgid "Save"
 #~ msgstr "Speichern"

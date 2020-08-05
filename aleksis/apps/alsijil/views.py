@@ -14,23 +14,25 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.apps.chronos.util.date import get_weeks_for_year
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
+from aleksis.core.util.core_helpers import get_site_preferences
 
 from .forms import (
     ExcuseTypeForm,
+    ExtraMarkForm,
     LessonDocumentationForm,
-    PersonalNoteFilterForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, LessonDocumentation, PersonalNoteFilter
-from .tables import ExcuseTypeTable, PersonalNoteFilterTable
+from .models import ExcuseType, ExtraMark, LessonDocumentation
+from .tables import ExcuseTypeTable, ExtraMarkTable
 
 
 def lesson(
@@ -47,6 +49,14 @@ def lesson(
         lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(
             pk=period_id
         )
+
+        date_of_lesson = week_weekday_to_date(wanted_week, lesson_period.period.weekday)
+
+        if (
+            date_of_lesson < lesson_period.lesson.validity.date_start
+            or date_of_lesson > lesson_period.lesson.validity.date_end
+        ):
+            return HttpResponseNotFound()
     else:
         # Determine current lesson by current date and time
         lesson_period = (
@@ -106,18 +116,23 @@ def lesson(
 
             messages.success(request, _("The lesson documentation has been saved."))
 
-        if personal_note_formset.is_valid():
-            instances = personal_note_formset.save()
+        substitution = lesson_period.get_substitution()
+        if (
+            not getattr(substitution, "cancelled", False)
+            or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
+        ):
+            if personal_note_formset.is_valid():
+                instances = personal_note_formset.save()
 
-            # Iterate over personal notes and carry changed absences to following lessons
-            for instance in instances:
-                instance.person.mark_absent(
-                    wanted_week[lesson_period.period.weekday],
-                    lesson_period.period.period + 1,
-                    instance.absent,
-                    instance.excused,
-                    instance.excuse_type,
-                )
+                # Iterate over personal notes and carry changed absences to following lessons
+                for instance in instances:
+                    instance.person.mark_absent(
+                        wanted_week[lesson_period.period.weekday],
+                        lesson_period.period.period + 1,
+                        instance.absent,
+                        instance.excused,
+                        instance.excuse_type,
+                    )
 
             messages.success(request, _("The personal notes have been saved."))
 
@@ -247,6 +262,21 @@ def week_view(
             )
         )
 
+        for extra_mark in ExtraMark.objects.all():
+            persons_qs = persons_qs.annotate(
+                **{
+                    extra_mark.count_label: Count(
+                        "personal_notes",
+                        filter=Q(
+                            personal_notes__lesson_period__in=lesson_periods_pk,
+                            personal_notes__week=wanted_week.week,
+                            personal_notes__extra_marks=extra_mark,
+                        ),
+                        distinct=True,
+                    )
+                }
+            )
+
         persons = []
         for person in persons_qs:
             persons.append(
@@ -270,6 +300,7 @@ def week_view(
             for a in args:
                 iterable.append(a)
 
+    context["extra_marks"] = ExtraMark.objects.all()
     context["week"] = wanted_week
     context["weeks"] = get_weeks_for_year(year=wanted_week.year)
     context["lesson_periods"] = lesson_periods
@@ -307,17 +338,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     group = get_object_or_404(Group, pk=id_)
 
-    # Get all lesson periods for the selected group
-    lesson_periods = (
-        LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related("documentations", "personal_notes")
-    )
-
     current_school_term = SchoolTerm.current
 
     if not current_school_term:
         return HttpResponseNotFound(_("There is no current school term."))
+
+    # Get all lesson periods for the selected group
+    lesson_periods = (
+        LessonPeriod.objects.filter_group(group)
+        .filter(lesson__validity__school_term=current_school_term)
+        .distinct()
+        .prefetch_related("documentations", "personal_notes")
+    )
 
     weeks = CalendarWeek.weeks_within(
         current_school_term.date_start, current_school_term.date_end,
@@ -351,9 +383,16 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, documentations, notes, substitution)
                 )
 
-    persons = group.members.annotate(
+    persons = Person.objects.filter(
+        personal_notes__groups_of_person=group,
+        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+    ).annotate(
         absences_count=Count(
-            "personal_notes__absent", filter=Q(personal_notes__absent=True)
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            ),
         ),
         excused=Count(
             "personal_notes__absent",
@@ -361,14 +400,32 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 personal_notes__absent=True,
                 personal_notes__excused=True,
                 personal_notes__excuse_type__isnull=True,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
             ),
         ),
         unexcused=Count(
             "personal_notes__absent",
-            filter=Q(personal_notes__absent=True, personal_notes__excused=False),
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=False,
+                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            ),
         ),
         tardiness=Sum("personal_notes__late"),
     )
+
+    for extra_mark in ExtraMark.objects.all():
+        persons = persons.annotate(
+            **{
+                extra_mark.count_label: Count(
+                    "personal_notes",
+                    filter=Q(
+                        personal_notes__extra_marks=extra_mark,
+                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+                    ),
+                )
+            }
+        )
 
     for excuse_type in ExcuseType.objects.all():
         persons = persons.annotate(
@@ -378,21 +435,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     filter=Q(
                         personal_notes__absent=True,
                         personal_notes__excuse_type=excuse_type,
-                    ),
-                )
-            }
-        )
-
-    # FIXME Move to manager
-    personal_note_filters = PersonalNoteFilter.objects.all()
-    for personal_note_filter in personal_note_filters:
-        persons = persons.annotate(
-            **{
-                "_personal_notes_with_%s"
-                % personal_note_filter.identifier: Count(
-                    "personal_notes__remarks",
-                    filter=Q(
-                        personal_notes__remarks__iregex=personal_note_filter.regex
+                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
                     ),
                 )
             }
@@ -400,11 +443,12 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     context["school_term"] = current_school_term
     context["persons"] = persons
-    context["personal_note_filters"] = personal_note_filters
     context["excuse_types"] = ExcuseType.objects.all()
+    context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
     context["weeks"] = weeks
     context["periods_by_day"] = periods_by_day
+    context["lesson_periods"] = lesson_periods
     context["today"] = date.today()
 
     return render(request, "alsijil/print/full_register.html", context)
@@ -441,57 +485,45 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
-def list_personal_note_filters(request: HttpRequest) -> HttpResponse:
-    context = {}
+class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
+    """Table of all extra marks."""
 
-    personal_note_filters = PersonalNoteFilter.objects.all()
-
-    # Prepare table
-    personal_note_filters_table = PersonalNoteFilterTable(personal_note_filters)
-    RequestConfig(request).configure(personal_note_filters_table)
-
-    context["personal_note_filters_table"] = personal_note_filters_table
-
-    return render(request, "alsijil/personal_note_filter/list.html", context)
+    model = ExtraMark
+    table_class = ExtraMarkTable
+    permission_required = "core.view_extramark"
+    template_name = "alsijil/extra_mark/list.html"
 
 
-def edit_personal_note_filter(
-    request: HttpRequest, id_: Optional["int"] = None
-) -> HttpResponse:
-    context = {}
+class ExtraMarkCreateView(AdvancedCreateView, PermissionRequiredMixin):
+    """Create view for extra marks."""
 
-    if id_:
-        personal_note_filter = PersonalNoteFilter.objects.get(id=id_)
-        context["personal_note_filter"] = personal_note_filter
-        personal_note_filter_form = PersonalNoteFilterForm(
-            request.POST or None, instance=personal_note_filter
-        )
-    else:
-        personal_note_filter_form = PersonalNoteFilterForm(request.POST or None)
-
-    if request.method == "POST":
-        if personal_note_filter_form.is_valid():
-            personal_note_filter_form.save(commit=True)
-
-            messages.success(request, _("The filter has been saved"))
-            return redirect("list_personal_note_filters")
-
-    context["personal_note_filter_form"] = personal_note_filter_form
-
-    return render(request, "alsijil/personal_note_filter/manage.html", context)
+    model = ExtraMark
+    form_class = ExtraMarkForm
+    permission_required = "core.create_extramark"
+    template_name = "alsijil/extra_mark/create.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been created.")
 
 
-def delete_personal_note_filter(request: HttpRequest, id_: int) -> HttpResponse:
-    context = {}
+class ExtraMarkEditView(AdvancedEditView, PermissionRequiredMixin):
+    """Edit view for extra marks."""
 
-    personal_note_filter = get_object_or_404(PersonalNoteFilter, pk=id_)
+    model = ExtraMark
+    form_class = ExtraMarkForm
+    permission_required = "core.edit_extramark"
+    template_name = "alsijil/extra_mark/edit.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been saved.")
 
-    PersonalNoteFilter.objects.filter(pk=id_).delete()
 
-    messages.success(request, _("The filter has been deleted."))
+class ExtraMarkDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+    """Delete view for extra marks"""
 
-    context["personal_note_filter"] = personal_note_filter
-    return redirect("list_personal_note_filters")
+    model = ExtraMark
+    permission_required = "core.delete_extramark"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("extra_marks")
+    success_message = _("The extra mark has been deleted.")
 
 
 class ExcuseTypeListView(SingleTableView, PermissionRequiredMixin):
