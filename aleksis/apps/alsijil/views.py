@@ -2,22 +2,21 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, F, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 
 from calendarweek import CalendarWeek
-from django_tables2 import RequestConfig, SingleTableView
+from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution
+from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
-from aleksis.apps.chronos.util.date import week_weekday_to_date
-from aleksis.apps.chronos.util.date import get_weeks_for_year
+from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
@@ -320,11 +319,9 @@ def week_view(
 
     context["week_select"] = {
         "year": wanted_week.year,
-        "dest": reverse("week_view_by_week", args=args_dest).replace(
-            str(wanted_week.year), "year"
-        ).replace(
-            str(wanted_week.week), "cw"
-        ),
+        "dest": reverse("week_view_by_week", args=args_dest)
+        .replace(str(wanted_week.year), "year")
+        .replace(str(wanted_week.week), "cw"),
     }
 
     context["url_prev"] = reverse("week_view_by_week", args=args_prev)
