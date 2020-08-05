@@ -13,6 +13,7 @@ from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
+from aleksis.apps.alsijil.util import append_if_all
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
@@ -293,11 +294,6 @@ def week_view(
     lesson_periods = sorted(
         lesson_periods, key=lambda x: (x.period.weekday, x.period.period)
     )
-
-    def append_if_all(iterable, *args):
-        if all(args):
-            for a in args:
-                iterable.append(a)
 
     context["extra_marks"] = ExtraMark.objects.all()
     context["week"] = wanted_week
