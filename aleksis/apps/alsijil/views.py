@@ -491,7 +491,7 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
-class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
+class ExtraMarkListView(PermissionRequiredMixin, SingleTableView):
     """Table of all extra marks."""
 
     model = ExtraMark
@@ -500,7 +500,7 @@ class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
     template_name = "alsijil/extra_mark/list.html"
 
 
-class ExtraMarkCreateView(AdvancedCreateView, PermissionRequiredMixin):
+class ExtraMarkCreateView(PermissionRequiredMixin, AdvancedCreateView):
     """Create view for extra marks."""
 
     model = ExtraMark
@@ -511,7 +511,7 @@ class ExtraMarkCreateView(AdvancedCreateView, PermissionRequiredMixin):
     success_message = _("The extra mark has been created.")
 
 
-class ExtraMarkEditView(AdvancedEditView, PermissionRequiredMixin):
+class ExtraMarkEditView(PermissionRequiredMixin, AdvancedEditView):
     """Edit view for extra marks."""
 
     model = ExtraMark
@@ -522,7 +522,7 @@ class ExtraMarkEditView(AdvancedEditView, PermissionRequiredMixin):
     success_message = _("The extra mark has been saved.")
 
 
-class ExtraMarkDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionMixin):
+class ExtraMarkDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
     """Delete view for extra marks"""
 
     model = ExtraMark
