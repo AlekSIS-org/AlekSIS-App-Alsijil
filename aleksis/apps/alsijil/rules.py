@@ -127,3 +127,19 @@ add_perm("alsijil.edit_excusetype", edit_excusetype_predicate)
 # Delete excuse type
 delete_excusetype_predicate = has_person & has_global_perm("alsijil.delete_excusetype")
 add_perm("alsijil.delete_excusetype", delete_excusetype_predicate)
+
+# View extra mark list
+view_extramark_predicate = has_person & has_global_perm("alsijil.view_extramark")
+add_perm("alsijil.view_extramark", view_extramark_predicate)
+
+# Add extra mark
+add_extramark_predicate = has_person & has_global_perm("alsijil.add_extramark")
+add_perm("alsijil.add_extramark", add_extramark_predicate)
+
+# Edit extra mark
+edit_extramark_predicate = has_person & has_global_perm("alsijil.change_extramark")
+add_perm("alsijil.edit_extramark", edit_extramark_predicate)
+
+# Delete extra mark
+delete_extramark_predicate = has_person & has_global_perm("alsijil.delete_extramark")
+add_perm("alsijil.delete_excusetype", delete_extramark_predicate)

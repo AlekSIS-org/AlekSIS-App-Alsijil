@@ -496,7 +496,7 @@ class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
 
     model = ExtraMark
     table_class = ExtraMarkTable
-    permission_required = "core.view_extramark"
+    permission_required = "alsijil.view_extramark"
     template_name = "alsijil/extra_mark/list.html"
 
 
@@ -505,7 +505,7 @@ class ExtraMarkCreateView(AdvancedCreateView, PermissionRequiredMixin):
 
     model = ExtraMark
     form_class = ExtraMarkForm
-    permission_required = "core.create_extramark"
+    permission_required = "alsijil.create_extramark"
     template_name = "alsijil/extra_mark/create.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been created.")
@@ -516,7 +516,7 @@ class ExtraMarkEditView(AdvancedEditView, PermissionRequiredMixin):
 
     model = ExtraMark
     form_class = ExtraMarkForm
-    permission_required = "core.edit_extramark"
+    permission_required = "alsijil.edit_extramark"
     template_name = "alsijil/extra_mark/edit.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been saved.")
@@ -526,7 +526,7 @@ class ExtraMarkDeleteView(AdvancedDeleteView, PermissionRequiredMixin, RevisionM
     """Delete view for extra marks"""
 
     model = ExtraMark
-    permission_required = "core.delete_extramark"
+    permission_required = "alsijil.delete_extramark"
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been deleted.")
