@@ -47,13 +47,13 @@ view_personal_note_predicate = has_person & (
 )
 add_perm("alsijil.view_personalnote", view_personal_note_predicate)
 
-# Edit lesson personal notes
-edit_lesson_personal_notes_predicate = has_person & (
+# Edit personal note
+edit_personal_note_predicate = has_person & (
     has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
     | is_lesson_teacher
 )
-add_perm("alsijil.edit_personalnote", edit_lesson_personal_notes_predicate)
+add_perm("alsijil.edit_personalnote", edit_personal_note_predicate)
 
 # View lesson documentation
 view_lesson_documentation_predicate = has_person & (
