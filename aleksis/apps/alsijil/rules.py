@@ -134,8 +134,8 @@ delete_excusetype_predicate = has_person & has_global_perm("alsijil.delete_excus
 add_perm("alsijil.delete_excusetype", delete_excusetype_predicate)
 
 # View extra mark list
-view_extramark_predicate = has_person & has_global_perm("alsijil.view_extramark")
-add_perm("alsijil.view_extramark", view_extramark_predicate)
+view_extramarks_predicate = has_person & has_global_perm("alsijil.view_extramark")
+add_perm("alsijil.view_extramarks", view_extramarks_predicate)
 
 # Add extra mark
 add_extramark_predicate = has_person & has_global_perm("alsijil.add_extramark")

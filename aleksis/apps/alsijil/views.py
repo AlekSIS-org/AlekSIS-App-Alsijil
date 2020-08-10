@@ -537,7 +537,7 @@ class ExcuseTypeListView(PermissionRequiredMixin, SingleTableView):
 
     model = ExcuseType
     table_class = ExcuseTypeTable
-    permission_required = "alsijil.view_excusetype"
+    permission_required = "alsijil.view_excusetypes"
     template_name = "alsijil/excuse_type/list.html"
 
 
