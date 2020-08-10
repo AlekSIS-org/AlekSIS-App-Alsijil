@@ -14,3 +14,11 @@ class BlockPersonalNotesForCancelled(BooleanPreference):
     name = "block_personal_notes_for_cancelled"
     default = True
     verbose_name = _("Block adding personal notes for cancelled lessons")
+
+
+@site_preferences_registry.register
+class ViewOwnPersonalNotes(BooleanPreference):
+    section = alsijil
+    name = "view_own_personal_notes"
+    default = True
+    verbose_name = _("Allow users to view their own personal notes")

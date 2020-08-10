@@ -6,7 +6,9 @@ from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.predicates import check_object_permission
+from aleksis.core.util.predicates import check_object_permission, get_site_preferences
+
+from ..models import PersonalNote
 
 
 @predicate
@@ -16,12 +18,7 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a teacher
     in the lesson or the substitution linked to the given LessonPeriod.
     """
-    if hasattr(obj, "lesson"):
-        return (
-            user.person in obj.lesson.teachers.all()
-            or user.person in Person.objects.filter(lesson_substitutions__lesson_period=obj, lesson_substitutions__week=obj._week)
-        )
-    return True
+    return user.person in Person.objects.filter(lesson_substitutions=obj.get_substitution())
 
 
 @predicate
@@ -122,3 +119,66 @@ def has_lesson_group_object_perm(perm: str):
         return True
 
     return fn
+
+
+def has_personal_note_group_perm(perm: str):
+    """Predicate builder for permissions on personal notes
+
+    Checks whether a user has a permission on any group of a person of a PersonalNote.
+    """
+    name = f"has_personal_note_person_or_group_perm:{perm}"
+
+    @predicate(name)
+    def fn(user: User, obj: PersonalNote) -> bool:
+        if hasattr(obj, "person"):
+            for group in obj.person.member_of.all():
+                if check_object_permission(user, perm, group):
+                    return True
+            return False
+
+    return fn
+
+
+@predicate
+def is_own_personal_note(user: User, obj: PersonalNote):
+    """Predicate for users referred to in a personal note
+
+    Checks whether the user referred to in a PersonalNote is the active user.
+    Is configurable via dynamic preferences.
+    """
+    if hasattr(obj, "person"):
+        if get_site_preferences()["alsijil__view_own_personal_notes"] and obj.person is user.person:
+            return True
+        return False
+
+
+@predicate
+def is_personal_note_lesson_teacher(user: User, obj: PersonalNote):
+    """Predicate for teachers of a lesson referred to in the lesson period of a personal note.
+
+    Checks whether the person linked to the user is a teacher
+    in the lesson or the substitution linked to the LessonPeriod of the given PersonalNote.
+    """
+    if hasattr(obj, "lesson_period"):
+        if hasattr(obj.lesson_period, "lesson"):
+            return (
+                user.person in obj.lesson_period.lesson.teachers.all()
+                or user.person in Person.objects.filter(lesson_substitutions=obj.lesson_period.get_substitution())
+            )
+        return False
+    return False
+
+
+@predicate
+def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote):
+    """
+    Predicate for parent group owners of a lesson referred to in the lesson period of a personal note.
+
+    Checks whether the person linked to the user is the owner of
+    any parent groups of any groups of the given LessonPeriod lesson of the given PersonalNote.
+    """
+    if hasattr(obj, "lesson_period"):
+        if hasattr(obj.lesson_period, "lesson"):
+            return obj.lesson_period.lesson.groups.filter(parent_groups__owners=user.person).exists()
+        return False
+    return False

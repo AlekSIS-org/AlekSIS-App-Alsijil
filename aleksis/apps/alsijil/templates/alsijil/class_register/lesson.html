@@ -131,7 +131,10 @@
                         <th>{{ extra_mark.name }}</th>
                         <td>
                           {% for note in notes %}
-                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+                            {% if can_view_personalnote %}
+                              <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% endif %}
                           {% endfor %}
                         </td>
                       </tr>
