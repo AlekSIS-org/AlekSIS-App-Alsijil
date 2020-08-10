@@ -142,4 +142,4 @@ add_perm("alsijil.edit_extramark", edit_extramark_predicate)
 
 # Delete extra mark
 delete_extramark_predicate = has_person & has_global_perm("alsijil.delete_extramark")
-add_perm("alsijil.delete_excusetype", delete_extramark_predicate)
+add_perm("alsijil.delete_extramark", delete_extramark_predicate)
