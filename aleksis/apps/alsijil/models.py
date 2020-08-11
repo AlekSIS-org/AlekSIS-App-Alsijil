@@ -1,7 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from calendarweek import CalendarWeek
+
+from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.mixins import ExtensibleModel
+from aleksis.core.util.core_helpers import get_site_preferences
 
 
 def isidentifier(value: str) -> bool:
@@ -101,6 +105,51 @@ class LessonDocumentation(ExtensibleModel):
     group_note = models.CharField(
         verbose_name=_("Group note"), max_length=200, blank=True
     )
+
+    def _take_over_data(self):
+        """Take over data to the next lesson, if exists and data are not already set.
+
+        Can be deactivated using site preference ``alsijil__take_over_double``.
+        """
+        if get_site_preferences()["alsijil__take_over_double"] and (
+            self.topic or self.homework or self.group_note
+        ):
+            try:
+                second_lesson = LessonPeriod.objects.get(
+                    lesson=self.lesson_period.lesson,
+                    period__weekday=self.lesson_period.period.weekday,
+                    period__period=self.lesson_period.period.period + 1,
+                )
+                lesson_documentation = second_lesson.get_or_create_lesson_documentation(
+                    CalendarWeek(
+                        week=self.week,
+                        year=self.lesson_period.lesson.get_year(self.week),
+                    )
+                )
+
+                changed = False
+
+                if not lesson_documentation.topic:
+                    lesson_documentation.topic = self.topic
+                    changed = True
+
+                if not lesson_documentation.homework:
+                    lesson_documentation.homework = self.homework
+                    changed = True
+
+                if not lesson_documentation.group_note:
+                    lesson_documentation.group_note = self.group_note
+                    changed = True
+
+                if changed:
+                    lesson_documentation.save()
+            except LessonPeriod.DoesNotExist:
+                # Do nothing if it's a single lesson
+                pass
+
+    def save(self, *args, **kwargs):
+        self._take_over_data()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Lesson documentation")
