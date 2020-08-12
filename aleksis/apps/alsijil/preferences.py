@@ -17,13 +17,13 @@ class BlockPersonalNotesForCancelled(BooleanPreference):
 
 
 @site_preferences_registry.register
-class TakeOverDataForDoubleLessons(BooleanPreference):
+class CarryOverDataToNextPeriods(BooleanPreference):
     section = alsijil
-    name = "take_over_double"
+    name = "carry_over"
     default = True
     verbose_name = _(
-        "Take over data from first lesson for second lesson in double lessons"
+        "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
     )
     help_text = _(
-        "This will take over data only if the data in the second lesson are empty."
+        "This will carry over data only if the data in the following periods are empty."
     )
