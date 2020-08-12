@@ -107,7 +107,7 @@ class LessonDocumentation(ExtensibleModel):
     )
 
     def _carry_over_data(self):
-        """Carry over data to the following lesson periods, if exist and data are not already set.
+        """Carry over data to directly adjacent periods in this lesson if data is not already set.
 
         Can be deactivated using site preference ``alsijil__carry_over``.
         """
