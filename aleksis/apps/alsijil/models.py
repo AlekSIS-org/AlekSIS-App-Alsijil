@@ -111,13 +111,13 @@ class LessonDocumentation(ExtensibleModel):
 
         Can be deactivated using site preference ``alsijil__carry_over``.
         """
-        try:
-            second_period = LessonPeriod.objects.get(
-                lesson=self.lesson_period.lesson,
-                period__weekday=self.lesson_period.period.weekday,
-                period__period=self.lesson_period.period.period + 1,
-            )
-            lesson_documentation = second_period.get_or_create_lesson_documentation(
+        following_periods = LessonPeriod.objects.filter(
+            lesson=self.lesson_period.lesson,
+            period__weekday=self.lesson_period.period.weekday,
+            period__period__gt=self.lesson_period.period.period,
+        )
+        for period in following_periods:
+            lesson_documentation = period.get_or_create_lesson_documentation(
                 CalendarWeek(
                     week=self.week, year=self.lesson_period.lesson.get_year(self.week),
                 )
@@ -139,9 +139,6 @@ class LessonDocumentation(ExtensibleModel):
 
             if changed:
                 lesson_documentation.save()
-        except LessonPeriod.DoesNotExist:
-            # Do nothing if it's a single period
-            pass
 
     def save(self, *args, **kwargs):
         if get_site_preferences()["alsijil__carry_over"] and (
