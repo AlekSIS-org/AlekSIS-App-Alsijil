@@ -14,3 +14,16 @@ class BlockPersonalNotesForCancelled(BooleanPreference):
     name = "block_personal_notes_for_cancelled"
     default = True
     verbose_name = _("Block adding personal notes for cancelled lessons")
+
+
+@site_preferences_registry.register
+class CarryOverDataToNextPeriods(BooleanPreference):
+    section = alsijil
+    name = "carry_over"
+    default = True
+    verbose_name = _(
+        "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
+    )
+    help_text = _(
+        "This will carry over data only if the data in the following periods are empty."
+    )
