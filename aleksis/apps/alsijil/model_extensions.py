@@ -35,12 +35,19 @@ def mark_absent(
     wanted_week = CalendarWeek.from_date(day)
 
     # Get all lessons of this person on the specified day
-    lesson_periods = self.lesson_periods_as_participant.on_day(day).filter(
-        period__period__gte=from_period
+    lesson_periods = (
+        self.lesson_periods_as_participant.on_day(day)
+        .filter(period__period__gte=from_period)
+        .annotate_week(wanted_week)
     )
 
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
+        sub = lesson_period.get_substitution()
+        if sub:
+            if sub.is_cancelled:
+                continue
+
         personal_note, created = PersonalNote.objects.update_or_create(
             person=self,
             lesson_period=lesson_period,
