@@ -1,0 +1,144 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load week_helpers %}
+{% load i18n %}
+
+{% block browser_title %}{% blocktrans %}Class register: person{% endblocktrans %}{% endblock %}
+
+
+{% block page_title %}
+  {% blocktrans with person=person %}
+    Class register overview for {{ person }}
+  {% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+  <div class="col s12 m12 l6">
+    <h5>{% trans "Unexcused absences" %}</h5>
+
+    <ul class="collection">
+      {% for note in unexcused_absences %}
+        {% period_to_date note.week note.lesson_period.period as note_date %}
+        <li class="collection-item">
+          <i class="material-icons left red-text">warning</i>
+          <p class="no-margin">{{ note_date }}, {{ note.lesson_period }}</p>
+          {% if note.remarks %}
+            <p class="no-margin"><em>{{ note.remarks }}</em></p>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="collection-item flow-text">
+          {% trans "There are unexcused lessons." %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col s12 m12 l6">
+    <h5>{% trans "Relevant personal notes" %}</h5>
+    <ul class="collapsible">
+      <li>
+        <div>
+          <ul>
+            {% for note in personal_notes %}
+              {% ifchanged note.lesson_period.lesson.validity.school_term %}</ul></div></li>
+                <li {% if forloop.first %}class="active"{% endif %}>
+                <div class="collapsible-header"><i
+                        class="material-icons">date_range</i>{{ note.lesson_period.lesson.validity.school_term }}</div>
+                <div class="collapsible-body">
+                <ul class="collection">
+              {% endifchanged %}
+
+              {% ifchanged note.week %}
+                <li class="collection-item">
+                  <strong>{% blocktrans with week=note.week %}Week {{ week }}{% endblocktrans %}</strong>
+                </li>
+              {% endifchanged %}
+
+              {% period_to_date note.week note.lesson_period.period as note_date %}
+              {% ifchanged note_date %}
+                <li class="collection-item">
+                  <form action="" method="post" class="right" style="margin-top: -7px;">
+                    {% csrf_token %}
+                    {% trans "Mark all as" %}
+                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                    <button type="submit" class="btn-flat" name="excuse_type" value="e">
+                      {% trans "e" %}
+                    </button>
+                    {% for excuse_type in excuse_types %}
+                      <button type="submit" class="btn-flat" value="{{ excuse_type.pk }}" name="excuse_type">
+                        {{ excuse_type.short_name }}
+                      </button>
+                    {% endfor %}
+                  </form>
+                  <i class="material-icons left">schedule</i>
+                  {{ note_date }}
+
+
+                </li>
+              {% endifchanged %}
+
+              <li class="collection-item">
+                <div class="row no-margin">
+                  <div class="col s12 m1">
+                    {{ note.lesson_period.period.period }}.
+                  </div>
+
+                  <div class="col s12 m4">
+                    <i class="material-icons left">event_note</i>
+                    {{ note.lesson_period.get_subject.name }},
+                    {{ note.lesson_period.get_teacher_names }}
+                  </div>
+
+                  <div class="col s12 m7">
+                    {% if note.absent and not note.excused %}
+                      <form action="" method="post" class="right" style="margin-top: -7px;">
+                        {% csrf_token %}
+                        {% trans "Mark all as" %}
+                        <input type="hidden" value="{{ note.pk }}" name="personal_note">
+                        <button type="submit" class="btn-flat" name="excuse_type" value="e">
+                          {% trans "e" %}
+                        </button>
+                        {% for excuse_type in excuse_types %}
+                          <button type="submit" class="btn-flat" value="{{ excuse_type.pk }}" name="excuse_type">
+                            {{ excuse_type.short_name }}
+                          </button>
+                        {% endfor %}
+                      </form>
+                    {% endif %}
+
+                    {% if note.absent %}
+                      <div class="chip red white-text">
+                        {% trans 'Absent' %}
+                      </div>
+                    {% endif %}
+                    {% if note.excused %}
+                      <div class="chip green white-text">
+                        {% if note.excuse_type %}
+                          {{ note.excuse_type.name }}
+                        {% else %}
+                          {% trans 'Excused' %}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+
+                    {% if note.late %}
+                      <div class="chip orange white-text">
+                        {% blocktrans with late=note.late %}{{ late }}' late{% endblocktrans %}
+                      </div>
+                    {% endif %}
+
+                    {% for extra_mark in note.extra_marks.all %}
+                      <div class="chip">{{ extra_mark.name }}</div>
+                    {% endfor %}
+
+                    <em>{{ note.remarks }}</em>
+
+                  </div>
+              </li>
+            {% endfor %}
+            </li>
+            </ul>
+            </div>
+  </div>
+{% endblock %}

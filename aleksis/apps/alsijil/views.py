@@ -20,7 +20,7 @@ from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_d
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
-from aleksis.core.util.core_helpers import get_site_preferences
+from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
     ExcuseTypeForm,
@@ -30,7 +30,7 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
 
 
@@ -443,6 +443,84 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["today"] = date.today()
 
     return render(request, "alsijil/print/full_register.html", context)
+
+
+def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
+    context = {}
+    person = objectgetter_optional(Person, default_eval="request.user.person")(
+        request, id_
+    )
+    context["person"] = person
+
+    if request.method == "POST":
+        if request.POST.get("excuse_type"):
+            # Get excuse type
+            excuse_type = request.POST["excuse_type"]
+            found = False
+            if excuse_type == "e":
+                excuse_type = None
+                found = True
+            else:
+                try:
+                    excuse_type = ExcuseType.objects.get(pk=int(excuse_type))
+                    found = True
+                except (ExcuseType.DoesNotExist, ValueError):
+                    pass
+
+            if found:
+                if request.POST.get("date"):
+                    # Mark absences on date as excused
+                    try:
+                        date = datetime.strptime(
+                            request.POST["date"], "%Y-%m-%d"
+                        ).date()
+
+                        notes = person.personal_notes.filter(
+                            week=date.isocalendar()[1],
+                            lesson_period__period__weekday=date.weekday(),
+                            lesson_period__lesson__validity__date_start__lte=date,
+                            lesson_period__lesson__validity__date_end__gte=date,
+                            absent=True,
+                            excused=False,
+                        )
+                        notes.update(excused=True, excuse_type=excuse_type)
+                        messages.success(
+                            request, _("The absences have been marked as excused.")
+                        )
+                    except ValueError:
+                        pass
+                elif request.POST.get("personal_note"):
+                    # Mark specific absence as excused
+                    try:
+                        note = PersonalNote.objects.get(
+                            pk=int(request.POST["personal_note"])
+                        )
+                        if note.absent:
+                            note.excused = True
+                            note.excuse_type = excuse_type
+                            note.save()
+                            messages.success(
+                                request, _("The absence has been marked as excused.")
+                            )
+                    except (PersonalNote.DoesNotExist, ValueError):
+                        pass
+
+                person.refresh_from_db()
+
+    unexcused_absences = person.personal_notes.filter(absent=True, excused=False)
+    context["unexcused_absences"] = unexcused_absences
+
+    personal_notes = person.personal_notes.filter(
+        Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
+    ).order_by(
+        "-lesson_period__lesson__validity__date_start",
+        "-week",
+        "lesson_period__period__weekday",
+        "lesson_period__period__period",
+    )
+    context["personal_notes"] = personal_notes
+    context["excuse_types"] = ExcuseType.objects.all()
+    return render(request, "alsijil/class_register/person.html", context)
 
 
 def register_absence(request: HttpRequest) -> HttpResponse:

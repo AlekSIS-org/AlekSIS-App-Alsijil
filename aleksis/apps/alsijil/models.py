@@ -69,6 +69,9 @@ class PersonalNote(ExtensibleModel):
     def save(self, *args, **kwargs):
         if self.excuse_type:
             self.excused = True
+        if not self.absent:
+            self.excused = False
+            self.excuse_type = None
         super().save(*args, **kwargs)
 
     class Meta:
