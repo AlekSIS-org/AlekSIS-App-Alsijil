@@ -1,8 +1,6 @@
 from rules import add_perm
 
-from aleksis.core.models import Person
 from aleksis.core.util.predicates import (
-    has_any_object,
     has_global_perm,
     has_object_perm,
     has_person,
@@ -10,6 +8,7 @@ from aleksis.core.util.predicates import (
 )
 
 from .util.predicates import (
+    has_any_object_absence,
     has_lesson_group_object_perm,
     has_personal_note_group_perm,
     has_person_group_object_perm,
@@ -96,7 +95,8 @@ add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 
 # View register absence page
 view_register_absence_predicate = has_person & (
-    has_any_object("alsijil.register_absence", Person)
+    has_global_perm("alsijil.register_absence")
+    | has_any_object_absence
 )
 add_perm("alsijil.view_register_absence", view_register_absence_predicate)
 

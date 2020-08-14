@@ -2,11 +2,13 @@ from typing import Union
 
 from django.contrib.auth.models import User
 
+from guardian.shortcuts import get_objects_for_user
 from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.predicates import check_object_permission, get_site_preferences
+from aleksis.core.util.predicates import check_object_permission
+from aleksis.core.util.core_helpers import get_site_preferences
 
 from ..models import PersonalNote
 
@@ -140,7 +142,7 @@ def has_personal_note_group_perm(perm: str):
 
 
 @predicate
-def is_own_personal_note(user: User, obj: PersonalNote):
+def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
     """Predicate for users referred to in a personal note
 
     Checks whether the user referred to in a PersonalNote is the active user.
@@ -153,7 +155,7 @@ def is_own_personal_note(user: User, obj: PersonalNote):
 
 
 @predicate
-def is_personal_note_lesson_teacher(user: User, obj: PersonalNote):
+def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
     """Predicate for teachers of a lesson referred to in the lesson period of a personal note.
 
     Checks whether the person linked to the user is a teacher
@@ -170,7 +172,7 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote):
 
 
 @predicate
-def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote):
+def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) -> bool:
     """
     Predicate for parent group owners of a lesson referred to in the lesson period of a personal note.
 
@@ -182,3 +184,14 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote):
             return obj.lesson_period.lesson.groups.filter(parent_groups__owners=user.person).exists()
         return False
     return False
+
+
+@predicate
+def has_any_object_absence(user: User) -> bool:
+    """
+    Predicate which builds a query with all the persons the given users is allowed to register an absence for.
+    """
+    return get_objects_for_user(user, "core.register_absence_person", Person)\
+        .union(Person.objects.filter(member_of__owners=user))\
+        .union(Person.objects.filter(member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)))\
+        .exists()
