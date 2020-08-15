@@ -456,7 +456,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
 def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
     context = {}
-    person = objectgetter_optional(Person, default_eval="request.user.person")(
+    person = objectgetter_optional(Person, default="request.user.person", default_eval=True)(
         request, id_
     )
     context["person"] = person
