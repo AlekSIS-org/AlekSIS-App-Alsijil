@@ -42,6 +42,47 @@
         </li>
       {% endfor %}
     </ul>
+    <h5>{% trans "Statistics on absences, tardinesses and remarks" %}</h5>
+    <ul class="collapsible">
+      {% for school_term, stat in stats %}
+        <li {% if forloop.first %}class="active"{% endif %}>
+          <div class="collapsible-header">
+            <i class="material-icons">date_range</i>{{ school_term }}</div>
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th colspan="2">{% trans 'Absences' %}</th>
+                <td>{{ stat.absences_count }}</td>
+              </tr>
+              <tr>
+                <td rowspan="{{ excuse_types.count|add:2 }}" style="width: 16mm;"
+                    class="rotate small-print">{% trans "thereof" %}</td>
+                <th>{% trans 'Excused' %}</th>
+                <td>{{ stat.excused }}</td>
+              </tr>
+              {% for excuse_type in excuse_types %}
+                <th>{{ excuse_type.name }}</th>
+                <td>{{ stat|get_dict:excuse_type.count_label }}</td>
+              {% endfor %}
+              <tr>
+                <th>{% trans 'Unexcused' %}</th>
+                <td>{{ stat.unexcused }}</td>
+              </tr>
+              <tr>
+                <th colspan="2">{% trans 'Tardiness' %}</th>
+                <td>{{ stat.tardiness }}'</td>
+              </tr>
+              {% for extra_mark in extra_marks %}
+                <tr>
+                  <th colspan="2">{{ extra_mark.name }}</th>
+                  <td>{{ stat|get_dict:extra_mark.count_label }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
   </div>
   <div class="col s12 m12 l6">
     <h5>{% trans "Relevant personal notes" %}</h5>

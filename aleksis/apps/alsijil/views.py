@@ -529,6 +529,55 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
+
+    school_terms = SchoolTerm.objects.all().order_by("-date_start")
+    stats = []
+    for school_term in school_terms:
+        stat = {}
+        personal_notes = PersonalNote.objects.filter(
+            person=person, lesson_period__lesson__validity__school_term=school_term
+        )
+
+        if not personal_notes.exists():
+            continue
+
+        stat.update(
+            personal_notes.filter(absent=True).aggregate(absences_count=Count("absent"))
+        )
+        stat.update(
+            personal_notes.filter(
+                absent=True, excused=True, excuse_type__isnull=True
+            ).aggregate(excused=Count("absent"))
+        )
+        stat.update(
+            personal_notes.filter(absent=True, excused=False).aggregate(
+                unexcused=Count("absent")
+            )
+        )
+        stat.update(
+            personal_notes.filter(absent=True, excused=False).aggregate(
+                tardiness=Count("late")
+            )
+        )
+
+        for extra_mark in ExtraMark.objects.all():
+            stat.update(
+                personal_notes.filter(extra_marks=extra_mark).aggregate(
+                    **{extra_mark.count_label: Count("pk")}
+                )
+            )
+
+        for excuse_type in ExcuseType.objects.all():
+            stat.update(
+                personal_notes.filter(absent=True, excuse_type=excuse_type).aggregate(
+                    **{excuse_type.count_label: Count("absent")}
+                )
+            )
+
+        stats.append((school_term, stat))
+    context["stats"] = stats
+    context["excuse_types"] = ExcuseType.objects.all()
+    context["extra_marks"] = ExtraMark.objects.all()
     return render(request, "alsijil/class_register/person.html", context)
 
 
