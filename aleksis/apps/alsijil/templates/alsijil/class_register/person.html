@@ -20,7 +20,7 @@
 
     <ul class="collection">
       {% for note in unexcused_absences %}
-        {% period_to_date note.week note.lesson_period.period as note_date %}
+        {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
         <li class="collection-item">
           <form action="" method="post" class="right" style="margin-top: -7px;">
             {% csrf_token %}
@@ -63,8 +63,7 @@
                   <strong>{% blocktrans with week=note.week %}Week {{ week }}{% endblocktrans %}</strong>
                 </li>
               {% endifchanged %}
-
-              {% period_to_date note.week note.lesson_period.period as note_date %}
+              {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
               {% ifchanged note_date %}
                 <li class="collection-item">
                   <form action="" method="post" class="right" style="margin-top: -7px;">
