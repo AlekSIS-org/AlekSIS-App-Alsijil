@@ -3,7 +3,9 @@ from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.util.date import get_current_year
 from aleksis.core.mixins import ExtensibleModel
 from aleksis.core.util.core_helpers import get_site_preferences
 
@@ -36,7 +38,7 @@ class ExcuseType(ExtensibleModel):
         verbose_name_plural = _("Excuse types")
 
 
-class PersonalNote(ExtensibleModel):
+class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     """A personal note about a single person.
 
     Used in the class register to note absences, excuses
@@ -49,6 +51,8 @@ class PersonalNote(ExtensibleModel):
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField()
+    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="personal_notes"
     )
@@ -80,7 +84,7 @@ class PersonalNote(ExtensibleModel):
         verbose_name_plural = _("Personal notes")
         unique_together = [["lesson_period", "week", "person"]]
         ordering = [
-            "lesson_period__lesson__validity__date_start",
+            "year",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
@@ -89,13 +93,15 @@ class PersonalNote(ExtensibleModel):
         ]
 
 
-class LessonDocumentation(ExtensibleModel):
+class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
     """A documentation on a single lesson period.
 
     Non-personal, includes the topic and homework of the lesson.
     """
 
     week = models.IntegerField()
+    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="documentations"
     )
@@ -118,9 +124,7 @@ class LessonDocumentation(ExtensibleModel):
         )
         for period in following_periods:
             lesson_documentation = period.get_or_create_lesson_documentation(
-                CalendarWeek(
-                    week=self.week, year=self.lesson_period.lesson.get_year(self.week),
-                )
+                CalendarWeek(week=self.week, year=self.year)
             )
 
             changed = False
@@ -152,7 +156,7 @@ class LessonDocumentation(ExtensibleModel):
         verbose_name_plural = _("Lesson documentations")
         unique_together = [["lesson_period", "week"]]
         ordering = [
-            "lesson_period__lesson__validity__date_start",
+            "year",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
