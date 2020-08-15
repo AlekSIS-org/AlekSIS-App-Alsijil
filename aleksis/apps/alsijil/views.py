@@ -555,8 +555,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
             )
         )
         stat.update(
-            personal_notes.filter(absent=True, excused=False).aggregate(
-                tardiness=Count("late")
+            personal_notes.aggregate(
+                tardiness=Sum("late")
             )
         )
 
