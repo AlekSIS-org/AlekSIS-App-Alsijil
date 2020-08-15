@@ -83,6 +83,10 @@ def lesson(
             wanted_week[lesson_period.period.weekday], lesson_period.period.time_start,
         )
         > datetime.now()
+        and not (
+            get_site_preferences()["alsijil__open_periods_same_day"]
+            and wanted_week[lesson_period.period.weekday] <= datetime.now().date()
+        )
         and not request.user.is_superuser
     ):
         raise PermissionDenied(
