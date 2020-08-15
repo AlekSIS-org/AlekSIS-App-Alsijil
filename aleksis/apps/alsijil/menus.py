@@ -24,6 +24,12 @@ MENUS = {
                     "icon": "view_week",
                     "validators": ["menu_generator.validators.is_authenticated"],
                 },
+{
+                    "name": _("My overview"),
+                    "url": "overview_me",
+                    "icon": "insert_chart",
+                    "validators": ["menu_generator.validators.is_authenticated"],
+                },
                 {
                     "name": _("Register absence"),
                     "url": "register_absence",
