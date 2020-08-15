@@ -27,3 +27,16 @@ class CarryOverDataToNextPeriods(BooleanPreference):
     help_text = _(
         "This will carry over data only if the data in the following periods are empty."
     )
+
+
+@site_preferences_registry.register
+class AllowOpenPeriodsOnSameDay(BooleanPreference):
+    section = alsijil
+    name = "open_periods_same_day"
+    default = False
+    verbose_name = _(
+        "Allow teachers to open lesson periods on the same day and not just at the beginning of the period"
+    )
+    help_text = _(
+        "Lessons in the past are not affected by this setting, you can open them whenever you want."
+    )
