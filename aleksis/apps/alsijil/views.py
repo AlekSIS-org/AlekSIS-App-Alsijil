@@ -82,6 +82,10 @@ def lesson(
             wanted_week[lesson_period.period.weekday], lesson_period.period.time_start,
         )
         > datetime.now()
+        and not (
+            get_site_preferences()["alsijil__open_periods_same_day"]
+            and wanted_week[lesson_period.period.weekday] <= datetime.now().date()
+        )
         and not request.user.is_superuser
     ):
         raise PermissionDenied(
@@ -173,7 +177,10 @@ def week_view(
     lesson_periods = LessonPeriod.objects.in_week(wanted_week).annotate(
         has_documentation=Exists(
             LessonDocumentation.objects.filter(
-                ~Q(topic__exact=""), lesson_period=OuterRef("pk"), week=wanted_week.week
+                ~Q(topic__exact=""),
+                lesson_period=OuterRef("pk"),
+                week=wanted_week.week,
+                year=wanted_week.year,
             )
         )
     )
@@ -243,6 +250,7 @@ def week_view(
                     filter=Q(
                         personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
+                        personal_notes__year=wanted_week.year,
                         personal_notes__absent=True,
                     ),
                     distinct=True,
@@ -252,6 +260,7 @@ def week_view(
                     filter=Q(
                         personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
+                        personal_notes__year=wanted_week.year,
                         personal_notes__absent=True,
                         personal_notes__excused=False,
                     ),
@@ -262,6 +271,7 @@ def week_view(
                         pk=OuterRef("pk"),
                         personal_notes__lesson_period__in=lesson_periods_pk,
                         personal_notes__week=wanted_week.week,
+                        personal_notes__year=wanted_week.year,
                     )
                     .distinct()
                     .annotate(tardiness_sum=Sum("personal_notes__late"))
@@ -278,6 +288,7 @@ def week_view(
                         filter=Q(
                             personal_notes__lesson_period__in=lesson_periods_pk,
                             personal_notes__week=wanted_week.week,
+                            personal_notes__year=wanted_week.year,
                             personal_notes__extra_marks=extra_mark,
                         ),
                         distinct=True,
@@ -291,7 +302,9 @@ def week_view(
                 {
                     "person": person,
                     "personal_notes": person.personal_notes.filter(
-                        week=wanted_week.week, lesson_period__in=lesson_periods_pk
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        lesson_period__in=lesson_periods_pk,
                     ),
                 }
             )
@@ -370,17 +383,17 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             ):
                 documentations = list(
                     filter(
-                        lambda d: d.week == week.week,
+                        lambda d: d.week == week.week and d.year == week.year,
                         lesson_period.documentations.all(),
                     )
                 )
                 notes = list(
                     filter(
-                        lambda d: d.week == week.week,
+                        lambda d: d.week == week.week and d.year == week.year,
                         lesson_period.personal_notes.all(),
                     )
                 )
-                substitution = lesson_period.get_substitution(week.week)
+                substitution = lesson_period.get_substitution(week)
 
                 periods_by_day.setdefault(day, []).append(
                     (lesson_period, documentations, notes, substitution)

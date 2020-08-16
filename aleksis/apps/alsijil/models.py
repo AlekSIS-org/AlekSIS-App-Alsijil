@@ -1,7 +1,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from calendarweek import CalendarWeek
+
+from aleksis.apps.chronos.mixins import WeekRelatedMixin
+from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.util.date import get_current_year
 from aleksis.core.mixins import ExtensibleModel
+from aleksis.core.util.core_helpers import get_site_preferences
 
 
 def isidentifier(value: str) -> bool:
@@ -32,7 +38,7 @@ class ExcuseType(ExtensibleModel):
         verbose_name_plural = _("Excuse types")
 
 
-class PersonalNote(ExtensibleModel):
+class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     """A personal note about a single person.
 
     Used in the class register to note absences, excuses
@@ -45,6 +51,8 @@ class PersonalNote(ExtensibleModel):
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField()
+    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="personal_notes"
     )
@@ -76,7 +84,7 @@ class PersonalNote(ExtensibleModel):
         verbose_name_plural = _("Personal notes")
         unique_together = [["lesson_period", "week", "person"]]
         ordering = [
-            "lesson_period__lesson__validity__date_start",
+            "year",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
@@ -85,13 +93,15 @@ class PersonalNote(ExtensibleModel):
         ]
 
 
-class LessonDocumentation(ExtensibleModel):
+class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
     """A documentation on a single lesson period.
 
     Non-personal, includes the topic and homework of the lesson.
     """
 
     week = models.IntegerField()
+    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="documentations"
     )
@@ -102,12 +112,51 @@ class LessonDocumentation(ExtensibleModel):
         verbose_name=_("Group note"), max_length=200, blank=True
     )
 
+    def _carry_over_data(self):
+        """Carry over data to directly adjacent periods in this lesson if data is not already set.
+
+        Can be deactivated using site preference ``alsijil__carry_over``.
+        """
+        following_periods = LessonPeriod.objects.filter(
+            lesson=self.lesson_period.lesson,
+            period__weekday=self.lesson_period.period.weekday,
+            period__period__gt=self.lesson_period.period.period,
+        )
+        for period in following_periods:
+            lesson_documentation = period.get_or_create_lesson_documentation(
+                CalendarWeek(week=self.week, year=self.year)
+            )
+
+            changed = False
+
+            if not lesson_documentation.topic:
+                lesson_documentation.topic = self.topic
+                changed = True
+
+            if not lesson_documentation.homework:
+                lesson_documentation.homework = self.homework
+                changed = True
+
+            if not lesson_documentation.group_note:
+                lesson_documentation.group_note = self.group_note
+                changed = True
+
+            if changed:
+                lesson_documentation.save()
+
+    def save(self, *args, **kwargs):
+        if get_site_preferences()["alsijil__carry_over"] and (
+            self.topic or self.homework or self.group_note
+        ):
+            self._carry_over_data()
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = _("Lesson documentation")
         verbose_name_plural = _("Lesson documentations")
         unique_together = [["lesson_period", "week"]]
         ordering = [
-            "lesson_period__lesson__validity__date_start",
+            "year",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
