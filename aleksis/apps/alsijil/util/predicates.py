@@ -20,7 +20,12 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a teacher
     in the lesson or the substitution linked to the given LessonPeriod.
     """
-    return user.person in Person.objects.filter(lesson_substitutions=obj.get_substitution())
+    if obj:
+        return (
+            user.person in obj.lesson.teachers.all()
+            or user.person in Person.objects.filter(lesson_substitutions=obj.get_substitution())
+        )
+    return True
 
 
 @predicate
