@@ -6,11 +6,12 @@ from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import Select2Widget
+from guardian.shortcuts import get_objects_for_user
 from material import Layout, Row
 
-from aleksis.core.util.core_helpers import queryset_rules_filter
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
+from aleksis.core.util.predicates import check_global_permission
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
@@ -51,12 +52,7 @@ class SelectForm(forms.Form):
         queryset=None, label=_("Group"), required=False, widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
-        queryset=Person.objects.annotate(
-            lessons_count=Count("lessons_as_teacher")
-        ).filter(lessons_count__gt=0),
-        label=_("Teacher"),
-        required=False,
-        widget=Select2Widget,
+        queryset=None, label=_("Teacher"), required=False, widget=Select2Widget,
     )
 
     def clean(self) -> dict:
@@ -78,12 +74,22 @@ class SelectForm(forms.Form):
         return data
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
         self.fields["group"].queryset = (
             Group.objects.for_current_school_term_or_all()
             .annotate(lessons_count=Count("lessons"))
             .filter(lessons_count__gt=0)
         )
+        if not check_global_permission(self.request.user, "alsijil.view_week"):
+            self.fields["group"].queryset = self.fields["group"].queryset & get_objects_for_user(
+                self.request.user, "core.register_absence_group", Group
+            )
+        self.fields["teacher"].queryset = (
+            Person.objects.annotate(lessons_count=Count("lessons_as_teacher")).filter(lessons_count__gt=0)
+        )
+        if not check_global_permission(self.request.user, "alsijil.view_week"):
+            self.fields["teacher"].queryset = self.fields["teacher"].queryset.filter(pk=self.request.user.person.pk)
 
 
 PersonalNoteFormSet = forms.modelformset_factory(

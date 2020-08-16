@@ -206,7 +206,7 @@ def week_view(
         initial = {type_.value: instance}
     else:
         initial = {}
-    select_form = SelectForm(request.POST or None, initial=initial)
+    select_form = SelectForm(request.POST or None, initial=initial, request=request)
 
     if request.method == "POST":
         if select_form.is_valid():
