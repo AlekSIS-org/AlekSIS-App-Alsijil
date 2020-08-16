@@ -1,7 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers %}
-{% load material_form i18n static %}
+{% load week_helpers material_form_internal material_form i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -29,6 +28,10 @@
 {% endblock %}
 
 {% block content %}
+  {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
+  {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
+  {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
+
   <div class="row">
     <div class="col s12">
       {% with prev_lesson=lesson_period.prev %}
@@ -50,18 +53,34 @@
   </div>
 
   <form method="post">
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+      <p>{% include "core/partials/save_button.html" %}</p>
+    {% endif %}
+
     {% csrf_token %}
 
     <div class="row">
-      <div class="col s12 m12 l6 xl8">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab">
+            <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
+          </li>
+          {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+            <li class="tab">
+              <a href="#personal-notes">{% trans "Personal notes" %}</a>
+            </li>
+          {% endif %}
+          <li class="tab">
+            <a href="#version-history">{% trans "Change history" %}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col s12" id="lesson-documentation">
         {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses %}
-            {% if prev_doc %}
+          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
+            {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+            {% if prev_doc and can_view_prev_lesson_documentation %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
 
               <div class="card">
@@ -86,6 +105,13 @@
                       </tr>
                     {% endif %}
 
+                    {% if prev_doc.group_note %}
+                      <tr>
+                        <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
+                        <td>{{ prev_doc.group_note }}</td>
+                      </tr>
+                    {% endif %}
+
                     {% if absences %}
                       <tr>
                         <th>{% trans "Absent persons:" %}</th>
@@ -99,6 +125,21 @@
                         <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
                       </tr>
                     {% endif %}
+
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+                            {% if can_view_personalnote %}
+                              <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% endif %}
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+
                   </table>
                 </div>
               </div>
@@ -112,96 +153,158 @@
             {% blocktrans %}Lesson documentation{% endblocktrans %}
           </span>
 
-            {% form form=lesson_documentation_form %}{% endform %}
+            {% if can_edit_lesson_documentation %}
+              {% form form=lesson_documentation_form %}{% endform %}
+            {% elif can_view_lesson_documentation %}
+              <table>
+                <tr>
+                  <th>
+                    {% trans "Lesson topic" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.topic }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Homework" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.homework }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Group note" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.group_note }}
+                  </td>
+                </tr>
+              </table>
+            {% endif %}
           </div>
         </div>
       </div>
-      <div class="col s12 m12 l6 xl4">
-        <div class="card">
-          <div class="card-content">
+
+      {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+        <div class="col s12" id="personal-notes">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">
+                {% blocktrans %}Personal notes{% endblocktrans %}
+              </span>
+              {% if can_edit_personalnote %}
+                {% form form=personal_note_formset.management_form %}{% endform %}
+              {% endif %}
+
+              <table class="striped responsive-table alsijil-table">
+                <thead>
+                <tr>
+                  <th>{% blocktrans %}Person{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Absent{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Excused{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in personal_note_formset %}
+                  {% if can_edit_personalnote %}
+                    <tr>
+                      {{ form.id }}
+                      <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                      <td class="center-align">
+                        <label>
+                          {{ form.absent }}
+                          <span></span>
+                        </label>
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.late }}
+                          <label for="{{ form.absent.id_for_label }}">
+                            {% trans "Tardiness (in m)" %}
+                          </label>
+                        </div>
+                      </td>
+                      <td class="center-align">
+                        <label>
+                          {{ form.excused }}
+                          <span></span>
+                        </label>
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.excuse_type }}
+                          <label for="{{ form.excuse_type.id_for_label }}">
+                            {% trans "Excuse type" %}
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        {% for group, items in form.extra_marks|select_options %}
+                          {% for choice, value, selected in items %}
+                            <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                              <input type="checkbox"
+                                     {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                      {% if selected %} checked="checked"{% endif %}
+                                     name="{{ form.extra_marks.html_name }}">
+                              <span>{{ choice }}</span>
+                            </label>
+                          {% endfor %}
+                        {% endfor %}
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.remarks }}
+                          <label for="{{ form.absent.id_for_label }}">
+                            {% trans "Remarks" %}
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td>{{ form.person_name.value }}</td>
+                      <td>{{ form.absent.value }}</td>
+                      <td>{{ form.late.value }}</td>
+                      <td>{{ form.excused.value }}</td>
+                      <td>{{ form.excuse_type.value }}</td>
+                      <td>
+                        {% for extra_mark in form.extra_marks.value %}
+                          {{ extra_mark }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                      </td>
+                      <td>{{ form.remarks.value }}</td>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if can_view_lesson_documentation %}
+        <div class="col s12" id="version-history">
+          <div class="card">
+            <div class="card-content">
           <span class="card-title">
             {% blocktrans %}Change history{% endblocktrans %}
           </span>
-            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+              {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
     </div>
 
-    <div class="row">
-      <div class="col s12">
-        <div class="card">
-          <div class="card-content">
-      <span class="card-title">
-        {% blocktrans %}Personal notes{% endblocktrans %}
-      </span>
-            {% form form=personal_note_formset.management_form %}{% endform %}
-
-            <table class="striped responsive-table alsijil-table">
-              <thead>
-              <tr>
-                <th>{% blocktrans %}Person{% endblocktrans %}</th>
-                <th>{% blocktrans %}Absent{% endblocktrans %}</th>
-                <th>{% blocktrans %}Tardiness{% endblocktrans %}</th>
-                <th>{% blocktrans %}Excused{% endblocktrans %}</th>
-                <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
-                <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
-              </tr>
-              </thead>
-              <tbody>
-              {% for form in personal_note_formset %}
-                <tr>
-                  {{ form.id }}
-                  <td>{{ form.person_name }}{{ form.person_name.value }}</td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.absent }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.late }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Tardiness (in m)" %}
-                      </label>
-                    </div>
-                  </td>
-                  <td class="center-align">
-                    <label>
-                      {{ form.excused }}
-                      <span></span>
-                    </label>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.excuse_type }}
-                      <label for="{{ form.excuse_type.id_for_label }}">
-                        {% trans "Excuse type" %}
-                      </label>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="input-field">
-                      {{ form.remarks }}
-                      <label for="{{ form.absent.id_for_label }}">
-                        {% trans "Remarks" %}
-                      </label>
-                    </div>
-                  </td>
-                </tr>
-              {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col s12">
-        {% include "core/partials/save_button.html" %}
-      </div>
-    </div>
+    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+      <p>{% include "core/partials/save_button.html" %}</p>
+    {% endif %}
   </form>
 {% endblock %}

@@ -12,13 +12,13 @@ from aleksis.core.util.core_helpers import queryset_rules_filter
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.core.models import Group, Person
 
-from .models import ExcuseType, LessonDocumentation, PersonalNote, PersonalNoteFilter
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
 class LessonDocumentationForm(forms.ModelForm):
     class Meta:
         model = LessonDocumentation
-        fields = ["topic", "homework"]
+        fields = ["topic", "homework", "group_note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,7 +29,7 @@ class LessonDocumentationForm(forms.ModelForm):
 class PersonalNoteForm(forms.ModelForm):
     class Meta:
         model = PersonalNote
-        fields = ["absent", "late", "excused", "excuse_type", "remarks"]
+        fields = ["absent", "late", "excused", "excuse_type", "extra_marks", "remarks"]
 
     person_name = forms.CharField(disabled=True)
 
@@ -116,12 +116,12 @@ class RegisterAbsenceForm(forms.Form):
                                                                "core.register_absence")
 
 
-class PersonalNoteFilterForm(forms.ModelForm):
-    layout = Layout(Row("identifier", "description"), Row("regex"))
+class ExtraMarkForm(forms.ModelForm):
+    layout = Layout("short_name", "name")
 
     class Meta:
-        model = PersonalNoteFilter
-        fields = ["identifier", "description", "regex"]
+        model = ExtraMark
+        fields = ["short_name", "name"]
 
 
 class ExcuseTypeForm(forms.ModelForm):

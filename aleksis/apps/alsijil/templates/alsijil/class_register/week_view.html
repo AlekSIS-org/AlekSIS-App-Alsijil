@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/base.html" %}
-{% load material_form i18n week_helpers static %}
+{% load material_form i18n week_helpers static data_helpers %}
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
@@ -11,6 +11,9 @@
 {% endblock %}
 
 {% block content %}
+  <script type="text/javascript" src="{% static "js/helper.js" %}"></script>
+  {{ week_select|json_script:"week_select" }}
+  <script type="text/javascript" src="{% static "js/chronos/week_select.js" %}"></script>
   <div class="row">
     {% if group %}
       <div class="col s12 m2 push-m10 l1 push-l11">
@@ -30,7 +33,11 @@
     </div>
   </div>
 
-  <h4>{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
+
+  <div class="row">
+    <h4 class="col s12 m6">{% blocktrans with el=el week=week.week %}CW {{ week }}: {{ instance }}{% endblocktrans %} </h4>
+    {% include "chronos/partials/week_select.html" with wanted_week=week %}
+  </div>
 
   {% if lesson_periods %}
     <div class="row">
@@ -48,8 +55,12 @@
                 <tr>
                   <th></th>
                   <th>{% blocktrans %}Period{% endblocktrans %}</th>
+                  {% if not group %}
+                    <th>{% blocktrans %}Groups{% endblocktrans %}</th>
+                  {% endif %}
                   <th>{% blocktrans %}Subject{% endblocktrans %}</th>
                   <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Lesson topic{% endblocktrans %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -63,6 +74,13 @@
                         {{ period.period.period }}.
                       </a>
                     </td>
+                    {% if not group %}
+                      <td>
+                        <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                          {{ period.lesson.group_names }}
+                        </a>
+                      </td>
+                    {% endif %}
                     <td>
                       <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
                         {{ period.get_subject.name }}
@@ -71,6 +89,11 @@
                     <td>
                       <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
                         {{ period.get_teacher_names }}
+                      </a>
+                    </td>
+                    <td>
+                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                        {{ period.get_lesson_documentation.topic }}
                       </a>
                     </td>
                   </tr>
@@ -96,6 +119,11 @@
               <p class="card-text">
                 {% trans "Summed up tardiness" %}: {{ person.person.tardiness_sum }}'
               </p>
+              {% for extra_mark in extra_marks %}
+                <p class="card-text">
+                  {{ extra_mark.name }}: {{ person.person|get_dict:extra_mark.count_label }}
+                </p>
+              {% endfor %}
               {% for note in person.personal_notes %}
                 {% if note.remarks %}
                   <blockquote>
