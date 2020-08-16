@@ -470,7 +470,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     return render(request, "alsijil/print/full_register.html", context)
 
 
-@permission_required("alsijil.register_absence")
+@permission_required("alsijil.view_register_absence")
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
