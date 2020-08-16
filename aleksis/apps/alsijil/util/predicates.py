@@ -191,7 +191,9 @@ def has_any_object_absence(user: User) -> bool:
     """
     Predicate which builds a query with all the persons the given users is allowed to register an absence for.
     """
-    return get_objects_for_user(user, "core.register_absence_person", Person)\
-        .union(Person.objects.filter(member_of__owners=user.person))\
-        .union(Person.objects.filter(member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)))\
-        .exists()
+    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
+        return True
+    if Person.objects.filter(member_of__owners=user.person).exists():
+        return True
+    if Person.objects.filter(member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)).exists():
+        return True
