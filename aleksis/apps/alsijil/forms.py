@@ -102,9 +102,7 @@ class RegisterAbsenceForm(forms.Form):
     date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
     date_end = forms.DateField(label=_("End date"), initial=datetime.today)
     from_period = forms.IntegerField(label=_("From period"), initial=0, min_value=0)
-    person = forms.ModelChoiceField(
-        label=_("Person"), queryset=Person.objects.all(), widget=Select2Widget
-    )
+    person = forms.ModelChoiceField(label=_("Person"), queryset=None, widget=Select2Widget)
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
     excused = forms.BooleanField(label=_("Excused"), initial=True, required=False)
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
@@ -112,8 +110,20 @@ class RegisterAbsenceForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
-        self.fields["person"].queryset = queryset_rules_filter(self.request, Person.objects.all(),
-                                                               "core.register_absence")
+        if check_global_permission(self.request.user, "alsijil.register_absence"):
+            self.fields["person"].queryset = Person.objects.all()
+        else:
+            self.fields["person"].queryset = (
+                get_objects_for_user(self.request.user, "core.register_absence_person", Person)
+                .union(Person.objects.filter(member_of__owners=self.request.user.person))
+                .union(
+                    Person.objects.filter(
+                        member_of__in=get_objects_for_user(
+                            self.request.user, "core.register_absence_group", Group
+                        )
+                    )
+                )
+            )
 
 
 class ExtraMarkForm(forms.ModelForm):
