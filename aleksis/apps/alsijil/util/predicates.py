@@ -7,8 +7,8 @@ from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.predicates import check_object_permission
 from aleksis.core.util.core_helpers import get_site_preferences
+from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
 
@@ -21,9 +21,8 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     in the lesson or the substitution linked to the given LessonPeriod.
     """
     if obj:
-        return (
-            user.person in obj.lesson.teachers.all()
-            or user.person in Person.objects.filter(lesson_substitutions=obj.get_substitution())
+        return user.person in obj.lesson.teachers.all() or user.person in Person.objects.filter(
+            lesson_substitutions=obj.get_substitution()
         )
     return True
 
@@ -154,7 +153,10 @@ def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
     Is configurable via dynamic preferences.
     """
     if hasattr(obj, "person"):
-        if get_site_preferences()["alsijil__view_own_personal_notes"] and obj.person is user.person:
+        if (
+            get_site_preferences()["alsijil__view_own_personal_notes"]
+            and obj.person is user.person
+        ):
             return True
         return False
 
@@ -168,9 +170,8 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
     """
     if hasattr(obj, "lesson_period"):
         if hasattr(obj.lesson_period, "lesson"):
-            return (
-                user.person in obj.lesson_period.lesson.teachers.all()
-                or user.person in Person.objects.filter(lesson_substitutions=obj.lesson_period.get_substitution())
+            return user.person in obj.lesson_period.lesson.teachers.all() or user.person in Person.objects.filter(
+                lesson_substitutions=obj.lesson_period.get_substitution()
             )
         return False
     return False
@@ -186,7 +187,9 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
     """
     if hasattr(obj, "lesson_period"):
         if hasattr(obj.lesson_period, "lesson"):
-            return obj.lesson_period.lesson.groups.filter(parent_groups__owners=user.person).exists()
+            return obj.lesson_period.lesson.groups.filter(
+                parent_groups__owners=user.person
+            ).exists()
         return False
     return False
 
@@ -200,5 +203,7 @@ def has_any_object_absence(user: User) -> bool:
         return True
     if Person.objects.filter(member_of__owners=user.person).exists():
         return True
-    if Person.objects.filter(member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)).exists():
+    if Person.objects.filter(
+        member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)
+    ).exists():
         return True

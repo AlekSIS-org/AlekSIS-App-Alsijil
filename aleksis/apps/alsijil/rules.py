@@ -10,17 +10,17 @@ from aleksis.core.util.predicates import (
 from .util.predicates import (
     has_any_object_absence,
     has_lesson_group_object_perm,
-    has_personal_note_group_perm,
     has_person_group_object_perm,
+    has_personal_note_group_perm,
     is_group_member,
     is_group_owner,
     is_lesson_parent_group_owner,
     is_lesson_participant,
     is_lesson_teacher,
     is_own_personal_note,
+    is_person_group_owner,
     is_personal_note_lesson_parent_group_owner,
     is_personal_note_lesson_teacher,
-    is_person_group_owner,
 )
 
 # View lesson
@@ -95,8 +95,7 @@ add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 
 # View register absence page
 view_register_absence_predicate = has_person & (
-    has_global_perm("alsijil.register_absence")
-    | has_any_object_absence
+    has_global_perm("alsijil.register_absence") | has_any_object_absence
 )
 add_perm("alsijil.view_register_absence", view_register_absence_predicate)
 
