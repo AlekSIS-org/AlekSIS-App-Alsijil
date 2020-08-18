@@ -21,6 +21,7 @@ def mark_absent(
     excused: bool = False,
     excuse_type: Optional[ExcuseType] = None,
     remarks: str = "",
+    to_period: Optional[int] = None,
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
 
@@ -39,6 +40,9 @@ def mark_absent(
     lesson_periods = self.lesson_periods_as_participant.on_day(day).filter(
         period__period__gte=from_period
     )
+
+    if to_period:
+        lesson_periods = lesson_periods.filter(period__period__lte=to_period)
 
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:

@@ -6,9 +6,10 @@ from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import Select2Widget
-from material import Layout, Row
+from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
+from aleksis.apps.chronos.models import TimePeriod
 from aleksis.core.models import Group, Person
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
@@ -92,21 +93,35 @@ PersonalNoteFormSet = forms.modelformset_factory(
 
 class RegisterAbsenceForm(forms.Form):
     layout = Layout(
-        Row("date_start", "date_end"),
-        Row("from_period"),
-        Row("absent", "excused"),
-        Row("person"),
-        Row("remarks"),
+        Fieldset("", "person"),
+        Fieldset("", Row("date_start", "date_end"), Row("from_period", "to_period")),
+        Fieldset("", Row("absent", "excused"), Row("excuse_type"), Row("remarks")),
     )
     date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
     date_end = forms.DateField(label=_("End date"), initial=datetime.today)
-    from_period = forms.IntegerField(label=_("From period"), initial=0, min_value=0)
+    from_period = forms.ChoiceField(label=_("Start period"))
+    to_period = forms.ChoiceField(label=_("End period"))
     person = forms.ModelChoiceField(
         label=_("Person"), queryset=Person.objects.all(), widget=Select2Widget
     )
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
     excused = forms.BooleanField(label=_("Excused"), initial=True, required=False)
+    excuse_type = forms.ModelChoiceField(
+        label=_("Excuse type"),
+        queryset=ExcuseType.objects.all(),
+        widget=Select2Widget,
+        required=False,
+    )
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        period_choices = TimePeriod.period_choices
+
+        self.fields["from_period"].choices = period_choices
+        self.fields["to_period"].choices = period_choices
+        self.fields["from_period"].initial = TimePeriod.period_min
+        self.fields["to_period"].initial = TimePeriod.period_max
 
 
 class ExtraMarkForm(forms.ModelForm):
