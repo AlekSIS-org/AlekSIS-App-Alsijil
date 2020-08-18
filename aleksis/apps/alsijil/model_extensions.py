@@ -108,7 +108,10 @@ def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
     return PersonalNote.objects.select_related("person").filter(
-        lesson_period=self, week=wanted_week.week, year=wanted_week.year
+        lesson_period=self,
+        week=wanted_week.week,
+        year=wanted_week.year,
+        person__in=persons,
     )
 
 

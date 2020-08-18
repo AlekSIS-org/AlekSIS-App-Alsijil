@@ -36,6 +36,15 @@ add_perm("alsijil.view_lesson", view_lesson_predicate)
 # View lesson in menu
 add_perm("alsijil.view_lesson_menu", has_person)
 
+# View lesson personal notes
+view_lesson_personal_notes_predicate = has_person & (
+    has_global_perm("alsijil.view_personalnote")
+    | has_lesson_group_object_perm("core.view_personalnote_group")
+    | is_lesson_teacher
+    | is_lesson_parent_group_owner
+)
+add_perm("alsijil.view_lesson_personalnote", view_lesson_personal_notes_predicate)
+
 # View personal note
 view_personal_note_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")

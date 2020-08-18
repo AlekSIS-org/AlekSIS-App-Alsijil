@@ -21,9 +21,10 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     in the lesson or the substitution linked to the given LessonPeriod.
     """
     if obj:
-        return user.person in obj.lesson.teachers.all() or user.person in Person.objects.filter(
-            lesson_substitutions=obj.get_substitution()
-        )
+        sub = obj.get_substitution()
+        if sub and sub in user.person.lesson_substitutions.all():
+            return True
+        return user.person in obj.lesson.teachers.all()
     return True
 
 
