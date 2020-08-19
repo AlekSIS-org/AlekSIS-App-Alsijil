@@ -14,7 +14,7 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
@@ -107,9 +107,9 @@ def lesson(
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons = Person.objects
+    persons = Person.objects.all()
     if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
-        persons = persons.filter(pk=request.user.pk)
+        persons = persons.filter(pk=request.user.person.pk)
     persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix="personal_notes"
@@ -485,19 +485,33 @@ def register_absence(request: HttpRequest) -> HttpResponse:
             start_date = register_absence_form.cleaned_data["date_start"]
             end_date = register_absence_form.cleaned_data["date_end"]
             from_period = register_absence_form.cleaned_data["from_period"]
+            to_period = register_absence_form.cleaned_data["to_period"]
             absent = register_absence_form.cleaned_data["absent"]
             excused = register_absence_form.cleaned_data["excused"]
+            excuse_type = register_absence_form.cleaned_data["excuse_type"]
             remarks = register_absence_form.cleaned_data["remarks"]
 
             # Mark person as absent
             delta = end_date - start_date
             for i in range(delta.days + 1):
-                from_period = from_period if i == 0 else 0
+                from_period_on_day = from_period if i == 0 else TimePeriod.period_min
+                to_period_on_day = (
+                    to_period if i == delta.days else TimePeriod.period_max
+                )
                 day = start_date + timedelta(days=i)
-                person.mark_absent(day, from_period, absent, excused, remarks)
+
+                person.mark_absent(
+                    day,
+                    from_period_on_day,
+                    absent,
+                    excused,
+                    excuse_type,
+                    remarks,
+                    to_period_on_day,
+                )
 
             messages.success(request, _("The absence has been saved."))
-            return redirect("index")
+            return redirect("register_absence")
 
     context["register_absence_form"] = register_absence_form
 
