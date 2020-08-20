@@ -319,7 +319,7 @@
       {% for note in person.personal_notes.all %}
         {% if note.lesson_period in lesson_periods %}
           {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
-            {% period_to_date note.week note.lesson_period.period as note_date %}
+              {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
             <tr>
               <td>{{ note_date }}</td>
               <td>{{ note.lesson_period.period.period }}</td>

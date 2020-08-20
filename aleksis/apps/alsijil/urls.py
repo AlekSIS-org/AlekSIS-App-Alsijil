@@ -26,6 +26,9 @@ urlpatterns = [
     path(
         "print/group/<int:id_>", views.full_register_group, name="full_register_group"
     ),
+    path("persons/", views.my_students, name="my_students"),
+    path("persons/<int:id_>/", views.overview_person, name="overview_person"),
+    path("me/", views.overview_person, name="overview_me"),
     path("absence/new", views.register_absence, name="register_absence"),
     path("extra_marks/", views.ExtraMarkListView.as_view(), name="extra_marks"),
     path(
