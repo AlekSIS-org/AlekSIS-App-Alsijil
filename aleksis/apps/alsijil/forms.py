@@ -99,7 +99,7 @@ class SelectForm(forms.Form):
                     ).values_list("pk", flat=True)
                 )
             ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
-        self.fields["group"].queryset = group_qs.distinct()
+        self.fields["group"].queryset = Group.objects.filter(pk__in=list(group_qs.values_list("pk", flat=True)))
 
         teacher_qs = Person.objects.annotate(
             lessons_count=Count("lessons_as_teacher")
@@ -123,7 +123,9 @@ class RegisterAbsenceForm(forms.Form):
     )
     date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
     date_end = forms.DateField(label=_("End date"), initial=datetime.today)
-    person = forms.ModelChoiceField(label=_("Person"), queryset=None, widget=Select2Widget)
+    person = forms.ModelChoiceField(
+        label=_("Person"), queryset=None, widget=Select2Widget
+    )
     from_period = forms.ChoiceField(label=_("Start period"))
     to_period = forms.ChoiceField(label=_("End period"))
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
@@ -144,8 +146,12 @@ class RegisterAbsenceForm(forms.Form):
             self.fields["person"].queryset = Person.objects.all()
         else:
             self.fields["person"].queryset = (
-                get_objects_for_user(self.request.user, "core.register_absence_person", Person)
-                .union(Person.objects.filter(member_of__owners=self.request.user.person))
+                get_objects_for_user(
+                    self.request.user, "core.register_absence_person", Person
+                )
+                .union(
+                    Person.objects.filter(member_of__owners=self.request.user.person)
+                )
                 .union(
                     Person.objects.filter(
                         member_of__in=get_objects_for_user(
