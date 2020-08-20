@@ -218,4 +218,4 @@ def has_any_object_absence(user: User) -> bool:
 @predicate
 def is_teacher(user: User, obj: Person) -> bool:
     """Predicate which checks if the provided object is a teacher."""
-    return user.person.is_teacher()
+    return user.person.is_teacher
