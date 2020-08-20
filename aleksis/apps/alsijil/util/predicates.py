@@ -171,9 +171,14 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
     """
     if hasattr(obj, "lesson_period"):
         if hasattr(obj.lesson_period, "lesson"):
-            return user.person in obj.lesson_period.lesson.teachers.all() or user.person in Person.objects.filter(
+            sub = obj.lesson_period.get_substitution()
+            if sub and user.person in Person.objects.filter(
                 lesson_substitutions=obj.lesson_period.get_substitution()
-            )
+            ):
+                return True
+
+            return user.person in obj.lesson_period.lesson.teachers.all()
+
         return False
     return False
 
