@@ -454,11 +454,23 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     return render(request, "alsijil/print/full_register.html", context)
 
 
+def my_students(request: HttpRequest) -> HttpResponse:
+    context = {}
+    relevant_groups = (
+        Group.objects.for_current_school_term_or_all()
+        .annotate(lessons_count=Count("lessons"))
+        .filter(lessons_count__gt=0, owners=request.user.person)
+    )
+    persons = Person.objects.filter(member_of__in=relevant_groups)
+    context["persons"] = persons
+    return render(request, "alsijil/class_register/persons.html", context)
+
+
 def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
     context = {}
-    person = objectgetter_optional(Person, default="request.user.person", default_eval=True)(
-        request, id_
-    )
+    person = objectgetter_optional(
+        Person, default="request.user.person", default_eval=True
+    )(request, id_)
     context["person"] = person
 
     if request.method == "POST":
@@ -554,11 +566,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                 unexcused=Count("absent")
             )
         )
-        stat.update(
-            personal_notes.aggregate(
-                tardiness=Sum("late")
-            )
-        )
+        stat.update(personal_notes.aggregate(tardiness=Sum("late")))
 
         for extra_mark in ExtraMark.objects.all():
             stat.update(

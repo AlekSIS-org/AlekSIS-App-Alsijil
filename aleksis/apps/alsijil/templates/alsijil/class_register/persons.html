@@ -1,0 +1,26 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load data_helpers %}
+{% load week_helpers %}
+{% load i18n %}
+
+{% block browser_title %}{% blocktrans %}My students{% endblocktrans %}{% endblock %}
+
+
+{% block page_title %}
+  {% blocktrans %}My students{% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+  <div class="collection">
+    {% for person in persons %}
+      <a class="collection-item" href="{% url "overview_person" person.pk %}">
+      {{ person }}
+      </a>
+    {% empty %}
+      <li class="collection-item flow-text">
+        {% blocktrans %}No students available.{% endblocktrans %}
+      </li>
+    {% endfor %}
+  </div>
+{% endblock %}
