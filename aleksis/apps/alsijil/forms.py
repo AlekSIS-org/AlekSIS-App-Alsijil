@@ -4,6 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
+from django_global_request.middleware import get_request
 
 from django_select2.forms import Select2Widget
 from guardian.shortcuts import get_objects_for_user
@@ -75,7 +76,7 @@ class SelectForm(forms.Form):
         return data
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs["request"]
+        self.request = get_request()
         super().__init__(*args, **kwargs)
 
         person = self.request.user.person
