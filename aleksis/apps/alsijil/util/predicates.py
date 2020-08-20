@@ -75,7 +75,22 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     Checks whether the person linked to the user is
     the owner of any group of the given person.
     """
-    return obj.member_of.filter(owners=user.person).exists()
+    if obj:
+        return obj.member_of.filter(owners=user.person).exists()
+    return False
+
+
+@predicate
+def is_person_primary_group_owner(user: User, obj: Person) -> bool:
+    """
+    Predicate for group owners of the person's primary group.
+
+    Checks whether the person linked to the user is
+    the owner of the primary group of the given person.
+    """
+    if obj.primary_group:
+        return user.person in obj.primary_group.owners.all()
+    return False
 
 
 def has_person_group_object_perm(perm: str):

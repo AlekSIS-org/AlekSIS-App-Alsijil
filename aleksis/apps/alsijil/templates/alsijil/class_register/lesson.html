@@ -30,7 +30,7 @@
 {% block content %}
   {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
   {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
-  {% has_perm "alsijil.edit_personalnote" user lesson_period as can_edit_personalnote %}
+  {% has_perm "alsijil.edit_lesson_personalnote" user lesson_period as can_edit_lesson_personalnote %}
 
   <div class="row">
     <div class="col s12">
@@ -53,7 +53,7 @@
   </div>
 
   <form method="post">
-    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+    {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
       <p>{% include "core/partials/save_button.html" %}</p>
     {% endif %}
 
@@ -194,7 +194,7 @@
               <span class="card-title">
                 {% blocktrans %}Personal notes{% endblocktrans %}
               </span>
-              {% if can_edit_personalnote %}
+              {% if can_edit_lesson_personalnote %}
                 {% form form=personal_note_formset.management_form %}{% endform %}
               {% endif %}
 
@@ -212,7 +212,7 @@
                 </thead>
                 <tbody>
                 {% for form in personal_note_formset %}
-                  {% if can_edit_personalnote %}
+                  {% if can_edit_lesson_personalnote %}
                     <tr>
                       {{ form.id }}
                       <td>{{ form.person_name }}{{ form.person_name.value }}</td>
@@ -303,7 +303,7 @@
       {% endif %}
     </div>
 
-    {% if can_edit_lesson_documentation or can_edit_personalnote %}
+    {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
       <p>{% include "core/partials/save_button.html" %}</p>
     {% endif %}
   </form>

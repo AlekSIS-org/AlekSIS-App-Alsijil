@@ -38,13 +38,23 @@ MENUS = {
                     "name": _("My overview"),
                     "url": "overview_me",
                     "icon": "insert_chart",
-                    "validators": ["menu_generator.validators.is_authenticated"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_person_overview_menu",
+                        ),
+                    ],
                 },
                 {
                     "name": _("My students"),
                     "url": "my_students",
                     "icon": "people",
-                    "validators": ["menu_generator.validators.is_authenticated"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_my_students",
+                        ),
+                    ],
                 },
                 {
                     "name": _("Register absence"),

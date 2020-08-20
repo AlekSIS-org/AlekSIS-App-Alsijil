@@ -19,6 +19,7 @@ from .util.predicates import (
     is_lesson_teacher,
     is_own_personal_note,
     is_person_group_owner,
+    is_person_primary_group_owner,
     is_personal_note_lesson_parent_group_owner,
     is_personal_note_lesson_teacher,
     is_teacher,
@@ -46,6 +47,16 @@ view_lesson_personal_notes_predicate = has_person & (
 )
 add_perm("alsijil.view_lesson_personalnote", view_lesson_personal_notes_predicate)
 
+# Edit personal note
+edit_lesson_personal_note_predicate = has_person & (
+    has_global_perm("alsijil.change_personalnote")
+    | has_lesson_group_object_perm("core.edit_personalnote_group")
+    | is_lesson_teacher
+    | is_lesson_parent_group_owner
+)
+add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate)
+
+
 # View personal note
 view_personal_note_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
@@ -58,9 +69,10 @@ add_perm("alsijil.view_personalnote", view_personal_note_predicate)
 
 # Edit personal note
 edit_personal_note_predicate = has_person & (
-    has_global_perm("alsijil.change_personalnote")
-    | has_lesson_group_object_perm("core.edit_personalnote_group")
-    | is_lesson_teacher
+    has_global_perm("alsijil.view_personalnote")
+    | has_personal_note_group_perm("core.edit_personalnote_group")
+    | is_personal_note_lesson_teacher
+    | is_personal_note_lesson_parent_group_owner
 )
 add_perm("alsijil.edit_personalnote", edit_personal_note_predicate)
 
@@ -126,6 +138,53 @@ view_full_register_predicate = has_person & (
     | is_group_owner
 )
 add_perm("alsijil.view_full_register", view_full_register_predicate)
+
+# View students list
+view_my_students_predicate = has_person & is_teacher
+add_perm("alsijil.view_my_students", view_my_students_predicate)
+
+# View person overview
+view_person_overview_predicate = has_person & (
+    is_current_person | is_person_group_owner
+)
+add_perm("alsijil.view_person_overview", view_person_overview_predicate)
+
+# View person overview
+view_person_overview_menu_predicate = has_person
+add_perm("alsijil.view_person_overview_menu", view_person_overview_menu_predicate)
+
+# View person overview personal notes
+view_person_overview_personal_notes_predicate = has_person & (
+    has_global_perm("alsijil.view_personalnote")
+    | has_person_group_object_perm("core.view_personalnote_group")
+    | is_person_primary_group_owner
+)
+add_perm(
+    "alsijil.view_person_overview_personalnote",
+    view_person_overview_personal_notes_predicate,
+)
+
+# Edit person overview personal notes
+edit_person_overview_personal_notes_predicate = has_person & (
+    has_global_perm("alsijil.edit_personalnote")
+    | has_person_group_object_perm("core.edit_personalnote_group")
+    | is_person_primary_group_owner
+)
+add_perm(
+    "alsijil.edit_person_overview_personalnote",
+    edit_person_overview_personal_notes_predicate,
+)
+
+# View person statistics on personal notes
+view_person_statistics_personal_notes_predicate = has_person & (
+    has_global_perm("alsijil.view_personalnote")
+    | has_person_group_object_perm("core.view_personalnote_group")
+    | is_person_primary_group_owner
+)
+add_perm(
+    "alsijil.view_person_statistics_personalnote",
+    view_person_statistics_personal_notes_predicate,
+)
 
 # View excuse type list
 view_excusetypes_predicate = has_person & has_global_perm("alsijil.view_excusetype")

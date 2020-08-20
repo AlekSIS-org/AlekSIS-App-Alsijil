@@ -116,7 +116,12 @@
             </span>
             {% for person in persons %}
               <h5 class="card-title">
-                <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
+                {% has_perm "alsijil.view_person_overview" user person.person as can_view_person_overview %}
+                {% if can_view_person_overview %}
+                  <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
+                {% else %}
+                  {{ person.person.full_name }}
+                {% endif %}
               </h5>
               <p class="card-text">
                 {% trans "Absent" %}: {{ person.person.absences_count }}

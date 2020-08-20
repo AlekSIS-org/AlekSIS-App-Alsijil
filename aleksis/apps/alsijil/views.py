@@ -129,7 +129,7 @@ def lesson(
             or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
         ):
             if personal_note_formset.is_valid() and request.user.has_perm(
-                "alsijil.edit_personalnote", lesson_period
+                "alsijil.edit_lesson_personalnote", lesson_period
             ):
                 instances = personal_note_formset.save()
 
@@ -470,6 +470,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     return render(request, "alsijil/print/full_register.html", context)
 
 
+@permission_required("alsijil.view_my_students")
 def my_students(request: HttpRequest) -> HttpResponse:
     context = {}
     relevant_groups = (
@@ -482,6 +483,10 @@ def my_students(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/class_register/persons.html", context)
 
 
+@permission_required(
+    "alsijil.view_person_overview",
+    fn=objectgetter_optional(Person, "request.user.person", True),
+)
 def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
     context = {}
     person = objectgetter_optional(
@@ -512,6 +517,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                             request.POST["date"], "%Y-%m-%d"
                         ).date()
 
+                        if not request.user.has_perm(
+                            "alsijil.edit_person_overview_personalnote", person
+                        ):
+                            raise PermissionDenied()
+
                         notes = person.personal_notes.filter(
                             week=date.isocalendar()[1],
                             lesson_period__period__weekday=date.weekday(),
@@ -532,6 +542,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                         note = PersonalNote.objects.get(
                             pk=int(request.POST["personal_note"])
                         )
+                        if not request.user.has_perm("alsijil.edit_personalnote", note):
+                            raise PermissionDenied()
                         if note.absent:
                             note.excused = True
                             note.excuse_type = excuse_type
@@ -544,10 +556,20 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
                 person.refresh_from_db()
 
-    unexcused_absences = person.personal_notes.filter(absent=True, excused=False)
+    allowed_personal_notes = person.personal_notes.all()
+
+    if not request.user.has_perm("alsijil.view_person_overview_personalnote", person):
+        print("has")
+        allowed_personal_notes = allowed_personal_notes.filter(
+            lesson_period__lesson__groups__owners=request.user.person
+        )
+
+    print(allowed_personal_notes)
+
+    unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
 
-    personal_notes = person.personal_notes.filter(
+    personal_notes = allowed_personal_notes.filter(
         Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
     ).order_by(
         "-lesson_period__lesson__validity__date_start",
@@ -558,48 +580,51 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
 
-    school_terms = SchoolTerm.objects.all().order_by("-date_start")
-    stats = []
-    for school_term in school_terms:
-        stat = {}
-        personal_notes = PersonalNote.objects.filter(
-            person=person, lesson_period__lesson__validity__school_term=school_term
-        )
-
-        if not personal_notes.exists():
-            continue
-
-        stat.update(
-            personal_notes.filter(absent=True).aggregate(absences_count=Count("absent"))
-        )
-        stat.update(
-            personal_notes.filter(
-                absent=True, excused=True, excuse_type__isnull=True
-            ).aggregate(excused=Count("absent"))
-        )
-        stat.update(
-            personal_notes.filter(absent=True, excused=False).aggregate(
-                unexcused=Count("absent")
+    if request.user.has_perm("alsijil.view_person_statistics_personalnote", person):
+        school_terms = SchoolTerm.objects.all().order_by("-date_start")
+        stats = []
+        for school_term in school_terms:
+            stat = {}
+            personal_notes = PersonalNote.objects.filter(
+                person=person, lesson_period__lesson__validity__school_term=school_term
             )
-        )
-        stat.update(personal_notes.aggregate(tardiness=Sum("late")))
 
-        for extra_mark in ExtraMark.objects.all():
+            if not personal_notes.exists():
+                continue
+
             stat.update(
-                personal_notes.filter(extra_marks=extra_mark).aggregate(
-                    **{extra_mark.count_label: Count("pk")}
+                personal_notes.filter(absent=True).aggregate(
+                    absences_count=Count("absent")
                 )
             )
-
-        for excuse_type in ExcuseType.objects.all():
             stat.update(
-                personal_notes.filter(absent=True, excuse_type=excuse_type).aggregate(
-                    **{excuse_type.count_label: Count("absent")}
+                personal_notes.filter(
+                    absent=True, excused=True, excuse_type__isnull=True
+                ).aggregate(excused=Count("absent"))
+            )
+            stat.update(
+                personal_notes.filter(absent=True, excused=False).aggregate(
+                    unexcused=Count("absent")
                 )
             )
+            stat.update(personal_notes.aggregate(tardiness=Sum("late")))
 
-        stats.append((school_term, stat))
-    context["stats"] = stats
+            for extra_mark in ExtraMark.objects.all():
+                stat.update(
+                    personal_notes.filter(extra_marks=extra_mark).aggregate(
+                        **{extra_mark.count_label: Count("pk")}
+                    )
+                )
+
+            for excuse_type in ExcuseType.objects.all():
+                stat.update(
+                    personal_notes.filter(
+                        absent=True, excuse_type=excuse_type
+                    ).aggregate(**{excuse_type.count_label: Count("absent")})
+                )
+
+            stats.append((school_term, stat))
+        context["stats"] = stats
     context["excuse_types"] = ExcuseType.objects.all()
     context["extra_marks"] = ExtraMark.objects.all()
     return render(request, "alsijil/class_register/person.html", context)
