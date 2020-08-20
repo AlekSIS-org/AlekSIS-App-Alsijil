@@ -92,15 +92,11 @@ class SelectForm(forms.Form):
 
         if not check_global_permission(self.request.user, "alsijil.view_week"):
             group_qs = (
-                (
-                    group_qs
-                    & get_objects_for_user(
-                        self.request.user, "core.view_week_class_register_group", Group
-                    )
+                group_qs
+                & get_objects_for_user(
+                    self.request.user, "core.view_week_class_register_group", Group
                 )
-                | group_qs.filter(members=person)
-                | group_qs.filter(owners=person)
-            )
+            ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
         self.fields["group"].queryset = group_qs
 
         teacher_qs = Person.objects.annotate(
