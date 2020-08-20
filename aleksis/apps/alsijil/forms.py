@@ -75,7 +75,7 @@ class SelectForm(forms.Form):
         return data
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
+        self.request = kwargs["request"]
         super().__init__(*args, **kwargs)
 
         person = self.request.user.person
@@ -98,7 +98,7 @@ class SelectForm(forms.Form):
                     ).values_list("pk", flat=True)
                 )
             ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
-        self.fields["group"].queryset = group_qs
+        self.fields["group"].queryset = group_qs.distinct()
 
         teacher_qs = Person.objects.annotate(
             lessons_count=Count("lessons_as_teacher")
