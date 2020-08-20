@@ -1,0 +1,202 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load data_helpers %}
+{% load week_helpers %}
+{% load i18n %}
+
+{% block browser_title %}{% blocktrans %}Class register: person{% endblocktrans %}{% endblock %}
+
+
+{% block page_title %}
+  {% blocktrans with person=person %}
+    Class register overview for {{ person }}
+  {% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+  <div class="col s12 m12 l6">
+    <h5>{% trans "Unexcused absences" %}</h5>
+
+    <ul class="collection">
+      {% for note in unexcused_absences %}
+        {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
+        <li class="collection-item">
+          <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+            {% csrf_token %}
+            {% trans "Mark as" %}
+            <input type="hidden" value="{{ note.pk }}" name="personal_note">
+            {% include "alsijil/partials/mark_as_buttons.html" %}
+          </form>
+          <i class="material-icons left red-text">warning</i>
+          <p class="no-margin">
+            <a href="{% url "lesson_by_week_and_period" note.year note.week note.lesson_period.pk %}">{{ note_date }}, {{ note.lesson_period }}</a>
+          </p>
+          {% if note.remarks %}
+            <p class="no-margin"><em>{{ note.remarks }}</em></p>
+          {% endif %}
+          <form action="" method="post" class="hide-on-med-and-up">
+            {% csrf_token %}
+            {% trans "Mark as" %}
+            <input type="hidden" value="{{ note.pk }}" name="personal_note">
+            {% include "alsijil/partials/mark_as_buttons.html" %}
+          </form>
+        </li>
+      {% empty %}
+        <li class="collection-item flow-text">
+          {% trans "There are unexcused lessons." %}
+        </li>
+      {% endfor %}
+    </ul>
+    <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
+    <ul class="collapsible">
+      {% for school_term, stat in stats %}
+        <li {% if forloop.first %}class="active"{% endif %}>
+          <div class="collapsible-header">
+            <i class="material-icons">date_range</i>{{ school_term }}</div>
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th colspan="2">{% trans 'Absences' %}</th>
+                <td>{{ stat.absences_count }}</td>
+              </tr>
+              <tr>
+                <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-small-only">{% trans "thereof" %}</td>
+                <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-med-and-up"></td>
+                <th class="truncate">{% trans 'Excused' %}</th>
+                <td>{{ stat.excused }}</td>
+              </tr>
+              {% for excuse_type in excuse_types %}
+                <th>{{ excuse_type.name }}</th>
+                <td>{{ stat|get_dict:excuse_type.count_label }}</td>
+              {% endfor %}
+              <tr>
+                <th>{% trans 'Unexcused' %}</th>
+                <td>{{ stat.unexcused }}</td>
+              </tr>
+              <tr>
+                <th colspan="2">{% trans 'Tardiness' %}</th>
+                <td>{{ stat.tardiness }}'</td>
+              </tr>
+              {% for extra_mark in extra_marks %}
+                <tr>
+                  <th colspan="2">{{ extra_mark.name }}</th>
+                  <td>{{ stat|get_dict:extra_mark.count_label }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col s12 m12 l6">
+    <h5>{% trans "Relevant personal notes" %}</h5>
+    <ul class="collapsible">
+      <li>
+        <div>
+          <ul>
+            {% for note in personal_notes %}
+              {% ifchanged note.lesson_period.lesson.validity.school_term %}</ul></div></li>
+                <li {% if forloop.first %}class="active"{% endif %}>
+                <div class="collapsible-header"><i
+                        class="material-icons">date_range</i>{{ note.lesson_period.lesson.validity.school_term }}</div>
+                <div class="collapsible-body">
+                <ul class="collection">
+              {% endifchanged %}
+
+              {% ifchanged note.week %}
+                <li class="collection-item">
+                  <strong>{% blocktrans with week=note.week %}Week {{ week }}{% endblocktrans %}</strong>
+                </li>
+              {% endifchanged %}
+              {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
+              {% ifchanged note_date %}
+                <li class="collection-item">
+                  <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+                    {% csrf_token %}
+                    {% trans "Mark all as" %}
+                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                    {% include "alsijil/partials/mark_as_buttons.html" %}
+                  </form>
+                  <i class="material-icons left">schedule</i>
+                  {{ note_date }}
+
+                  <form action="" method="post" class="hide-on-med-and-up">
+                    {% csrf_token %}
+                    {% trans "Mark all as" %}
+                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                    {% include "alsijil/partials/mark_as_buttons.html" %}
+                  </form>
+                </li>
+              {% endifchanged %}
+
+              <li class="collection-item">
+                <div class="row no-margin">
+                  <div class="col s2 m1">
+                    {{ note.lesson_period.period.period }}.
+                  </div>
+
+                  <div class="col s10 m4">
+                    <i class="material-icons left">event_note</i>
+                    <a href="{% url "lesson_by_week_and_period" note.year note.week note.lesson_period.pk %}">
+                      {{ note.lesson_period.get_subject.name }}<br/>
+                      {{ note.lesson_period.get_teacher_names }}
+                    </a>
+                  </div>
+
+                  <div class="col s12 m7 no-padding">
+                    {% if note.absent and not note.excused %}
+                      <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+                        {% csrf_token %}
+                        {% trans "Mark as" %}
+                        <input type="hidden" value="{{ note.pk }}" name="personal_note">
+                        {% include "alsijil/partials/mark_as_buttons.html" %}
+                      </form>
+                    {% endif %}
+
+                    {% if note.absent %}
+                      <div class="chip red white-text">
+                        {% trans 'Absent' %}
+                      </div>
+                    {% endif %}
+                    {% if note.excused %}
+                      <div class="chip green white-text">
+                        {% if note.excuse_type %}
+                          {{ note.excuse_type.name }}
+                        {% else %}
+                          {% trans 'Excused' %}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+
+                    {% if note.late %}
+                      <div class="chip orange white-text">
+                        {% blocktrans with late=note.late %}{{ late }}' late{% endblocktrans %}
+                      </div>
+                    {% endif %}
+
+                    {% for extra_mark in note.extra_marks.all %}
+                      <div class="chip">{{ extra_mark.name }}</div>
+                    {% endfor %}
+
+                    <em>{{ note.remarks }}</em>
+
+                  </div>
+                  <div class="col s12 hide-on-med-and-up">
+                    {% if note.absent and not note.excused %}
+                      <form action="" method="post">
+                        {% csrf_token %}
+                        {% trans "Mark as" %}
+                        <input type="hidden" value="{{ note.pk }}" name="personal_note">
+                        {% include "alsijil/partials/mark_as_buttons.html" %}
+                      </form>
+                    {% endif %}
+                  </div>
+              </li>
+            {% endfor %}
+            </li>
+            </ul>
+            </div>
+  </div>
+{% endblock %}

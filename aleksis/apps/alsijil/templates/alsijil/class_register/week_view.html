@@ -115,7 +115,9 @@
               {% blocktrans %}Personal notes{% endblocktrans %}
             </span>
             {% for person in persons %}
-              <h5 class="card-title">{{ person.person.full_name }}</h5>
+              <h5 class="card-title">
+                <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
+              </h5>
               <p class="card-text">
                 {% trans "Absent" %}: {{ person.person.absences_count }}
                 ({{ person.person.unexcused_count }} {% trans "unexcused" %})
