@@ -21,6 +21,7 @@ from .util.predicates import (
     is_person_group_owner,
     is_personal_note_lesson_parent_group_owner,
     is_personal_note_lesson_teacher,
+    is_teacher,
 )
 
 # View lesson
@@ -99,6 +100,7 @@ view_week_personal_notes_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
     | has_object_perm("core.view_personalnote_group")
     | is_group_owner
+    | (is_current_person & is_teacher)
 )
 add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 

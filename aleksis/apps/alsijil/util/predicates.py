@@ -208,3 +208,9 @@ def has_any_object_absence(user: User) -> bool:
         member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)
     ).exists():
         return True
+
+
+@predicate
+def is_teacher(user: User, obj: Person) -> bool:
+    """Predicate which checks if the provided object is a teacher."""
+    return user.person.is_teacher()
