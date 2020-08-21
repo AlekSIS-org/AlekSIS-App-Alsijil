@@ -52,7 +52,6 @@ edit_lesson_personal_note_predicate = has_person & (
     has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
     | is_lesson_teacher
-    | is_lesson_parent_group_owner
 )
 add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate)
 
@@ -127,7 +126,7 @@ register_absence_predicate = has_person & (
     has_global_perm("alsijil.register_absence")
     | has_person_group_object_perm("core.register_absence_group")
     | has_object_perm("core.register_absence_person")
-    | is_person_group_owner
+    | is_person_primary_group_owner
 )
 add_perm("alsijil.register_absence", register_absence_predicate)
 

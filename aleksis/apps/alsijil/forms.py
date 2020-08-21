@@ -150,7 +150,7 @@ class RegisterAbsenceForm(forms.Form):
                     self.request.user, "core.register_absence_person", Person
                 )
                 .union(
-                    Person.objects.filter(member_of__owners=self.request.user.person)
+                    Person.objects.filter(primary_group__owners=self.request.user.person)
                 )
                 .union(
                     Person.objects.filter(
