@@ -110,19 +110,6 @@
                 {{ weekday }}, {{ current_date }}
               </span>
               <div class="collection">
-                <!--<thead>
-                <tr>
-                  <th></th>
-                  <th>{% blocktrans %}Period{% endblocktrans %}</th>
-                  {% if not group %}
-                    <th>{% blocktrans %}Groups{% endblocktrans %}</th>
-                  {% endif %}
-                  <th>{% blocktrans %}Subject{% endblocktrans %}</th>
-                  <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
-                  <th>{% blocktrans %}Lesson topic{% endblocktrans %}</th>
-                </tr>
-                </thead>
-                <tbody>-->
                 {% for period in periods %}
                   <a class="collection-item avatar"
                      href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
