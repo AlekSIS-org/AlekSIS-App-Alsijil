@@ -9,12 +9,12 @@
   {% period_to_time_end week period.period as time_end %}
 
   {% if period.get_substitution.cancelled %}
-    <i class="material-icons red-text tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Lesson cancelled" %}" title="{% trans "Lesson cancelled" %}">cancel</i>
+    <i class="material-icons red{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Lesson cancelled" %}" title="{% trans "Lesson cancelled" %}">cancel</i>
   {% elif now_dt > time_end %}
-    <i class="material-icons red-text tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Missing data" %}" title="{% trans "Missing data" %}">history</i>
+    <i class="material-icons red{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Missing data" %}" title="{% trans "Missing data" %}">history</i>
   {% elif now_dt > time_start and now_dt < time_end %}
-    <i class="material-icons orange-text tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Pending" %}" title="{% trans "Pending" %}">more_horiz</i>
+    <i class="material-icons orange{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Pending" %}" title="{% trans "Pending" %}">more_horiz</i>
   {% elif period.get_substitution %}
-    <i class="material-icons orange-text tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Substitution" %}" title="{% trans "Substitution" %}">update</i>
+    <i class="material-icons orange{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Substitution" %}" title="{% trans "Substitution" %}">update</i>
   {% endif %}
 {% endif %}
