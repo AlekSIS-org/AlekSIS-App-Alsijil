@@ -29,6 +29,11 @@ urlpatterns = [
     path("persons/", views.my_students, name="my_students"),
     path("persons/<int:id_>/", views.overview_person, name="overview_person"),
     path("me/", views.overview_person, name="overview_me"),
+    path(
+        "notes/<int:id_>/delete/",
+        views.delete_personal_note,
+        name="delete_personal_note",
+    ),
     path("absence/new", views.register_absence, name="register_absence"),
     path("extra_marks/", views.ExtraMarkListView.as_view(), name="extra_marks"),
     path(

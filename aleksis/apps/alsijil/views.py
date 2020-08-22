@@ -638,6 +638,20 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
+def delete_personal_note(request: HttpRequest, id_: int) -> HttpResponse:
+    context = {}
+
+    personal_note = get_object_or_404(PersonalNote, pk=id_)
+
+    context["object"] = personal_note
+
+    if request.method == "POST":
+        personal_note.reset()
+        return redirect("overview_person", personal_note.person.pk)
+    else:
+        return render(request, "core/pages/delete.html", context)
+
+
 class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):
     """Table of all extra marks."""
 

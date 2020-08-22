@@ -1,6 +1,8 @@
 from django.db import models
+from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
+import reversion
 from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
@@ -81,6 +83,25 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
             self.excused = False
             self.excuse_type = None
         super().save(*args, **kwargs)
+
+    def reset(self):
+        """Reset all saved data to default values.
+
+        This will create revisions internally.
+        """
+        with reversion.create_revision():
+            self.save()
+        with reversion.create_revision():
+            self.absent = False
+            self.late = 0
+            self.excused = False
+            self.excuse_type = None
+            self.remarks = ""
+            self.extra_marks.clear()
+            self.save()
+
+    def __str__(self):
+        return f"{date_format(self.date)}, {self.lesson_period}, {self.person}"
 
     class Meta:
         verbose_name = _("Personal note")
