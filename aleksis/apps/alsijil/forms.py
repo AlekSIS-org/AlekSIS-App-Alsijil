@@ -4,8 +4,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
-from django_global_request.middleware import get_request
 
+from django_global_request.middleware import get_request
 from django_select2.forms import Select2Widget
 from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
@@ -99,7 +99,9 @@ class SelectForm(forms.Form):
                     ).values_list("pk", flat=True)
                 )
             ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
-        self.fields["group"].queryset = Group.objects.filter(pk__in=list(group_qs.values_list("pk", flat=True)))
+        self.fields["group"].queryset = Group.objects.filter(
+            pk__in=list(group_qs.values_list("pk", flat=True))
+        )
 
         teacher_qs = Person.objects.annotate(
             lessons_count=Count("lessons_as_teacher")
@@ -150,7 +152,9 @@ class RegisterAbsenceForm(forms.Form):
                     self.request.user, "core.register_absence_person", Person
                 )
                 .union(
-                    Person.objects.filter(primary_group__owners=self.request.user.person)
+                    Person.objects.filter(
+                        primary_group__owners=self.request.user.person
+                    )
                 )
                 .union(
                     Person.objects.filter(
