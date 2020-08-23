@@ -89,14 +89,15 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
 
         This will create revisions internally.
         """
+        defaults = PersonalNote()
         with reversion.create_revision():
             self.save()
         with reversion.create_revision():
-            self.absent = False
-            self.late = 0
-            self.excused = False
-            self.excuse_type = None
-            self.remarks = ""
+            self.absent = defaults.absent
+            self.late = defaults.late
+            self.excused = defaults.excused
+            self.excuse_type = defaults.excuse_type
+            self.remarks = defaults.remarks
             self.extra_marks.clear()
             self.save()
 
