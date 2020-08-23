@@ -25,12 +25,15 @@
       {% for note in unexcused_absences %}
         {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
         <li class="collection-item">
-          <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
-            {% csrf_token %}
-            {% trans "Mark as" %}
-            <input type="hidden" value="{{ note.pk }}" name="personal_note">
-            {% include "alsijil/partials/mark_as_buttons.html" %}
-          </form>
+          {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
+          {% if can_edit_personal_note %}
+            <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+              {% csrf_token %}
+              {% trans "Mark as" %}
+              <input type="hidden" value="{{ note.pk }}" name="personal_note">
+              {% include "alsijil/partials/mark_as_buttons.html" %}
+            </form>
+          {% endif %}
           <i class="material-icons left red-text">warning</i>
           <p class="no-margin">
             <a href="{% url "lesson_by_week_and_period" note.year note.week note.lesson_period.pk %}">{{ note_date }}, {{ note.lesson_period }}</a>
@@ -38,7 +41,6 @@
           {% if note.remarks %}
             <p class="no-margin"><em>{{ note.remarks }}</em></p>
           {% endif %}
-          {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
           {% if can_edit_personal_note %}
             <form action="" method="post" class="hide-on-med-and-up">
               {% csrf_token %}
@@ -132,12 +134,14 @@
                   <i class="material-icons left">schedule</i>
                   {{ note_date }}
 
-                  <form action="" method="post" class="hide-on-med-and-up">
-                    {% csrf_token %}
-                    {% trans "Mark all as" %}
-                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
-                    {% include "alsijil/partials/mark_as_buttons.html" %}
-                  </form>
+                  {% if can_mark_all_as_excused %}
+                    <form action="" method="post" class="hide-on-med-and-up">
+                      {% csrf_token %}
+                      {% trans "Mark all as" %}
+                      <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                      {% include "alsijil/partials/mark_as_buttons.html" %}
+                    </form>
+                  {% endif %}
                 </li>
               {% endifchanged %}
 
@@ -156,7 +160,8 @@
                   </div>
 
                   <div class="col s12 m7 no-padding">
-                    {% if note.absent and not note.excused %}
+                    {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
+                    {% if note.absent and not note.excused and can_edit_personal_note %}
                       <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
                         {% csrf_token %}
                         {% trans "Mark as" %}
@@ -194,7 +199,6 @@
 
                   </div>
                   <div class="col s12 hide-on-med-and-up">
-                    {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
                     {% if note.absent and not note.excused and can_edit_personal_note %}
                       <form action="" method="post">
                         {% csrf_token %}

@@ -157,6 +157,7 @@ view_person_overview_personal_notes_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
     | has_person_group_object_perm("core.view_personalnote_group")
     | is_person_primary_group_owner
+    | is_current_person
 )
 add_perm(
     "alsijil.view_person_overview_personalnote",
@@ -179,6 +180,7 @@ view_person_statistics_personal_notes_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
     | has_person_group_object_perm("core.view_personalnote_group")
     | is_person_primary_group_owner
+    | is_current_person
 )
 add_perm(
     "alsijil.view_person_statistics_personalnote",

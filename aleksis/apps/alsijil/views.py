@@ -478,7 +478,7 @@ def my_students(request: HttpRequest) -> HttpResponse:
         .annotate(lessons_count=Count("lessons"))
         .filter(lessons_count__gt=0, owners=request.user.person)
     )
-    persons = Person.objects.filter(member_of__in=relevant_groups)
+    persons = Person.objects.filter(member_of__in=relevant_groups).distinct()
     context["persons"] = persons
     return render(request, "alsijil/class_register/persons.html", context)
 
