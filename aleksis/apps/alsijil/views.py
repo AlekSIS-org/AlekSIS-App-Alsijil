@@ -9,6 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
 from django.views.generic import DetailView
 
+import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
@@ -645,7 +646,10 @@ class DeletePersonalNoteView(DetailView):
 
     def post(self, request, *args, **kwargs):
         note = self.get_object()
-        note.reset()
+        with reversion.create_revision():
+            self.save()
+        with reversion.create_revision():
+            note.reset_values()
         messages.success(request, _("The personal note has been deleted."))
         return redirect("overview_person", note.person.pk)
 
