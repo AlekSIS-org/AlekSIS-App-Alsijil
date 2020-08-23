@@ -7,6 +7,7 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
+from django.views.generic import DetailView
 
 from calendarweek import CalendarWeek
 from django_tables2 import SingleTableView
@@ -638,18 +639,15 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
-def delete_personal_note(request: HttpRequest, id_: int) -> HttpResponse:
-    context = {}
+class DeletePersonalNoteView(DetailView):
+    model = PersonalNote
+    template_name = "core/pages/delete.html"
 
-    personal_note = get_object_or_404(PersonalNote, pk=id_)
-
-    context["object"] = personal_note
-
-    if request.method == "POST":
-        personal_note.reset()
-        return redirect("overview_person", personal_note.person.pk)
-    else:
-        return render(request, "core/pages/delete.html", context)
+    def post(self, request, *args, **kwargs):
+        note = self.get_object()
+        note.reset()
+        messages.success(request, _("The personal note has been deleted."))
+        return redirect("overview_person", note.person.pk)
 
 
 class ExtraMarkListView(SingleTableView, PermissionRequiredMixin):

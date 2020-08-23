@@ -30,8 +30,8 @@ urlpatterns = [
     path("persons/<int:id_>/", views.overview_person, name="overview_person"),
     path("me/", views.overview_person, name="overview_me"),
     path(
-        "notes/<int:id_>/delete/",
-        views.delete_personal_note,
+        "notes/<int:pk>/delete/",
+        views.DeletePersonalNoteView.as_view(),
         name="delete_personal_note",
     ),
     path("absence/new", views.register_absence, name="register_absence"),
