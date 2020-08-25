@@ -650,6 +650,7 @@ class DeletePersonalNoteView(DetailView):
             self.save()
         with reversion.create_revision():
             note.reset_values()
+            note.save()
         messages.success(request, _("The personal note has been deleted."))
         return redirect("overview_person", note.person.pk)
 
