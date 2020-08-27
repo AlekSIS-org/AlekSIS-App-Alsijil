@@ -127,7 +127,8 @@ def lesson(
             or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
         ):
             if personal_note_formset.is_valid():
-                instances = personal_note_formset.save()
+                with reversion.create_revision():
+                    instances = personal_note_formset.save()
 
                 # Iterate over personal notes and carry changed absences to following lessons
                 for instance in instances:
@@ -510,7 +511,12 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                             absent=True,
                             excused=False,
                         )
-                        notes.update(excused=True, excuse_type=excuse_type)
+                        for note in notes:
+                            note.excused = True
+                            note.excuse_type = excuse_type
+                            with reversion.create_revision():
+                                note.save()
+
                         messages.success(
                             request, _("The absences have been marked as excused.")
                         )
@@ -525,7 +531,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                         if note.absent:
                             note.excused = True
                             note.excuse_type = excuse_type
-                            note.save()
+                            with reversion.create_revision():
+                                note.save()
                             messages.success(
                                 request, _("The absence has been marked as excused.")
                             )
@@ -646,8 +653,6 @@ class DeletePersonalNoteView(DetailView):
 
     def post(self, request, *args, **kwargs):
         note = self.get_object()
-        with reversion.create_revision():
-            self.save()
         with reversion.create_revision():
             note.reset_values()
         messages.success(request, _("The personal note has been deleted."))

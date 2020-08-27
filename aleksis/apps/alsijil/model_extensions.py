@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union
 
 from django.db.models import Exists, OuterRef, QuerySet
 
+import reversion
 from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.models import LessonPeriod
@@ -45,21 +46,26 @@ def mark_absent(
 
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
-        personal_note, created = PersonalNote.objects.update_or_create(
-            person=self,
-            lesson_period=lesson_period,
-            week=wanted_week.week,
-            year=wanted_week.year,
-            defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type},
-        )
-        personal_note.groups_of_person.set(self.member_of.all())
+        with reversion.create_revision():
+            personal_note, created = PersonalNote.objects.update_or_create(
+                person=self,
+                lesson_period=lesson_period,
+                week=wanted_week.week,
+                year=wanted_week.year,
+                defaults={
+                    "absent": absent,
+                    "excused": excused,
+                    "excuse_type": excuse_type,
+                },
+            )
+            personal_note.groups_of_person.set(self.member_of.all())
 
-        if remarks:
-            if personal_note.remarks:
-                personal_note.remarks += "; %s" % remarks
-            else:
-                personal_note.remarks = remarks
-            personal_note.save()
+            if remarks:
+                if personal_note.remarks:
+                    personal_note.remarks += "; %s" % remarks
+                else:
+                    personal_note.remarks = remarks
+                personal_note.save()
 
 
 @LessonPeriod.method
