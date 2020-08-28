@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
@@ -81,6 +82,25 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
             self.excused = False
             self.excuse_type = None
         super().save(*args, **kwargs)
+
+    def reset_values(self):
+        """Reset all saved data to default values.
+
+        .. warning ::
+
+            This won't save the data, please execute ``save`` extra.
+        """
+        defaults = PersonalNote()
+
+        self.absent = defaults.absent
+        self.late = defaults.late
+        self.excused = defaults.excused
+        self.excuse_type = defaults.excuse_type
+        self.remarks = defaults.remarks
+        self.extra_marks.clear()
+
+    def __str__(self):
+        return f"{date_format(self.date)}, {self.lesson_period}, {self.person}"
 
     class Meta:
         verbose_name = _("Personal note")
