@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union
 
 from django.db.models import Exists, OuterRef, QuerySet
 
+import reversion
 from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.models import LessonPeriod
@@ -20,6 +21,7 @@ def mark_absent(
     excused: bool = False,
     excuse_type: Optional[ExcuseType] = None,
     remarks: str = "",
+    to_period: Optional[int] = None,
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
 
@@ -41,26 +43,35 @@ def mark_absent(
         .annotate_week(wanted_week)
     )
 
+    if to_period:
+        lesson_periods = lesson_periods.filter(period__period__lte=to_period)
+
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
         sub = lesson_period.get_substitution()
         if sub and sub.is_cancelled:
                 continue
 
-        personal_note, created = PersonalNote.objects.update_or_create(
-            person=self,
-            lesson_period=lesson_period,
-            week=wanted_week.week,
-            defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type},
-        )
-        personal_note.groups_of_person.set(self.member_of.all())
+        with reversion.create_revision():
+            personal_note, created = PersonalNote.objects.update_or_create(
+                person=self,
+                lesson_period=lesson_period,
+                week=wanted_week.week,
+                year=wanted_week.year,
+                defaults={
+                    "absent": absent,
+                    "excused": excused,
+                    "excuse_type": excuse_type,
+                },
+            )
+            personal_note.groups_of_person.set(self.member_of.all())
 
-        if remarks:
-            if personal_note.remarks:
-                personal_note.remarks += "; %s" % remarks
-            else:
-                personal_note.remarks = remarks
-            personal_note.save()
+            if remarks:
+                if personal_note.remarks:
+                    personal_note.remarks += "; %s" % remarks
+                else:
+                    personal_note.remarks = remarks
+                personal_note.save()
 
 
 @LessonPeriod.method
@@ -80,7 +91,10 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
     missing_persons = Person.objects.annotate(
         no_personal_notes=~Exists(
             PersonalNote.objects.filter(
-                week=wanted_week.week, lesson_period=self, person__pk=OuterRef("pk")
+                week=wanted_week.week,
+                year=wanted_week.year,
+                lesson_period=self,
+                person__pk=OuterRef("pk"),
             )
         )
     ).filter(
@@ -91,7 +105,12 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
 
     # Create all missing personal notes
     new_personal_notes = [
-        PersonalNote(person=person, lesson_period=self, week=wanted_week.week)
+        PersonalNote(
+            person=person,
+            lesson_period=self,
+            week=wanted_week.week,
+            year=wanted_week.year,
+        )
         for person in missing_persons
     ]
     PersonalNote.objects.bulk_create(new_personal_notes)
@@ -100,7 +119,7 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
     return PersonalNote.objects.select_related("person").filter(
-        lesson_period=self, week=wanted_week.week
+        lesson_period=self, week=wanted_week.week, year=wanted_week.year
     )
 
 
@@ -112,7 +131,9 @@ def get_lesson_documentation(
     if not week:
         week = self.week
     try:
-        return LessonDocumentation.objects.get(lesson_period=self, week=week.week)
+        return LessonDocumentation.objects.get(
+            lesson_period=self, week=week.week, year=week.year
+        )
     except LessonDocumentation.DoesNotExist:
         return None
 
@@ -125,7 +146,7 @@ def get_or_create_lesson_documentation(
     if not week:
         week = self.week
     lesson_documentation, created = LessonDocumentation.objects.get_or_create(
-        lesson_period=self, week=week.week
+        lesson_period=self, week=week.week, year=week.year
     )
     return lesson_documentation
 
@@ -135,7 +156,7 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of absent persons for this lesson."""
     if not week:
         week = self.week
-    return self.personal_notes.filter(week=week.week, absent=True)
+    return self.personal_notes.filter(week=week.week, year=week.year, absent=True)
 
 
 @LessonPeriod.method
@@ -143,7 +164,9 @@ def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of excused absent persons for this lesson."""
     if not week:
         week = self.week
-    return self.personal_notes.filter(week=week.week, absent=True, excused=True)
+    return self.personal_notes.filter(
+        week=week.week, year=week.year, absent=True, excused=True
+    )
 
 
 @LessonPeriod.method
@@ -151,7 +174,9 @@ def get_unexcused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySe
     """Get all personal notes of unexcused absent persons for this lesson."""
     if not week:
         week = self.week
-    return self.personal_notes.filter(week=week.week, absent=True, excused=False)
+    return self.personal_notes.filter(
+        week=week.week, year=week.year, absent=True, excused=False
+    )
 
 
 @LessonPeriod.method
@@ -159,7 +184,7 @@ def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of late persons for this lesson."""
     if not week:
         week = self.week
-    return self.personal_notes.filter(week=week.week, late__gt=0)
+    return self.personal_notes.filter(week=week.week, year=week.year, late__gt=0)
 
 
 @LessonPeriod.method
@@ -172,7 +197,9 @@ def get_extra_marks(
 
     stats = {}
     for extra_mark in ExtraMark.objects.all():
-        qs = self.personal_notes.filter(week=week.week, extra_marks=extra_mark)
+        qs = self.personal_notes.filter(
+            week=week.week, year=week.year, extra_marks=extra_mark
+        )
         if qs:
             stats[extra_mark] = qs
 

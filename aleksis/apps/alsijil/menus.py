@@ -25,6 +25,18 @@ MENUS = {
                     "validators": ["menu_generator.validators.is_authenticated"],
                 },
                 {
+                    "name": _("My overview"),
+                    "url": "overview_me",
+                    "icon": "insert_chart",
+                    "validators": ["menu_generator.validators.is_authenticated"],
+                },
+                {
+                    "name": _("My students"),
+                    "url": "my_students",
+                    "icon": "people",
+                    "validators": ["menu_generator.validators.is_authenticated"],
+                },
+                {
                     "name": _("Register absence"),
                     "url": "register_absence",
                     "icon": "rate_review",
