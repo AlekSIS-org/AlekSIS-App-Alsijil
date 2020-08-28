@@ -44,8 +44,7 @@ def mark_absent(
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
         sub = lesson_period.get_substitution()
-        if sub:
-            if sub.is_cancelled:
+        if sub and sub.is_cancelled:
                 continue
 
         personal_note, created = PersonalNote.objects.update_or_create(
