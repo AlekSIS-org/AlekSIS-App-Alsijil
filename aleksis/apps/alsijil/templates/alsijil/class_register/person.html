@@ -32,6 +32,10 @@
               {% trans "Mark as" %}
               <input type="hidden" value="{{ note.pk }}" name="personal_note">
               {% include "alsijil/partials/mark_as_buttons.html" %}
+              <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                 href="{% url "delete_personal_note" note.pk %}">
+                <i class="material-icons center">cancel</i>
+              </a>
             </form>
           {% endif %}
           <i class="material-icons left red-text">warning</i>
@@ -47,6 +51,10 @@
               {% trans "Mark as" %}
               <input type="hidden" value="{{ note.pk }}" name="personal_note">
               {% include "alsijil/partials/mark_as_buttons.html" %}
+              <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                 href="{% url "delete_personal_note" note.pk %}">
+                <i class="material-icons center">cancel</i>
+              </a>
             </form>
           {% endif %}
         </li>
@@ -167,6 +175,10 @@
                         {% trans "Mark as" %}
                         <input type="hidden" value="{{ note.pk }}" name="personal_note">
                         {% include "alsijil/partials/mark_as_buttons.html" %}
+                        <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                           href="{% url "delete_personal_note" note.pk %}">
+                          <i class="material-icons center">cancel</i>
+                        </a>
                       </form>
                     {% endif %}
 
@@ -205,6 +217,10 @@
                         {% trans "Mark as" %}
                         <input type="hidden" value="{{ note.pk }}" name="personal_note">
                         {% include "alsijil/partials/mark_as_buttons.html" %}
+                        <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                           href="{% url "delete_personal_note" note.pk %}">
+                          <i class="material-icons center">cancel</i>
+                        </a>
                       </form>
                     {% endif %}
                   </div>

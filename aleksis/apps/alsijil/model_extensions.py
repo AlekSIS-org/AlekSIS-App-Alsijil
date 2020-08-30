@@ -4,6 +4,7 @@ from typing import Dict, Optional, Union
 from django.db.models import Exists, OuterRef, QuerySet
 from django.utils.translation import gettext as _
 
+import reversion
 from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.models import LessonPeriod
@@ -37,8 +38,10 @@ def mark_absent(
     wanted_week = CalendarWeek.from_date(day)
 
     # Get all lessons of this person on the specified day
-    lesson_periods = self.lesson_periods_as_participant.on_day(day).filter(
-        period__period__gte=from_period
+    lesson_periods = (
+        self.lesson_periods_as_participant.on_day(day)
+        .filter(period__period__gte=from_period)
+        .annotate_week(wanted_week)
     )
 
     if to_period:
@@ -46,21 +49,30 @@ def mark_absent(
 
     # Create and update all personal notes for the discovered lesson periods
     for lesson_period in lesson_periods:
-        personal_note, created = PersonalNote.objects.update_or_create(
-            person=self,
-            lesson_period=lesson_period,
-            week=wanted_week.week,
-            year=wanted_week.year,
-            defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type},
-        )
-        personal_note.groups_of_person.set(self.member_of.all())
+        sub = lesson_period.get_substitution()
+        if sub and sub.is_cancelled:
+                continue
 
-        if remarks:
-            if personal_note.remarks:
-                personal_note.remarks += "; %s" % remarks
-            else:
-                personal_note.remarks = remarks
-            personal_note.save()
+        with reversion.create_revision():
+            personal_note, created = PersonalNote.objects.update_or_create(
+                person=self,
+                lesson_period=lesson_period,
+                week=wanted_week.week,
+                year=wanted_week.year,
+                defaults={
+                    "absent": absent,
+                    "excused": excused,
+                    "excuse_type": excuse_type,
+                },
+            )
+            personal_note.groups_of_person.set(self.member_of.all())
+
+            if remarks:
+                if personal_note.remarks:
+                    personal_note.remarks += "; %s" % remarks
+                else:
+                    personal_note.remarks = remarks
+                personal_note.save()
 
 
 @LessonPeriod.method

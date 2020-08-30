@@ -7,7 +7,9 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
+from django.views.generic import DetailView
 
+import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
@@ -131,7 +133,8 @@ def lesson(
             if personal_note_formset.is_valid() and request.user.has_perm(
                 "alsijil.edit_lesson_personalnote", lesson_period
             ):
-                instances = personal_note_formset.save()
+                with reversion.create_revision():
+                    instances = personal_note_formset.save()
 
                 # Iterate over personal notes and carry changed absences to following lessons
                 for instance in instances:
@@ -530,7 +533,12 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                             absent=True,
                             excused=False,
                         )
-                        notes.update(excused=True, excuse_type=excuse_type)
+                        for note in notes:
+                            note.excused = True
+                            note.excuse_type = excuse_type
+                            with reversion.create_revision():
+                                note.save()
+
                         messages.success(
                             request, _("The absences have been marked as excused.")
                         )
@@ -547,7 +555,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                         if note.absent:
                             note.excused = True
                             note.excuse_type = excuse_type
-                            note.save()
+                            with reversion.create_revision():
+                                note.save()
                             messages.success(
                                 request, _("The absence has been marked as excused.")
                             )
@@ -676,6 +685,19 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     context["register_absence_form"] = register_absence_form
 
     return render(request, "alsijil/absences/register.html", context)
+
+
+class DeletePersonalNoteView(DetailView):
+    model = PersonalNote
+    template_name = "core/pages/delete.html"
+
+    def post(self, request, *args, **kwargs):
+        note = self.get_object()
+        with reversion.create_revision():
+            note.reset_values()
+            note.save()
+        messages.success(request, _("The personal note has been deleted."))
+        return redirect("overview_person", note.person.pk)
 
 
 class ExtraMarkListView(PermissionRequiredMixin, SingleTableView):
