@@ -180,6 +180,11 @@
                           <i class="material-icons center">cancel</i>
                         </a>
                       </form>
+                    {% elif can_edit_personal_note %}
+                      <a class="btn-flat red-text right hide-on-small-only" title="{% trans "Delete note" %}"
+                         href="{% url "delete_personal_note" note.pk %}">
+                        <i class="material-icons center">cancel</i>
+                      </a>
                     {% endif %}
 
                     {% if note.absent %}
@@ -222,6 +227,12 @@
                           <i class="material-icons center">cancel</i>
                         </a>
                       </form>
+                    {% elif can_edit_personal_note %}
+                      <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                         href="{% url "delete_personal_note" note.pk %}">
+                        <i class="material-icons left">cancel</i>
+                        {% trans "Delete" %}
+                      </a>
                     {% endif %}
                   </div>
               </li>
