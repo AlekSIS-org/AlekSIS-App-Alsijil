@@ -687,9 +687,10 @@ def register_absence(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
-class DeletePersonalNoteView(DetailView):
+class DeletePersonalNoteView(PermissionRequiredMixin, DetailView):
     model = PersonalNote
     template_name = "core/pages/delete.html"
+    permission_required = "alsijil.edit_personalnote"
 
     def post(self, request, *args, **kwargs):
         note = self.get_object()
