@@ -45,7 +45,7 @@
       <div class="col s12 l7">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
-          <div class="card hide-on-med-and-down">
+          <div class="card show-on-extra-large">
             <div class="card-content">
               {% weekday_to_date week periods.0.period.weekday as current_date %}
               <span class="card-title">
@@ -106,7 +106,7 @@
               </table>
             </div>
           </div>
-          <ul class="collapsible hide-on-large-only">
+          <ul class="collapsible hide-on-extra-large-only">
             <li class="">
               {% weekday_to_date week periods.0.period.weekday as current_date %}
               <div class="collapsible-header flow-text">

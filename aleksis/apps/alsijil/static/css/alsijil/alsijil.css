@@ -13,3 +13,16 @@ table a.tr-link {
 	flex-grow: 100;
 	text-align: right!important;
 }
+
+@media only screen and (min-width: 1201px) {
+    .hide-on-extra-large-only {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    .show-on-extra-large {
+        display: none;
+    }
+
+}
