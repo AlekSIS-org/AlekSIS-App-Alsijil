@@ -7,3 +7,9 @@ table a.tr-link {
   width: inherit;
   height: inherit;
 }
+
+.collapsible-icon-right {
+	align-self: end;
+	flex-grow: 100;
+	text-align: right!important;
+}
