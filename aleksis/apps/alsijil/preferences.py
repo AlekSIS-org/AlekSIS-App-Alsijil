@@ -17,6 +17,14 @@ class BlockPersonalNotesForCancelled(BooleanPreference):
 
 
 @site_preferences_registry.register
+class ViewOwnPersonalNotes(BooleanPreference):
+    section = alsijil
+    name = "view_own_personal_notes"
+    default = True
+    verbose_name = _("Allow users to view their own personal notes")
+
+
+@site_preferences_registry.register
 class CarryOverDataToNextPeriods(BooleanPreference):
     section = alsijil
     name = "carry_over"
