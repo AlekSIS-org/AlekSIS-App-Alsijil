@@ -42,7 +42,7 @@
 
   {% if lesson_periods %}
     <div class="row">
-      <div class="col s12 m7">
+      <div class="col s12 l7">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
           <div class="card hide-on-med-and-down">
@@ -106,36 +106,37 @@
               </table>
             </div>
           </div>
-          <div class="card hide-on-large-only">
-            <div class="card-content">
+          <ul class="collapsible hide-on-large-only">
+            <li class="">
               {% weekday_to_date week periods.0.period.weekday as current_date %}
-              <span class="card-title">
-                {{ weekday }}, {{ current_date }}
-              </span>
-              <div class="collection">
-                {% for period in periods %}
-                  <a class="collection-item avatar"
-                     href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                    <p class="title">
-                      {% include "alsijil/partials/lesson_status_icon.html" with period=period css_class="circle" color_suffix=" " %}
-                      {{ period.period.period }}. {{ period.get_subject.name }}
-                    </p>
-                    <p>
-                      {% if not group %}
-                        {{ period.lesson.group_names }}
-                      {% endif %}
-                      {{ period.get_teacher_names }}
-                    </p>
-                    <p>{{ period.get_lesson_documentation.topic }}</p>
-                  </a>
-                {% endfor %}
-                <!--</tbody>-->
+              <div class="collapsible-header flow-text">
+                {{ weekday }}, {{ current_date }} <i class="material-icons right">expand_more</i>
               </div>
-            </div>
-          </div>
+              <div class="collapsible-body">
+                <div class="collection">
+                  {% for period in periods %}
+                    <a class="collection-item avatar"
+                       href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                      <p class="title">
+                        {% include "alsijil/partials/lesson_status_icon.html" with period=period css_class="circle" color_suffix=" " %}
+                        {{ period.period.period }}. {{ period.get_subject.name }}
+                      </p>
+                      <p>
+                        {% if not group %}
+                          {{ period.lesson.group_names }}
+                        {% endif %}
+                        {{ period.get_teacher_names }}
+                      </p>
+                      <p>{{ period.get_lesson_documentation.topic }}</p>
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </li>
+          </ul>
         {% endfor %}
       </div>
-      <div class="col s12 m5">
+      <div class="col s12 l5">
         <div class="card">
           <div class="card-content">
             <span class="card-title">
