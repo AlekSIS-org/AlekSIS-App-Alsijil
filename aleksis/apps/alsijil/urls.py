@@ -26,6 +26,7 @@ urlpatterns = [
     path(
         "print/group/<int:id_>", views.full_register_group, name="full_register_group"
     ),
+    path("groups/", views.my_groups, name="my_groups"),
     path("persons/", views.my_students, name="my_students"),
     path("persons/<int:id_>/", views.overview_person, name="overview_person"),
     path("me/", views.overview_person, name="overview_me"),

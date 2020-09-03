@@ -25,6 +25,12 @@ MENUS = {
                     "validators": ["menu_generator.validators.is_authenticated"],
                 },
                 {
+                    "name": _("My groups"),
+                    "url": "my_groups",
+                    "icon": "people",
+                    "validators": ["menu_generator.validators.is_authenticated"],
+                },
+                {
                     "name": _("My overview"),
                     "url": "overview_me",
                     "icon": "insert_chart",
