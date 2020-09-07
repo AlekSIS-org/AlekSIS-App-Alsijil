@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.date import get_current_year
@@ -45,6 +46,8 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     Used in the class register to note absences, excuses
     and remarks about a student in a single lesson period.
     """
+
+    objects = PersonalNoteManager()
 
     person = models.ForeignKey(
         "core.Person", models.CASCADE, related_name="personal_notes"
