@@ -119,7 +119,7 @@ def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
     for personal_note in new_personal_notes:
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
-    return PersonalNote.objects.select_related("person").filter(
+    return PersonalNote.objects.filter(
         lesson_period=self,
         week=wanted_week.week,
         year=wanted_week.year,
@@ -165,12 +165,11 @@ def get_lesson_documentation(
     """Get lesson documentation object for this lesson."""
     if not week:
         week = self.week
-    try:
-        return LessonDocumentation.objects.get(
-            lesson_period=self, week=week.week, year=week.year
-        )
-    except LessonDocumentation.DoesNotExist:
-        return None
+    # Use all to make effect of prefetched data
+    for documentation in self.documentations.all():
+        if documentation.week == week.week and documentation.year == week.year:
+            return documentation
+    return None
 
 
 @LessonPeriod.method
