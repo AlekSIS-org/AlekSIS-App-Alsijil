@@ -156,6 +156,8 @@ def lesson(
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form
     context["personal_note_formset"] = personal_note_formset
+    context["prev_lesson"] = lesson_period.prev
+    context["next_lesson"] = lesson_period.next
 
     return render(request, "alsijil/class_register/lesson.html", context)
 
