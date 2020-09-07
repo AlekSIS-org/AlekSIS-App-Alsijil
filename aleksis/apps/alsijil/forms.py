@@ -147,7 +147,7 @@ class RegisterAbsenceForm(forms.Form):
         if check_global_permission(self.request.user, "alsijil.register_absence"):
             self.fields["person"].queryset = Person.objects.all()
         else:
-            self.fields["person"].queryset = (
+            persons_qs = (
                 get_objects_for_user(
                     self.request.user, "core.register_absence_person", Person
                 )
@@ -164,6 +164,8 @@ class RegisterAbsenceForm(forms.Form):
                     )
                 )
             )
+            self.fields["person"].queryset = Person.objects.filter(pk__in=list(persons_qs.values_list("pk", flat=True)))
+
         self.fields["from_period"].choices = period_choices
         self.fields["to_period"].choices = period_choices
         self.fields["from_period"].initial = TimePeriod.period_min
