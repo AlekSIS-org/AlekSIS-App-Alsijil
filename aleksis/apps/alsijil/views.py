@@ -471,7 +471,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["periods_by_day"] = periods_by_day
     context["lesson_periods"] = lesson_periods
     context["today"] = date.today()
-
+    context["lessons"] = (
+        group.lessons.all()
+        .select_related("validity", "subject")
+        .prefetch_related("teachers", "lesson_periods")
+    )
+    context["child_groups"] = group.child_groups.all().prefetch_related(
+        "lessons",
+        "lessons__validity",
+        "lessons__subject",
+        "lessons__teachers",
+        "lessons__lesson_periods",
+    )
     return render(request, "alsijil/print/full_register.html", context)
 
 
