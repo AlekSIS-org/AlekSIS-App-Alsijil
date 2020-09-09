@@ -27,10 +27,10 @@ from .util.predicates import (
 
 # View lesson
 view_lesson_predicate = has_person & (
-    has_global_perm("alsijil.view_lesson")
-    | is_lesson_teacher
+    is_lesson_teacher
     | is_lesson_participant
     | is_lesson_parent_group_owner
+    | has_global_perm("alsijil.view_lesson")
     | has_lesson_group_object_perm("core.view_week_class_register_group")
 )
 add_perm("alsijil.view_lesson", view_lesson_predicate)
@@ -40,66 +40,66 @@ add_perm("alsijil.view_lesson_menu", has_person)
 
 # View lesson personal notes
 view_lesson_personal_notes_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_lesson_group_object_perm("core.view_personalnote_group")
-    | is_lesson_teacher
+    is_lesson_teacher
     | is_lesson_parent_group_owner
+    | has_global_perm("alsijil.view_personalnote")
+    | has_lesson_group_object_perm("core.view_personalnote_group")
 )
 add_perm("alsijil.view_lesson_personalnote", view_lesson_personal_notes_predicate)
 
 # Edit personal note
 edit_lesson_personal_note_predicate = has_person & (
-    has_global_perm("alsijil.change_personalnote")
+    is_lesson_teacher
+    | has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
-    | is_lesson_teacher
 )
 add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate)
 
 
 # View personal note
 view_personal_note_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_personal_note_group_perm("core.view_personalnote_group")
+    is_own_personal_note
     | is_personal_note_lesson_teacher
-    | is_own_personal_note
     | is_personal_note_lesson_parent_group_owner
+    | has_global_perm("alsijil.view_personalnote")
+    | has_personal_note_group_perm("core.view_personalnote_group")
 )
 add_perm("alsijil.view_personalnote", view_personal_note_predicate)
 
 # Edit personal note
 edit_personal_note_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_personal_note_group_perm("core.edit_personalnote_group")
-    | is_personal_note_lesson_teacher
+    is_personal_note_lesson_teacher
     | is_personal_note_lesson_parent_group_owner
+    | has_global_perm("alsijil.view_personalnote")
+    | has_personal_note_group_perm("core.edit_personalnote_group")
 )
 add_perm("alsijil.edit_personalnote", edit_personal_note_predicate)
 
 # View lesson documentation
 view_lesson_documentation_predicate = has_person & (
-    has_global_perm("alsijil.view_lessondocumentation")
-    | has_lesson_group_object_perm("core.view_lessondocumentation_group")
-    | is_lesson_teacher
-    | is_lesson_parent_group_owner
+    is_lesson_teacher
     | is_lesson_participant
+    | is_lesson_parent_group_owner
+    | has_global_perm("alsijil.view_lessondocumentation")
+    | has_lesson_group_object_perm("core.view_lessondocumentation_group")
 )
 add_perm("alsijil.view_lessondocumentation", view_lesson_documentation_predicate)
 
 # Edit lesson documentation
 edit_lesson_documentation_predicate = has_person & (
-    has_global_perm("alsijil.change_lessondocumentation")
+    is_lesson_teacher
+    | has_global_perm("alsijil.change_lessondocumentation")
     | has_lesson_group_object_perm("core.edit_lessondocumentation_group")
-    | is_lesson_teacher
 )
 add_perm("alsijil.edit_lessondocumentation", edit_lesson_documentation_predicate)
 
 # View week overview
 view_week_predicate = has_person & (
-    has_global_perm("alsijil.view_week")
-    | has_object_perm("core.view_week_class_register_group")
+    is_current_person
     | is_group_member
     | is_group_owner
-    | is_current_person
+    | has_global_perm("alsijil.view_week")
+    | has_object_perm("core.view_week_class_register_group")
 )
 add_perm("alsijil.view_week", view_week_predicate)
 
@@ -108,10 +108,10 @@ add_perm("alsijil.view_week_menu", has_person)
 
 # View week personal notes
 view_week_personal_notes_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_object_perm("core.view_personalnote_group")
+    (is_current_person & is_teacher)
     | is_group_owner
-    | (is_current_person & is_teacher)
+    | has_global_perm("alsijil.view_personalnote")
+    | has_object_perm("core.view_personalnote_group")
 )
 add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 
@@ -123,18 +123,18 @@ add_perm("alsijil.view_register_absence", view_register_absence_predicate)
 
 # Register absence
 register_absence_predicate = has_person & (
-    has_global_perm("alsijil.register_absence")
-    | has_person_group_object_perm("core.register_absence_group")
+    is_person_primary_group_owner
+    | has_global_perm("alsijil.register_absence")
     | has_object_perm("core.register_absence_person")
-    | is_person_primary_group_owner
+    | has_person_group_object_perm("core.register_absence_group")
 )
 add_perm("alsijil.register_absence", register_absence_predicate)
 
 # View full register for group
 view_full_register_predicate = has_person & (
-    has_global_perm("alsijil.view_full_register")
+    is_group_owner
+    | has_global_perm("alsijil.view_full_register")
     | has_object_perm("core.view_full_register_group")
-    | is_group_owner
 )
 add_perm("alsijil.view_full_register", view_full_register_predicate)
 
@@ -154,10 +154,10 @@ add_perm("alsijil.view_person_overview_menu", view_person_overview_menu_predicat
 
 # View person overview personal notes
 view_person_overview_personal_notes_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_person_group_object_perm("core.view_personalnote_group")
+    is_current_person
     | is_person_primary_group_owner
-    | is_current_person
+    | has_global_perm("alsijil.view_personalnote")
+    | has_person_group_object_perm("core.view_personalnote_group")
 )
 add_perm(
     "alsijil.view_person_overview_personalnote",
@@ -166,9 +166,9 @@ add_perm(
 
 # Edit person overview personal notes
 edit_person_overview_personal_notes_predicate = has_person & (
-    has_global_perm("alsijil.edit_personalnote")
+    is_person_primary_group_owner
+    | has_global_perm("alsijil.edit_personalnote")
     | has_person_group_object_perm("core.edit_personalnote_group")
-    | is_person_primary_group_owner
 )
 add_perm(
     "alsijil.edit_person_overview_personalnote",
@@ -177,10 +177,10 @@ add_perm(
 
 # View person statistics on personal notes
 view_person_statistics_personal_notes_predicate = has_person & (
-    has_global_perm("alsijil.view_personalnote")
-    | has_person_group_object_perm("core.view_personalnote_group")
+    is_current_person
     | is_person_primary_group_owner
-    | is_current_person
+    | has_global_perm("alsijil.view_personalnote")
+    | has_person_group_object_perm("core.view_personalnote_group")
 )
 add_perm(
     "alsijil.view_person_statistics_personalnote",
