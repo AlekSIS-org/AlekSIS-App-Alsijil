@@ -136,10 +136,58 @@
                             <td>{{ period.lesson.teacher_names }}</td>
                           </tr>
                           <tr>
-                            <th>{% trans "Lesson Topic" %}</th>
-                            <td>{{ period.get_lesson_documentation.topic }}</td>
+                            <th>{% trans "Lesson topic" %}</th>
+                            <td>{% firstof period.get_lesson_documentation.topic "–" %}</td>
                           </tr>
+                          {% with period.get_lesson_documentation as lesson_documentation %}
+                            {% if lesson_documentation.homework %}
+                            <tr>
+                              <th>{% trans "Homework" %}</th>
+                              <td>{% firstof period.get_lesson_documentation.homework "–" %}</td>
+                            </tr>
+                            {% endif %}
+                            {% if lesson_documentation.group_note %}
+                            <tr>
+                              <th>{% trans "Group note" %}</th>
+                              <td>{% firstof period.get_lesson_documentation.group_note "–" %}</td>
+                            </tr>
+                            {% endif %}
+                          {% endwith %}
                         </table>
+                        <div class="hide-on-large-only">
+                          <ul class="collection">
+                            <li class="collection-item">
+                              {{ period.period.period }}. {{ period.get_subject.name }}
+                            </li>
+                            {% if not group %}
+                              <li class="collection-item">
+
+                                {{ period.lesson.group_names }}
+
+                              </li>
+                            {% endif %}
+                            <li class="collection-item">
+                              {{ period.lesson.teacher_names }}
+                            </li>
+                            <li class="collection-item">
+                              {{ period.get_lesson_documentation.topic }}
+                            </li>
+                            {% with period.get_lesson_documentation as lesson_documentation %}
+                              {% if lesson_documentation.homework %}
+                              <li class="collection-item">
+                                <strong>{% trans "Homework" %}</strong>
+                                {% firstof period.get_lesson_documentation.homework "–" %}
+                              </li>
+                              {% endif %}
+                              {% if lesson_documentation.group_note %}
+                              <li class="collection-item">
+                                <strong>{% trans "Group note" %}</strong>
+                                {% firstof period.get_lesson_documentation.group_note "–" %}
+                              </li>
+                              {% endif %}
+                            {% endwith %}
+                          </ul>
+                        </div>
                       </a>
                     {% endif %}
                   {% endfor %}
