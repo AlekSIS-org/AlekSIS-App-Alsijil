@@ -135,14 +135,16 @@ def has_lesson_group_object_perm(perm: str):
     """
     name = f"has_lesson_group_object_perm:{perm}"
 
+    ct = ContentType.objects.get_for_model(Group)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
-            for group in obj.lesson.groups.all():
-                if check_object_permission(user, perm, group):
-                    return True
-            return False
-        return True
+            groups = obj.lesson.groups.all()
+            qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+            return qs.exists()
+        return False
 
     return fn
 
@@ -154,13 +156,16 @@ def has_personal_note_group_perm(perm: str):
     """
     name = f"has_personal_note_person_or_group_perm:{perm}"
 
+    ct = ContentType.objects.get_for_model(Person)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
-            for group in obj.person.member_of.all():
-                if check_object_permission(user, perm, group):
-                    return True
-            return False
+            groups = obj.person.member_of.all()
+            qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+            return qs.exists()
+        return False
 
     return fn
 
@@ -224,9 +229,9 @@ def has_any_object_absence(user: User) -> bool:
     """
     Predicate which builds a query with all the persons the given users is allowed to register an absence for.
     """
-    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
-        return True
     if Person.objects.filter(member_of__owners=user.person).exists():
+        return True
+    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
         return True
     if Person.objects.filter(
         member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)
