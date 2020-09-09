@@ -66,8 +66,9 @@
           {% endif %}
         </li>
       {% empty %}
-        <li class="collection-item flow-text">
-          {% trans "There are unexcused lessons." %}
+        <li class="collection-item avatar">
+          <i class="material-icons left circle green white-text">check</i>
+          {% trans "There are no unexcused lessons." %}
         </li>
       {% endfor %}
     </ul>
