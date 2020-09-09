@@ -179,7 +179,7 @@ def week_view(
 
     instance = get_instance_by_pk(request, year, week, type_, id_)
 
-    lesson_periods = LessonPeriod.objects.in_week(wanted_week)
+    lesson_periods = LessonPeriod.objects.in_week(wanted_week).prefetch_related("lesson__groups__members", "lesson__groups__parent_groups", "lesson__groups__parent_groups__owners")
 
     lesson_periods_query_exists = True
     if type_ and id_:

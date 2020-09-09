@@ -38,7 +38,10 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     the groups linked to the given LessonPeriod.
     """
     if hasattr(obj, "lesson"):
-        return obj.lesson.groups.filter(members=user.person).exists()
+        for group in obj.lesson.groups.all():
+            if user.person in group.members.all():
+                return True
+        return False
     return True
 
 
@@ -51,7 +54,11 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     any parent groups of any groups of the given LessonPeriods lesson.
     """
     if hasattr(obj, "lesson"):
-        return obj.lesson.groups.filter(parent_groups__owners=user.person).exists()
+        for group in obj.lesson.groups.all():
+            for parent_group in group.parent_groups.all():
+                if user.person in parent_group.owners.all():
+                    return True
+        return False
     return True
 
 
@@ -63,7 +70,7 @@ def is_group_owner(user: User, obj: Union[Group, Person]) -> bool:
     If there isn't provided a group, it will return `False`.
     """
     if isinstance(obj, Group):
-        if obj.owners.filter(pk=user.person.pk).exists():
+        if user.person in obj.owners.all():
             return True
 
     return False
