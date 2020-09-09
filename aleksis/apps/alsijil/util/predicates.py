@@ -108,7 +108,7 @@ def has_person_group_object_perm(perm: str):
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
         groups = obj.member_of.all()
-        qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+        qs = UserObjectPermission.objects.filter(object_pk__in=list(groups.values_list("pk", flat=True)), content_type=ct, user=user, permission__in=permissions)
         return qs.exists()
 
     return fn
@@ -142,7 +142,7 @@ def has_lesson_group_object_perm(perm: str):
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
             groups = obj.lesson.groups.all()
-            qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+            qs = UserObjectPermission.objects.filter(object_pk__in=list(groups.values_list("pk", flat=True)), content_type=ct, user=user, permission__in=permissions)
             return qs.exists()
         return False
 
@@ -163,7 +163,7 @@ def has_personal_note_group_perm(perm: str):
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
             groups = obj.person.member_of.all()
-            qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+            qs = UserObjectPermission.objects.filter(object_pk__in=list(groups.values_list("pk", flat=True)), content_type=ct, user=user, permission__in=permissions)
             return qs.exists()
         return False
 
