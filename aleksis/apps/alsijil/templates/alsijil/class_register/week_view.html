@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/base.html" %}
-{% load material_form i18n week_helpers static data_helpers rules %}
+{% load material_form i18n week_helpers static data_helpers rules time_helpers %}
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
@@ -235,7 +235,7 @@
                 ({{ person.person.unexcused_count }} {% trans "unexcused" %})
               </p>
               <p class="card-text">
-                {% trans "Summed up tardiness" %}: {{ person.person.tardiness_sum }}'
+                {% trans "Summed up tardiness" %}: {% firstof person.person.tardiness_sum|to_time|time:"H\h i\m"  "–" %}
               </p>
               {% for extra_mark in extra_marks %}
                 <p class="card-text">
