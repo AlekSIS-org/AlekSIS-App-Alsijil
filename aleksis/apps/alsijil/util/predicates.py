@@ -39,7 +39,7 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     """
     if hasattr(obj, "lesson"):
         for group in obj.lesson.groups.all():
-            if user.person in group.members.all():
+            if user.person in list(group.members.all()):
                 return True
         return False
     return True
@@ -56,7 +56,7 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     if hasattr(obj, "lesson"):
         for group in obj.lesson.groups.all():
             for parent_group in group.parent_groups.all():
-                if user.person in parent_group.owners.all():
+                if user.person in list(parent_group.owners.all()):
                     return True
         return False
     return True
