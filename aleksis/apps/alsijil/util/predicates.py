@@ -1,6 +1,8 @@
 from typing import Union
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
+from django.contrib.contenttypes.models import ContentType
+from guardian.models import UserObjectPermission
 
 from guardian.shortcuts import get_objects_for_user
 from rules import predicate
@@ -100,12 +102,14 @@ def has_person_group_object_perm(perm: str):
     """
     name = f"has_person_group_object_perm:{perm}"
 
+    ct = ContentType.objects.get_for_model(Group)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
-        for group in obj.member_of.all():
-            if check_object_permission(user, perm, group):
-                return True
-        return False
+        groups = obj.member_of.all()
+        qs = UserObjectPermission.objects.filter(object_pk__in=groups.values_list("pk", flat=True), content_type=ct, user=user, permission__in=permissions)
+        return qs.exists()
 
     return fn
 
