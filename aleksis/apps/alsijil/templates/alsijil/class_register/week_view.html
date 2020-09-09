@@ -48,7 +48,7 @@
           <li class="tab col s6"><a class="active" href="#personal-notes">{% trans "Personal notes" %}</a></li>
         </ul>
       </div>
-      <div class="col s12 l7" id="week-overview">
+      <div class="col s12" id="week-overview">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
           <div class="card show-on-extra-large">
@@ -203,7 +203,7 @@
           </ul>
         {% endfor %}
       </div>
-      <div class="col s12 l5" id="personal-notes">
+      <div class="col s12" id="personal-notes">
         <div class="card">
           <div class="card-content">
             <span class="card-title">
