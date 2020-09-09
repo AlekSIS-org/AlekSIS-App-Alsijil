@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers material_form_internal material_form i18n static rules %}
+{% load week_helpers material_form_internal material_form i18n static rules time_helpers %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -270,7 +270,12 @@
                     <tr>
                       <td>{{ form.person_name.value }}</td>
                       <td><i class="material-icons center">{{ form.absent.value|yesno:"check,clear" }}</i></td>
-                      <td><i class="material-icons center">{{ form.late.value|yesno:"check,clear" }}</i></td>
+                      <td>
+                          <i class="material-icons center">{{ form.late.value|yesno:"check,clear" }}</i>
+                          <span class="alsijil-tardiness-text">
+                            {% if form.late.value %}{{ form.late.value|to_time|time:"i\m" }}{% endif %}
+                          </span>
+                      </td>
                       <td><i class="material-icons center">{{ form.excused.value|yesno:"check,clear" }}</i></td>
                       <td>{% firstof form.excuse_type.value "–" %}</td>
                       <td>
