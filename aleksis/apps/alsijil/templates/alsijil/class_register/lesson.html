@@ -10,6 +10,13 @@
 {% endblock %}
 
 {% block page_title %}
+  {% with lesson_period.get_lesson_documentation as lesson_doc %}
+    <a
+            href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
+    class="btn-flat primary-color-text waves-light waves-effect btn-large">
+      <i class="material-icons center">chevron_left</i>
+    </a>
+  {% endwith %}
   {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
 
   {% for group in lesson_period.get_groups.all %}
@@ -70,6 +77,12 @@
               <a href="#personal-notes">{% trans "Personal notes" %}</a>
             </li>
           {% endif %}
+          {% has_perm "alsijil.view_lessondocumentation" user lesson_period.prev as can_view_prev_lesson_documentation %}
+          {% if lesson_period.prev.get_lesson_documentation and can_view_prev_lesson_documentation %}
+            <li class="tab">
+              <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
+            </li>
+          {% endif %}
           <li class="tab">
             <a href="#version-history">{% trans "Change history" %}</a>
           </li>
@@ -77,12 +90,52 @@
       </div>
 
       <div class="col s12" id="lesson-documentation">
-        {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
+        <div class="card">
+          <div class="card-content">
+          <span class="card-title">
+            {% blocktrans %}Lesson documentation{% endblocktrans %}
+          </span>
+
+            {% if can_edit_lesson_documentation %}
+              {% form form=lesson_documentation_form %}{% endform %}
+            {% elif can_view_lesson_documentation %}
+              <table>
+                <tr>
+                  <th>
+                    {% trans "Lesson topic" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.topic }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Homework" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.homework }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Group note" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.group_note }}
+                  </td>
+                </tr>
+              </table>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
           {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
             {% if prev_doc and can_view_prev_lesson_documentation %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
-
+              <div class="col s12" id="previous-lesson">
               <div class="card">
                 <div class="card-content">
                   <span class="card-title">
@@ -143,49 +196,10 @@
                   </table>
                 </div>
               </div>
+              </div>
             {% endif %}
           {% endwith %}
         {% endwith %}
-
-        <div class="card">
-          <div class="card-content">
-          <span class="card-title">
-            {% blocktrans %}Lesson documentation{% endblocktrans %}
-          </span>
-
-            {% if can_edit_lesson_documentation %}
-              {% form form=lesson_documentation_form %}{% endform %}
-            {% elif can_view_lesson_documentation %}
-              <table>
-                <tr>
-                  <th>
-                    {% trans "Lesson topic" %}
-                  </th>
-                  <td>
-                    {{ lesson_documentation.topic }}
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    {% trans "Homework" %}
-                  </th>
-                  <td>
-                    {{ lesson_documentation.homework }}
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    {% trans "Group note" %}
-                  </th>
-                  <td>
-                    {{ lesson_documentation.group_note }}
-                  </td>
-                </tr>
-              </table>
-            {% endif %}
-          </div>
-        </div>
-      </div>
 
       {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
         <div class="col s12" id="personal-notes">
