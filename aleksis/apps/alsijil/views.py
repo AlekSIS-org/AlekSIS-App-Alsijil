@@ -281,7 +281,8 @@ def week_view(
                         year=wanted_week.year,
                         lesson_period__in=lesson_periods_pk,
                     ),
-                )
+                ),
+                "member_of__owners"
             )
             .annotate(
                 absences_count=Count(
