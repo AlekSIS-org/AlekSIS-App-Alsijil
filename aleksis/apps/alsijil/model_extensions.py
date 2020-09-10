@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, Optional, Union, Iterator
+from typing import Dict, Iterator, Optional, Union
 
 from django.db.models import Exists, OuterRef, QuerySet
 from django.utils.translation import gettext as _
@@ -191,7 +191,10 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     if not week:
         week = self.week
 
-    return filter(lambda p: p.week == week.week and p.year == week.year and p.absent, self.personal_notes.all())
+    return filter(
+        lambda p: p.week == week.week and p.year == week.year and p.absent,
+        self.personal_notes.all(),
+    )
 
 
 @LessonPeriod.method
