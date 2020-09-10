@@ -273,7 +273,16 @@ def week_view(
 
         persons_qs = (
             persons_qs.distinct()
-            .prefetch_related("personal_notes")
+            .prefetch_related(
+                Prefetch(
+                    "personal_notes",
+                    queryset=PersonalNote.objects.filter(
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        lesson_period__in=lesson_periods_pk,
+                    ),
+                )
+            )
             .annotate(
                 absences_count=Count(
                     "personal_notes",
@@ -329,16 +338,7 @@ def week_view(
         persons = []
         for person in persons_qs:
             persons.append(
-                {
-                    "person": person,
-                    "personal_notes": list(
-                        person.personal_notes.filter(
-                            week=wanted_week.week,
-                            year=wanted_week.year,
-                            lesson_period__in=lesson_periods_pk,
-                        )
-                    ),
-                }
+                {"person": person, "personal_notes": list(person.personal_notes.all())}
             )
     else:
         persons = None
