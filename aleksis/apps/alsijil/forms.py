@@ -46,6 +46,11 @@ class PersonalNoteForm(forms.ModelForm):
         if self.instance and getattr(self.instance, "person", None):
             self.fields["person_name"].initial = str(self.instance.person)
 
+        self.fields["extra_marks"].choices = [(e.id, str(e)) for e in ExtraMark.all]
+        self.fields["excuse_type"].choices = [(None, "-----")] + [
+            (e.id, str(e)) for e in ExcuseType.all
+        ]
+
 
 class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
@@ -164,7 +169,9 @@ class RegisterAbsenceForm(forms.Form):
                     )
                 )
             )
-            self.fields["person"].queryset = Person.objects.filter(pk__in=list(persons_qs.values_list("pk", flat=True)))
+            self.fields["person"].queryset = Person.objects.filter(
+                pk__in=list(persons_qs.values_list("pk", flat=True))
+            )
 
         self.fields["from_period"].choices = period_choices
         self.fields["to_period"].choices = period_choices

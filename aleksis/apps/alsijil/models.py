@@ -1,9 +1,9 @@
-from cache_memoize import cache_memoize
 from django.db import models
 from django.utils.decorators import classproperty
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
+from cache_memoize import cache_memoize
 from calendarweek import CalendarWeek
 
 from aleksis.apps.alsijil.managers import PersonalNoteManager
@@ -35,6 +35,12 @@ class ExcuseType(ExtensibleModel):
     @property
     def count_label(self):
         return f"{self.short_name}_count"
+
+    @classproperty
+    @cache_memoize(3600)
+    def all(cls):
+        qs = cls.objects.all()
+        return qs
 
     class Meta:
         ordering = ["name"]
