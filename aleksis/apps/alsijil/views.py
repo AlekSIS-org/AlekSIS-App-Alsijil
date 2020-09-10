@@ -336,7 +336,7 @@ def week_view(
                             week=wanted_week.week,
                             year=wanted_week.year,
                             lesson_period__in=lesson_periods_pk,
-                        ).prefetch_related("lesson_period__substitutions__subject")
+                        )
                     ),
                 }
             )
