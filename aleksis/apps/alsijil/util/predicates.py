@@ -8,7 +8,10 @@ from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import get_content_type_by_perm, get_site_preferences
+from aleksis.core.util.core_helpers import (
+    get_content_type_by_perm,
+    get_site_preferences,
+)
 
 from ..models import PersonalNote
 
@@ -83,7 +86,10 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     the owner of any group of the given person.
     """
     if obj:
-        return obj.member_of.filter(owners=user.person).exists()
+        for group in obj.member_of.all():
+            if user.person in list(group.owners.all()):
+                return True
+        return False
     return False
 
 
@@ -132,7 +138,7 @@ def is_group_member(user: User, obj: Union[Group, Person]) -> bool:
     If there isn't provided a group, it will return `False`.
     """
     if isinstance(obj, Group):
-        if obj.members.filter(pk=user.person.pk).exists():
+        if user.person in obj.members.all():
             return True
 
     return False
@@ -237,10 +243,10 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
     """
     if hasattr(obj, "lesson_period"):
         if hasattr(obj.lesson_period, "lesson"):
-            return obj.lesson_period.lesson.groups.filter(
-                parent_groups__owners=user.person
-            ).exists()
-        return False
+            for group in obj.lesson_period.lesson.groups.all():
+                for parent_group in group.parent_groups.all():
+                    if user.person in list(parent_group.owners.all()):
+                        return True
     return False
 
 
