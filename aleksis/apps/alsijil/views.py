@@ -485,6 +485,16 @@ def my_students(request: HttpRequest) -> HttpResponse:
     context["persons"] = persons
     return render(request, "alsijil/class_register/persons.html", context)
 
+def my_groups(request: HttpRequest) -> HttpResponse:
+    context = {}
+    groups = (
+        Group.objects.for_current_school_term_or_all()
+        .annotate(lessons_count=Count("lessons"))
+        .filter(lessons_count__gt=0, owners=request.user.person)
+    )
+    context["groups"] = groups
+    return render(request, "alsijil/class_register/groups.html", context)
+
 
 @permission_required(
     "alsijil.view_person_overview",
