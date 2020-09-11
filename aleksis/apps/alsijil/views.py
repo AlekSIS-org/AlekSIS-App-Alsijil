@@ -485,6 +485,8 @@ def my_students(request: HttpRequest) -> HttpResponse:
     context["persons"] = persons
     return render(request, "alsijil/class_register/persons.html", context)
 
+
+@permission_required("alsijil.view_my_groups",)
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
     groups = (
