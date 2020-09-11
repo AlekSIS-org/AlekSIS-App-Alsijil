@@ -1,0 +1,24 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block browser_title %}{% blocktrans %}My groups{% endblocktrans %}{% endblock %}
+
+
+{% block page_title %}
+  {% blocktrans %}My groups{% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+  <div class="collection">
+    {% for group in groups %}
+      <a class="collection-item" href="{% url "week_view" "group" group.pk %}">
+        {{ group }}
+      </a>
+    {% empty %}
+      <li class="collection-item flow-text">
+        {% blocktrans %}No groups available.{% endblocktrans %}
+      </li>
+    {% endfor %}
+  </div>
+{% endblock %}

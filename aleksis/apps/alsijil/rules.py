@@ -142,6 +142,10 @@ add_perm("alsijil.view_full_register", view_full_register_predicate)
 view_my_students_predicate = has_person & is_teacher
 add_perm("alsijil.view_my_students", view_my_students_predicate)
 
+# View groups list
+view_my_groups_predicate = has_person & is_teacher
+add_perm("alsijil.view_my_groups", view_my_groups_predicate)
+
 # View person overview
 view_person_overview_predicate = has_person & (
     is_current_person | is_person_group_owner
