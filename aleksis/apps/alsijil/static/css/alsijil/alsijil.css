@@ -24,5 +24,14 @@ table a.tr-link {
     .show-on-extra-large {
         display: none;
     }
+}
 
+@media only screen and (max-width: 600px) {
+    .collection .collection-item.avatar {
+        padding-left: 20px;
+    }
+    .collection .collection-item.avatar:not(.circle-clipper) > .circle {
+        position: relative;
+        margin-bottom: 10px;
+    }
 }
