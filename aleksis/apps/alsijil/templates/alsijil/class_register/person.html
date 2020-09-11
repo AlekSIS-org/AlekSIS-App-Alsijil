@@ -12,8 +12,8 @@
   {% has_perm "alsijil.view_my_students" user as has_students %}
   {% if has_students %}
     <a href="{% url "my_students" %}"
-    class="btn-flat primary-color-text waves-light waves-effect btn-large">
-      <i class="material-icons center">chevron_left</i>
+    class="btn-flat primary-color-text waves-light waves-effect">
+      <i class="material-icons left">chevron_left</i> {% trans "Back" %}
     </a>
   {% endif %}
   {% blocktrans with person=person %}

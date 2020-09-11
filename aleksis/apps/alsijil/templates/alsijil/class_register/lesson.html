@@ -12,8 +12,8 @@
 {% block page_title %}
   {% with lesson_period.get_lesson_documentation as lesson_doc %}
     <a href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
-    class="btn-flat primary-color-text waves-light waves-effect btn-large">
-      <i class="material-icons center">chevron_left</i>
+    class="btn-flat primary-color-text waves-light waves-effect">
+      <i class="material-icons left">chevron_left</i> {% trans "Back" %}
     </a>
   {% endwith %}
   {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
