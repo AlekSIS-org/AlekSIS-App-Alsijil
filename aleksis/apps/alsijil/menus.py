@@ -38,7 +38,12 @@ MENUS = {
                     "name": _("My groups"),
                     "url": "my_groups",
                     "icon": "people",
-                    "validators": ["menu_generator.validators.is_authenticated"],
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_my_groups",
+                        ),
+                    ],
                 },
                 {
                     "name": _("My overview"),
