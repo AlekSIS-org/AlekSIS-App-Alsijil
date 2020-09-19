@@ -7,6 +7,8 @@ from django.utils.translation import gettext as _
 import reversion
 from calendarweek import CalendarWeek
 
+from aleksis.core.util.core_helpers import celery_optional
+
 
 class SolveOption:
     name: str = "default"
@@ -90,6 +92,7 @@ DATA_CHECKS_BY_NAME = {check.name: check for check in DATA_CHECKS}
 DATA_CHECKS_CHOICES = [(check.name, check.verbose_name) for check in DATA_CHECKS]
 
 
+@celery_optional
 def check_data():
     for check in DATA_CHECKS:
         logging.info(f"Run check: {check.verbose_name}")

@@ -23,7 +23,11 @@ from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_d
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
-from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
+from aleksis.core.util.core_helpers import (
+    get_site_preferences,
+    is_celery_enabled,
+    objectgetter_optional,
+)
 
 from .forms import (
     ExcuseTypeForm,
@@ -765,13 +769,23 @@ class DataCheckView(ListView):
     template_name = "alsijil/data_check/list.html"
     context_object_name = "results"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        check_data()
-        return context
-
     def get_queryset(self) -> QuerySet:
         return DataCheckResult.objects.filter(solved=False).order_by("check")
+
+
+def run_data_checks(request: HttpRequest) -> HttpResponse:
+    check_data()
+    if is_celery_enabled():
+        messages.success(
+            request,
+            _(
+                "The data check has been started. Please note that it may take "
+                "a while before you are able to fetch the data on this page."
+            ),
+        )
+    else:
+        messages.success(request, _("The data check has been finished."))
+    return redirect("check_data")
 
 
 def solve_data_check_view(
