@@ -1,13 +1,13 @@
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 import reversion
 from calendarweek import CalendarWeek
@@ -15,6 +15,7 @@ from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin
 
+from aleksis.apps.alsijil.data_checks import check_data
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
@@ -32,7 +33,13 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .models import (
+    DataCheckResult,
+    ExcuseType,
+    ExtraMark,
+    LessonDocumentation,
+    PersonalNote,
+)
 from .tables import ExcuseTypeTable, ExtraMarkTable
 
 
@@ -751,3 +758,36 @@ class ExcuseTypeDeleteView(AdvancedDeleteView, PermissionRequiredMixin, Revision
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
+
+
+class DataCheckView(ListView):
+    model = DataCheckResult
+    template_name = "alsijil/data_check/list.html"
+    context_object_name = "results"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        check_data()
+        return context
+
+    def get_queryset(self) -> QuerySet:
+        return DataCheckResult.objects.filter(solved=False).order_by("check")
+
+
+def solve_data_check_view(
+    request: HttpRequest, id_: int, solve_option: str = "default"
+):
+    result = get_object_or_404(DataCheckResult, pk=id_)
+    if solve_option in result.related_check.solve_options:
+        solve_option_obj = result.related_check.solve_options[solve_option]
+
+        msg = _(
+            f"The solve option '{solve_option_obj.verbose_name}' has been affected on the object '{result.related_object}' (type: {result.related_object._meta.verbose_name})."
+        )
+
+        result.solve(solve_option)
+
+        messages.success(request, msg)
+        return redirect("check_data")
+    else:
+        return HttpResponseNotFound()

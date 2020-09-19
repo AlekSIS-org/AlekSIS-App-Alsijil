@@ -68,4 +68,10 @@ urlpatterns = [
         views.ExcuseTypeDeleteView.as_view(),
         name="delete_excuse_type",
     ),
+    path("data_check/", views.DataCheckView.as_view(), name="check_data",),
+    path(
+        "data_check/<int:id_>/<str:solve_option>/",
+        views.solve_data_check_view,
+        name="data_check_solve",
+    ),
 ]
