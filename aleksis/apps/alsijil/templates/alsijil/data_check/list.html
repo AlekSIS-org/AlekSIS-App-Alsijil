@@ -10,7 +10,7 @@
 {% block page_title %}{% blocktrans %}Data checks{% endblocktrans %}{% endblock %}
 
 {% block content %}
-  <a class="btn green waves-effect waves-light" href="#">
+  <a class="btn green waves-effect waves-light" href="{% url "data_check_run" %}">
     <i class="material-icons left">refresh</i>
     {% trans "Check data again" %}
   </a>
