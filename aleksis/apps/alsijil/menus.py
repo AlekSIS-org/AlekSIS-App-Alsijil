@@ -61,9 +61,9 @@ MENUS = {
                     "validators": ["menu_generator.validators.is_superuser"],
                 },
                 {
-                    "name": _("Check data"),
+                    "name": _("Data checks"),
                     "url": "check_data",
-                    "icon": "label",
+                    "icon": "done_all",
                     "validators": ["menu_generator.validators.is_superuser"],
                 },
             ],
