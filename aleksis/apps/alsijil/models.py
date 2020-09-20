@@ -239,6 +239,7 @@ class DataCheckResult(ExtensibleModel):
     related_object = GenericForeignKey("content_type", "object_id")
 
     solved = models.BooleanField(default=False, verbose_name=_("Issue solved"))
+    sent = models.BooleanField(default=False, verbose_name=_("Notification sent"))
 
     @property
     def related_check(self) -> DataCheck:

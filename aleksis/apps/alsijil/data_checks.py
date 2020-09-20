@@ -2,12 +2,14 @@ import logging
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import F
+from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 
 import reversion
 from calendarweek import CalendarWeek
+from templated_email import send_templated_mail
 
-from aleksis.core.util.core_helpers import celery_optional
+from aleksis.core.util.core_helpers import celery_optional, get_site_preferences
 
 
 class SolveOption:
@@ -97,3 +99,37 @@ def check_data():
     for check in DATA_CHECKS:
         logging.info(f"Run check: {check.verbose_name}")
         check.check_data()
+
+    if get_site_preferences()["alsijil__data_checks_send_emails"]:
+        send_emails_for_data_checks()
+
+
+def send_emails_for_data_checks():
+    """Notify one or more recipients about new problems with data.
+
+    Recipients can be set in dynamic preferences.
+    """
+    from .models import DataCheckResult  # noqa
+
+    results = DataCheckResult.objects.filter(solved=False, sent=False)
+
+    if results.exists():
+        results_by_check = results.values("check").annotate(count=Count("check"))
+
+        results_with_checks = []
+        for result in results_by_check:
+            results_with_checks.append(
+                (DATA_CHECKS_BY_NAME[result["check"]], result["count"])
+            )
+
+        send_templated_mail(
+            template_name="data_checks",
+            from_email=get_site_preferences()["mail__address"],
+            recipient_list=[
+                p.email
+                for p in get_site_preferences()["alsijil__data_checks_recipients"]
+            ],
+            context={"results": results_with_checks},
+        )
+
+        results.update(sent=True)

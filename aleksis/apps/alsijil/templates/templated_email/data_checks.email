@@ -1,0 +1,44 @@
+{% load i18n %}
+
+{% block subject %}
+ {% trans "The system detected some new problems with your data." %}
+{% endblock %}
+
+{% block plain %}
+ {% trans "Hello," %}
+
+ {% blocktrans %}
+  the system detected some new problems with your data in the digital class register.
+  Please take some time to inspect them and solve the issues or mark them as ignored.
+ {% endblocktrans %}
+
+ {% for result in results %}
+  {{ result.0.problem_name }}: {{ result.1 }}
+ {% endfor %}
+{% endblock %}
+
+{% block html %}
+ <style>
+  {% include "templated_email/data_checks.css" %}
+ </style>
+ <p>{% trans "Hello," %}</p>
+ <p>
+  {% blocktrans %}
+   the system detected some new problems with your data in the digital class register.
+   Please take some time to inspect them and solve the issues or mark them as ignored.
+  {% endblocktrans %}
+ </p>
+
+ <table>
+  <tr>
+   <th>{% trans "Problem description" %}</th>
+   <th>{% trans "Count of objects with new problems" %}</th>
+  </tr>
+  {% for result in results %}
+   <tr>
+    <td>{{ result.0.problem_name }}</td>
+    <td class="count">{{ result.1 }}</td>
+   </tr>
+  {% endfor %}
+ </table>
+{% endblock %}

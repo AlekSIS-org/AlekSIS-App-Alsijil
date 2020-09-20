@@ -1,8 +1,9 @@
 from django.utils.translation import gettext as _
 
 from dynamic_preferences.preferences import Section
-from dynamic_preferences.types import BooleanPreference
+from dynamic_preferences.types import BooleanPreference, ModelMultipleChoicePreference
 
+from aleksis.core.models import Person
 from aleksis.core.registries import site_preferences_registry
 
 alsijil = Section("alsijil", verbose_name=_("Class register"))
@@ -40,3 +41,24 @@ class AllowOpenPeriodsOnSameDay(BooleanPreference):
     help_text = _(
         "Lessons in the past are not affected by this setting, you can open them whenever you want."
     )
+
+
+@site_preferences_registry.register
+class DataChecksSendEmails(BooleanPreference):
+    """Enable email sending if data checks detect problems."""
+
+    section = alsijil
+    name = "data_checks_send_emails"
+    default = False
+    verbose_name = _("Send emails if data checks detect problems")
+
+
+@site_preferences_registry.register
+class DataChecksEmailsRecipients(ModelMultipleChoicePreference):
+    """Email recipients for data check problem emails."""
+
+    section = alsijil
+    name = "data_checks_recipients"
+    default = []
+    model = Person
+    verbose_name = _("Email recipients for data checks problem emails")
