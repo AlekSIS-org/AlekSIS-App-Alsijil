@@ -79,11 +79,7 @@ class SelectForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["group"].queryset = (
-            Group.objects.for_current_school_term_or_all()
-            .annotate(lessons_count=Count("lessons"))
-            .filter(lessons_count__gt=0)
-        )
+        self.fields["group"].queryset = Group.get_groups_with_lessons()
 
 
 PersonalNoteFormSet = forms.modelformset_factory(

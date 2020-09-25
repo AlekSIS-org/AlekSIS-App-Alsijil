@@ -463,11 +463,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
 def my_students(request: HttpRequest) -> HttpResponse:
     context = {}
-    relevant_groups = (
-        Group.objects.for_current_school_term_or_all()
-        .annotate(lessons_count=Count("lessons"))
-        .filter(lessons_count__gt=0, owners=request.user.person)
-    )
+    relevant_groups = request.user.person.get_owner_groups_with_lessons()
     persons = Person.objects.filter(member_of__in=relevant_groups)
     context["persons"] = persons
     return render(request, "alsijil/class_register/persons.html", context)
@@ -475,12 +471,7 @@ def my_students(request: HttpRequest) -> HttpResponse:
 
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
-    groups = (
-        Group.objects.for_current_school_term_or_all()
-        .annotate(lessons_count=Count("lessons"))
-        .filter(lessons_count__gt=0, owners=request.user.person)
-    )
-    context["groups"] = groups
+    context["groups"] = request.user.person.get_owner_groups_with_lessons()
     return render(request, "alsijil/class_register/groups.html", context)
 
 
