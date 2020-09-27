@@ -1,7 +1,8 @@
 from datetime import date
 from typing import Dict, Optional, Union
 
-from django.db.models import Exists, OuterRef, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 
 import reversion
@@ -239,3 +240,28 @@ def get_extra_marks(
             stats[extra_mark] = qs
 
     return stats
+
+
+@Group.class_method
+def get_groups_with_lessons(cls: Group):
+    """Get all groups which have related lessons or child groups with related lessons."""
+    group_pks = (
+        cls.objects.for_current_school_term_or_all()
+        .annotate(lessons_count=Count("lessons"))
+        .filter(lessons_count__gt=0)
+        .values_list("pk", flat=True)
+    )
+    groups = cls.objects.filter(
+        Q(child_groups__pk__in=group_pks) | Q(pk__in=group_pks)
+    ).distinct()
+
+    return groups
+
+
+@Person.method
+def get_owner_groups_with_lessons(self: Person):
+    """Get all groups the person is an owner of and which have related lessons.
+
+    Groups which have child groups with related lessons are also included.
+    """
+    return Group.get_groups_with_lessons().filter(owners=self)
