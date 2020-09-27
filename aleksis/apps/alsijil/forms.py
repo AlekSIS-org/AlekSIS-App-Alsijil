@@ -86,15 +86,7 @@ class SelectForm(forms.Form):
 
         person = self.request.user.person
 
-        group_pks = (
-            Group.objects.for_current_school_term_or_all()
-            .annotate(lessons_count=Count("lessons"))
-            .filter(lessons_count__gt=0)
-            .values_list("pk", flat=True)
-        )
-        group_qs = Group.objects.filter(
-            Q(child_groups__pk__in=group_pks) | Q(pk__in=group_pks)
-        ).distinct()
+        group_qs = Group.get_groups_with_lessons()
 
         if not check_global_permission(self.request.user, "alsijil.view_week"):
             group_qs = (
