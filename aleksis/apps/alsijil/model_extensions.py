@@ -54,16 +54,20 @@ def mark_absent(
             continue
 
         with reversion.create_revision():
-            personal_note, created = PersonalNote.objects.update_or_create(
-                person=self,
-                lesson_period=lesson_period,
-                week=wanted_week.week,
-                year=wanted_week.year,
-                defaults={
-                    "absent": absent,
-                    "excused": excused,
-                    "excuse_type": excuse_type,
-                },
+            personal_note, created = (
+                PersonalNote.objects.select_related(None)
+                .prefetch_related(None)
+                .update_or_create(
+                    person=self,
+                    lesson_period=lesson_period,
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    defaults={
+                        "absent": absent,
+                        "excused": excused,
+                        "excuse_type": excuse_type,
+                    },
+                )
             )
             personal_note.groups_of_person.set(self.member_of.all())
 
@@ -119,8 +123,14 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
     for personal_note in new_personal_notes:
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
-    return PersonalNote.objects.select_related("person").filter(
-        lesson_period=self, week=wanted_week.week, year=wanted_week.year
+    return (
+        PersonalNote.objects.filter(
+            lesson_period=self, week=wanted_week.week, year=wanted_week.year
+        )
+        .select_related(None)
+        .prefetch_related(None)
+        .select_related("person", "excuse_type")
+        .prefetch_related("extra_marks")
     )
 
 
