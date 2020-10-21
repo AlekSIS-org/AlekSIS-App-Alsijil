@@ -5,6 +5,7 @@ from aleksis.core.util.predicates import (
     has_object_perm,
     has_person,
     is_current_person,
+    is_site_preference_set,
 )
 
 from .util.predicates import (
@@ -55,13 +56,15 @@ edit_lesson_personal_note_predicate = has_person & (
 )
 add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate)
 
-
 # View personal note
 view_personal_note_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
     | has_personal_note_group_perm("core.view_personalnote_group")
     | is_personal_note_lesson_teacher
-    | is_own_personal_note
+    | (
+        is_own_personal_note
+        & is_site_preference_set("alsijil", "view_own_personal_notes")
+    )
     | is_personal_note_lesson_parent_group_owner
 )
 add_perm("alsijil.view_personalnote", view_personal_note_predicate)
@@ -148,7 +151,8 @@ add_perm("alsijil.view_my_groups", view_my_groups_predicate)
 
 # View person overview
 view_person_overview_predicate = has_person & (
-    is_current_person | is_person_group_owner
+    (is_current_person & is_site_preference_set("alsijil", "view_own_personal_notes"))
+    | is_person_group_owner
 )
 add_perm("alsijil.view_person_overview", view_person_overview_predicate)
 
@@ -161,7 +165,7 @@ view_person_overview_personal_notes_predicate = has_person & (
     has_global_perm("alsijil.view_personalnote")
     | has_person_group_object_perm("core.view_personalnote_group")
     | is_person_primary_group_owner
-    | is_current_person
+    | (is_current_person & is_site_preference_set("alsijil", "view_own_personal_notes"))
 )
 add_perm(
     "alsijil.view_person_overview_personalnote",

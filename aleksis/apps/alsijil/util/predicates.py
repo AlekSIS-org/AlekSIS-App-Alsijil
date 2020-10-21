@@ -7,7 +7,6 @@ from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
@@ -166,15 +165,10 @@ def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
     """Predicate for users referred to in a personal note
 
     Checks whether the user referred to in a PersonalNote is the active user.
-    Is configurable via dynamic preferences.
     """
-    if hasattr(obj, "person"):
-        if (
-            get_site_preferences()["alsijil__view_own_personal_notes"]
-            and obj.person is user.person
-        ):
-            return True
-        return False
+    if hasattr(obj, "person") and obj.person is user.person:
+        return True
+    return False
 
 
 @predicate
