@@ -129,7 +129,10 @@ register_absence_predicate = has_person & (
     has_global_perm("alsijil.register_absence")
     | has_person_group_object_perm("core.register_absence_group")
     | has_object_perm("core.register_absence_person")
-    | is_person_primary_group_owner
+    | (
+        is_person_primary_group_owner
+        & is_site_preference_set("alsijil", "register_absence_as_primary_group_owner")
+    )
 )
 add_perm("alsijil.register_absence", register_absence_predicate)
 
