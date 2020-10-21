@@ -55,7 +55,7 @@ def lesson(
     else:
         wanted_week = None
 
-    if not (year and week and period_id):
+    if not all((year, week, period_id)):
         if lesson_period:
             return redirect(
                 "lesson_by_week_and_period",
