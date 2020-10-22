@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-09-11 11:08+0200\n"
-"PO-Revision-Date: 2020-09-06 17:48+0000\n"
-"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"PO-Revision-Date: 2020-10-30 20:21+0000\n"
+"Last-Translator: magicfelix <felix@felix-zauberer.de>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -100,10 +101,8 @@ msgstr "Aktuelle Woche"
 
 #: menus.py:28 templates/alsijil/class_register/groups.html:5
 #: templates/alsijil/class_register/groups.html:9
-#, fuzzy
-#| msgid "Groups"
 msgid "My groups"
-msgstr "Gruppen"
+msgstr "Meine Gruppen"
 
 #: menus.py:34
 msgid "My overview"
@@ -209,10 +208,8 @@ msgid "Delete"
 msgstr "Löschen"
 
 #: templates/alsijil/class_register/groups.html:20
-#, fuzzy
-#| msgid "No students available."
 msgid "No groups available."
-msgstr "Keine Schüler*innen verfügbar."
+msgstr "Keine Gruppen verfügbar."
 
 #: templates/alsijil/class_register/lesson.html:6
 msgid "Lesson"
@@ -301,10 +298,8 @@ msgstr "Markiere als"
 #: templates/alsijil/class_register/person.html:47
 #: templates/alsijil/class_register/person.html:163
 #: templates/alsijil/class_register/person.html:205
-#, fuzzy
-#| msgid "Delete filter"
 msgid "Delete note"
-msgstr "Filter löschen"
+msgstr "Notiz löschen"
 
 #: templates/alsijil/class_register/person.html:55
 msgid "There are unexcused lessons."
@@ -694,10 +689,8 @@ msgid "The absence has been saved."
 msgstr "Die Abwesenheit wurde gespeichert."
 
 #: views.py:670
-#, fuzzy
-#| msgid "The personal notes have been saved."
 msgid "The personal note has been deleted."
-msgstr "Die persönlichen Notizen wurden gespeichert."
+msgstr "Die persönliche Notiz wurde gelöscht."
 
 #: views.py:691
 msgid "The extra mark has been created."
