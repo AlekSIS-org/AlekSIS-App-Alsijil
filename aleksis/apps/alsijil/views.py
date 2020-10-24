@@ -34,7 +34,7 @@ from .forms import (
 )
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
-from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
+from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
 @permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
@@ -162,7 +162,7 @@ def lesson(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
-@permission_required("alsijil.view_week", fn=get_instance_by_pk)
+@permission_required("alsijil.view_week", fn=get_timetable_instance_by_pk)
 def week_view(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -177,7 +177,7 @@ def week_view(
     else:
         wanted_week = CalendarWeek()
 
-    instance = get_instance_by_pk(request, year, week, type_, id_)
+    instance = get_timetable_instance_by_pk(request, year, week, type_, id_)
 
     lesson_periods = LessonPeriod.objects.in_week(wanted_week).annotate(
         has_documentation=Exists(

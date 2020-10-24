@@ -38,14 +38,14 @@ def get_lesson_period_by_pk(
     return lesson_period
 
 
-def get_instance_by_pk(
+def get_timetable_instance_by_pk(
     request: HttpRequest,
     year: Optional[int] = None,
     week: Optional[int] = None,
     type_: Optional[str] = None,
     id_: Optional[int] = None,
 ):
-    """Get Instance object by given type and id or the current person."""
+    """Get timetable object (teacher, room or group) by given type and id or the current person."""
     if type_ and id_:
         return get_el_by_pk(request, type_, id_)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
