@@ -109,9 +109,11 @@ def lesson(
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons = Person.objects.all()
     if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
-        persons = persons.filter(pk=request.user.person.pk)
+        persons = Person.objects.filter(pk=request.user.person.pk)
+    else:
+        persons = Person.objects.all()
+
     persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix="personal_notes"
@@ -568,10 +570,10 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
                 person.refresh_from_db()
 
-    allowed_personal_notes = person.personal_notes.all()
-
-    if not request.user.has_perm("alsijil.view_person_overview_personalnote", person):
-        allowed_personal_notes = allowed_personal_notes.filter(
+    if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
+        allowed_personal_notes = person.personal_notes.all()
+    else:
+        allowed_personal_notes = person.personal_notes.filter(
             lesson_period__lesson__groups__owners=request.user.person
         )
 
