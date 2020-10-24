@@ -643,7 +643,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
-    register_absence_form = RegisterAbsenceForm(request.POST or None, request=request)
+    register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST":
         if register_absence_form.is_valid() and request.user.has_perm(

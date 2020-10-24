@@ -133,7 +133,7 @@ class RegisterAbsenceForm(forms.Form):
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
+        self.request = get_request()
         super().__init__(*args, **kwargs)
         period_choices = TimePeriod.period_choices
         if check_global_permission(self.request.user, "alsijil.register_absence"):
