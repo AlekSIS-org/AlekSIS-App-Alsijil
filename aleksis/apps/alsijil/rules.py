@@ -18,6 +18,7 @@ from .util.predicates import (
     is_lesson_parent_group_owner,
     is_lesson_participant,
     is_lesson_teacher,
+    is_none,
     is_own_personal_note,
     is_person_group_owner,
     is_person_primary_group_owner,
@@ -29,6 +30,7 @@ from .util.predicates import (
 # View lesson
 view_lesson_predicate = has_person & (
     has_global_perm("alsijil.view_lesson")
+    | is_none  # View is opened as "Current lesson"
     | is_lesson_teacher
     | is_lesson_participant
     | is_lesson_parent_group_owner

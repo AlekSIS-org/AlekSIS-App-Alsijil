@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 
 from django.contrib.auth.models import User
 
@@ -13,6 +13,12 @@ from ..models import PersonalNote
 
 
 @predicate
+def is_none(user: User, obj: Any) -> bool:
+    """Predicate that checks if the provided object is None-like."""
+    return bool(obj)
+
+
+@predicate
 def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
     """Predicate for teachers of a lesson.
 
@@ -24,7 +30,7 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
         if sub and sub in user.person.lesson_substitutions.all():
             return True
         return user.person in obj.lesson.teachers.all()
-    return True
+    return False
 
 
 @predicate
@@ -36,7 +42,7 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     """
     if hasattr(obj, "lesson"):
         return obj.lesson.groups.filter(members=user.person).exists()
-    return True
+    return False
 
 
 @predicate
@@ -49,7 +55,7 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     """
     if hasattr(obj, "lesson"):
         return obj.lesson.groups.filter(parent_groups__owners=user.person).exists()
-    return True
+    return False
 
 
 @predicate
