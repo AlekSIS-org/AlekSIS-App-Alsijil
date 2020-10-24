@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/base.html" %}
-{% load material_form i18n week_helpers static data_helpers %}
+{% load material_form i18n week_helpers static data_helpers rules %}
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
@@ -66,38 +66,41 @@
                 </thead>
                 <tbody>
                 {% for period in periods %}
-                  <tr>
-                    <td class="center-align">
-                      {% include "alsijil/partials/lesson_status_icon.html" with period=period %}
-                    </td>
-                    <td class="tr-link">
-                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                        {{ period.period.period }}.
-                      </a>
-                    </td>
-                    {% if not group %}
-                      <td>
+                  {% has_perm "alsijil.view_lessondocumentation" user period as can_view_lesson_documentation %}
+                  {% if can_view_lesson_documentation %}
+                    <tr>
+                      <td class="center-align">
+                        {% include "alsijil/partials/lesson_status_icon.html" with period=period %}
+                      </td>
+                      <td class="tr-link">
                         <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                          {{ period.lesson.group_names }}
+                          {{ period.period.period }}.
                         </a>
                       </td>
-                    {% endif %}
-                    <td>
-                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                        {{ period.get_subject.name }}
-                      </a>
-                    </td>
-                    <td>
-                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                        {{ period.get_teacher_names }}
-                      </a>
-                    </td>
-                    <td>
-                      <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                        {{ period.get_lesson_documentation.topic }}
-                      </a>
-                    </td>
-                  </tr>
+                      {% if not group %}
+                        <td>
+                          <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                            {{ period.lesson.group_names }}
+                          </a>
+                        </td>
+                      {% endif %}
+                      <td>
+                        <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                          {{ period.get_subject.name }}
+                        </a>
+                      </td>
+                      <td>
+                        <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                          {{ period.get_teacher_names }}
+                        </a>
+                      </td>
+                      <td>
+                        <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                          {{ period.get_lesson_documentation.topic }}
+                        </a>
+                      </td>
+                    </tr>
+                  {% endif %}
                 {% endfor %}
                 </tbody>
               </table>
@@ -113,7 +116,12 @@
             </span>
             {% for person in persons %}
               <h5 class="card-title">
-                <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
+                {% has_perm "alsijil.view_person_overview" user person.person as can_view_person_overview %}
+                {% if can_view_person_overview %}
+                  <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
+                {% else %}
+                  {{ person.person.full_name }}
+                {% endif %}
               </h5>
               <p class="card-text">
                 {% trans "Absent" %}: {{ person.person.absences_count }}

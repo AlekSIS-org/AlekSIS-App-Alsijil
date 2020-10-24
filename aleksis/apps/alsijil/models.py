@@ -208,3 +208,13 @@ class ExtraMark(ExtensibleModel):
         ordering = ["short_name"]
         verbose_name = _("Extra mark")
         verbose_name_plural = _("Extra marks")
+
+
+class AlsijilGlobalPermissions(ExtensibleModel):
+    class Meta:
+        managed = False
+        permissions = (
+            ("view_week", _("Can view week overview")),
+            ("register_absence", _("Can register absence")),
+            ("list_personal_note_filters", _("Can list all personal note filters")),
+        )

@@ -2,15 +2,18 @@ from datetime import datetime
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
+from django_global_request.middleware import get_request
 from django_select2.forms import Select2Widget
+from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import TimePeriod
 from aleksis.core.models import Group, Person
+from aleksis.core.util.predicates import check_global_permission
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
@@ -51,12 +54,7 @@ class SelectForm(forms.Form):
         queryset=None, label=_("Group"), required=False, widget=Select2Widget,
     )
     teacher = forms.ModelChoiceField(
-        queryset=Person.objects.annotate(
-            lessons_count=Count("lessons_as_teacher")
-        ).filter(lessons_count__gt=0),
-        label=_("Teacher"),
-        required=False,
-        widget=Select2Widget,
+        queryset=None, label=_("Teacher"), required=False, widget=Select2Widget,
     )
 
     def clean(self) -> dict:
@@ -78,8 +76,40 @@ class SelectForm(forms.Form):
         return data
 
     def __init__(self, *args, **kwargs):
+        self.request = get_request()
         super().__init__(*args, **kwargs)
-        self.fields["group"].queryset = Group.get_groups_with_lessons()
+
+        person = self.request.user.person
+
+        group_qs = Group.get_groups_with_lessons()
+
+        # Filter selectable groups by permissions
+        if not check_global_permission(self.request.user, "alsijil.view_week"):
+            # 1) All groups the user is allowed to see the week view by object permissions
+            # 2) All groups the user is a member of an owner of
+            group_qs = (
+                group_qs.filter(
+                    pk__in=get_objects_for_user(
+                        self.request.user, "core.view_week_class_register_group", Group
+                    ).values_list("pk", flat=True)
+                )
+            ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
+
+        # Flatten query by filtering groups by pk
+        self.fields["group"].queryset = Group.objects.filter(
+            pk__in=list(group_qs.values_list("pk", flat=True))
+        )
+
+        teacher_qs = Person.objects.annotate(
+            lessons_count=Count("lessons_as_teacher")
+        ).filter(lessons_count__gt=0)
+
+        # Filter selectable teachers by permissions
+        if not check_global_permission(self.request.user, "alsijil.view_week"):
+            # If the user hasn't the global permission, the user is only allowed to see his own person
+            teacher_qs = teacher_qs.filter(pk=person.pk)
+
+        self.fields["teacher"].queryset = teacher_qs
 
 
 PersonalNoteFormSet = forms.modelformset_factory(
@@ -95,11 +125,11 @@ class RegisterAbsenceForm(forms.Form):
     )
     date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
     date_end = forms.DateField(label=_("End date"), initial=datetime.today)
+    person = forms.ModelChoiceField(
+        label=_("Person"), queryset=None, widget=Select2Widget
+    )
     from_period = forms.ChoiceField(label=_("Start period"))
     to_period = forms.ChoiceField(label=_("End period"))
-    person = forms.ModelChoiceField(
-        label=_("Person"), queryset=Person.objects.all(), widget=Select2Widget
-    )
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
     excused = forms.BooleanField(label=_("Excused"), initial=True, required=False)
     excuse_type = forms.ModelChoiceField(
@@ -111,8 +141,40 @@ class RegisterAbsenceForm(forms.Form):
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
 
     def __init__(self, *args, **kwargs):
+        self.request = get_request()
         super().__init__(*args, **kwargs)
         period_choices = TimePeriod.period_choices
+
+        # Filter selectable persons by permissions
+        if check_global_permission(self.request.user, "alsijil.register_absence"):
+            # Global permission, user can register absences for all persons
+            self.fields["person"].queryset = Person.objects.all()
+        else:
+            # 1) All persons the user is allowed to register an absence for by object permissions
+            # 2) All persons the user is the primary group owner
+            # 3) All persons the user is allowed to register an absence for by object permissions of the person's group
+            persons_qs = (
+                get_objects_for_user(
+                    self.request.user, "core.register_absence_person", Person
+                )
+                .union(
+                    Person.objects.filter(
+                        primary_group__owners=self.request.user.person
+                    )
+                )
+                .union(
+                    Person.objects.filter(
+                        member_of__in=get_objects_for_user(
+                            self.request.user, "core.register_absence_group", Group
+                        )
+                    )
+                )
+            )
+
+            # Flatten query by getting all pks and filter persons
+            self.fields["person"].queryset = Person.objects.filter(
+                pk__in=list(persons_qs.values_list("pk", flat=True))
+            )
 
         self.fields["from_period"].choices = period_choices
         self.fields["to_period"].choices = period_choices

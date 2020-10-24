@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union
 
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count
+from django.utils.translation import gettext as _
 
 import reversion
 from calendarweek import CalendarWeek
@@ -54,16 +55,20 @@ def mark_absent(
             continue
 
         with reversion.create_revision():
-            personal_note, created = PersonalNote.objects.update_or_create(
-                person=self,
-                lesson_period=lesson_period,
-                week=wanted_week.week,
-                year=wanted_week.year,
-                defaults={
-                    "absent": absent,
-                    "excused": excused,
-                    "excuse_type": excuse_type,
-                },
+            personal_note, created = (
+                PersonalNote.objects.select_related(None)
+                .prefetch_related(None)
+                .update_or_create(
+                    person=self,
+                    lesson_period=lesson_period,
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    defaults={
+                        "absent": absent,
+                        "excused": excused,
+                        "excuse_type": excuse_type,
+                    },
+                )
             )
             personal_note.groups_of_person.set(self.member_of.all())
 
@@ -76,7 +81,7 @@ def mark_absent(
 
 
 @LessonPeriod.method
-def get_personal_notes(self, wanted_week: CalendarWeek):
+def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
     """Get all personal notes for that lesson in a specified week.
 
     Returns all linked `PersonalNote` objects, filtered by the given weeek,
@@ -89,7 +94,7 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
         - Dominik George <dominik.george@teckids.org>
     """
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
-    missing_persons = Person.objects.annotate(
+    missing_persons = persons.annotate(
         no_personal_notes=~Exists(
             PersonalNote.objects.filter(
                 week=wanted_week.week,
@@ -119,9 +124,49 @@ def get_personal_notes(self, wanted_week: CalendarWeek):
     for personal_note in new_personal_notes:
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
-    return PersonalNote.objects.select_related("person").filter(
-        lesson_period=self, week=wanted_week.week, year=wanted_week.year
+    return (
+        PersonalNote.objects.filter(
+            lesson_period=self,
+            week=wanted_week.week,
+            year=wanted_week.year,
+            person__in=persons,
+        )
+        .select_related(None)
+        .prefetch_related(None)
+        .select_related("person", "excuse_type")
+        .prefetch_related("extra_marks")
     )
+
+
+# Dynamically add extra permissions to Group and Person models in core
+# Note: requires migrate afterwards
+Group.add_permission(
+    "view_week_class_register_group",
+    _("Can view week overview of group class register"),
+)
+Group.add_permission(
+    "view_lesson_class_register_group",
+    _("Can view lesson overview of group class register"),
+)
+Group.add_permission(
+    "view_personalnote_group", _("Can view all personal notes of a group")
+)
+Group.add_permission(
+    "edit_personalnote_group", _("Can edit all personal notes of a group")
+)
+Group.add_permission(
+    "view_lessondocumentation_group", _("Can view all lesson documentation of a group")
+)
+Group.add_permission(
+    "edit_lessondocumentation_group", _("Can edit all lesson documentation of a group")
+)
+Group.add_permission("view_full_register_group", _("Can view full register of a group"))
+Group.add_permission(
+    "register_absence_group", _("Can register an absence for all members of a group")
+)
+Person.add_permission(
+    "register_absence_person", _("Can register an absence for a person")
+)
 
 
 @LessonPeriod.method
