@@ -571,12 +571,9 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     allowed_personal_notes = person.personal_notes.all()
 
     if not request.user.has_perm("alsijil.view_person_overview_personalnote", person):
-        print("has")
         allowed_personal_notes = allowed_personal_notes.filter(
             lesson_period__lesson__groups__owners=request.user.person
         )
-
-    print(allowed_personal_notes)
 
     unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
