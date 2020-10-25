@@ -9,6 +9,13 @@
 
 
 {% block page_title %}
+  {% has_perm "alsijil.view_my_students" user as has_students %}
+  {% if has_students %}
+    <a href="{% url "my_students" %}"
+    class="btn-flat primary-color-text waves-light waves-effect">
+      <i class="material-icons left">chevron_left</i> {% trans "Back" %}
+    </a>
+  {% endif %}
   {% blocktrans with person=person %}
     Class register overview for {{ person }}
   {% endblocktrans %}
@@ -59,8 +66,9 @@
           {% endif %}
         </li>
       {% empty %}
-        <li class="collection-item flow-text">
-          {% trans "There are unexcused lessons." %}
+        <li class="collection-item avatar valign-wrapper">
+          <i class="material-icons left circle green white-text">check</i>
+          <span class="title">{% trans "There are no unexcused lessons." %}</span>
         </li>
       {% endfor %}
     </ul>
