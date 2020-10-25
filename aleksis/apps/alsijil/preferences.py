@@ -25,6 +25,16 @@ class ViewOwnPersonalNotes(BooleanPreference):
 
 
 @site_preferences_registry.register
+class RegisterAbsenceAsPrimaryGroupOwner(BooleanPreference):
+    section = alsijil
+    name = "register_absence_as_primary_group_owner"
+    default = True
+    verbose_name = _(
+        "Allow primary group owners to register future absences for students in their groups"
+    )
+
+
+@site_preferences_registry.register
 class CarryOverDataToNextPeriods(BooleanPreference):
     section = alsijil
     name = "carry_over"

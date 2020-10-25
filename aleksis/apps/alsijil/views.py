@@ -34,7 +34,7 @@ from .forms import (
 )
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
-from .util.alsijil_helpers import get_instance_by_pk, get_lesson_period_by_pk
+from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
 @permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
@@ -55,7 +55,7 @@ def lesson(
     else:
         wanted_week = None
 
-    if not (year and week and period_id):
+    if not all((year, week, period_id)):
         if lesson_period:
             return redirect(
                 "lesson_by_week_and_period",
@@ -109,9 +109,11 @@ def lesson(
     )
 
     # Create a formset that holds all personal notes for all persons in this lesson
-    persons = Person.objects.all()
     if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
-        persons = persons.filter(pk=request.user.person.pk)
+        persons = Person.objects.filter(pk=request.user.person.pk)
+    else:
+        persons = Person.objects.all()
+
     persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
     personal_note_formset = PersonalNoteFormSet(
         request.POST or None, queryset=persons_qs, prefix="personal_notes"
@@ -162,7 +164,7 @@ def lesson(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
-@permission_required("alsijil.view_week", fn=get_instance_by_pk)
+@permission_required("alsijil.view_week", fn=get_timetable_instance_by_pk)
 def week_view(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -177,7 +179,7 @@ def week_view(
     else:
         wanted_week = CalendarWeek()
 
-    instance = get_instance_by_pk(request, year, week, type_, id_)
+    instance = get_timetable_instance_by_pk(request, year, week, type_, id_)
 
     lesson_periods = LessonPeriod.objects.in_week(wanted_week).prefetch_related(
         "lesson__groups__members",
@@ -282,7 +284,7 @@ def week_view(
                         lesson_period__in=lesson_periods_pk,
                     ),
                 ),
-                "member_of__owners"
+                "member_of__owners",
             )
             .annotate(
                 absences_count=Count(
@@ -625,19 +627,18 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
                 person.refresh_from_db()
 
-    allowed_personal_notes = person.personal_notes.all().prefetch_related(
+    person_personal_notes = person.personal_notes.all().prefetch_related(
         "lesson_period__lesson__groups",
         "lesson_period__lesson__teachers",
         "lesson_period__substitutions",
     )
 
-    if not request.user.has_perm("alsijil.view_person_overview_personalnote", person):
-        print("has")
-        allowed_personal_notes = allowed_personal_notes.filter(
+    if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
+        allowed_personal_notes = person_personal_notes.all()
+    else:
+        allowed_personal_notes = person_personal_notes.filter(
             lesson_period__lesson__groups__owners=request.user.person
         )
-
-    print(allowed_personal_notes)
 
     unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
@@ -711,7 +712,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 def register_absence(request: HttpRequest) -> HttpResponse:
     context = {}
 
-    register_absence_form = RegisterAbsenceForm(request.POST or None, request=request)
+    register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST":
         if register_absence_form.is_valid() and request.user.has_perm(

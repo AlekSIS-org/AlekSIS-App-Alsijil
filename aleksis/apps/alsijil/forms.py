@@ -88,7 +88,10 @@ class SelectForm(forms.Form):
 
         group_qs = Group.get_groups_with_lessons()
 
+        # Filter selectable groups by permissions
         if not check_global_permission(self.request.user, "alsijil.view_week"):
+            # 1) All groups the user is allowed to see the week view by object permissions
+            # 2) All groups the user is a member of an owner of
             group_qs = (
                 group_qs.filter(
                     pk__in=get_objects_for_user(
@@ -96,6 +99,8 @@ class SelectForm(forms.Form):
                     ).values_list("pk", flat=True)
                 )
             ).union(group_qs.filter(Q(members=person) | Q(owners=person)))
+
+        # Flatten query by filtering groups by pk
         self.fields["group"].queryset = Group.objects.filter(
             pk__in=list(group_qs.values_list("pk", flat=True))
         )
@@ -103,7 +108,10 @@ class SelectForm(forms.Form):
         teacher_qs = Person.objects.annotate(
             lessons_count=Count("lessons_as_teacher")
         ).filter(lessons_count__gt=0)
+
+        # Filter selectable teachers by permissions
         if not check_global_permission(self.request.user, "alsijil.view_week"):
+            # If the user hasn't the global permission, the user is only allowed to see his own person
             teacher_qs = teacher_qs.filter(pk=person.pk)
 
         self.fields["teacher"].queryset = teacher_qs
@@ -138,12 +146,18 @@ class RegisterAbsenceForm(forms.Form):
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
+        self.request = get_request()
         super().__init__(*args, **kwargs)
         period_choices = TimePeriod.period_choices
+
+        # Filter selectable persons by permissions
         if check_global_permission(self.request.user, "alsijil.register_absence"):
+            # Global permission, user can register absences for all persons
             self.fields["person"].queryset = Person.objects.all()
         else:
+            # 1) All persons the user is allowed to register an absence for by object permissions
+            # 2) All persons the user is the primary group owner
+            # 3) All persons the user is allowed to register an absence for by object permissions of the person's group
             persons_qs = (
                 get_objects_for_user(
                     self.request.user, "core.register_absence_person", Person
@@ -161,6 +175,8 @@ class RegisterAbsenceForm(forms.Form):
                     )
                 )
             )
+
+            # Flatten query by getting all pks and filter persons
             self.fields["person"].queryset = Person.objects.filter(
                 pk__in=list(persons_qs.values_list("pk", flat=True))
             )

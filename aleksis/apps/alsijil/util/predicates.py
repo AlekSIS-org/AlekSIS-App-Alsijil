@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 
 from django.contrib.auth.models import Permission, User
 
@@ -12,8 +12,15 @@ from aleksis.core.util.core_helpers import (
     get_content_type_by_perm,
     get_site_preferences,
 )
+from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
+
+
+@predicate
+def is_none(user: User, obj: Any) -> bool:
+    """Predicate that checks if the provided object is None-like."""
+    return bool(obj)
 
 
 @predicate
@@ -28,7 +35,7 @@ def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
         if sub and sub in user.person.lesson_substitutions.all():
             return True
         return user.person in obj.lesson.teachers.all()
-    return True
+    return False
 
 
 @predicate
@@ -42,8 +49,7 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
         for group in obj.lesson.groups.all():
             if user.person in list(group.members.all()):
                 return True
-        return False
-    return True
+    return False
 
 
 @predicate
@@ -59,8 +65,7 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
             for parent_group in group.parent_groups.all():
                 if user.person in list(parent_group.owners.all()):
                     return True
-        return False
-    return True
+    return False
 
 
 @predicate
@@ -201,15 +206,10 @@ def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
     """Predicate for users referred to in a personal note
 
     Checks whether the user referred to in a PersonalNote is the active user.
-    Is configurable via dynamic preferences.
     """
-    if hasattr(obj, "person"):
-        if (
-            get_site_preferences()["alsijil__view_own_personal_notes"]
-            and obj.person is user.person
-        ):
-            return True
-        return False
+    if hasattr(obj, "person") and obj.person is user.person:
+        return True
+    return False
 
 
 @predicate
