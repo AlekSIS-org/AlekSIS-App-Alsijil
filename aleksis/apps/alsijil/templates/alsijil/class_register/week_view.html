@@ -1,7 +1,7 @@
 {# -*- engine:django -*- #}
 
 {% extends "core/base.html" %}
-{% load material_form i18n week_helpers static data_helpers rules %}
+{% load material_form i18n week_helpers static data_helpers rules time_helpers %}
 
 {% block browser_title %}{% blocktrans %}Week view{% endblocktrans %}{% endblock %}
 
@@ -42,10 +42,16 @@
 
   {% if lesson_periods %}
     <div class="row">
-      <div class="col s12 m7">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab col s6"><a class="active" href="#week-overview">{% trans "Lesson documentations" %}</a></li>
+          <li class="tab col s6"><a class="active" href="#personal-notes">{% trans "Personal notes" %}</a></li>
+        </ul>
+      </div>
+      <div class="col s12" id="week-overview">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
-          <div class="card">
+          <div class="card show-on-extra-large">
             <div class="card-content">
               {% weekday_to_date week periods.0.period.weekday as current_date %}
               <span class="card-title">
@@ -62,6 +68,8 @@
                   <th>{% blocktrans %}Subject{% endblocktrans %}</th>
                   <th>{% blocktrans %}Teachers{% endblocktrans %}</th>
                   <th>{% blocktrans %}Lesson topic{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Homework{% endblocktrans %}</th>
+                  <th>{% blocktrans %}Group note{% endblocktrans %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -96,9 +104,19 @@
                       </td>
                       <td>
                         <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                          {{ period.get_lesson_documentation.topic }}
+                          {% firstof period.get_lesson_documentation.topic "–" %}
                         </a>
                       </td>
+                      <td>
+                          <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                            {% firstof period.get_lesson_documentation.homework "–" %}
+                          </a>
+                        </td>
+                      <td>
+                          <a class="tr-link" href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                            {% firstof period.get_lesson_documentation.group_note "–" %}
+                          </a>
+                        </td>
                     </tr>
                   {% endif %}
                 {% endfor %}
@@ -106,9 +124,98 @@
               </table>
             </div>
           </div>
+          <ul class="collapsible hide-on-extra-large-only">
+            <li class="">
+              {% weekday_to_date week periods.0.period.weekday as current_date %}
+              <div class="collapsible-header flow-text">
+                {{ weekday }}, {{ current_date }} <i class="material-icons collapsible-icon-right">expand_more</i>
+              </div>
+              <div class="collapsible-body">
+                <div class="collection">
+                  {% for period in periods %}
+                    {% has_perm "alsijil.view_lessondocumentation" user period as can_view_lesson_documentation %}
+                    {% if can_view_lesson_documentation %}
+                      <a class="collection-item avatar"
+                         href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
+                        {% include "alsijil/partials/lesson_status_icon.html" with period=period css_class="circle" color_suffix=" " %}
+                        <table class="hide-on-med-and-down">
+                          <tr>
+                            <th>{% trans "Subject" %}</th>
+                            <td>{{ period.period.period }}. {{ period.get_subject.name }}</td>
+                          </tr>
+                          {% if not group %}
+                            <tr>
+                              <th>{% trans "Group" %}</th>
+                              <td>{{ period.lesson.group_names }}</td>
+                            </tr>
+                          {% endif %}
+                          <tr>
+                            <th>{% trans "Teachers" %}</th>
+                            <td>{{ period.lesson.teacher_names }}</td>
+                          </tr>
+                          <tr>
+                            <th>{% trans "Lesson topic" %}</th>
+                            <td>{% firstof period.get_lesson_documentation.topic "–" %}</td>
+                          </tr>
+                          {% with period.get_lesson_documentation as lesson_documentation %}
+                            {% if lesson_documentation.homework %}
+                            <tr>
+                              <th>{% trans "Homework" %}</th>
+                              <td>{% firstof period.get_lesson_documentation.homework "–" %}</td>
+                            </tr>
+                            {% endif %}
+                            {% if lesson_documentation.group_note %}
+                            <tr>
+                              <th>{% trans "Group note" %}</th>
+                              <td>{% firstof period.get_lesson_documentation.group_note "–" %}</td>
+                            </tr>
+                            {% endif %}
+                          {% endwith %}
+                        </table>
+                        <div class="hide-on-large-only">
+                          <ul class="collection">
+                            <li class="collection-item">
+                              {{ period.period.period }}. {{ period.get_subject.name }}
+                            </li>
+                            {% if not group %}
+                              <li class="collection-item">
+
+                                {{ period.lesson.group_names }}
+
+                              </li>
+                            {% endif %}
+                            <li class="collection-item">
+                              {{ period.lesson.teacher_names }}
+                            </li>
+                            <li class="collection-item">
+                              {{ period.get_lesson_documentation.topic }}
+                            </li>
+                            {% with period.get_lesson_documentation as lesson_documentation %}
+                              {% if lesson_documentation.homework %}
+                              <li class="collection-item">
+                                <strong>{% trans "Homework" %}</strong>
+                                {% firstof period.get_lesson_documentation.homework "–" %}
+                              </li>
+                              {% endif %}
+                              {% if lesson_documentation.group_note %}
+                              <li class="collection-item">
+                                <strong>{% trans "Group note" %}</strong>
+                                {% firstof period.get_lesson_documentation.group_note "–" %}
+                              </li>
+                              {% endif %}
+                            {% endwith %}
+                          </ul>
+                        </div>
+                      </a>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </li>
+          </ul>
         {% endfor %}
       </div>
-      <div class="col s12 m5">
+      <div class="col s12" id="personal-notes">
         <div class="card">
           <div class="card-content">
             <span class="card-title">
@@ -128,7 +235,7 @@
                 ({{ person.person.unexcused_count }} {% trans "unexcused" %})
               </p>
               <p class="card-text">
-                {% trans "Summed up tardiness" %}: {{ person.person.tardiness_sum }}'
+                {% trans "Summed up tardiness" %}: {% firstof person.person.tardiness_sum|to_time|time:"H\h i\m"  "–" %}
               </p>
               {% for extra_mark in extra_marks %}
                 <p class="card-text">
