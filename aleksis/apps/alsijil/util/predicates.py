@@ -8,10 +8,7 @@ from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import (
-    get_content_type_by_perm,
-    get_site_preferences,
-)
+from aleksis.core.util.core_helpers import get_content_type_by_perm, get_site_preferences
 from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
