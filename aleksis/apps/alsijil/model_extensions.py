@@ -177,10 +177,14 @@ def get_lesson_documentation(
     if not week:
         week = self.week
     # Use all to make effect of prefetched data
-    for documentation in self.documentations.all():
-        if documentation.week == week.week and documentation.year == week.year:
-            return documentation
-    return None
+    doc_filter = filter(
+        lambda d: d.week == week.week and d.year == week.year,
+        self.dopycumentations.all(),
+    )
+    try:
+        return next(doc_filter)
+    except StopIteration:
+        return None
 
 
 @LessonPeriod.method
