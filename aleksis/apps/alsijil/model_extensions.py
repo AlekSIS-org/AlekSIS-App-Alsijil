@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, Optional, Union
+from typing import Dict, Iterator, Optional, Union
 
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count
@@ -176,11 +176,14 @@ def get_lesson_documentation(
     """Get lesson documentation object for this lesson."""
     if not week:
         week = self.week
+    # Use all to make effect of prefetched data
+    doc_filter = filter(
+        lambda d: d.week == week.week and d.year == week.year,
+        self.dopycumentations.all(),
+    )
     try:
-        return LessonDocumentation.objects.get(
-            lesson_period=self, week=week.week, year=week.year
-        )
-    except LessonDocumentation.DoesNotExist:
+        return next(doc_filter)
+    except StopIteration:
         return None
 
 
@@ -198,11 +201,15 @@ def get_or_create_lesson_documentation(
 
 
 @LessonPeriod.method
-def get_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     """Get all personal notes of absent persons for this lesson."""
     if not week:
         week = self.week
-    return self.personal_notes.filter(week=week.week, year=week.year, absent=True)
+
+    return filter(
+        lambda p: p.week == week.week and p.year == week.year and p.absent,
+        self.personal_notes.all(),
+    )
 
 
 @LessonPeriod.method

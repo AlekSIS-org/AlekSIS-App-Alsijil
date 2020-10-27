@@ -1,12 +1,14 @@
 from typing import Any, Union
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 
+from guardian.models import UserObjectPermission
 from guardian.shortcuts import get_objects_for_user
 from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
+from aleksis.core.util.core_helpers import get_content_type_by_perm, get_site_preferences
 from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
@@ -41,7 +43,9 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     the groups linked to the given LessonPeriod.
     """
     if hasattr(obj, "lesson"):
-        return obj.lesson.groups.filter(members=user.person).exists()
+        for group in obj.lesson.groups.all():
+            if user.person in list(group.members.all()):
+                return True
     return False
 
 
@@ -54,7 +58,10 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     any parent groups of any groups of the given LessonPeriods lesson.
     """
     if hasattr(obj, "lesson"):
-        return obj.lesson.groups.filter(parent_groups__owners=user.person).exists()
+        for group in obj.lesson.groups.all():
+            for parent_group in group.parent_groups.all():
+                if user.person in list(parent_group.owners.all()):
+                    return True
     return False
 
 
@@ -66,7 +73,7 @@ def is_group_owner(user: User, obj: Union[Group, Person]) -> bool:
     If there isn't provided a group, it will return `False`.
     """
     if isinstance(obj, Group):
-        if obj.owners.filter(pk=user.person.pk).exists():
+        if user.person in obj.owners.all():
             return True
 
     return False
@@ -81,7 +88,10 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     the owner of any group of the given person.
     """
     if obj:
-        return obj.member_of.filter(owners=user.person).exists()
+        for group in obj.member_of.all():
+            if user.person in list(group.owners.all()):
+                return True
+        return False
     return False
 
 
@@ -105,12 +115,19 @@ def has_person_group_object_perm(perm: str):
     """
     name = f"has_person_group_object_perm:{perm}"
 
+    ct = get_content_type_by_perm(perm)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
-        for group in obj.member_of.all():
-            if check_object_permission(user, perm, group):
-                return True
-        return False
+        groups = obj.member_of.all()
+        qs = UserObjectPermission.objects.filter(
+            object_pk__in=list(groups.values_list("pk", flat=True)),
+            content_type=ct,
+            user=user,
+            permission__in=permissions,
+        )
+        return qs.exists()
 
     return fn
 
@@ -123,7 +140,7 @@ def is_group_member(user: User, obj: Union[Group, Person]) -> bool:
     If there isn't provided a group, it will return `False`.
     """
     if isinstance(obj, Group):
-        if obj.members.filter(pk=user.person.pk).exists():
+        if user.person in obj.members.all():
             return True
 
     return False
@@ -136,14 +153,21 @@ def has_lesson_group_object_perm(perm: str):
     """
     name = f"has_lesson_group_object_perm:{perm}"
 
+    ct = get_content_type_by_perm(perm)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
-            for group in obj.lesson.groups.all():
-                if check_object_permission(user, perm, group):
-                    return True
-            return False
-        return True
+            groups = obj.lesson.groups.all()
+            qs = UserObjectPermission.objects.filter(
+                object_pk__in=list(groups.values_list("pk", flat=True)),
+                content_type=ct,
+                user=user,
+                permission__in=permissions,
+            )
+            return qs.exists()
+        return False
 
     return fn
 
@@ -155,13 +179,21 @@ def has_personal_note_group_perm(perm: str):
     """
     name = f"has_personal_note_person_or_group_perm:{perm}"
 
+    ct = get_content_type_by_perm(perm)
+    permissions = Permission.objects.filter(content_type=ct, codename=perm)
+
     @predicate(name)
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
-            for group in obj.person.member_of.all():
-                if check_object_permission(user, perm, group):
-                    return True
-            return False
+            groups = obj.person.member_of.all()
+            qs = UserObjectPermission.objects.filter(
+                object_pk__in=list(groups.values_list("pk", flat=True)),
+                content_type=ct,
+                user=user,
+                permission__in=permissions,
+            )
+            return qs.exists()
+        return False
 
     return fn
 
@@ -208,10 +240,10 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
     """
     if hasattr(obj, "lesson_period"):
         if hasattr(obj.lesson_period, "lesson"):
-            return obj.lesson_period.lesson.groups.filter(
-                parent_groups__owners=user.person
-            ).exists()
-        return False
+            for group in obj.lesson_period.lesson.groups.all():
+                for parent_group in group.parent_groups.all():
+                    if user.person in list(parent_group.owners.all()):
+                        return True
     return False
 
 
@@ -220,9 +252,9 @@ def has_any_object_absence(user: User) -> bool:
     """
     Predicate which builds a query with all the persons the given users is allowed to register an absence for.
     """
-    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
-        return True
     if Person.objects.filter(member_of__owners=user.person).exists():
+        return True
+    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
         return True
     if Person.objects.filter(
         member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)

@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -16,7 +16,7 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod, TimePeriod
+from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution, TimePeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
@@ -158,6 +158,8 @@ def lesson(
     context["lesson_documentation"] = lesson_documentation
     context["lesson_documentation_form"] = lesson_documentation_form
     context["personal_note_formset"] = personal_note_formset
+    context["prev_lesson"] = lesson_period.prev
+    context["next_lesson"] = lesson_period.next
 
     return render(request, "alsijil/class_register/lesson.html", context)
 
@@ -179,17 +181,13 @@ def week_view(
 
     instance = get_timetable_instance_by_pk(request, year, week, type_, id_)
 
-    lesson_periods = LessonPeriod.objects.in_week(wanted_week).annotate(
-        has_documentation=Exists(
-            LessonDocumentation.objects.filter(
-                ~Q(topic__exact=""),
-                lesson_period=OuterRef("pk"),
-                week=wanted_week.week,
-                year=wanted_week.year,
-            )
-        )
+    lesson_periods = LessonPeriod.objects.in_week(wanted_week).prefetch_related(
+        "lesson__groups__members",
+        "lesson__groups__parent_groups",
+        "lesson__groups__parent_groups__owners",
     )
 
+    lesson_periods_query_exists = True
     if type_ and id_:
         if isinstance(instance, HttpResponseNotFound):
             return HttpResponseNotFound()
@@ -204,6 +202,7 @@ def week_view(
         else:
             lesson_periods = lesson_periods.filter_participant(request.user.person)
     else:
+        lesson_periods_query_exists = False
         lesson_periods = None
 
     # Add a form to filter the view
@@ -231,10 +230,38 @@ def week_view(
     else:
         group = None
 
-    if lesson_periods:
-        # Aggregate all personal notes for this group and week
-        lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
+    extra_marks = ExtraMark.objects.all()
 
+    if lesson_periods_query_exists:
+        lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
+        lesson_periods = (
+            LessonPeriod.objects.prefetch_related(
+                Prefetch(
+                    "documentations",
+                    queryset=LessonDocumentation.objects.filter(
+                        week=wanted_week.week, year=wanted_week.year
+                    ),
+                )
+            )
+            .filter(pk__in=lesson_periods_pk)
+            .annotate_week(wanted_week)
+            .annotate(
+                has_documentation=Exists(
+                    LessonDocumentation.objects.filter(
+                        ~Q(topic__exact=""),
+                        lesson_period=OuterRef("pk"),
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                    )
+                )
+            )
+            .order_by("period__weekday", "period__period")
+        )
+    else:
+        lesson_periods_pk = []
+
+    if lesson_periods_pk:
+        # Aggregate all personal notes for this group and week
         persons_qs = Person.objects.filter(is_active=True)
 
         if not request.user.has_perm("alsijil.view_week_personalnote", instance):
@@ -248,7 +275,17 @@ def week_view(
 
         persons_qs = (
             persons_qs.distinct()
-            .prefetch_related("personal_notes")
+            .prefetch_related(
+                Prefetch(
+                    "personal_notes",
+                    queryset=PersonalNote.objects.filter(
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        lesson_period__in=lesson_periods_pk,
+                    ),
+                ),
+                "member_of__owners",
+            )
             .annotate(
                 absences_count=Count(
                     "personal_notes",
@@ -285,7 +322,7 @@ def week_view(
             )
         )
 
-        for extra_mark in ExtraMark.objects.all():
+        for extra_mark in extra_marks:
             persons_qs = persons_qs.annotate(
                 **{
                     extra_mark.count_label: Count(
@@ -304,24 +341,12 @@ def week_view(
         persons = []
         for person in persons_qs:
             persons.append(
-                {
-                    "person": person,
-                    "personal_notes": person.personal_notes.filter(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
-                    ),
-                }
+                {"person": person, "personal_notes": list(person.personal_notes.all())}
             )
     else:
         persons = None
 
-    # Resort lesson periods manually because an union queryset doesn't support order_by
-    lesson_periods = sorted(
-        lesson_periods, key=lambda x: (x.period.weekday, x.period.period)
-    )
-
-    context["extra_marks"] = ExtraMark.objects.all()
+    context["extra_marks"] = extra_marks
     context["week"] = wanted_week
     context["weeks"] = get_weeks_for_year(year=wanted_week.year)
     context["lesson_periods"] = lesson_periods
@@ -369,7 +394,14 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         LessonPeriod.objects.filter_group(group)
         .filter(lesson__validity__school_term=current_school_term)
         .distinct()
-        .prefetch_related("documentations", "personal_notes")
+        .prefetch_related(
+            "documentations",
+            "personal_notes",
+            "personal_notes__excuse_type",
+            "personal_notes__extra_marks",
+            "personal_notes__person",
+            "personal_notes__groups_of_person",
+        )
     )
 
     weeks = CalendarWeek.weeks_within(
@@ -404,35 +436,49 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, documentations, notes, substitution)
                 )
 
-    persons = Person.objects.filter(
-        personal_notes__groups_of_person=group,
-        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-    ).annotate(
-        absences_count=Count(
-            "personal_notes__absent",
-            filter=Q(
-                personal_notes__absent=True,
-                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+    persons = (
+        Person.objects.prefetch_related(
+            "personal_notes",
+            "personal_notes__excuse_type",
+            "personal_notes__extra_marks",
+            "personal_notes__lesson_period__lesson__subject",
+            "personal_notes__lesson_period__substitutions",
+            "personal_notes__lesson_period__substitutions__subject",
+            "personal_notes__lesson_period__substitutions__teachers",
+            "personal_notes__lesson_period__lesson__teachers",
+            "personal_notes__lesson_period__period",
+        )
+        .filter(
+            personal_notes__groups_of_person=group,
+            personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+        )
+        .annotate(
+            absences_count=Count(
+                "personal_notes__absent",
+                filter=Q(
+                    personal_notes__absent=True,
+                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+                ),
             ),
-        ),
-        excused=Count(
-            "personal_notes__absent",
-            filter=Q(
-                personal_notes__absent=True,
-                personal_notes__excused=True,
-                personal_notes__excuse_type__isnull=True,
-                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            excused=Count(
+                "personal_notes__absent",
+                filter=Q(
+                    personal_notes__absent=True,
+                    personal_notes__excused=True,
+                    personal_notes__excuse_type__isnull=True,
+                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+                ),
             ),
-        ),
-        unexcused=Count(
-            "personal_notes__absent",
-            filter=Q(
-                personal_notes__absent=True,
-                personal_notes__excused=False,
-                personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+            unexcused=Count(
+                "personal_notes__absent",
+                filter=Q(
+                    personal_notes__absent=True,
+                    personal_notes__excused=False,
+                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
+                ),
             ),
-        ),
-        tardiness=Sum("personal_notes__late"),
+            tardiness=Sum("personal_notes__late"),
+        )
     )
 
     for extra_mark in ExtraMark.objects.all():
@@ -471,7 +517,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["periods_by_day"] = periods_by_day
     context["lesson_periods"] = lesson_periods
     context["today"] = date.today()
-
+    context["lessons"] = (
+        group.lessons.all()
+        .select_related("validity", "subject")
+        .prefetch_related("teachers", "lesson_periods")
+    )
+    context["child_groups"] = group.child_groups.all().prefetch_related(
+        "lessons",
+        "lessons__validity",
+        "lessons__subject",
+        "lessons__teachers",
+        "lessons__lesson_periods",
+    )
     return render(request, "alsijil/print/full_register.html", context)
 
 
@@ -570,10 +627,16 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
                 person.refresh_from_db()
 
+    person_personal_notes = person.personal_notes.all().prefetch_related(
+        "lesson_period__lesson__groups",
+        "lesson_period__lesson__teachers",
+        "lesson_period__substitutions",
+    )
+
     if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
-        allowed_personal_notes = person.personal_notes.all()
+        allowed_personal_notes = person_personal_notes.all()
     else:
-        allowed_personal_notes = person.personal_notes.filter(
+        allowed_personal_notes = person_personal_notes.filter(
             lesson_period__lesson__groups__owners=request.user.person
         )
 
@@ -591,6 +654,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
 
+    extra_marks = ExtraMark.objects.all()
+    excuse_types = ExcuseType.objects.all()
     if request.user.has_perm("alsijil.view_person_statistics_personalnote", person):
         school_terms = SchoolTerm.objects.all().order_by("-date_start")
         stats = []
@@ -620,14 +685,14 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
             )
             stat.update(personal_notes.aggregate(tardiness=Sum("late")))
 
-            for extra_mark in ExtraMark.objects.all():
+            for extra_mark in extra_marks:
                 stat.update(
                     personal_notes.filter(extra_marks=extra_mark).aggregate(
                         **{extra_mark.count_label: Count("pk")}
                     )
                 )
 
-            for excuse_type in ExcuseType.objects.all():
+            for excuse_type in excuse_types:
                 stat.update(
                     personal_notes.filter(
                         absent=True, excuse_type=excuse_type
@@ -636,8 +701,10 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
             stats.append((school_term, stat))
         context["stats"] = stats
-    context["excuse_types"] = ExcuseType.objects.all()
-    context["extra_marks"] = ExtraMark.objects.all()
+
+    context["excuse_types"] = excuse_types
+    context["extra_marks"] = extra_marks
+
     return render(request, "alsijil/class_register/person.html", context)
 
 
