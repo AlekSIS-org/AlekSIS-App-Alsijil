@@ -36,12 +36,6 @@ class ExcuseType(ExtensibleModel):
     def count_label(self):
         return f"{self.short_name}_count"
 
-    @classproperty
-    @cache_memoize(3600)
-    def all(cls):
-        qs = cls.objects.all()
-        return qs
-
     class Meta:
         ordering = ["name"]
         verbose_name = _("Excuse type")
@@ -214,11 +208,6 @@ class ExtraMark(ExtensibleModel):
     @property
     def count_label(self):
         return f"{self.short_name}_count"
-
-    @classproperty
-    @cache_memoize(3600)
-    def all(cls):
-        return cls.objects.all()
 
     class Meta:
         ordering = ["short_name"]

@@ -245,7 +245,7 @@ def get_extra_marks(
         week = self.week
 
     stats = {}
-    for extra_mark in ExtraMark.all:
+    for extra_mark in ExtraMark.objects.all():
         qs = self.personal_notes.filter(
             week=week.week, year=week.year, extra_marks=extra_mark
         )

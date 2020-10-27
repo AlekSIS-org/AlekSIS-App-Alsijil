@@ -46,11 +46,6 @@ class PersonalNoteForm(forms.ModelForm):
         if self.instance and getattr(self.instance, "person", None):
             self.fields["person_name"].initial = str(self.instance.person)
 
-        self.fields["extra_marks"].choices = [(e.id, str(e)) for e in ExtraMark.all]
-        self.fields["excuse_type"].choices = [(None, "-----")] + [
-            (e.id, str(e)) for e in ExcuseType.all
-        ]
-
 
 class SelectForm(forms.Form):
     layout = Layout(Row("group", "teacher"))
