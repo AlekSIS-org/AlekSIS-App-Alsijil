@@ -179,7 +179,7 @@ def get_lesson_documentation(
     # Use all to make effect of prefetched data
     doc_filter = filter(
         lambda d: d.week == week.week and d.year == week.year,
-        self.dopycumentations.all(),
+        self.documentations.all(),
     )
     try:
         return next(doc_filter)
