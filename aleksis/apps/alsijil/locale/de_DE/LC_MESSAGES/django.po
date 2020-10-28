@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-09-11 11:08+0200\n"
 "PO-Revision-Date: 2020-10-30 20:21+0000\n"
-"Last-Translator: magicfelix <felix@felix-zauberer.de>\n"
+"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -546,7 +546,7 @@ msgstr "Verspätet"
 
 #: templates/alsijil/print/full_register.html:89
 msgid "Custom excuse types"
-msgstr "Benutzerdefinierte Entschuldigunsarten"
+msgstr "Benutzerdefinierte Entschuldigungsarten"
 
 #: templates/alsijil/print/full_register.html:101
 msgid "Available extra marks"
