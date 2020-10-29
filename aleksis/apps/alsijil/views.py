@@ -384,15 +384,9 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     group = get_object_or_404(Group, pk=id_)
 
-    current_school_term = SchoolTerm.current
-
-    if not current_school_term:
-        return HttpResponseNotFound(_("There is no current school term."))
-
     # Get all lesson periods for the selected group
     lesson_periods = (
         LessonPeriod.objects.filter_group(group)
-        .filter(lesson__validity__school_term=current_school_term)
         .distinct()
         .prefetch_related(
             "documentations",
@@ -405,7 +399,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     )
 
     weeks = CalendarWeek.weeks_within(
-        current_school_term.date_start, current_school_term.date_end,
+        group.school_term.date_start, group.school_term.date_end,
     )
 
     periods_by_day = {}
@@ -494,21 +488,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             }
         )
 
-    for excuse_type in ExcuseType.objects.all():
-        persons = persons.annotate(
-            **{
-                excuse_type.count_label: Count(
-                    "personal_notes__absent",
-                    filter=Q(
-                        personal_notes__absent=True,
-                        personal_notes__excuse_type=excuse_type,
-                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-                    ),
-                )
-            }
-        )
-
-    context["school_term"] = current_school_term
+    context["school_term"] = group.school_term
     context["persons"] = persons
     context["excuse_types"] = ExcuseType.objects.all()
     context["extra_marks"] = ExtraMark.objects.all()
