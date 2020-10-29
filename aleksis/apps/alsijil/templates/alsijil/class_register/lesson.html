@@ -131,64 +131,65 @@
           {% if prev_doc and can_view_prev_lesson_documentation %}
             {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
             <div class="col s12" id="previous-lesson">
-            <div class="card">
-              <div class="card-content">
+              <div class="card">
+                <div class="card-content">
                   <span class="card-title">
                     {% blocktrans %}Overview: Previous lesson{% endblocktrans %} ({{ prev_date }},
                     {% blocktrans with period=prev_lesson.period.period %}{{ period }}. period{% endblocktrans %})
                   </span>
 
-                <table>
-                  {% if prev_doc.topic %}
-                    <tr>
-                      <th class="collection-item">{% trans "Lesson topic of previous lesson:" %}</th>
-                      <td>{{ prev_doc.topic }}</td>
-                    </tr>
-                  {% endif %}
+                  <table>
+                    {% if prev_doc.topic %}
+                      <tr>
+                        <th class="collection-item">{% trans "Lesson topic of previous lesson:" %}</th>
+                        <td>{{ prev_doc.topic }}</td>
+                      </tr>
+                    {% endif %}
 
-                  {% if prev_doc.homework %}
-                    <tr>
-                      <th class="collection-item">{% trans "Homework for this lesson:" %}</th>
-                      <td>{{ prev_doc.homework }}</td>
-                    </tr>
-                  {% endif %}
+                    {% if prev_doc.homework %}
+                      <tr>
+                        <th class="collection-item">{% trans "Homework for this lesson:" %}</th>
+                        <td>{{ prev_doc.homework }}</td>
+                      </tr>
+                    {% endif %}
 
-                  {% if prev_doc.group_note %}
-                    <tr>
-                      <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
-                      <td>{{ prev_doc.group_note }}</td>
-                    </tr>
-                  {% endif %}
+                    {% if prev_doc.group_note %}
+                      <tr>
+                        <th class="collection-item">{% trans "Group notes for previous lesson:" %}</th>
+                        <td>{{ prev_doc.group_note }}</td>
+                      </tr>
+                    {% endif %}
 
-                  {% if absences %}
-                    <tr>
-                      <th>{% trans "Absent persons:" %}</th>
-                      <td>{% include "alsijil/partials/absences.html" with notes=absences %}</td>
-                    </tr>
-                  {% endif %}
+                    {% if absences %}
+                      <tr>
+                        <th>{% trans "Absent persons:" %}</th>
+                        <td>{% include "alsijil/partials/absences.html" with notes=absences %}</td>
+                      </tr>
+                    {% endif %}
 
-                  {% if tardinesses %}
-                    <tr>
-                      <th>{% trans "Late persons:" %}</th>
-                      <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
-                    </tr>
-                  {% endif %}
+                    {% if tardinesses %}
+                      <tr>
+                        <th>{% trans "Late persons:" %}</th>
+                        <td>{% include "alsijil/partials/tardinesses.html" with notes=tardinesses %}</td>
+                      </tr>
+                    {% endif %}
 
-                  {% for extra_mark, notes in extra_marks.items %}
-                    <tr>
-                      <th>{{ extra_mark.name }}</th>
-                      <td>
-                        {% for note in notes %}
-                          {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
-                          {% if can_view_personalnote %}
-                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
-                          {% endif %}
-                        {% endfor %}
-                      </td>
-                    </tr>
-                  {% endfor %}
+                    {% for extra_mark, notes in extra_marks.items %}
+                      <tr>
+                        <th>{{ extra_mark.name }}</th>
+                        <td>
+                          {% for note in notes %}
+                            {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+                            {% if can_view_personalnote %}
+                              <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% endif %}
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
 
-                </table>
+                  </table>
+                </div>
               </div>
             </div>
           {% endif %}
@@ -316,10 +317,10 @@
           </div>
         </div>
       {% endif %}
-      </div>
+    </div>
 
-      {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
-        <p>{% include "core/partials/save_button.html" %}</p>
-      {% endif %}
+    {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+      <p>{% include "core/partials/save_button.html" %}</p>
+    {% endif %}
   </form>
 {% endblock %}
