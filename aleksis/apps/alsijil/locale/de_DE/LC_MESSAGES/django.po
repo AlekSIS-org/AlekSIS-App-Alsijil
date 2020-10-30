@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-10-30 21:24+0100\n"
-"PO-Revision-Date: 2020-10-30 20:21+0000\n"
+"PO-Revision-Date: 2020-10-30 20:33+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -136,49 +137,39 @@ msgstr "Zusätzliche Markierungen"
 
 #: model_extensions.py:145
 msgid "Can view week overview of group class register"
-msgstr ""
+msgstr "Kann Wochenübersicht des Gruppenklassenbuches sehen"
 
 #: model_extensions.py:149
 msgid "Can view lesson overview of group class register"
-msgstr ""
+msgstr "Kann Stundenübersicht des Gruppenklassenbuches sehen"
 
 #: model_extensions.py:152
-#, fuzzy
-#| msgid "List of all personal note filters"
 msgid "Can view all personal notes of a group"
-msgstr "Liste aller Filter für persönliche Notizen"
+msgstr "Kann alle persönlichen Notizen einer Gruppe sehen"
 
 #: model_extensions.py:155
-#, fuzzy
-#| msgid "List of all personal note filters"
 msgid "Can edit all personal notes of a group"
-msgstr "Liste aller Filter für persönliche Notizen"
+msgstr "Kann alle persönlichen Notizen einer Gruppe bearbeiten"
 
 #: model_extensions.py:158
-#, fuzzy
-#| msgid "Lesson documentation for week"
 msgid "Can view all lesson documentation of a group"
-msgstr "Unterrichtsdokumentation für Woche"
+msgstr "Kann alle Unterrichtsdokumentationen für eine Gruppe sehen"
 
 #: model_extensions.py:161
-#, fuzzy
-#| msgid "Lesson documentation for week"
 msgid "Can edit all lesson documentation of a group"
-msgstr "Unterrichtsdokumentation für Woche"
+msgstr "Kann alle Unterrichtsdokumentationen für eine Gruppe bearbeiten"
 
 #: model_extensions.py:163
 msgid "Can view full register of a group"
-msgstr ""
+msgstr "Kann komplettes Klassenbuch einer Gruppe sehen"
 
 #: model_extensions.py:165
 msgid "Can register an absence for all members of a group"
-msgstr ""
+msgstr "Kann eine Absenz für alle Mitglieder eine Gruppe registrieren"
 
 #: model_extensions.py:168
-#, fuzzy
-#| msgid "Class register: person"
 msgid "Can register an absence for a person"
-msgstr "Klassenbuch: Person"
+msgstr "Kann eine Absenz für eine Person registrieren"
 
 #: models.py:28 models.py:201
 msgid "Short name"
@@ -242,19 +233,15 @@ msgstr "Zusätzliche Markierung"
 
 #: models.py:222
 msgid "Can view week overview"
-msgstr ""
+msgstr "Kann die Wochenübersicht sehen"
 
 #: models.py:223
-#, fuzzy
-#| msgid "Register absence"
 msgid "Can register absence"
-msgstr "Abwesenheit eintragen"
+msgstr "Kann eine Absenz registrieren"
 
 #: models.py:224
-#, fuzzy
-#| msgid "List of all personal note filters"
 msgid "Can list all personal note filters"
-msgstr "Liste aller Filter für persönliche Notizen"
+msgstr "Kann alle Filter für persönliche Notizen anzeigen"
 
 #: preferences.py:16
 msgid "Block adding personal notes for cancelled lessons"
@@ -262,11 +249,13 @@ msgstr "Blockiere das Hinzufügen von persönlichen Notizen für ausgefallene St
 
 #: preferences.py:24
 msgid "Allow users to view their own personal notes"
-msgstr ""
+msgstr "Erlaube Nutzern, ihre eigenen persönlichen Notizen zu sehen"
 
 #: preferences.py:33
 msgid "Allow primary group owners to register future absences for students in their groups"
 msgstr ""
+"Erlaube Primärgruppeninhabern Absenzen in der Zukunft für Mitglieder ihrer "
+"Gruppen zu registrieren"
 
 #: preferences.py:43
 msgid "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
@@ -293,17 +282,15 @@ msgid "Delete"
 msgstr "Löschen"
 
 #: templates/alsijil/class_register/groups.html:21
-#, fuzzy
-#| msgid "My students"
 msgid "Students"
-msgstr "Meine Schüler*innen"
+msgstr "Schüler*innen"
 
 #: templates/alsijil/class_register/groups.html:35
 #: templates/alsijil/class_register/groups.html:69
 #: templates/alsijil/class_register/week_view.html:40
 #: templates/alsijil/class_register/week_view.html:51
 msgid "Students list"
-msgstr ""
+msgstr "Schüler*innenliste"
 
 #: templates/alsijil/class_register/groups.html:39
 #: templates/alsijil/class_register/groups.html:75
@@ -324,7 +311,7 @@ msgstr "Wochenansicht"
 #: templates/alsijil/class_register/week_view.html:44
 #: templates/alsijil/class_register/week_view.html:58
 msgid "Generate printout"
-msgstr ""
+msgstr "Ausdruck generieren"
 
 #: templates/alsijil/class_register/groups.html:52
 #: templates/alsijil/class_register/groups.html:88
@@ -332,10 +319,8 @@ msgid "No groups available."
 msgstr "Keine Gruppen verfügbar."
 
 #: templates/alsijil/class_register/groups.html:64
-#, fuzzy
-#| msgid "My students"
 msgid "students"
-msgstr "Meine Schüler*innen"
+msgstr "Schüler*innen"
 
 #: templates/alsijil/class_register/lesson.html:5
 msgid "Lesson"
@@ -345,7 +330,7 @@ msgstr "Unterrichtsstunde"
 #: templates/alsijil/class_register/person.html:16
 #: templates/alsijil/class_register/students_list.html:10
 msgid "Back"
-msgstr ""
+msgstr "Zurück"
 
 #: templates/alsijil/class_register/lesson.html:19
 #: templates/alsijil/class_register/lesson.html:138
@@ -441,8 +426,6 @@ msgid "Delete note"
 msgstr "Notiz löschen"
 
 #: templates/alsijil/class_register/person.html:71
-#, fuzzy
-#| msgid "There are unexcused lessons."
 msgid "There are no unexcused lessons."
 msgstr "Es gibt keine unentschuldigten Unterrichtsstunden."
 
@@ -495,7 +478,7 @@ msgstr "%(late)s' verspätet"
 #: templates/alsijil/class_register/students_list.html:12
 #, python-format
 msgid "Students list: %(group)s"
-msgstr ""
+msgstr "Schüler*innenliste: %(group)s"
 
 #: templates/alsijil/class_register/week_view.html:23
 msgid "Select"
@@ -600,7 +583,7 @@ msgstr "(u)"
 
 #: templates/alsijil/partials/legend.html:4
 msgid "Legend"
-msgstr ""
+msgstr "Legende"
 
 #: templates/alsijil/partials/legend.html:7
 #: templates/alsijil/print/full_register.html:71
@@ -608,10 +591,8 @@ msgid "General"
 msgstr "Allgemein"
 
 #: templates/alsijil/partials/legend.html:18
-#, fuzzy
-#| msgid "Unexcused absences"
 msgid "Excused absences"
-msgstr "Unentschuldigte Fehlzeiten"
+msgstr "Entschuldigte Fehlzeiten"
 
 #: templates/alsijil/partials/lesson_status_icon.html:6
 msgid "Data complete"
@@ -647,28 +628,24 @@ msgstr "Keine Schüler*innen verfügbar."
 
 #: templates/alsijil/partials/persons_with_stats.html:15
 #: templates/alsijil/partials/persons_with_stats.html:25
-#, fuzzy
-#| msgid "My groups"
 msgid "Primary group"
-msgstr "Meine Gruppen"
+msgstr "Primärgruppe"
 
 #: templates/alsijil/partials/persons_with_stats.html:43
 msgid "Sum"
-msgstr ""
+msgstr "Summe"
 
 #: templates/alsijil/partials/persons_with_stats.html:94
-#, fuzzy
-#| msgid "Summed up tardiness"
 msgid "Count of tardiness"
-msgstr "Summierte Verspätung"
+msgstr "Anzahl der Verspätungen"
 
 #: templates/alsijil/partials/persons_with_stats.html:107
 msgid "Show more details"
-msgstr ""
+msgstr "Mehr Details anzeigen"
 
 #: templates/alsijil/partials/persons_with_stats.html:108
 msgid "Details"
-msgstr ""
+msgstr "Details"
 
 #: templates/alsijil/print/full_register.html:6
 msgid "Class register:"
