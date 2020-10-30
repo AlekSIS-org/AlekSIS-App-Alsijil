@@ -492,12 +492,11 @@ def my_students(request: HttpRequest) -> HttpResponse:
     context = {}
     relevant_groups = (
         request.user.person.get_owner_groups_with_lessons()
+        .annotate(has_parents=Exists(Group.objects.filter(child_groups=OuterRef("pk"))))
         .filter(members__isnull=False)
+        .order_by("has_parents", "name")
         .prefetch_related("members")
         .distinct()
-    )
-    relevant_groups = sorted(
-        relevant_groups, key=lambda g: g.name if g.parent_groups else "0"
     )
 
     new_groups = []
