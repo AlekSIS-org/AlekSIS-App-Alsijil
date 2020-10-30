@@ -1,24 +1,93 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block browser_title %}{% blocktrans %}My groups{% endblocktrans %}{% endblock %}
-
 
 {% block page_title %}
   {% blocktrans %}My groups{% endblocktrans %}
 {% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}"/>
+{% endblock %}
+
 {% block content %}
-  <div class="collection">
+  <table class="highlight responsive-table hide-on-med-and-down">
+    <thead>
+    <tr>
+      <th>{% trans "Name" %}</th>
+      <th>{% trans "Students" %}</th>
+      <th></th>
+    </tr>
+    </thead>
     {% for group in groups %}
-      <a class="collection-item" href="{% url "week_view" "group" group.pk %}">
-        {{ group }}
-      </a>
+      <tr>
+        <td>
+          {{ group }}
+        </td>
+        <td>{{ group.students_count }}</td>
+        <td>
+          <div class="right">
+            <a class="btn primary-color waves-effect waves-light" href="{% url "students_list" group.pk %}">
+              <i class="material-icons left">people</i>
+              {% trans "Students list" %}
+            </a>
+            <a class="btn secondary-color waves-effect waves-light" href="{% url "week_view" "group" group.pk %}">
+              <i class="material-icons left">view_week</i>
+              {% trans "Week view" %}
+            </a>
+            <a class="btn primary waves-effect waves-light" href="{% url "full_register_group" group.pk %}"
+               target="_blank">
+              <i class="material-icons left">print</i>
+              {% trans "Generate printout" %}
+            </a>
+          </div>
+        </td>
+      </tr>
     {% empty %}
-      <li class="collection-item flow-text">
-        {% blocktrans %}No groups available.{% endblocktrans %}
-      </li>
+      <tr>
+        <td class="flow-text" colspan="3">
+          {% blocktrans %}No groups available.{% endblocktrans %}
+        </td>
+      </tr>
     {% endfor %}
+  </table>
+
+  <div class="hide-on-large-only">
+    <ul class="collection">
+      {% for group in groups %}
+        <li class="collection-item">
+          <span class="title">{{ group }}</span>
+          <p>
+            {{ group.students_count }} {% trans "students" %}
+          </p>
+          <p>
+            <a class="btn primary-color waves-effect waves-light" href="{% url "week_view" "group" group.pk %}">
+              <i class="material-icons left">people</i>
+              {% trans "Students list" %}
+            </a>
+          </p>
+          <p>
+            <a class="btn secondary-color waves-effect waves-light" href="{% url "week_view" "group" group.pk %}">
+              <i class="material-icons left">view_week</i>
+              {% trans "Week view" %}
+            </a>
+          </p>
+          <p>
+            <a class="btn primary waves-effect waves-light" href="{% url "full_register_group" group.pk %}"
+               target="_blank">
+              <i class="material-icons left">print</i>
+              {% trans "Generate printout" %}
+            </a>
+          </p>
+        </li>
+      {% empty %}
+          <li class="collection-item flow-text">
+            {% blocktrans %}No groups available.{% endblocktrans %}
+          </li>
+      {% endfor %}
+    </ul>
   </div>
 {% endblock %}

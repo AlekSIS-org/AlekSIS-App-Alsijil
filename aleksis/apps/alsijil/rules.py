@@ -146,6 +146,14 @@ add_perm("alsijil.view_my_students", view_my_students_predicate)
 view_my_groups_predicate = has_person & is_teacher
 add_perm("alsijil.view_my_groups", view_my_groups_predicate)
 
+# View students list
+view_students_list_predicate = view_my_groups_predicate & (
+    is_group_owner
+    | has_global_perm("alsijil.view_personalnote")
+    | has_object_perm("core.view_personalnote_group")
+)
+add_perm("alsijil.view_students_list", view_students_list_predicate)
+
 # View person overview
 view_person_overview_predicate = has_person & (
     (is_current_person & is_site_preference_set("alsijil", "view_own_personal_notes"))

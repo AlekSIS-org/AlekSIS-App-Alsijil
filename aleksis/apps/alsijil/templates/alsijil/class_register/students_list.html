@@ -1,0 +1,49 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load static time_helpers data_helpers week_helpers i18n %}
+
+{% block browser_title %}{% blocktrans with group=group %}Students list: {{ group }}{% endblocktrans %}{% endblock %}
+
+{% block page_title %}
+  <a href="{% url "my_groups" %}"
+     class="btn-flat primary-color-text waves-light waves-effect">
+    <i class="material-icons left">chevron_left</i> {% trans "Back" %}
+  </a>
+  {% blocktrans with group=group %}Students list: {{ group }}{% endblocktrans %}
+  <span class="right show-on-active hide-on-small-and-down">
+    <a class="btn primary-color waves-effect waves-light" href="{% url "week_view" "group" group.pk %}">
+      <i class="material-icons left">view_week</i>
+      {% trans "Week view" %}
+    </a>
+    <a class="btn waves-effect waves-light" href="{% url "full_register_group" group.pk %}" target="_blank">
+      <i class="material-icons left">print</i>
+      {% trans "Generate printout" %}
+    </a>
+  </span>
+{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}"/>
+{% endblock %}
+
+{% block content %}
+  <p class="show-on-active hide-on-med-and-up">
+    <a class="btn primary-color waves-effect waves-light hundred-percent"
+       href="{% url "week_view" "group" group.pk %}">
+      <i class="material-icons left">view_week</i>
+      {% trans "Week view" %}
+    </a>
+  </p>
+  <p class="show-on-active hide-on-med-and-up">
+    <a class="btn waves-effect waves-light hundred-percent" href="{% url "full_register_group" group.pk %}"
+       target="_blank">
+      <i class="material-icons left">print</i>
+      {% trans "Generate printout" %}
+    </a>
+  </p>
+
+  {% include "alsijil/partials/persons_with_stats.html" with persons=persons %}
+
+  {% include "alsijil/partials/legend.html" %}
+{% endblock %}

@@ -430,63 +430,18 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, documentations, notes, substitution)
                 )
 
-    persons = (
-        Person.objects.prefetch_related(
-            "personal_notes",
-            "personal_notes__excuse_type",
-            "personal_notes__extra_marks",
-            "personal_notes__lesson_period__lesson__subject",
-            "personal_notes__lesson_period__substitutions",
-            "personal_notes__lesson_period__substitutions__subject",
-            "personal_notes__lesson_period__substitutions__teachers",
-            "personal_notes__lesson_period__lesson__teachers",
-            "personal_notes__lesson_period__period",
-        )
-        .filter(
-            personal_notes__groups_of_person=group,
-            personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-        )
-        .annotate(
-            absences_count=Count(
-                "personal_notes__absent",
-                filter=Q(
-                    personal_notes__absent=True,
-                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-                ),
-            ),
-            excused=Count(
-                "personal_notes__absent",
-                filter=Q(
-                    personal_notes__absent=True,
-                    personal_notes__excused=True,
-                    personal_notes__excuse_type__isnull=True,
-                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-                ),
-            ),
-            unexcused=Count(
-                "personal_notes__absent",
-                filter=Q(
-                    personal_notes__absent=True,
-                    personal_notes__excused=False,
-                    personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-                ),
-            ),
-            tardiness=Sum("personal_notes__late"),
-        )
+    persons = Person.objects.prefetch_related(
+        "personal_notes",
+        "personal_notes__excuse_type",
+        "personal_notes__extra_marks",
+        "personal_notes__lesson_period__lesson__subject",
+        "personal_notes__lesson_period__substitutions",
+        "personal_notes__lesson_period__substitutions__subject",
+        "personal_notes__lesson_period__substitutions__teachers",
+        "personal_notes__lesson_period__lesson__teachers",
+        "personal_notes__lesson_period__period",
     )
-
-    for extra_mark in ExtraMark.objects.all():
-        persons = persons.annotate(
-            **{
-                extra_mark.count_label: Count(
-                    "personal_notes",
-                    filter=Q(
-                        personal_notes__extra_marks=extra_mark,
-                        personal_notes__lesson_period__lesson__validity__school_term=current_school_term,
-                    ),
-                )
-            }
-        )
+    persons = group.generate_person_list_with_class_register_statistics(persons)
 
     context["school_term"] = group.school_term
     context["persons"] = persons
@@ -515,17 +470,49 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 @permission_required("alsijil.view_my_students")
 def my_students(request: HttpRequest) -> HttpResponse:
     context = {}
-    relevant_groups = request.user.person.get_owner_groups_with_lessons()
-    persons = Person.objects.filter(member_of__in=relevant_groups)
-    context["persons"] = persons
+    relevant_groups = (
+        request.user.person.get_owner_groups_with_lessons()
+        .annotate(has_parents=Exists(Group.objects.filter(child_groups=OuterRef("pk"))))
+        .filter(members__isnull=False)
+        .order_by("has_parents", "name")
+        .prefetch_related("members")
+        .distinct()
+    )
+
+    new_groups = []
+    for group in relevant_groups:
+        persons = group.generate_person_list_with_class_register_statistics()
+        new_groups.append((group, persons))
+
+    context["groups"] = new_groups
+    context["excuse_types"] = ExcuseType.objects.all()
+    context["extra_marks"] = ExtraMark.objects.all()
     return render(request, "alsijil/class_register/persons.html", context)
 
 
 @permission_required("alsijil.view_my_groups",)
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
-    context["groups"] = request.user.person.get_owner_groups_with_lessons()
+    context["groups"] = request.user.person.get_owner_groups_with_lessons().annotate(
+        students_count=Count("members")
+    )
     return render(request, "alsijil/class_register/groups.html", context)
+
+
+class StudentsList(PermissionRequiredMixin, DetailView):
+    model = Group
+    template_name = "alsijil/class_register/students_list.html"
+    permission_required = "alsijil.view_students_list"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["group"] = self.object
+        context[
+            "persons"
+        ] = self.object.generate_person_list_with_class_register_statistics()
+        context["extra_marks"] = ExtraMark.objects.all()
+        context["excuse_types"] = ExcuseType.objects.all()
+        return context
 
 
 @permission_required(

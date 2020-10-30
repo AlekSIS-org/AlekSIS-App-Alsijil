@@ -1,8 +1,8 @@
 from datetime import date
-from typing import Dict, Iterator, Optional, Union
+from typing import Dict, Iterable, Iterator, Optional, Union
 
 from django.db.models import Exists, OuterRef, Q, QuerySet
-from django.db.models.aggregates import Count
+from django.db.models.aggregates import Count, Sum
 from django.utils.translation import gettext as _
 
 import reversion
@@ -282,3 +282,77 @@ def get_owner_groups_with_lessons(self: Person):
     Groups which have child groups with related lessons are also included.
     """
     return Group.get_groups_with_lessons().filter(owners=self)
+
+
+@Group.method
+def generate_person_list_with_class_register_statistics(
+    self: Group, persons: Optional[Iterable] = None
+) -> QuerySet:
+    """Get with class register statistics annotated list of all members."""
+    persons = persons or self.members.all()
+    persons = persons.filter(
+        personal_notes__groups_of_person=self,
+        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+    ).annotate(
+        absences_count=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            ),
+        ),
+        excused=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=True,
+                personal_notes__excuse_type__isnull=True,
+                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            ),
+        ),
+        unexcused=Count(
+            "personal_notes__absent",
+            filter=Q(
+                personal_notes__absent=True,
+                personal_notes__excused=False,
+                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            ),
+        ),
+        tardiness=Sum("personal_notes__late"),
+        tardiness_count=Count(
+            "personal_notes",
+            filter=~Q(personal_notes__late=0)
+            & Q(
+                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            ),
+        ),
+    )
+
+    for extra_mark in ExtraMark.objects.all():
+        persons = persons.annotate(
+            **{
+                extra_mark.count_label: Count(
+                    "personal_notes",
+                    filter=Q(
+                        personal_notes__extra_marks=extra_mark,
+                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                    ),
+                )
+            }
+        )
+
+    for excuse_type in ExcuseType.objects.all():
+        persons = persons.annotate(
+            **{
+                excuse_type.count_label: Count(
+                    "personal_notes__absent",
+                    filter=Q(
+                        personal_notes__absent=True,
+                        personal_notes__excuse_type=excuse_type,
+                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                    ),
+                )
+            }
+        )
+
+    return persons

@@ -35,3 +35,26 @@ table a.tr-link {
         margin-bottom: 10px;
     }
 }
+
+.collapsible li .show-on-active {
+    display: none;
+}
+
+.collapsible li.active .show-on-active {
+    display: block;
+}
+
+th.chip-height {
+    height: 67px;
+    line-height: 2.2;
+}
+
+.collection-item.chip-height {
+    height: 52px;
+    line-height: 2.2;
+}
+
+li.collection-item.button-height {
+    height: 58px;
+    line-height: 2.5;
+}
