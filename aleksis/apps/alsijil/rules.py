@@ -44,6 +44,7 @@ add_perm("alsijil.view_lesson_menu", has_person)
 # View lesson personal notes
 view_lesson_personal_notes_predicate = view_lesson_predicate & (
     ~is_lesson_participant
+    | is_lesson_teacher
     | has_global_perm("alsijil.view_personalnote")
     | has_lesson_group_object_perm("core.view_personalnote_group")
 )
