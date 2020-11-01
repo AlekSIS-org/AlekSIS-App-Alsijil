@@ -96,9 +96,14 @@ def lesson(
             )
         )
 
+    next_lesson = request.user.person.next_lesson(lesson_period, date_of_lesson)
+    prev_lesson = request.user.person.previous_lesson(lesson_period, date_of_lesson)
+
     context["lesson_period"] = lesson_period
     context["week"] = wanted_week
     context["day"] = wanted_week[lesson_period.period.weekday]
+    context["next_lesson_person"] = next_lesson
+    context["prev_lesson_person"] = prev_lesson
 
     # Create or get lesson documentation object; can be empty when first opening lesson
     lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
