@@ -68,17 +68,6 @@ MENUS = {
                     ],
                 },
                 {
-                    "name": _("Register absence"),
-                    "url": "register_absence",
-                    "icon": "rate_review",
-                    "validators": [
-                        (
-                            "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_register_absence",
-                        ),
-                    ],
-                },
-                {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",

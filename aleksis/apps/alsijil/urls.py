@@ -36,7 +36,7 @@ urlpatterns = [
         views.DeletePersonalNoteView.as_view(),
         name="delete_personal_note",
     ),
-    path("absence/new", views.register_absence, name="register_absence"),
+    path("absence/new/<int:id_>/", views.register_absence, name="register_absence"),
     path("extra_marks/", views.ExtraMarkListView.as_view(), name="extra_marks"),
     path(
         "extra_marks/create/",
