@@ -52,7 +52,7 @@ add_perm("alsijil.view_lesson_personalnote", view_lesson_personal_notes_predicat
 
 # Edit personal note
 edit_lesson_personal_note_predicate = view_lesson_personal_notes_predicate & (
-    ~is_lesson_parent_group_owner
+    is_lesson_teacher
     | has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
 )
