@@ -680,49 +680,47 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     return render(request, "alsijil/class_register/person.html", context)
 
 
-@permission_required("alsijil.view_register_absence")
-def register_absence(request: HttpRequest) -> HttpResponse:
+@permission_required("alsijil.register_absence", fn=objectgetter_optional(Person))
+def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
+
+    person = get_object_or_404(Person, pk=id_)
 
     register_absence_form = RegisterAbsenceForm(request.POST or None)
 
-    if request.method == "POST":
-        if register_absence_form.is_valid() and request.user.has_perm(
-            "alsijil.register_absence", register_absence_form.cleaned_data["person"]
-        ):
-            # Get data from form
-            person = register_absence_form.cleaned_data["person"]
-            start_date = register_absence_form.cleaned_data["date_start"]
-            end_date = register_absence_form.cleaned_data["date_end"]
-            from_period = register_absence_form.cleaned_data["from_period"]
-            to_period = register_absence_form.cleaned_data["to_period"]
-            absent = register_absence_form.cleaned_data["absent"]
-            excused = register_absence_form.cleaned_data["excused"]
-            excuse_type = register_absence_form.cleaned_data["excuse_type"]
-            remarks = register_absence_form.cleaned_data["remarks"]
+    if request.method == "POST" and register_absence_form.is_valid():
+        # Get data from form
+        # person = register_absence_form.cleaned_data["person"]
+        start_date = register_absence_form.cleaned_data["date_start"]
+        end_date = register_absence_form.cleaned_data["date_end"]
+        from_period = register_absence_form.cleaned_data["from_period"]
+        to_period = register_absence_form.cleaned_data["to_period"]
+        absent = register_absence_form.cleaned_data["absent"]
+        excused = register_absence_form.cleaned_data["excused"]
+        excuse_type = register_absence_form.cleaned_data["excuse_type"]
+        remarks = register_absence_form.cleaned_data["remarks"]
 
-            # Mark person as absent
-            delta = end_date - start_date
-            for i in range(delta.days + 1):
-                from_period_on_day = from_period if i == 0 else TimePeriod.period_min
-                to_period_on_day = (
-                    to_period if i == delta.days else TimePeriod.period_max
-                )
-                day = start_date + timedelta(days=i)
+        # Mark person as absent
+        delta = end_date - start_date
+        for i in range(delta.days + 1):
+            from_period_on_day = from_period if i == 0 else TimePeriod.period_min
+            to_period_on_day = to_period if i == delta.days else TimePeriod.period_max
+            day = start_date + timedelta(days=i)
 
-                person.mark_absent(
-                    day,
-                    from_period_on_day,
-                    absent,
-                    excused,
-                    excuse_type,
-                    remarks,
-                    to_period_on_day,
-                )
+            person.mark_absent(
+                day,
+                from_period_on_day,
+                absent,
+                excused,
+                excuse_type,
+                remarks,
+                to_period_on_day,
+            )
 
-            messages.success(request, _("The absence has been saved."))
-            return redirect("register_absence")
+        messages.success(request, _("The absence has been saved."))
+        return redirect("overview_person", person.pk)
 
+    context["person"] = person
     context["register_absence_form"] = register_absence_form
 
     return render(request, "alsijil/absences/register.html", context)

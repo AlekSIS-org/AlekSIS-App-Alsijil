@@ -249,6 +249,13 @@
                 {% else %}
                   {{ person.person.full_name }}
                 {% endif %}
+                {% has_perm "alsijil.register_absence" user person.person as can_register_absence %}
+                {% if can_register_absence %}
+                  <a class="btn primary-color waves-effect waves-light right" href="{% url "register_absence" person.person.pk %}">
+                    <i class="material-icons left">rate_review</i>
+                    {% trans "Register absence" %}
+                  </a>
+                {% endif %}
               </h5>
               <p class="card-text">
                 {% trans "Absent" %}: {{ person.person.absences_count }}

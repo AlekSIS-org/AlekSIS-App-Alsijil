@@ -119,15 +119,11 @@ PersonalNoteFormSet = forms.modelformset_factory(
 
 class RegisterAbsenceForm(forms.Form):
     layout = Layout(
-        Fieldset("", "person"),
         Fieldset("", Row("date_start", "date_end"), Row("from_period", "to_period")),
         Fieldset("", Row("absent", "excused"), Row("excuse_type"), Row("remarks")),
     )
     date_start = forms.DateField(label=_("Start date"), initial=datetime.today)
     date_end = forms.DateField(label=_("End date"), initial=datetime.today)
-    person = forms.ModelChoiceField(
-        label=_("Person"), queryset=None, widget=Select2Widget
-    )
     from_period = forms.ChoiceField(label=_("Start period"))
     to_period = forms.ChoiceField(label=_("End period"))
     absent = forms.BooleanField(label=_("Absent"), initial=True, required=False)
@@ -144,37 +140,6 @@ class RegisterAbsenceForm(forms.Form):
         self.request = get_request()
         super().__init__(*args, **kwargs)
         period_choices = TimePeriod.period_choices
-
-        # Filter selectable persons by permissions
-        if check_global_permission(self.request.user, "alsijil.register_absence"):
-            # Global permission, user can register absences for all persons
-            self.fields["person"].queryset = Person.objects.all()
-        else:
-            # 1) All persons the user is allowed to register an absence for by object permissions
-            # 2) All persons the user is the primary group owner
-            # 3) All persons the user is allowed to register an absence for by object permissions of the person's group
-            persons_qs = (
-                get_objects_for_user(
-                    self.request.user, "core.register_absence_person", Person
-                )
-                .union(
-                    Person.objects.filter(
-                        primary_group__owners=self.request.user.person
-                    )
-                )
-                .union(
-                    Person.objects.filter(
-                        member_of__in=get_objects_for_user(
-                            self.request.user, "core.register_absence_group", Group
-                        )
-                    )
-                )
-            )
-
-            # Flatten query by getting all pks and filter persons
-            self.fields["person"].queryset = Person.objects.filter(
-                pk__in=list(persons_qs.values_list("pk", flat=True))
-            )
 
         self.fields["from_period"].choices = period_choices
         self.fields["to_period"].choices = period_choices

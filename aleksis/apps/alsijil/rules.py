@@ -113,12 +113,6 @@ view_week_personal_notes_predicate = has_person & (
 )
 add_perm("alsijil.view_week_personalnote", view_week_personal_notes_predicate)
 
-# View register absence page
-view_register_absence_predicate = has_person & (
-    has_global_perm("alsijil.register_absence") | has_any_object_absence
-)
-add_perm("alsijil.view_register_absence", view_register_absence_predicate)
-
 # Register absence
 register_absence_predicate = has_person & (
     (
