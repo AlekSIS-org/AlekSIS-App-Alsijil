@@ -9,55 +9,84 @@
   <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}"/>
 {% endblock %}
 
-{% block page_title %}
-  {% with lesson_period.get_lesson_documentation as lesson_doc %}
-    <a href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
-       class="btn-flat primary-color-text waves-light waves-effect">
-      <i class="material-icons left">chevron_left</i> {% trans "Back" %}
-    </a>
-  {% endwith %}
-  {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
+{% block content %}
+  {% if next_lesson_person or prev_lesson_person %}
+    <div class="row no-margin">
+      <div class="col s12 no-padding">
+        {# Back to week view #}
+        {% with lesson_period.get_lesson_documentation as lesson_doc %}
+          <a href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
+             class="btn primary-color waves-light waves-effect alsijil-top-button">
+            <i class="material-icons left">chevron_left</i> {% trans "Back to week view" %}
+          </a>
+        {% endwith %}
 
-  {% for group in lesson_period.get_groups.all %}
-    <span>{{ group.name }}</span>,
-  {% endfor %}
+        {# Next lesson #}
+        {% if prev_lesson_person %}
+          <a class="btn primary waves-effect waves-light alsijil-top-button"
+             href="{% url "lesson_by_week_and_period" prev_lesson_person.week.year prev_lesson_person.week.week prev_lesson_person.id %}">
+            <i class="material-icons left">arrow_back</i>
+            {% trans "My previous lesson" %}
+          </a>
+        {% endif %}
 
-  {{ lesson_period.get_subject.name }},
+        {# Previous lesson #}
+        {% if next_lesson_person %}
+          <a class="btn primary right waves-effect waves-light alsijil-top-button"
+             href="{% url "lesson_by_week_and_period" next_lesson_person.week.year next_lesson_person.week.week next_lesson_person.id %}">
+            <i class="material-icons right">arrow_forward</i>
+            {% trans "My next lesson" %}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 
-  {% for teacher in lesson_period.get_teachers.all %}
-    {{ teacher.short_name }}
-  {% endfor %}
+  <h4>
+    {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
 
-  <span class="right">
+    {% for group in lesson_period.get_groups.all %}
+      <span>{{ group.name }}</span>,
+    {% endfor %}
+
+    {{ lesson_period.get_subject.name }},
+
+    {% for teacher in lesson_period.get_teachers.all %}
+      {{ teacher.short_name }}
+    {% endfor %}
+
+    <span class="right">
     {% include "alsijil/partials/lesson_status_icon.html" with period=lesson_period css_class="medium" %}
   </span>
-{% endblock %}
+  </h4>
+  <br/>
 
-{% block content %}
   {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
   {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
   {% has_perm "alsijil.edit_lesson_personalnote" user lesson_period as can_edit_lesson_personalnote %}
 
-  <div class="row">
-    <div class="col s12">
-      <a class="btn-flat left waves-effect waves-light"
+  <form method="post" class="row">
+    <p>
+      {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% include "core/partials/save_button.html" %}
+      {% endif %}
+
+      <a class="btn waves-effect waves-light primary"
          href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
         <i class="material-icons left">arrow_back</i>
-        {% trans "Previous lesson" %}
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Previous {{ subject }} lesson
+        {% endblocktrans %}
       </a>
 
-      <a class="btn-flat right waves-effect waves-light"
+      <a class="btn right waves-effect waves-light primary"
          href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
         <i class="material-icons right">arrow_forward</i>
-        {% trans "Next lesson" %}
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Next {{ subject }} lesson
+        {% endblocktrans %}
       </a>
-    </div>
-  </div>
-
-  <form method="post">
-    {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
-      <p>{% include "core/partials/save_button.html" %}</p>
-    {% endif %}
+    </p>
 
     {% csrf_token %}
 
@@ -319,8 +348,26 @@
       {% endif %}
     </div>
 
-    {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
-      <p>{% include "core/partials/save_button.html" %}</p>
-    {% endif %}
+    <p>
+      {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% include "core/partials/save_button.html" %}
+      {% endif %}
+
+      <a class="btn primary waves-effect waves-light"
+         href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+        <i class="material-icons left">arrow_back</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Previous {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+
+      <a class="btn primary right waves-effect waves-light"
+         href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+        <i class="material-icons right">arrow_forward</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Next {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+    </p>
   </form>
 {% endblock %}
