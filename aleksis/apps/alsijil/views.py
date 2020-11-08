@@ -324,6 +324,16 @@ def week_view(
                     .annotate(tardiness_sum=Sum("personal_notes__late"))
                     .values("tardiness_sum")
                 ),
+                tardiness_count=Count(
+                    "personal_notes",
+                    filter=Q(
+                        personal_notes__lesson_period__in=lesson_periods_pk,
+                        personal_notes__week=wanted_week.week,
+                        personal_notes__year=wanted_week.year,
+                    )
+                    & ~Q(personal_notes__late=0),
+                    distinct=True,
+                ),
             )
         )
 
@@ -656,6 +666,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                 )
             )
             stat.update(personal_notes.aggregate(tardiness=Sum("late")))
+            stat.update(
+                personal_notes.filter(~Q(late=0)).aggregate(
+                    tardiness_count=Count("late")
+                )
+            )
 
             for extra_mark in extra_marks:
                 stat.update(
