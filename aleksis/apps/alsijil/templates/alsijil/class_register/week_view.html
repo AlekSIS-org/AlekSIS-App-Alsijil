@@ -264,6 +264,9 @@
               <p class="card-text">
                 {% trans "Summed up tardiness" %}: {% firstof person.person.tardiness_sum|to_time|time:"H\h i\m"  "–" %}
               </p>
+              <p class="card-text">
+                {% trans "Count of tardiness" %}: {{ person.person.tardiness_count }} &times;
+              </p>
               {% for extra_mark in extra_marks %}
                 <p class="card-text">
                   {{ extra_mark.name }}: {{ person.person|get_dict:extra_mark.count_label }}

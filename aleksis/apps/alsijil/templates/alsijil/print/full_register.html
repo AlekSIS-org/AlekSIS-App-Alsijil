@@ -149,7 +149,7 @@
           <td>{{ person|get_dict:excuse_type.count_label }}</td>
         {% endfor %}
         <td>{{ person.unexcused }}</td>
-        <td>{{ person.tardiness }}'</td>
+        <td>{{ person.tardiness }}'/{{ person.tardiness_count }} &times;</td>
         {% for extra_mark in extra_marks %}
           <td>{{ person|get_dict:extra_mark.count_label }}</td>
         {% endfor %}
@@ -285,7 +285,7 @@
       </tr>
       <tr>
         <th colspan="2">{% trans 'Tardiness' %}</th>
-        <td>{{ person.tardiness }}'</td>
+        <td>{{ person.tardiness }}'/{{ person.tardiness_count }} &times;</td>
       </tr>
     </table>
 
