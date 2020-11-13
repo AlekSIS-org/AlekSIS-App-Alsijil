@@ -281,7 +281,7 @@ def get_owner_groups_with_lessons(self: Person):
 
     Groups which have child groups with related lessons are also included.
     """
-    return Group.get_groups_with_lessons().filter(owners=self)
+    return Group.get_groups_with_lessons().filter(owners=self).distinct()
 
 
 @Group.method
@@ -299,6 +299,10 @@ def generate_person_list_with_class_register_statistics(
             filter=Q(
                 personal_notes__absent=True,
                 personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            )
+            & (
+                Q(personal_notes__lesson_period__lesson__groups=self)
+                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
             ),
         ),
         excused=Count(
@@ -308,6 +312,10 @@ def generate_person_list_with_class_register_statistics(
                 personal_notes__excused=True,
                 personal_notes__excuse_type__isnull=True,
                 personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            )
+            & (
+                Q(personal_notes__lesson_period__lesson__groups=self)
+                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
             ),
         ),
         unexcused=Count(
@@ -316,14 +324,28 @@ def generate_person_list_with_class_register_statistics(
                 personal_notes__absent=True,
                 personal_notes__excused=False,
                 personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            )
+            & (
+                Q(personal_notes__lesson_period__lesson__groups=self)
+                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
             ),
         ),
-        tardiness=Sum("personal_notes__late"),
+        tardiness=Sum(
+            "personal_notes__late",
+            filter=(
+                Q(personal_notes__lesson_period__lesson__groups=self)
+                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
+            ),
+        ),
         tardiness_count=Count(
             "personal_notes",
             filter=~Q(personal_notes__late=0)
             & Q(
                 personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+            )
+            & (
+                Q(personal_notes__lesson_period__lesson__groups=self)
+                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
             ),
         ),
     )
@@ -336,6 +358,12 @@ def generate_person_list_with_class_register_statistics(
                     filter=Q(
                         personal_notes__extra_marks=extra_mark,
                         personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                    )
+                    & (
+                        Q(personal_notes__lesson_period__lesson__groups=self)
+                        | Q(
+                            personal_notes__lesson_period__lesson__groups__parent_groups=self
+                        )
                     ),
                 )
             }
@@ -350,6 +378,12 @@ def generate_person_list_with_class_register_statistics(
                         personal_notes__absent=True,
                         personal_notes__excuse_type=excuse_type,
                         personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                    )
+                    & (
+                        Q(personal_notes__lesson_period__lesson__groups=self)
+                        | Q(
+                            personal_notes__lesson_period__lesson__groups__parent_groups=self
+                        )
                     ),
                 )
             }
