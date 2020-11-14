@@ -10,10 +10,19 @@
     text-decoration: line-through;
 }
 
+.alsijil-tardiness-text{
+    vertical-align: super;
+}
+
+
 @media only screen and (max-width : 992px) {
     table.responsive-table.alsijil-table th,
     table.responsive-table.alsijil-table td {
       margin: 0;
       vertical-align: top;
       height: 109px;}
+}
+
+.alsijil-top-button {
+    margin-top: -20px;
 }

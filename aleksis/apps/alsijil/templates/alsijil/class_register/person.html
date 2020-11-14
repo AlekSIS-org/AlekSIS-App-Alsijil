@@ -1,5 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
+{% load rules %}
 {% load data_helpers %}
 {% load week_helpers %}
 {% load i18n %}
@@ -8,12 +9,28 @@
 
 
 {% block page_title %}
+  {% has_perm "alsijil.view_my_students" user as has_students %}
+  {% if has_students %}
+    <a href="{% url "my_students" %}"
+    class="btn-flat primary-color-text waves-light waves-effect">
+      <i class="material-icons left">chevron_left</i> {% trans "Back" %}
+    </a>
+  {% endif %}
   {% blocktrans with person=person %}
     Class register overview for {{ person }}
   {% endblocktrans %}
 {% endblock %}
 
 {% block content %}
+  {% has_perm "alsijil.edit_person_overview_personalnote" user person as can_mark_all_as_excused %}
+  {% has_perm "alsijil.register_absence" user person as can_register_absence %}
+  {% if can_register_absence %}
+    <a class="btn primary-color waves-effect waves-light" href="{% url "register_absence" person.pk %}">
+      <i class="material-icons left">rate_review</i>
+      {% trans "Register absence" %}
+    </a>
+  {% endif %}
+
   <div class="row">
   <div class="col s12 m12 l6">
     <h5>{% trans "Unexcused absences" %}</h5>
@@ -22,16 +39,19 @@
       {% for note in unexcused_absences %}
         {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
         <li class="collection-item">
-          <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
-            {% csrf_token %}
-            {% trans "Mark as" %}
-            <input type="hidden" value="{{ note.pk }}" name="personal_note">
-            {% include "alsijil/partials/mark_as_buttons.html" %}
-            <a class="btn-flat red-text" title="{% trans "Delete note" %}"
-               href="{% url "delete_personal_note" note.pk %}">
-              <i class="material-icons center">cancel</i>
-            </a>
-          </form>
+          {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
+          {% if can_edit_personal_note %}
+            <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+              {% csrf_token %}
+              {% trans "Mark as" %}
+              <input type="hidden" value="{{ note.pk }}" name="personal_note">
+              {% include "alsijil/partials/mark_as_buttons.html" %}
+              <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                 href="{% url "delete_personal_note" note.pk %}">
+                <i class="material-icons center">cancel</i>
+              </a>
+            </form>
+          {% endif %}
           <i class="material-icons left red-text">warning</i>
           <p class="no-margin">
             <a href="{% url "lesson_by_week_and_period" note.year note.week note.lesson_period.pk %}">{{ note_date }}, {{ note.lesson_period }}</a>
@@ -39,64 +59,69 @@
           {% if note.remarks %}
             <p class="no-margin"><em>{{ note.remarks }}</em></p>
           {% endif %}
-          <form action="" method="post" class="hide-on-med-and-up">
-            {% csrf_token %}
-            {% trans "Mark as" %}
-            <input type="hidden" value="{{ note.pk }}" name="personal_note">
-            {% include "alsijil/partials/mark_as_buttons.html" %}
-            <a class="btn-flat red-text" title="{% trans "Delete note" %}"
-               href="{% url "delete_personal_note" note.pk %}">
-              <i class="material-icons center">cancel</i>
-            </a>
-          </form>
+          {% if can_edit_personal_note %}
+            <form action="" method="post" class="hide-on-med-and-up">
+              {% csrf_token %}
+              {% trans "Mark as" %}
+              <input type="hidden" value="{{ note.pk }}" name="personal_note">
+              {% include "alsijil/partials/mark_as_buttons.html" %}
+              <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                 href="{% url "delete_personal_note" note.pk %}">
+                <i class="material-icons center">cancel</i>
+              </a>
+            </form>
+          {% endif %}
         </li>
       {% empty %}
-        <li class="collection-item flow-text">
-          {% trans "There are unexcused lessons." %}
+        <li class="collection-item avatar valign-wrapper">
+          <i class="material-icons left circle green white-text">check</i>
+          <span class="title">{% trans "There are no unexcused lessons." %}</span>
         </li>
       {% endfor %}
     </ul>
-    <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
-    <ul class="collapsible">
-      {% for school_term, stat in stats %}
-        <li {% if forloop.first %}class="active"{% endif %}>
-          <div class="collapsible-header">
-            <i class="material-icons">date_range</i>{{ school_term }}</div>
-          <div class="collapsible-body">
-            <table>
-              <tr>
-                <th colspan="2">{% trans 'Absences' %}</th>
-                <td>{{ stat.absences_count }}</td>
-              </tr>
-              <tr>
-                <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-small-only">{% trans "thereof" %}</td>
-                <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-med-and-up"></td>
-                <th class="truncate">{% trans 'Excused' %}</th>
-                <td>{{ stat.excused }}</td>
-              </tr>
-              {% for excuse_type in excuse_types %}
-                <th>{{ excuse_type.name }}</th>
-                <td>{{ stat|get_dict:excuse_type.count_label }}</td>
-              {% endfor %}
-              <tr>
-                <th>{% trans 'Unexcused' %}</th>
-                <td>{{ stat.unexcused }}</td>
-              </tr>
-              <tr>
-                <th colspan="2">{% trans 'Tardiness' %}</th>
-                <td>{{ stat.tardiness }}'</td>
-              </tr>
-              {% for extra_mark in extra_marks %}
+    {% if stats %}
+      <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
+      <ul class="collapsible">
+        {% for school_term, stat in stats %}
+          <li {% if forloop.first %}class="active"{% endif %}>
+            <div class="collapsible-header">
+              <i class="material-icons">date_range</i>{{ school_term }}</div>
+            <div class="collapsible-body">
+              <table>
                 <tr>
-                  <th colspan="2">{{ extra_mark.name }}</th>
-                  <td>{{ stat|get_dict:extra_mark.count_label }}</td>
+                  <th colspan="2">{% trans 'Absences' %}</th>
+                  <td>{{ stat.absences_count }}</td>
                 </tr>
-              {% endfor %}
-            </table>
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
+                <tr>
+                  <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-small-only">{% trans "thereof" %}</td>
+                  <td rowspan="{{ excuse_types.count|add:2 }}" class="hide-on-med-and-up"></td>
+                  <th class="truncate">{% trans 'Excused' %}</th>
+                  <td>{{ stat.excused }}</td>
+                </tr>
+                {% for excuse_type in excuse_types %}
+                  <th>{{ excuse_type.name }}</th>
+                  <td>{{ stat|get_dict:excuse_type.count_label }}</td>
+                {% endfor %}
+                <tr>
+                  <th>{% trans 'Unexcused' %}</th>
+                  <td>{{ stat.unexcused }}</td>
+                </tr>
+                <tr>
+                  <th colspan="2">{% trans 'Tardiness' %}</th>
+                  <td>{{ stat.tardiness }}'/{{ stat.tardiness_count }} &times;</td>
+                </tr>
+                {% for extra_mark in extra_marks %}
+                  <tr>
+                    <th colspan="2">{{ extra_mark.name }}</th>
+                    <td>{{ stat|get_dict:extra_mark.count_label }}</td>
+                  </tr>
+                {% endfor %}
+              </table>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </div>
   <div class="col s12 m12 l6">
     <h5>{% trans "Relevant personal notes" %}</h5>
@@ -121,21 +146,25 @@
               {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
               {% ifchanged note_date %}
                 <li class="collection-item">
-                  <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
-                    {% csrf_token %}
-                    {% trans "Mark all as" %}
-                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
-                    {% include "alsijil/partials/mark_as_buttons.html" %}
-                  </form>
+                  {% if can_mark_all_as_excused %}
+                    <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+                      {% csrf_token %}
+                      {% trans "Mark all as" %}
+                      <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                      {% include "alsijil/partials/mark_as_buttons.html" %}
+                    </form>
+                  {% endif %}
                   <i class="material-icons left">schedule</i>
                   {{ note_date }}
 
-                  <form action="" method="post" class="hide-on-med-and-up">
-                    {% csrf_token %}
-                    {% trans "Mark all as" %}
-                    <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
-                    {% include "alsijil/partials/mark_as_buttons.html" %}
-                  </form>
+                  {% if can_mark_all_as_excused %}
+                    <form action="" method="post" class="hide-on-med-and-up">
+                      {% csrf_token %}
+                      {% trans "Mark all as" %}
+                      <input type="hidden" value="{{ note_date|date:"Y-m-d" }}" name="date">
+                      {% include "alsijil/partials/mark_as_buttons.html" %}
+                    </form>
+                  {% endif %}
                 </li>
               {% endifchanged %}
 
@@ -154,7 +183,8 @@
                   </div>
 
                   <div class="col s12 m7 no-padding">
-                    {% if note.absent and not note.excused %}
+                    {% has_perm "alsijil.edit_personalnote" user note as can_edit_personal_note %}
+                    {% if note.absent and not note.excused and can_edit_personal_note %}
                       <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
                         {% csrf_token %}
                         {% trans "Mark as" %}
@@ -165,6 +195,11 @@
                           <i class="material-icons center">cancel</i>
                         </a>
                       </form>
+                    {% elif can_edit_personal_note %}
+                      <a class="btn-flat red-text right hide-on-small-only" title="{% trans "Delete note" %}"
+                         href="{% url "delete_personal_note" note.pk %}">
+                        <i class="material-icons center">cancel</i>
+                      </a>
                     {% endif %}
 
                     {% if note.absent %}
@@ -196,7 +231,7 @@
 
                   </div>
                   <div class="col s12 hide-on-med-and-up">
-                    {% if note.absent and not note.excused %}
+                    {% if note.absent and not note.excused and can_edit_personal_note %}
                       <form action="" method="post">
                         {% csrf_token %}
                         {% trans "Mark as" %}
@@ -207,6 +242,12 @@
                           <i class="material-icons center">cancel</i>
                         </a>
                       </form>
+                    {% elif can_edit_personal_note %}
+                      <a class="btn-flat red-text" title="{% trans "Delete note" %}"
+                         href="{% url "delete_personal_note" note.pk %}">
+                        <i class="material-icons left">cancel</i>
+                        {% trans "Delete" %}
+                      </a>
                     {% endif %}
                   </div>
               </li>

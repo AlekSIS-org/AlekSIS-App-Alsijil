@@ -6,6 +6,7 @@
 {% block page_title %}{% blocktrans %}Register absence{% endblocktrans %}{% endblock %}
 
 {% block content %}
+  <h6>{% trans "Person" %}: {{ person }}</h6>
 
   <form method="post">
     {% csrf_token %}
@@ -17,7 +18,7 @@
     $(document).ready(function () {
       $("#id_date_start").change(function () {
         $("#id_date_end").val($("#id_date_start").val());
-        $("#id_date_end").change();
+        initDatePicker("#id_date_end");
       });
     });
   </script>

@@ -1,0 +1,55 @@
+{% load i18n %}
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">{% trans "Legend" %}</div>
+    <div class="row">
+      <div class="col s12 m12 l4">
+        <h6>{% trans "General" %}</h6>
+        <ul class="collection">
+          <li class="collection-item chip-height">
+            <strong>(a)</strong> {% trans "Absences" %}
+            <span class="chip secondary-color white-text right">0</span>
+          </li>
+          <li class="collection-item chip-height">
+            <strong>(u)</strong> {% trans "Unexcused absences" %}
+            <span class="chip red white-text right">0</span>
+          </li>
+          <li class="collection-item chip-height">
+            <strong>(e)</strong> {% trans "Excused absences" %}
+            <span class="chip green white-text right">0</span>
+          </li>
+        </ul>
+      </div>
+
+      {% if excuse_types %}
+        <div class="col s12 m12 l4">
+          <h6>{% trans "Excuse types" %}</h6>
+
+          <ul class="collection">
+            {% for excuse_type in excuse_types %}
+              <li class="collection-item chip-height">
+                <strong>({{ excuse_type.short_name }})</strong> {{ excuse_type.name }}
+                <span class="chip grey white-text right">0</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {% if extra_marks %}
+        <div class="col s12 m12 l4">
+          <h6>{% trans "Extra marks" %}</h6>
+
+          <ul class="collection">
+            {% for extra_mark in extra_marks %}
+              <li class="collection-item chip-height">
+                <strong>{{ extra_mark.short_name }}</strong> {{ extra_mark.name }}
+                <span class="chip grey white-text right">0</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

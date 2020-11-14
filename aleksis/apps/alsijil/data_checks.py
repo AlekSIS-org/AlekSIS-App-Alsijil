@@ -11,8 +11,6 @@ from templated_email import send_templated_mail
 
 from aleksis.core.util.core_helpers import celery_optional, get_site_preferences
 
-from aleksis.core.util.core_helpers import celery_optional
-
 
 class SolveOption:
     name: str = "default"

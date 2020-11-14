@@ -149,7 +149,7 @@
           <td>{{ person|get_dict:excuse_type.count_label }}</td>
         {% endfor %}
         <td>{{ person.unexcused }}</td>
-        <td>{{ person.tardiness }}'</td>
+        <td>{{ person.tardiness }}'/{{ person.tardiness_count }} &times;</td>
         {% for extra_mark in extra_marks %}
           <td>{{ person|get_dict:extra_mark.count_label }}</td>
         {% endfor %}
@@ -175,7 +175,7 @@
       </thead>
 
       <tbody>
-      {% for lesson in group.lessons.all %}
+      {% for lesson in lessons %}
         <tr>
           <td>{{ lesson.subject.name }}</td>
           <td>{{ lesson.teachers.all|join:', ' }}</td>
@@ -206,7 +206,7 @@
       </thead>
 
       <tbody>
-      {% for child_group in group.child_groups.all %}
+      {% for child_group in child_groups %}
         {% for lesson in child_group.lessons.all %}
           <tr>
             <td>{{ child_group.name }}</td>
@@ -285,7 +285,7 @@
       </tr>
       <tr>
         <th colspan="2">{% trans 'Tardiness' %}</th>
-        <td>{{ person.tardiness }}'</td>
+        <td>{{ person.tardiness }}'/{{ person.tardiness_count }} &times;</td>
       </tr>
     </table>
 

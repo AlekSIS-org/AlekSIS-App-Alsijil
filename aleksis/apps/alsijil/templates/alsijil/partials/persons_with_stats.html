@@ -1,0 +1,122 @@
+{% load data_helpers time_helpers i18n rules %}
+
+{% if not persons %}
+  <div class="alert primary">
+    <div>
+      <i class="material-icons left">warning</i>
+      {% blocktrans %}No students available.{% endblocktrans %}
+    </div>
+  </div>
+{% else %}
+  <table class="highlight responsive-table">
+  <thead>
+  <tr class="hide-on-med-and-down">
+    <th rowspan="2">{% trans "Name" %}</th>
+    <th rowspan="2">{% trans "Primary group" %}</th>
+    <th colspan="{{ excuse_types.count|add:3 }}">{% trans "Absences" %}</th>
+    <th rowspan="2">{% trans "Tardiness" %}</th>
+    {% if extra_marks %}
+      <th colspan="{{ extra_marks.count }}">{% trans "Extra marks" %}</th>
+    {% endif %}
+    <th rowspan="2"></th>
+  </tr>
+  <tr class="hide-on-large-only">
+    <th class="truncate">{% trans "Name" %}</th>
+    <th class="truncate">{% trans "Primary group" %}</th>
+    <th class="truncate chip-height">{% trans "Absences" %}</th>
+    <th class="chip-height">{% trans "(e)" %}</th>
+    {% for excuse_type in excuse_types %}
+      <th class="chip-height">
+        ({{ excuse_type.short_name }})
+      </th>
+    {% endfor %}
+    <th class="chip-height">{% trans "(u)" %}</th>
+    <th class="truncate chip-height">{% trans "Tardiness" %}</th>
+    {% for extra_mark in extra_marks %}
+      <th class="chip-height">
+        {{ extra_mark.short_name }}
+      </th>
+    {% endfor %}
+    <th rowspan="2"></th>
+  </tr>
+  <tr class="hide-on-med-and-down">
+    <th>{% trans "Sum" %}</th>
+    <th>{% trans "(e)" %}</th>
+    {% for excuse_type in excuse_types %}
+      <th>
+        ({{ excuse_type.short_name }})
+      </th>
+    {% endfor %}
+    <th>{% trans "(u)" %}</th>
+    {% for extra_mark in extra_marks %}
+      <th>
+        {{ extra_mark.short_name }}
+      </th>
+    {% endfor %}
+  </tr>
+  </thead>
+  {% for person in persons %}
+    <tr>
+      <td>
+        <a href="{% url "overview_person" person.pk %}">
+          {{ person }}
+        </a>
+      </td>
+      <td>
+        {% firstof person.primary_group  "–" %}
+      </td>
+      <td>
+        <span class="chip secondary-color white-text" title="{% trans "Absences" %}">
+          {{ person.absences_count }}
+        </span>
+      </td>
+      <td class="green-text">
+        <span class="chip green white-text" title="{% trans "Excused" %}">
+        {{ person.excused }}
+        </span>
+      </td>
+      {% for excuse_type in excuse_types %}
+        <td>
+          <span class="chip grey white-text" title="{{ excuse_type.name }}">
+            {{ person|get_dict:excuse_type.count_label }}
+          </span>
+        </td>
+      {% endfor %}
+      <td class="red-text">
+        <span class="chip red white-text" title="{% trans "Unexcused" %}">
+        {{ person.unexcused }}
+        </span>
+      </td>
+      <td>
+        <span class="chip orange white-text" title="{% trans "Tardiness" %}">
+          {% firstof person.tardiness|to_time|time:"H\h i\m"  "–" %}
+        </span>
+        <span class="chip orange white-text" title="{% trans "Count of tardiness" %}">{{ person.tardiness_count }} &times;</span>
+      </td>
+      {% for extra_mark in extra_marks %}
+        <td>
+          <span class="chip grey white-text" title="{{ extra_mark.name }}">
+            {{ person|get_dict:extra_mark.count_label }}
+          </span>
+        </td>
+      {% endfor %}
+
+      <td>
+        <a class="btn primary waves-effect waves-light" href="{% url "overview_person" person.pk %}">
+          <i class="material-icons left">insert_chart</i>
+          <span class="hide-on-med-and-down"> {% trans "Show more details" %}</span>
+          <span class="hide-on-large-only">{% trans "Details" %}</span>
+        </a>
+
+        {% has_perm "alsijil.register_absence" user person as can_register_absence %}
+        {% if can_register_absence %}
+          <a class="btn primary-color waves-effect waves-light" href="{% url "register_absence" person.pk %}">
+            <i class="material-icons left">rate_review</i>
+            {% trans "Register absence" %}
+          </a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+{% endif %}
+</table>

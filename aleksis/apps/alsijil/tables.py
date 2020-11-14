@@ -42,3 +42,9 @@ class ExcuseTypeTable(tables.Table):
         text=_("Delete"),
         attrs={"a": {"class": "btn-flat waves-effect waves-red red-text"}},
     )
+
+    def before_render(self, request):
+        if not request.user.has_perm("alsijil.edit_excusetype"):
+            self.columns.hide("edit")
+        if not request.user.has_perm("alsijil.delete_excusetype"):
+            self.columns.hide("delete")

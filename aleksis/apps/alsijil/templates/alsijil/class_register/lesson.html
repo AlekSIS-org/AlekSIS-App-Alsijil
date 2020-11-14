@@ -1,7 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load week_helpers material_form_internal %}
-{% load material_form i18n static %}
+{% load week_helpers material_form_internal material_form i18n static rules time_helpers %}
 
 {% block browser_title %}{% blocktrans %}Lesson{% endblocktrans %}{% endblock %}
 
@@ -10,47 +9,85 @@
   <link rel="stylesheet" href="{% static 'css/alsijil/lesson.css' %}"/>
 {% endblock %}
 
-{% block page_title %}
-  {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
+{% block content %}
+  {% if next_lesson_person or prev_lesson_person %}
+    <div class="row no-margin">
+      <div class="col s12 no-padding">
+        {# Back to week view #}
+        {% with lesson_period.get_lesson_documentation as lesson_doc %}
+          <a href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
+             class="btn primary-color waves-light waves-effect alsijil-top-button">
+            <i class="material-icons left">chevron_left</i> {% trans "Back to week view" %}
+          </a>
+        {% endwith %}
 
-  {% for group in lesson_period.get_groups.all %}
-    <span>{{ group.name }}</span>,
-  {% endfor %}
+        {# Next lesson #}
+        {% if prev_lesson_person %}
+          <a class="btn primary waves-effect waves-light alsijil-top-button"
+             href="{% url "lesson_by_week_and_period" prev_lesson_person.week.year prev_lesson_person.week.week prev_lesson_person.id %}">
+            <i class="material-icons left">arrow_back</i>
+            {% trans "My previous lesson" %}
+          </a>
+        {% endif %}
 
-  {{ lesson_period.get_subject.name }},
+        {# Previous lesson #}
+        {% if next_lesson_person %}
+          <a class="btn primary right waves-effect waves-light alsijil-top-button"
+             href="{% url "lesson_by_week_and_period" next_lesson_person.week.year next_lesson_person.week.week next_lesson_person.id %}">
+            <i class="material-icons right">arrow_forward</i>
+            {% trans "My next lesson" %}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 
-  {% for teacher in lesson_period.get_teachers.all %}
-    {{ teacher.short_name }}
-  {% endfor %}
+  <h4>
+    {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
 
-  <span class="right">
+    {% for group in lesson_period.get_groups.all %}
+      <span>{{ group.name }}</span>,
+    {% endfor %}
+
+    {{ lesson_period.get_subject.name }},
+
+    {% for teacher in lesson_period.get_teachers.all %}
+      {{ teacher.short_name }}
+    {% endfor %}
+
+    <span class="right">
     {% include "alsijil/partials/lesson_status_icon.html" with period=lesson_period css_class="medium" %}
   </span>
-{% endblock %}
+  </h4>
+  <br/>
 
-{% block content %}
-  <div class="row">
-    <div class="col s12">
-      {% with prev_lesson=lesson_period.prev %}
-        <a class="btn-flat left waves-effect waves-light"
-           href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
-          <i class="material-icons left">arrow_back</i>
-          {% trans "Previous lesson" %}
-        </a>
-      {% endwith %}
+  {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
+  {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
+  {% has_perm "alsijil.edit_lesson_personalnote" user lesson_period as can_edit_lesson_personalnote %}
 
-      {% with next_lesson=lesson_period.next %}
-        <a class="btn-flat right waves-effect waves-light"
-           href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
-          <i class="material-icons right">arrow_forward</i>
-          {% trans "Next lesson" %}
-        </a>
-      {% endwith %}
-    </div>
-  </div>
+  <form method="post" class="row">
+    <p>
+      {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% include "core/partials/save_button.html" %}
+      {% endif %}
 
-  <form method="post">
-    <p>{% include "core/partials/save_button.html" %}</p>
+      <a class="btn waves-effect waves-light primary"
+         href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+        <i class="material-icons left">arrow_back</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Previous {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+
+      <a class="btn right waves-effect waves-light primary"
+         href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+        <i class="material-icons right">arrow_forward</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Next {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+    </p>
+
     {% csrf_token %}
 
     <div class="row">
@@ -64,6 +101,12 @@
               <a href="#personal-notes">{% trans "Personal notes" %}</a>
             </li>
           {% endif %}
+          {% has_perm "alsijil.view_lessondocumentation" user lesson_period.prev as can_view_prev_lesson_documentation %}
+          {% if lesson_period.prev.get_lesson_documentation and can_view_prev_lesson_documentation %}
+            <li class="tab">
+              <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
+            </li>
+          {% endif %}
           <li class="tab">
             <a href="#version-history">{% trans "Change history" %}</a>
           </li>
@@ -71,11 +114,52 @@
       </div>
 
       <div class="col s12" id="lesson-documentation">
-        {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
-          {% with prev_doc=prev_lesson.get_lesson_documentation absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
-            {% if prev_doc %}
-              {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
+        <div class="card">
+          <div class="card-content">
+          <span class="card-title">
+            {% blocktrans %}Lesson documentation{% endblocktrans %}
+          </span>
 
+            {% if can_edit_lesson_documentation %}
+              {% form form=lesson_documentation_form %}{% endform %}
+            {% elif can_view_lesson_documentation %}
+              <table>
+                <tr>
+                  <th>
+                    {% trans "Lesson topic" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.topic }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Homework" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.homework }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    {% trans "Group note" %}
+                  </th>
+                  <td>
+                    {{ lesson_documentation.group_note }}
+                  </td>
+                </tr>
+              </table>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
+        {% with absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
+          {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+          {% if prev_doc and can_view_prev_lesson_documentation %}
+            {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
+            <div class="col s12" id="previous-lesson">
               <div class="card">
                 <div class="card-content">
                   <span class="card-title">
@@ -124,7 +208,10 @@
                         <th>{{ extra_mark.name }}</th>
                         <td>
                           {% for note in notes %}
-                            <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+                            {% if can_view_personalnote %}
+                              <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
+                            {% endif %}
                           {% endfor %}
                         </td>
                       </tr>
@@ -133,29 +220,21 @@
                   </table>
                 </div>
               </div>
-            {% endif %}
-          {% endwith %}
+            </div>
+          {% endif %}
         {% endwith %}
-
-        <div class="card">
-          <div class="card-content">
-          <span class="card-title">
-            {% blocktrans %}Lesson documentation{% endblocktrans %}
-          </span>
-
-            {% form form=lesson_documentation_form %}{% endform %}
-          </div>
-        </div>
-      </div>
+      {% endwith %}
 
       {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
         <div class="col s12" id="personal-notes">
           <div class="card">
             <div class="card-content">
-      <span class="card-title">
-        {% blocktrans %}Personal notes{% endblocktrans %}
-      </span>
-              {% form form=personal_note_formset.management_form %}{% endform %}
+              <span class="card-title">
+                {% blocktrans %}Personal notes{% endblocktrans %}
+              </span>
+              {% if can_edit_lesson_personalnote %}
+                {% form form=personal_note_formset.management_form %}{% endform %}
+              {% endif %}
 
               <table class="striped responsive-table alsijil-table">
                 <thead>
@@ -166,94 +245,129 @@
                   <th>{% blocktrans %}Excused{% endblocktrans %}</th>
                   <th>{% blocktrans %}Excuse type{% endblocktrans %}</th>
                   <th>{% blocktrans %}Extra marks{% endblocktrans %}</th>
-
                   <th>{% blocktrans %}Remarks{% endblocktrans %}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for form in personal_note_formset %}
-                  <tr>
-                    {{ form.id }}
-                    <td>{{ form.person_name }}{{ form.person_name.value }}</td>
-                    <td class="center-align">
-                      <label>
-                        {{ form.absent }}
-                        <span></span>
-                      </label>
-                    </td>
-                    <td>
-                      <div class="input-field">
-                        {{ form.late }}
-                        <label for="{{ form.absent.id_for_label }}">
-                          {% trans "Tardiness (in m)" %}
+                  {% if can_edit_lesson_personalnote %}
+                    <tr>
+                      {{ form.id }}
+                      <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                      <td class="center-align">
+                        <label>
+                          {{ form.absent }}
+                          <span></span>
                         </label>
-                      </div>
-                    </td>
-                    <td class="center-align">
-                      <label>
-                        {{ form.excused }}
-                        <span></span>
-                      </label>
-                    </td>
-                    <td>
-                      <div class="input-field">
-                        {{ form.excuse_type }}
-                        <label for="{{ form.excuse_type.id_for_label }}">
-                          {% trans "Excuse type" %}
-                        </label>
-                      </div>
-                    </td>
-                    <td>
-                      {% for group, items in form.extra_marks|select_options %}
-                        {% for choice, value, selected in items %}
-                          <label class="{% if selected %} active{% endif %} alsijil-check-box">
-                            <input type="checkbox"
-                                   {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
-                                    {% if selected %} checked="checked"{% endif %}
-                                   name="{{ form.extra_marks.html_name }}">
-                            <span>{{ choice }}</span>
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.late }}
+                          <label for="{{ form.absent.id_for_label }}">
+                            {% trans "Tardiness (in m)" %}
                           </label>
+                        </div>
+                      </td>
+                      <td class="center-align">
+                        <label>
+                          {{ form.excused }}
+                          <span></span>
+                        </label>
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.excuse_type }}
+                          <label for="{{ form.excuse_type.id_for_label }}">
+                            {% trans "Excuse type" %}
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        {% for group, items in form.extra_marks|select_options %}
+                          {% for choice, value, selected in items %}
+                            <label class="{% if selected %} active{% endif %} alsijil-check-box">
+                              <input type="checkbox"
+                                     {% if value == None or value == '' %}disabled{% else %}value="{{ value }}"{% endif %}
+                                      {% if selected %} checked="checked"{% endif %}
+                                     name="{{ form.extra_marks.html_name }}">
+                              <span>{{ choice }}</span>
+                            </label>
+                          {% endfor %}
                         {% endfor %}
-                      {% endfor %}
-                    </td>
-                    <td>
-                      <div class="input-field">
-                        {{ form.remarks }}
-                        <label for="{{ form.absent.id_for_label }}">
-                          {% trans "Remarks" %}
-                        </label>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="input-field">
-                        {{ form.remarks }}
-                        <label for="{{ form.absent.id_for_label }}">
-                          {% trans "Remarks" %}
-                        </label>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td>
+                        <div class="input-field">
+                          {{ form.remarks }}
+                          <label for="{{ form.absent.id_for_label }}">
+                            {% trans "Remarks" %}
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td>{{ form.person_name.value }}</td>
+                      <td><i class="material-icons center">{{ form.absent.value|yesno:"check,clear" }}</i></td>
+                      <td>
+                        <i class="material-icons center">{{ form.late.value|yesno:"check,clear" }}</i>
+                        <span class="alsijil-tardiness-text">
+                            {% if form.late.value %}{{ form.late.value|to_time|time:"i\m" }}{% endif %}
+                          </span>
+                      </td>
+                      <td><i class="material-icons center">{{ form.excused.value|yesno:"check,clear" }}</i></td>
+                      <td>{% firstof form.excuse_type.value "–" %}</td>
+                      <td>
+                        {% for extra_mark in form.extra_marks.value %}
+                          {{ extra_mark }}{% if not forloop.last %},{% endif %}
+                        {% empty %}
+                          –
+                        {% endfor %}
+                      </td>
+                      <td>{% firstof form.remarks.value "–" %}</td>
+                    </tr>
+                  {% endif %}
                 {% endfor %}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       {% endif %}
 
-      <div class="col s12" id="version-history">
-        <div class="card">
-          <div class="card-content">
+      {% if can_view_lesson_documentation %}
+        <div class="col s12" id="version-history">
+          <div class="card">
+            <div class="card-content">
           <span class="card-title">
             {% blocktrans %}Change history{% endblocktrans %}
           </span>
-            {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+              {% include 'core/partials/crud_events.html' with obj=lesson_documentation %}
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
     </div>
 
-    <p>{% include "core/partials/save_button.html" %}</p>
+    <p>
+      {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% include "core/partials/save_button.html" %}
+      {% endif %}
+
+      <a class="btn primary waves-effect waves-light"
+         href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+        <i class="material-icons left">arrow_back</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Previous {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+
+      <a class="btn primary right waves-effect waves-light"
+         href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+        <i class="material-icons right">arrow_forward</i>
+        {% blocktrans with subject=lesson_period.get_subject.name %}
+          Next {{ subject }} lesson
+        {% endblocktrans %}
+      </a>
+    </p>
   </form>
 {% endblock %}

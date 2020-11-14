@@ -27,6 +27,7 @@ urlpatterns = [
         "print/group/<int:id_>", views.full_register_group, name="full_register_group"
     ),
     path("groups/", views.my_groups, name="my_groups"),
+    path("groups/<int:pk>/", views.StudentsList.as_view(), name="students_list"),
     path("persons/", views.my_students, name="my_students"),
     path("persons/<int:id_>/", views.overview_person, name="overview_person"),
     path("me/", views.overview_person, name="overview_me"),
@@ -35,7 +36,7 @@ urlpatterns = [
         views.DeletePersonalNoteView.as_view(),
         name="delete_personal_note",
     ),
-    path("absence/new", views.register_absence, name="register_absence"),
+    path("absence/new/<int:id_>/", views.register_absence, name="register_absence"),
     path("extra_marks/", views.ExtraMarkListView.as_view(), name="extra_marks"),
     path(
         "extra_marks/create/",
