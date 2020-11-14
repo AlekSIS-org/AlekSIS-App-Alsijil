@@ -31,7 +31,8 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
 
     @classmethod
     def check_data(cls):
-        from .models import PersonalNote, DataCheckResult
+        from aleksis.core.models import DataCheckResult
+        from .models import PersonalNote
 
         ct = ContentType.objects.get_for_model(PersonalNote)
 
