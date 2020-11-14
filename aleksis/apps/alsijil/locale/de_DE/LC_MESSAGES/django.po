@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-14 12:23+0100\n"
-"PO-Revision-Date: 2020-10-30 20:33+0000\n"
+"PO-Revision-Date: 2020-11-14 11:29+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -328,22 +329,16 @@ msgid "Lesson"
 msgstr "Unterrichtsstunde"
 
 #: templates/alsijil/class_register/lesson.html:20
-#, fuzzy
-#| msgid "Can view week overview"
 msgid "Back to week view"
-msgstr "Kann die Wochenübersicht sehen"
+msgstr "Zurück zur Wochenübersicht"
 
 #: templates/alsijil/class_register/lesson.html:29
-#, fuzzy
-#| msgid "Previous lesson"
 msgid "My previous lesson"
-msgstr "Vorherige Unterrichtsstunde"
+msgstr "Meine vorherige Stunde"
 
 #: templates/alsijil/class_register/lesson.html:38
-#, fuzzy
-#| msgid "Next lesson"
 msgid "My next lesson"
-msgstr "Nächste Unterrichtsstunde"
+msgstr "Meine nächste Stunde"
 
 #: templates/alsijil/class_register/lesson.html:46
 #: templates/alsijil/class_register/lesson.html:167
@@ -359,6 +354,9 @@ msgid ""
 "          Previous %(subject)s lesson\n"
 "        "
 msgstr ""
+"\n"
+"          Vorherige %(subject)s Stunde\n"
+"        "
 
 #: templates/alsijil/class_register/lesson.html:85
 #: templates/alsijil/class_register/lesson.html:367
@@ -368,6 +366,9 @@ msgid ""
 "          Next %(subject)s lesson\n"
 "        "
 msgstr ""
+"\n"
+"          Nächste %(subject)s Stunde\n"
+"        "
 
 #: templates/alsijil/class_register/lesson.html:107
 msgid "Previous lesson"
