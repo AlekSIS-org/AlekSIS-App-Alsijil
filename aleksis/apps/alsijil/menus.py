@@ -89,12 +89,6 @@ MENUS = {
                         ),
                     ],
                 },
-                {
-                    "name": _("Data checks"),
-                    "url": "check_data",
-                    "icon": "done_all",
-                    "validators": ["menu_generator.validators.is_superuser"],
-                },
             ],
         }
     ]

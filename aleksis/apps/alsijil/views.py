@@ -15,7 +15,6 @@ from django_tables2 import SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
-from aleksis.apps.alsijil.data_checks import check_data
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution, TimePeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
@@ -37,7 +36,7 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import DataCheckResult, ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
 from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
@@ -840,46 +839,3 @@ class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelet
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
-
-
-class DataCheckView(ListView):
-    model = DataCheckResult
-    template_name = "alsijil/data_check/list.html"
-    context_object_name = "results"
-
-    def get_queryset(self) -> QuerySet:
-        return DataCheckResult.objects.filter(solved=False).order_by("check")
-
-
-def run_data_checks(request: HttpRequest) -> HttpResponse:
-    check_data()
-    if is_celery_enabled():
-        messages.success(
-            request,
-            _(
-                "The data check has been started. Please note that it may take "
-                "a while before you are able to fetch the data on this page."
-            ),
-        )
-    else:
-        messages.success(request, _("The data check has been finished."))
-    return redirect("check_data")
-
-
-def solve_data_check_view(
-    request: HttpRequest, id_: int, solve_option: str = "default"
-):
-    result = get_object_or_404(DataCheckResult, pk=id_)
-    if solve_option in result.related_check.solve_options:
-        solve_option_obj = result.related_check.solve_options[solve_option]
-
-        msg = _(
-            f"The solve option '{solve_option_obj.verbose_name}' has been affected on the object '{result.related_object}' (type: {result.related_object._meta.verbose_name})."
-        )
-
-        result.solve(solve_option)
-
-        messages.success(request, msg)
-        return redirect("check_data")
-    else:
-        return HttpResponseNotFound()

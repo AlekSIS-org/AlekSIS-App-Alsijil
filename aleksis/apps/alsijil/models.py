@@ -1,15 +1,10 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils.formats import date_format
-from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
 
-from cache_memoize import cache_memoize
 from calendarweek import CalendarWeek
 
-from aleksis.apps.alsijil.data_checks import DATA_CHECKS_BY_NAME, DATA_CHECKS_CHOICES, DataCheck
 from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
@@ -226,32 +221,6 @@ class ExtraMark(ExtensibleModel):
         ordering = ["short_name"]
         verbose_name = _("Extra mark")
         verbose_name_plural = _("Extra marks")
-
-
-class DataCheckResult(ExtensibleModel):
-    check = models.CharField(
-        max_length=255,
-        verbose_name=_("Related data check task"),
-        choices=DATA_CHECKS_CHOICES,
-    )
-
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.CharField(max_length=255)
-    related_object = GenericForeignKey("content_type", "object_id")
-
-    solved = models.BooleanField(default=False, verbose_name=_("Issue solved"))
-    sent = models.BooleanField(default=False, verbose_name=_("Notification sent"))
-
-    @property
-    def related_check(self) -> DataCheck:
-        return DATA_CHECKS_BY_NAME[self.check]
-
-    def solve(self, solve_option: str = "default"):
-        self.related_check.solve(self, solve_option)
-
-    class Meta:
-        verbose_name = _("Data check result")
-        verbose_name_plural = _("Data check results")
 
 
 class AlsijilGlobalPermissions(ExtensibleModel):
