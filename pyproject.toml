@@ -54,6 +54,9 @@ flake8-isort = "^4.0.0"
 pytest-cov = "^2.8.1"
 pytest-sugar = "^0.9.2"
 
+[tool.poetry.plugins."aleksis.app"]
+alsijil = "aleksis.apps.alsijil.apps:AlsijilConfig"
+
 [build-system]
 requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
