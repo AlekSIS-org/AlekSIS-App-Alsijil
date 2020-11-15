@@ -357,7 +357,7 @@ def generate_person_list_with_class_register_statistics(
                     "personal_notes",
                     filter=Q(
                         personal_notes__extra_marks=extra_mark,
-                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,  # noqa
                     )
                     & (
                         Q(personal_notes__lesson_period__lesson__groups=self)
@@ -377,7 +377,7 @@ def generate_person_list_with_class_register_statistics(
                     filter=Q(
                         personal_notes__absent=True,
                         personal_notes__excuse_type=excuse_type,
-                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
+                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,  # noqa
                     )
                     & (
                         Q(personal_notes__lesson_period__lesson__groups=self)

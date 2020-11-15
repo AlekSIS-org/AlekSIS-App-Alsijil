@@ -16,8 +16,7 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod, LessonSubstitution, TimePeriod
-from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
+from aleksis.apps.chronos.models import LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
@@ -155,7 +154,8 @@ def lesson(
 
             messages.success(request, _("The personal notes have been saved."))
 
-            # Regenerate form here to ensure that programmatically changed data will be shown correctly
+            # Regenerate form here to ensure that programmatically
+            # changed data will be shown correctly
             personal_note_formset = PersonalNoteFormSet(
                 None, queryset=persons_qs, prefix="personal_notes"
             )
@@ -787,7 +787,7 @@ class ExtraMarkEditView(PermissionRequiredMixin, AdvancedEditView):
 
 
 class ExtraMarkDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
-    """Delete view for extra marks"""
+    """Delete view for extra marks."""
 
     model = ExtraMark
     permission_required = "alsijil.delete_extramark"
@@ -828,7 +828,7 @@ class ExcuseTypeEditView(PermissionRequiredMixin, AdvancedEditView):
 
 
 class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
-    """Delete view for excuse types"""
+    """Delete view for excuse types."""
 
     model = ExcuseType
     permission_required = "alsijil.delete_excusetype"

@@ -106,7 +106,8 @@ class SelectForm(forms.Form):
 
         # Filter selectable teachers by permissions
         if not check_global_permission(self.request.user, "alsijil.view_week"):
-            # If the user hasn't the global permission, the user is only allowed to see his own person
+            # If the user hasn't the global permission,
+            # the user is only allowed to see his own person
             teacher_qs = teacher_qs.filter(pk=person.pk)
 
         self.fields["teacher"].queryset = teacher_qs

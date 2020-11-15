@@ -40,7 +40,8 @@ class CarryOverDataToNextPeriods(BooleanPreference):
     name = "carry_over"
     default = True
     verbose_name = _(
-        "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
+        "Carry over data from first lesson period to the "
+        "following lesson periods in lessons over multiple periods"
     )
     help_text = _(
         "This will carry over data only if the data in the following periods are empty."
@@ -53,7 +54,8 @@ class AllowOpenPeriodsOnSameDay(BooleanPreference):
     name = "open_periods_same_day"
     default = False
     verbose_name = _(
-        "Allow teachers to open lesson periods on the same day and not just at the beginning of the period"
+        "Allow teachers to open lesson periods on the "
+        "same day and not just at the beginning of the period"
     )
     help_text = _(
         "Lessons in the past are not affected by this setting, you can open them whenever you want."
