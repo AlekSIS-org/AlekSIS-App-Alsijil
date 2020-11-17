@@ -43,9 +43,7 @@ class CarryOverDataToNextPeriods(BooleanPreference):
         "Carry over data from first lesson period to the "
         "following lesson periods in lessons over multiple periods"
     )
-    help_text = _(
-        "This will carry over data only if the data in the following periods are empty."
-    )
+    help_text = _("This will carry over data only if the data in the following periods are empty.")
 
 
 @site_preferences_registry.register

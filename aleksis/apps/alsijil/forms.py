@@ -100,9 +100,9 @@ class SelectForm(forms.Form):
             pk__in=list(group_qs.values_list("pk", flat=True))
         )
 
-        teacher_qs = Person.objects.annotate(
-            lessons_count=Count("lessons_as_teacher")
-        ).filter(lessons_count__gt=0)
+        teacher_qs = Person.objects.annotate(lessons_count=Count("lessons_as_teacher")).filter(
+            lessons_count__gt=0
+        )
 
         # Filter selectable teachers by permissions
         if not check_global_permission(self.request.user, "alsijil.view_week"):

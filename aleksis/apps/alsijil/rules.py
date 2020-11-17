@@ -59,10 +59,7 @@ add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate
 
 # View personal note
 view_personal_note_predicate = has_person & (
-    (
-        is_own_personal_note
-        & is_site_preference_set("alsijil", "view_own_personal_notes")
-    )
+    (is_own_personal_note & is_site_preference_set("alsijil", "view_own_personal_notes"))
     | is_personal_note_lesson_teacher
     | is_personal_note_lesson_parent_group_owner
     | has_global_perm("alsijil.view_personalnote")
@@ -167,31 +164,23 @@ view_person_overview_personal_notes_predicate = view_person_overview_predicate &
     | has_person_group_object_perm("core.view_personalnote_group")
 )
 add_perm(
-    "alsijil.view_person_overview_personalnote",
-    view_person_overview_personal_notes_predicate,
+    "alsijil.view_person_overview_personalnote", view_person_overview_personal_notes_predicate,
 )
 
 # Edit person overview personal notes
-edit_person_overview_personal_notes_predicate = (
-    view_person_overview_personal_notes_predicate
-    & (
-        ~is_current_person
-        | has_global_perm("alsijil.edit_personalnote")
-        | has_person_group_object_perm("core.edit_personalnote_group")
-    )
+edit_person_overview_personal_notes_predicate = view_person_overview_personal_notes_predicate & (
+    ~is_current_person
+    | has_global_perm("alsijil.edit_personalnote")
+    | has_person_group_object_perm("core.edit_personalnote_group")
 )
 add_perm(
-    "alsijil.edit_person_overview_personalnote",
-    edit_person_overview_personal_notes_predicate,
+    "alsijil.edit_person_overview_personalnote", edit_person_overview_personal_notes_predicate,
 )
 
 # View person statistics on personal notes
-view_person_statistics_personal_notes_predicate = (
-    view_person_overview_personal_notes_predicate
-)
+view_person_statistics_personal_notes_predicate = view_person_overview_personal_notes_predicate
 add_perm(
-    "alsijil.view_person_statistics_personalnote",
-    view_person_statistics_personal_notes_predicate,
+    "alsijil.view_person_statistics_personalnote", view_person_statistics_personal_notes_predicate,
 )
 
 # View excuse type list
@@ -199,9 +188,7 @@ view_excusetypes_predicate = has_person & has_global_perm("alsijil.view_excusety
 add_perm("alsijil.view_excusetypes", view_excusetypes_predicate)
 
 # Add excuse type
-add_excusetype_predicate = view_excusetypes_predicate & has_global_perm(
-    "alsijil.add_excusetype"
-)
+add_excusetype_predicate = view_excusetypes_predicate & has_global_perm("alsijil.add_excusetype")
 add_perm("alsijil.add_excusetype", add_excusetype_predicate)
 
 # Edit excuse type
@@ -221,19 +208,13 @@ view_extramarks_predicate = has_person & has_global_perm("alsijil.view_extramark
 add_perm("alsijil.view_extramarks", view_extramarks_predicate)
 
 # Add extra mark
-add_extramark_predicate = view_extramarks_predicate & has_global_perm(
-    "alsijil.add_extramark"
-)
+add_extramark_predicate = view_extramarks_predicate & has_global_perm("alsijil.add_extramark")
 add_perm("alsijil.add_extramark", add_extramark_predicate)
 
 # Edit extra mark
-edit_extramark_predicate = view_extramarks_predicate & has_global_perm(
-    "alsijil.change_extramark"
-)
+edit_extramark_predicate = view_extramarks_predicate & has_global_perm("alsijil.change_extramark")
 add_perm("alsijil.edit_extramark", edit_extramark_predicate)
 
 # Delete extra mark
-delete_extramark_predicate = view_extramarks_predicate & has_global_perm(
-    "alsijil.delete_extramark"
-)
+delete_extramark_predicate = view_extramarks_predicate & has_global_perm("alsijil.delete_extramark")
 add_perm("alsijil.delete_extramark", delete_extramark_predicate)
