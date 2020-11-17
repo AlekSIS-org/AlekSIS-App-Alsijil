@@ -17,21 +17,15 @@ def get_lesson_period_by_pk(
     """Get LessonPeriod object either by given object_id or by time and current person."""
     wanted_week = CalendarWeek(year=year, week=week)
     if period_id:
-        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(
-            pk=period_id
-        )
+        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(pk=period_id)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
             lesson_period = (
-                LessonPeriod.objects.at_time()
-                .filter_teacher(request.user.person)
-                .first()
+                LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
             )
         else:
             lesson_period = (
-                LessonPeriod.objects.at_time()
-                .filter_participant(request.user.person)
-                .first()
+                LessonPeriod.objects.at_time().filter_participant(request.user.person).first()
             )
     else:
         lesson_period = None

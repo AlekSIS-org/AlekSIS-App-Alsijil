@@ -100,13 +100,14 @@ class SelectForm(forms.Form):
             pk__in=list(group_qs.values_list("pk", flat=True))
         )
 
-        teacher_qs = Person.objects.annotate(
-            lessons_count=Count("lessons_as_teacher")
-        ).filter(lessons_count__gt=0)
+        teacher_qs = Person.objects.annotate(lessons_count=Count("lessons_as_teacher")).filter(
+            lessons_count__gt=0
+        )
 
         # Filter selectable teachers by permissions
         if not check_global_permission(self.request.user, "alsijil.view_week"):
-            # If the user hasn't the global permission, the user is only allowed to see his own person
+            # If the user hasn't the global permission,
+            # the user is only allowed to see his own person
             teacher_qs = teacher_qs.filter(pk=person.pk)
 
         self.fields["teacher"].queryset = teacher_qs

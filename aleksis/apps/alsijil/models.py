@@ -23,9 +23,7 @@ class ExcuseType(ExtensibleModel):
     Can be used to count different types of absences separately.
     """
 
-    short_name = models.CharField(
-        max_length=255, unique=True, verbose_name=_("Short name")
-    )
+    short_name = models.CharField(max_length=255, unique=True, verbose_name=_("Short name"))
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
     def __str__(self):
@@ -50,9 +48,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
 
     objects = PersonalNoteManager()
 
-    person = models.ForeignKey(
-        "core.Person", models.CASCADE, related_name="personal_notes"
-    )
+    person = models.ForeignKey("core.Person", models.CASCADE, related_name="personal_notes")
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField()
@@ -66,11 +62,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     late = models.IntegerField(default=0)
     excused = models.BooleanField(default=False)
     excuse_type = models.ForeignKey(
-        ExcuseType,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("Excuse type"),
+        ExcuseType, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Excuse type"),
     )
 
     remarks = models.CharField(max_length=200, blank=True)
@@ -144,9 +136,7 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
     topic = models.CharField(verbose_name=_("Lesson topic"), max_length=200, blank=True)
     homework = models.CharField(verbose_name=_("Homework"), max_length=200, blank=True)
-    group_note = models.CharField(
-        verbose_name=_("Group note"), max_length=200, blank=True
-    )
+    group_note = models.CharField(verbose_name=_("Group note"), max_length=200, blank=True)
 
     def _carry_over_data(self):
         """Carry over data to directly adjacent periods in this lesson if data is not already set.
@@ -205,9 +195,7 @@ class ExtraMark(ExtensibleModel):
     Can be used for lesson-based counting of things (like forgotten homework).
     """
 
-    short_name = models.CharField(
-        max_length=255, unique=True, verbose_name=_("Short name")
-    )
+    short_name = models.CharField(max_length=255, unique=True, verbose_name=_("Short name"))
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
     def __str__(self):
