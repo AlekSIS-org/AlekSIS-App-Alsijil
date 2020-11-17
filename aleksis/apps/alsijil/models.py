@@ -101,8 +101,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     def get_absolute_url(self):
         return (
             reverse(
-                "lesson_by_week_and_period",
-                args=[self.year, self.week, self.lesson_period.pk],
+                "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
             )
             + "#personal-notes"
         )
