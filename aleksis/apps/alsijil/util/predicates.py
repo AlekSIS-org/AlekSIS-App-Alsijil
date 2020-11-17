@@ -3,13 +3,11 @@ from typing import Any, Union
 from django.contrib.auth.models import Permission, User
 
 from guardian.models import UserObjectPermission
-from guardian.shortcuts import get_objects_for_user
 from rules import predicate
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import get_content_type_by_perm, get_site_preferences
-from aleksis.core.util.predicates import check_object_permission
+from aleksis.core.util.core_helpers import get_content_type_by_perm
 
 from ..models import PersonalNote
 
@@ -173,7 +171,7 @@ def has_lesson_group_object_perm(perm: str):
 
 
 def has_personal_note_group_perm(perm: str):
-    """Predicate builder for permissions on personal notes
+    """Predicate builder for permissions on personal notes.
 
     Checks whether a user has a permission on any group of a person of a PersonalNote.
     """
@@ -200,7 +198,7 @@ def has_personal_note_group_perm(perm: str):
 
 @predicate
 def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
-    """Predicate for users referred to in a personal note
+    """Predicate for users referred to in a personal note.
 
     Checks whether the user referred to in a PersonalNote is the active user.
     """
@@ -233,7 +231,7 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
 @predicate
 def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) -> bool:
     """
-    Predicate for parent group owners of a lesson referred to in the lesson period of a personal note.
+    Predicate for parent group owners of a lesson referred to in the lesson of a personal note.
 
     Checks whether the person linked to the user is the owner of
     any parent groups of any groups of the given LessonPeriod lesson of the given PersonalNote.
@@ -245,21 +243,6 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
                     if user.person in list(parent_group.owners.all()):
                         return True
     return False
-
-
-@predicate
-def has_any_object_absence(user: User) -> bool:
-    """
-    Predicate which builds a query with all the persons the given users is allowed to register an absence for.
-    """
-    if Person.objects.filter(member_of__owners=user.person).exists():
-        return True
-    if get_objects_for_user(user, "core.register_absence_person", Person).exists():
-        return True
-    if Person.objects.filter(
-        member_of__in=get_objects_for_user(user, "core.register_absence_group", Group)
-    ).exists():
-        return True
 
 
 @predicate
