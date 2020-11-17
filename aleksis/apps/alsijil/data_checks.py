@@ -6,7 +6,12 @@ from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
-from aleksis.core.data_checks import DATA_CHECK_REGISTRY, DataCheck, IgnoreSolveOption, SolveOption
+from aleksis.core.data_checks import (
+    DATA_CHECK_REGISTRY,
+    DataCheck,
+    IgnoreSolveOption,
+    SolveOption,
+)
 
 
 class DeleteRelatedObjectSolveOption(SolveOption):
@@ -16,6 +21,17 @@ class DeleteRelatedObjectSolveOption(SolveOption):
     @classmethod
     def solve(cls, check_result: "DataCheckResult"):
         check_result.related_object.delete()
+        check_result.delete()
+
+
+class SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption(SolveOption):
+    name = "set_groups_of_person"
+    verbose_name = _("Set current groups")
+
+    @classmethod
+    def solve(cls, check_result: "DataCheckResult"):
+        person = check_result.related_object.person
+        check_result.related_object.groups_of_person.set(person.member_of.all())
         check_result.delete()
 
 
@@ -47,6 +63,33 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
             sub = note.lesson_period.get_substitution(
                 CalendarWeek(week=note.week, year=note.year)
             )
+            result = DataCheckResult.objects.get_or_create(
+                check=cls.name, content_type=ct, object_id=note.id
+            )
+
+
+@DATA_CHECK_REGISTRY.register
+class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
+    name = "no_groups_of_persons_set_in_personal_notes"
+    verbose_name = _("Ensure that 'groups_of_person' is set for every personal note")
+    problem_name = _("The personal note has no group in 'groups_of_person'.")
+    solve_options = {
+        SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption.name: SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption,
+        DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
+        IgnoreSolveOption.name: IgnoreSolveOption,
+    }
+
+    @classmethod
+    def check_data(cls):
+        from aleksis.core.models import DataCheckResult
+        from .models import PersonalNote
+
+        ct = ContentType.objects.get_for_model(PersonalNote)
+
+        personal_notes = PersonalNote.objects.filter(groups_of_person__isnull=True)
+
+        for note in personal_notes:
+            logging.info(f"Check personal note {note}")
             result = DataCheckResult.objects.get_or_create(
                 check=cls.name, content_type=ct, object_id=note.id
             )
