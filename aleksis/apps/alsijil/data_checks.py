@@ -2,10 +2,12 @@ import logging
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import F
+from django.db.models.query_utils import Q
 from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.data_checks import DATA_CHECK_REGISTRY, DataCheck, IgnoreSolveOption, SolveOption
 
 
@@ -88,3 +90,42 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
             result = DataCheckResult.objects.get_or_create(
                 check=cls.name, content_type=ct, object_id=note.id
             )
+
+
+@DATA_CHECK_REGISTRY.register
+class LessonDocumentationOnHolidaysDataCheck(DataCheck):
+    """Checks for lesson documentation objects on holidays.
+
+    This ignores empty lesson documentation as they are created by default.
+    """
+
+    name = "lesson_documentation_on_holidays"
+    verbose_name = _("Ensure that there are no filled out lesson documentations on holidays")
+    problem_name = _("The lesson documentation is on holidays.")
+    solve_options = {
+        DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
+        IgnoreSolveOption.name: IgnoreSolveOption,
+    }
+
+    @classmethod
+    def check_data(cls):
+        from aleksis.apps.chronos.models import Holiday
+        from aleksis.core.models import DataCheckResult
+
+        from .models import LessonDocumentation
+
+        ct = ContentType.objects.get_for_model(LessonDocumentation)
+        holidays = list(Holiday.objects.all())
+
+        documentations = LessonDocumentation.objects.filter(
+            ~Q(topic="") | ~Q(group_note="") | ~Q(homework="")
+        )
+
+        for doc in documentations:
+            logging.info(f"Check lesson documentation {doc}")
+            day = week_weekday_to_date(doc.calendar_week, doc.lesson_period.period.weekday)
+            if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
+                logging.info("  ... on holidays")
+                result = DataCheckResult.objects.get_or_create(
+                    check=cls.name, content_type=ct, object_id=doc.id
+                )

@@ -169,6 +169,14 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
             if changed:
                 lesson_documentation.save()
 
+    def __str__(self):
+        return f"{self.lesson_period}, {date_format(self.date)}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
+        )
+
     def save(self, *args, **kwargs):
         if get_site_preferences()["alsijil__carry_over"] and (
             self.topic or self.homework or self.group_note
