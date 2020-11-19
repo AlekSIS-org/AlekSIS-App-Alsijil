@@ -21,7 +21,7 @@ class DeleteRelatedObjectSolveOption(SolveOption):
         check_result.delete()
 
 
-class SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption(SolveOption):
+class SetGroupsWithCurrentGroupsSolveOption(SolveOption):
     name = "set_groups_of_person"
     verbose_name = _("Set current groups")
 
@@ -70,7 +70,7 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
     verbose_name = _("Ensure that 'groups_of_person' is set for every personal note")
     problem_name = _("The personal note has no group in 'groups_of_person'.")
     solve_options = {
-        SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption.name: SetGroupsOfPersonWithCurrentGroupsOfPersonSolveOption,
+        SetGroupsWithCurrentGroupsSolveOption.name: SetGroupsWithCurrentGroupsSolveOption,
         DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
         IgnoreSolveOption.name: IgnoreSolveOption,
     }

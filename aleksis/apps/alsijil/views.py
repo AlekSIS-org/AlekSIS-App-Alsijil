@@ -1,13 +1,13 @@
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, QuerySet, Subquery, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext as _
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
@@ -21,11 +21,7 @@ from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_d
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
-from aleksis.core.util.core_helpers import (
-    get_site_preferences,
-    is_celery_enabled,
-    objectgetter_optional,
-)
+from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
     ExcuseTypeForm,
