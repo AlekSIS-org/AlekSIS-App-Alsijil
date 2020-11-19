@@ -124,7 +124,8 @@ def lesson(
         if lesson_documentation_form.is_valid() and request.user.has_perm(
             "alsijil.edit_lessondocumentation", lesson_period
         ):
-            lesson_documentation_form.save()
+            with reversion.create_revision():
+                lesson_documentation_form.save()
 
             messages.success(request, _("The lesson documentation has been saved."))
 
