@@ -12,7 +12,6 @@ from django.views.generic import DetailView
 import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import SingleTableView
-from reversion import set_user
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -122,7 +121,7 @@ def lesson(
             "alsijil.edit_lessondocumentation", lesson_period
         ):
             with reversion.create_revision():
-                set_user(request.user)
+                reversion.set_user(request.user)
                 lesson_documentation_form.save()
 
             messages.success(request, _("The lesson documentation has been saved."))
@@ -136,7 +135,7 @@ def lesson(
                 "alsijil.edit_lesson_personalnote", lesson_period
             ):
                 with reversion.create_revision():
-                    set_user(request.user)
+                    reversion.set_user(request.user)
                     instances = personal_note_formset.save()
 
                 # Iterate over personal notes and carry changed absences to following lessons
@@ -565,7 +564,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                             note.excused = True
                             note.excuse_type = excuse_type
                             with reversion.create_revision():
-                                set_user(request.user)
+                                reversion.set_user(request.user)
                                 note.save()
 
                         messages.success(request, _("The absences have been marked as excused."))
@@ -581,7 +580,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                             note.excused = True
                             note.excuse_type = excuse_type
                             with reversion.create_revision():
-                                set_user(request.user)
+                                reversion.set_user(request.user)
                                 note.save()
                             messages.success(request, _("The absence has been marked as excused."))
                     except (PersonalNote.DoesNotExist, ValueError):
@@ -717,7 +716,7 @@ class DeletePersonalNoteView(PermissionRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         note = self.get_object()
         with reversion.create_revision():
-            set_user(request.user)
+            reversion.set_user(request.user)
             note.reset_values()
             note.save()
         messages.success(request, _("The personal note has been deleted."))
