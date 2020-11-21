@@ -7,6 +7,8 @@ from django.utils.translation import gettext as _
 
 import reversion
 from calendarweek import CalendarWeek
+from django_global_request.middleware import get_request
+from reversion import set_user
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
@@ -55,6 +57,7 @@ def mark_absent(
             continue
 
         with reversion.create_revision():
+            set_user(get_request().user)
             personal_note, created = (
                 PersonalNote.objects.select_related(None)
                 .prefetch_related(None)
