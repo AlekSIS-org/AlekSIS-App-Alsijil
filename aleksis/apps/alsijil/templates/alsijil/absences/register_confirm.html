@@ -1,0 +1,84 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load material_form i18n static %}
+
+{% block browser_title %}{% blocktrans %}Confirm: Register absence{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans %}Confirm: Register absence{% endblocktrans %}{% endblock %}
+
+{% block content %}
+  <p class="flow-text">
+    {% blocktrans %}
+      Do you really want to register the following absence?
+    {% endblocktrans %}
+  </p>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">
+        {{ person }}
+      </div>
+      <div class="collection">
+        <div class="collection-item">
+          <i class="material-icons left">date_range</i>
+          {{ form_data.date_start }}, {{ form_data.from_period }}. – {{ form_data.date_end }}, {{ form_data.to_period }}.
+          {% if form_data.date_start != form_data.date_end %}
+            <div class="alert warning">
+              <div>
+                <i class="material-icons left">warning</i>
+                {% blocktrans %}
+                  As the length of this absence is longer than one day,
+                  please double check the correctness of your entry.
+                {% endblocktrans %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        <div class="collection-item">
+          <i class="material-icons left">list</i>
+          {% blocktrans with count=affected_lessons %} {{ count }} affected lessons {% endblocktrans %}
+          {% if affected_lessons == 0 %}
+            <div class="alert error">
+              <div>
+                <i class="material-icons left">error</i>
+                {% blocktrans %}
+                  There are no affected lessons. Registering this absence won't have any effect.
+                {% endblocktrans %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        <div class="collection-item">
+          <i class="material-icons left">label</i>
+          {% if form_data.absent %}
+            <span class="chip red white-text">{% trans "Absent" %}</span>
+            {% if form_data.excused and form_data.excuse_type %}
+              <span class="chip green white-text">{{ form_data.excuse_type.name }}</span>
+            {% elif form_data.excused %}
+              <span class="chip green white-text">{% trans "Excused" %}</span>
+            {% endif %}
+          {% else %}
+            {% trans "Reset status to 'not absent'" %}
+          {% endif %}
+        </div>
+        {% if form_data.remarks %}
+          <div class="collection-item">
+            <i class="material-icons left">edit</i>
+            {{ form_data.remarks }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="hide">
+      {% form form=form %}{% endform %}
+    </div>
+    <input type="hidden" name="confirmed" value="1">
+    {% include "core/partials/save_button.html" %}
+    <a class="btn red waves-effect waves-light" href="{% url "register_absence" person.pk %}">
+      <i class="material-icons left">cancel</i>
+      {% trans "Cancel" %}
+    </a>
+  </form>
+{% endblock %}
