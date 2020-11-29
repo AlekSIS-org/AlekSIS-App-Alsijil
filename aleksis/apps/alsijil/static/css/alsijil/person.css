@@ -1,17 +1,17 @@
 span.input-field.inline > .select-wrapper > input {
-	color: red;
-	padding: 14px 0 0 0;
-	line-height: 2px;
-	height: 36px;
-	vertical-align: middle;
+    color: red;
+    padding: 14px 0 0 0;
+    line-height: 2px;
+    height: 36px;
+    vertical-align: middle;
 }
 
 span.input-field.inline > .select-wrapper .caret {
-	top: 12px !important;
+    top: 12px !important;
 }
 
 @media screen and (min-width: 1400px) {
-	h6.excuse-form-container {
-	margin: -30px 0 -30px 0;
-}
+    h6.excuse-form-container {
+        margin: -30px 0 -30px 0;
+    }
 }
