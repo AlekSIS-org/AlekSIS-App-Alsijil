@@ -40,7 +40,7 @@
   <div class="col s12 m12 l6">
 
       <h5>{% trans "Unexcused absences" %}</h5>
-      <h6>
+      <h6 class="excuse-form-container">
           <form method="POST" id="excuse-multiple-form">
               {% csrf_token %}
               {% trans "Mark selected as" %}
