@@ -677,6 +677,8 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST" and register_absence_form.is_valid():
+        confirmed = request.POST.get("confirmed", "0") == "1"
+
         # Get data from form
         # person = register_absence_form.cleaned_data["person"]
         start_date = register_absence_form.cleaned_data["date_start"]
@@ -689,18 +691,35 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
         remarks = register_absence_form.cleaned_data["remarks"]
 
         # Mark person as absent
+        affected_count = 0
         delta = end_date - start_date
         for i in range(delta.days + 1):
             from_period_on_day = from_period if i == 0 else TimePeriod.period_min
             to_period_on_day = to_period if i == delta.days else TimePeriod.period_max
             day = start_date + timedelta(days=i)
 
-            person.mark_absent(
-                day, from_period_on_day, absent, excused, excuse_type, remarks, to_period_on_day,
+            affected_count += person.mark_absent(
+                day,
+                from_period_on_day,
+                absent,
+                excused,
+                excuse_type,
+                remarks,
+                to_period_on_day,
+                dry_run=not confirmed,
             )
 
-        messages.success(request, _("The absence has been saved."))
-        return redirect("overview_person", person.pk)
+        if not confirmed:
+            # Show confirmation page
+            context = {}
+            context["affected_lessons"] = affected_count
+            context["person"] = person
+            context["form_data"] = register_absence_form.cleaned_data
+            context["form"] = register_absence_form
+            return render(request, "alsijil/absences/register_confirm.html", context)
+        else:
+            messages.success(request, _("The absence has been saved."))
+            return redirect("overview_person", person.pk)
 
     context["person"] = person
     context["register_absence_form"] = register_absence_form

@@ -26,11 +26,17 @@ def mark_absent(
     excuse_type: Optional[ExcuseType] = None,
     remarks: str = "",
     to_period: Optional[int] = None,
+    dry_run: bool = False,
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
 
     This function creates `PersonalNote` objects for every `LessonPeriod` the person
     participates in on the selected day and marks them as absent/excused.
+
+    :param dry_run: With this activated, the function won't change any data
+        and just return the count of affected lessons
+
+    :return: Count of affected lesson periods
 
     ..note:: Only available when AlekSIS-App-Alsijil is installed.
 
@@ -51,32 +57,39 @@ def mark_absent(
         lesson_periods = lesson_periods.filter(period__period__lte=to_period)
 
     # Create and update all personal notes for the discovered lesson periods
-    for lesson_period in lesson_periods:
-        sub = lesson_period.get_substitution()
-        if sub and sub.cancelled:
-            continue
+    if not dry_run:
+        for lesson_period in lesson_periods:
+            sub = lesson_period.get_substitution()
+            if sub and sub.cancelled:
+                continue
 
-        with reversion.create_revision():
-            set_user(get_request().user)
-            personal_note, created = (
-                PersonalNote.objects.select_related(None)
-                .prefetch_related(None)
-                .update_or_create(
-                    person=self,
-                    lesson_period=lesson_period,
-                    week=wanted_week.week,
-                    year=wanted_week.year,
-                    defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type,},
+            with reversion.create_revision():
+                set_user(get_request().user)
+                personal_note, created = (
+                    PersonalNote.objects.select_related(None)
+                    .prefetch_related(None)
+                    .update_or_create(
+                        person=self,
+                        lesson_period=lesson_period,
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        defaults={
+                            "absent": absent,
+                            "excused": excused,
+                            "excuse_type": excuse_type,
+                        },
+                    )
                 )
-            )
-            personal_note.groups_of_person.set(self.member_of.all())
+                personal_note.groups_of_person.set(self.member_of.all())
 
-            if remarks:
-                if personal_note.remarks:
-                    personal_note.remarks += "; %s" % remarks
-                else:
-                    personal_note.remarks = remarks
-                personal_note.save()
+                if remarks:
+                    if personal_note.remarks:
+                        personal_note.remarks += "; %s" % remarks
+                    else:
+                        personal_note.remarks = remarks
+                    personal_note.save()
+
+    return lesson_periods.count()
 
 
 @LessonPeriod.method
