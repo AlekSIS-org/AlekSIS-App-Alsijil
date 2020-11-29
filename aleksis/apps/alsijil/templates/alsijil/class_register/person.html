@@ -40,26 +40,35 @@
   <div class="col s12 m12 l6">
 
       <h5>{% trans "Unexcused absences" %}</h5>
-      <h6 class="excuse-form-container">
-          <form method="POST" id="excuse-multiple-form">
-              {% csrf_token %}
-              {% trans "Mark selected as" %}
-              <span class="input-field inline">
-                  <select id="excuse-type-multiple" name="excuse_type">
-                      <option value="e" selected>{% trans "Excused" %}</option>
-                      {% for excuse_type in excuse_types %}
-                      <option value="{{ excuse_type.pk }}">{{ excuse_type.name }}</option>
-                      {% endfor %}
-                  </select>
-                  <label for="excuse-type-multiple" class="hide">{% trans "Excuse type" %}</label>
-              </span>
-              <button type="submit" class="btn secondary-color" name="excuse_multiple" value="1">
-                  {% trans "Submit" %}<i class="material-icons right">send</i>
-              </button>
-          </form>
-      </h6>
 
       <ul class="collection">
+          {% if unexcused_absences %}
+              <li class="collection-item row" id="title">
+                  <label class="col s12 xl2" id="select_all_container">
+                      <input type="checkbox" id="select_all_box"
+                             form="excuse-multiple-form"/>
+                      <span id="select_all_span" >Select all</span>
+                  </label>
+                  <div class="col s12 xl10">
+                      <form method="POST" id="excuse-multiple-form" class="right">
+                          {% csrf_token %}
+                          {% trans "Mark selected as" %}
+                          <span class="input-field inline">
+                          <select id="excuse-type-multiple" name="excuse_type">
+                              <option value="e" selected>{% trans "Excused" %}</option>
+                              {% for excuse_type in excuse_types %}
+                                  <option value="{{ excuse_type.pk }}">{{ excuse_type.name }}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="excuse-type-multiple" class="hide">{% trans "Excuse type" %}</label>
+                      </span>
+                          <button type="submit" class="btn secondary-color" name="excuse_multiple" value="1">
+                              {% trans "Submit" %}<i class="material-icons right">send</i>
+                          </button>
+                      </form>
+                  </div>
+              </li>
+          {% endif %}
           {% for note in unexcused_absences %}
               {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
               <li class="collection-item">
