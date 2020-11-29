@@ -11,7 +11,15 @@ span.input-field.inline > .select-wrapper .caret {
 }
 
 @media screen and (min-width: 1400px) {
-    h6.excuse-form-container {
+    li.collection-item#title form {
         margin: -30px 0 -30px 0;
     }
+
+    li.collection-item#title #select_all_span {
+        margin-top: 5px;
+    }
+}
+
+#select_all_container {
+    display: none;
 }
