@@ -1,5 +1,6 @@
 from contextlib import nullcontext
 from copy import deepcopy
+from contextlib import suppress
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -736,7 +737,35 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                     pass
 
             if found:
-                if request.POST.get("date"):
+                if request.POST.get("excuse_multiple") and request.POST.get("selected_notes"):
+                    if not request.user.has_perm(
+                            "alsijil.edit_person_overview_personalnote", person
+                    ):
+                        raise PermissionDenied()
+
+                    lesson_pks = request.POST.getlist("selected_notes")
+
+                    def convert_to_int_optional(x):
+                        with suppress(ValueError):
+                            return int(x)
+
+                    lesson_pks = [convert_to_int_optional(pk) for pk in lesson_pks]
+
+                    notes = person.personal_notes.filter(
+                        pk__in=lesson_pks,
+                        absent=True,
+                        excused=False,
+                    )
+                    for note in notes:
+                        note.excused = True
+                        note.excuse_type = excuse_type
+                        with reversion.create_revision():
+                            reversion.set_user(request.user)
+                            note.save()
+
+                    messages.success(request, _("The absences have been marked as excused."))
+
+                elif request.POST.get("date"):
                     # Mark absences on date as excused
                     try:
                         date = datetime.strptime(request.POST["date"], "%Y-%m-%d").date()
