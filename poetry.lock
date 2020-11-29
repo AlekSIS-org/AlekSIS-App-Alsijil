@@ -71,7 +71,7 @@ python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
 calendarweek = ">=0.4.3,<0.5.0"
-celery-progress = ">=0.0.12,<0.0.13"
+celery-progress = ">=0.0.14,<0.0.15"
 colour = ">=0.1.5,<0.2.0"
 Django = ">=3.0,<4.0"
 django-any-js = ">=1.0,<2.0"
@@ -114,6 +114,7 @@ django-yarnpkg = ">=6.0,<7.0"
 dynaconf = {version = ">=3.1,<4.0", extras = ["ini", "toml", "yaml"]}
 easy-thumbnails = ">=2.6,<3.0"
 html2text = ">=2020.0.0,<2021.0.0"
+importlib-metadata = {version = ">=2.0.0,<3.0.0", markers = "python_version < \"3.8\""}
 libsass = ">=0.20.0,<0.21.0"
 license-expression = ">=1.2,<2.0"
 Pillow = ">=7.0,<8.0"
@@ -269,7 +270,7 @@ django = ["Django (>=2.2,<4.0)"]
 
 [[package]]
 name = "celery-progress"
-version = "0.0.12"
+version = "0.0.14"
 description = "Drop in, configurable, dependency-free progress bars for your Django/Celery applications."
 category = "main"
 optional = false
@@ -590,7 +591,7 @@ django-appconf = ">=1.0.2"
 
 [[package]]
 name = "django-impersonate"
-version = "1.5.1"
+version = "1.7"
 description = "Django app to allow superusers to impersonate other users."
 category = "main"
 optional = false
@@ -637,7 +638,7 @@ six = "*"
 
 [[package]]
 name = "django-maintenance-mode"
-version = "0.15.0"
+version = "0.15.1"
 description = "django-maintenance-mode shows a 503 error page when maintenance-mode is on."
 category = "main"
 optional = false
@@ -645,7 +646,7 @@ python-versions = "*"
 
 [[package]]
 name = "django-material"
-version = "1.7.1"
+version = "1.7.3"
 description = "Material design for django forms and admin"
 category = "main"
 optional = false
@@ -656,7 +657,7 @@ six = "*"
 
 [[package]]
 name = "django-menu-generator"
-version = "1.0.4"
+version = "1.1.0"
 description = "A straightforward menu generator for Django"
 category = "main"
 optional = false
@@ -938,7 +939,7 @@ yaml = ["ruamel.yaml"]
 
 [[package]]
 name = "easy-thumbnails"
-version = "2.7"
+version = "2.7.1"
 description = "Easy thumbnails for Django"
 category = "main"
 optional = false
@@ -950,7 +951,7 @@ pillow = "*"
 
 [[package]]
 name = "faker"
-version = "4.14.2"
+version = "4.17.1"
 description = "Faker is a Python package that generates fake data for you."
 category = "main"
 optional = false
@@ -1145,9 +1146,9 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "importlib-metadata"
-version = "2.0.0"
+version = "2.1.0"
 description = "Read metadata from Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
@@ -1156,7 +1157,7 @@ zipp = ">=0.5"
 
 [package.extras]
 docs = ["sphinx", "rst.linker"]
-testing = ["packaging", "pep517", "importlib-resources (>=1.3)"]
+testing = ["packaging", "pep517", "unittest2", "importlib-resources (>=1.3)"]
 
 [[package]]
 name = "iniconfig"
@@ -1334,7 +1335,7 @@ dev = ["pre-commit", "tox"]
 
 [[package]]
 name = "prometheus-client"
-version = "0.8.0"
+version = "0.9.0"
 description = "Python client for the Prometheus monitoring system."
 category = "main"
 optional = false
@@ -1596,7 +1597,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 
 [[package]]
 name = "restructuredtext-lint"
-version = "1.3.1"
+version = "1.3.2"
 description = "reStructuredText linter"
 category = "dev"
 optional = false
@@ -1919,18 +1920,18 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tqdm"
-version = "4.51.0"
+version = "4.54.0"
 description = "Fast, Extensible Progress Meter"
 category = "main"
 optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
 [package.extras]
-dev = ["py-make (>=0.1.0)", "twine", "argopt", "pydoc-markdown"]
+dev = ["py-make (>=0.1.0)", "twine", "argopt", "pydoc-markdown", "wheel"]
 
 [[package]]
 name = "twilio"
-version = "6.47.0"
+version = "6.48.0"
 description = "Twilio API client and TwiML generator"
 category = "main"
 optional = false
@@ -1994,7 +1995,7 @@ pycryptodome = "*"
 name = "zipp"
 version = "3.4.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -2014,7 +2015,27 @@ alabaster = [
 ]
 aleksis-app-chronos = [
     {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201114181205.58815f85.tar.gz", hash = "sha256:3b4e7d78a3996c40a4817830c8cfe2adeb6a47e3414b7eeec52c30d24cd6020f"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201114223246.32e3c906.tar.gz", hash = "sha256:7ea6db3d01f655e6ce03387d0aeda03d592084b5081b3e697daf8ee83958fd4f"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201114235246.65bf857a.tar.gz", hash = "sha256:778cce20425cab84920ec1686918069e12a5244dddd67c980219112e403ccb98"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201115122918.3d28dd8a.tar.gz", hash = "sha256:efa696d355379454503acbd0f9597f5c822d0369dd6a1b7e22b9acaf13cd6f6d"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201115140200.765291db.tar.gz", hash = "sha256:917495eff2d91bb1a3d097a453d7a954226aa96ead7265b7bff9e29cd441cac8"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201115195358.7b86df4c.tar.gz", hash = "sha256:0341c9a625cfe8474bb9dffa8a9cd1faec561c6a20c1fb853c61d69572f71f2a"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201117201204.ca84c2c6.tar.gz", hash = "sha256:b1281b0e5c802dc3bf22461230ef4819be147117403b3097e83a6daa35786b27"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201118191856.e492d537.tar.gz", hash = "sha256:9e3bf61fca08707b85d9beded170689c037c6b7875d9cdd03d27b90c5d8c2568"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201119232658.ebb8e175.tar.gz", hash = "sha256:ad1344a750925c81ac6fcf5665ea940920a272f89dc989de24044d7df7747681"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201121110708.8f6bfbea.tar.gz", hash = "sha256:996600db5d13a6b3178f4d957f68a65cc0d5d8143dd6ead5839a9b63b85bd3a8"},
+    {file = "AlekSIS-App-Chronos-2.0a3.dev0+20201121171621.ad73a375.tar.gz", hash = "sha256:203dd8f30f3150c223d8f25210438f54cb30c75917416fb556e3ea24af6ce334"},
     {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201114181205.58815f85-py3-none-any.whl", hash = "sha256:93ef99384f5b593618f83d21005c45231aad9035afbaf6b6889e33e9d1a5c175"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201114223246.32e3c906-py3-none-any.whl", hash = "sha256:35550f0990aceed1932a37b935ea423796bea5e7995a8d6494bec17a0b17bf00"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201114235246.65bf857a-py3-none-any.whl", hash = "sha256:9e3343f9c63536a99b3fcbd230dda1e4e6cde15a1bfcbb948ac05ad5f88033f2"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201115122918.3d28dd8a-py3-none-any.whl", hash = "sha256:96df0735d58d9bae2bdb6ff69287e85bb4622d9dc8807f6f858e771b93e68752"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201115140200.765291db-py3-none-any.whl", hash = "sha256:04b7ec138f82bdd50849bbc8818a0ffae1639377d03024bedb23f6beb23ac458"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201115195358.7b86df4c-py3-none-any.whl", hash = "sha256:1e35e710a2e5ddf7da2a38f9505e38914376ba9860096c4c64ffd6a1f17ffea3"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201117201204.ca84c2c6-py3-none-any.whl", hash = "sha256:5eb111b589ed418e57ccad3e571b653baede81895cc639e6884594cefd6969d9"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201118191856.e492d537-py3-none-any.whl", hash = "sha256:e6ebf40b0cff6dfec2ca43dbea513f85cb3ea26dd81bbb00b0fc4bf0e11a1604"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201119232658.ebb8e175-py3-none-any.whl", hash = "sha256:b6c2a408e50d62a2dcfba638bac914c54bfa33af280ec0bb4063f01d674e7075"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201121110708.8f6bfbea-py3-none-any.whl", hash = "sha256:0371a182048034e1908a597232d9d83a3b15892e2874a0104f6644ac69fcbe30"},
+    {file = "AlekSIS_App_Chronos-2.0a3.dev0+20201121171621.ad73a375-py3-none-any.whl", hash = "sha256:f4216323befe44e743fdfdf53338ad879ce5fb7f74fe604904cbf917ca293f47"},
 ]
 aleksis-builddeps = [
     {file = "AlekSIS-Builddeps-1.tar.gz", hash = "sha256:97a19597f422593cbdc438aabf17f95748126c8951df6ac7db7991fc99c108c4"},
@@ -2022,8 +2043,16 @@ aleksis-builddeps = [
 aleksis-core = [
     {file = "AlekSIS-Core-2.0a3.dev0+20201114132749.88d92354.tar.gz", hash = "sha256:be16d8b6478029ec86cc92389a5f679be85112cb20d18996c8ae95adf86690ba"},
     {file = "AlekSIS-Core-2.0a3.dev0+20201114154746.9129dcd7.tar.gz", hash = "sha256:89bf9908411953eb337cc40b702f00394d4ff137fcd5160c538608c0a867a294"},
+    {file = "AlekSIS-Core-2.0a3.dev0+20201115003323.d1ff5fff.tar.gz", hash = "sha256:ffada26ef5593fd3f0f392bc8ea1cd9142875d08607e4737c38d84dea3ac3533"},
+    {file = "AlekSIS-Core-2.0a3.dev0+20201115124223.ce62cc6a.tar.gz", hash = "sha256:358e9c2cd292d0b23d8bffd02f777e3fb9a764ce4c70148ef94cf6ca83e2aeef"},
+    {file = "AlekSIS-Core-2.0a3.dev0+20201115134935.59be5513.tar.gz", hash = "sha256:3452fc7572df2e1bed31d5df20573f050f47d3d3ccd084c8597e327667f0219d"},
+    {file = "AlekSIS-Core-2.0a3.dev0+20201115135217.fa0090db.tar.gz", hash = "sha256:f9113d35d677533580131eb274331ab6590cba222a2bd28c2384936b00eaf5cf"},
     {file = "AlekSIS_Core-2.0a3.dev0+20201114132749.88d92354-py3-none-any.whl", hash = "sha256:180477173a1e23f9ca42b6b79383b556dbd97868e3f3079c8b090466aeba256c"},
     {file = "AlekSIS_Core-2.0a3.dev0+20201114154746.9129dcd7-py3-none-any.whl", hash = "sha256:a60b456a300f1fa7786567cb0b948690422c95492a0cec936a0b99d6109afed5"},
+    {file = "AlekSIS_Core-2.0a3.dev0+20201115003323.d1ff5fff-py3-none-any.whl", hash = "sha256:e16da1f4895f7d1b7c595a9a3fd9800ccad401a2a8a0ce146774f8b01e63f089"},
+    {file = "AlekSIS_Core-2.0a3.dev0+20201115124223.ce62cc6a-py3-none-any.whl", hash = "sha256:d4ce35f02210f3d08f953e67d74c77bc64f54956c808407946531afb88d25628"},
+    {file = "AlekSIS_Core-2.0a3.dev0+20201115134935.59be5513-py3-none-any.whl", hash = "sha256:98f097859b3ee4eb3e54e6f3c34ee2b0d1857998000e60f6324d3b6eebe6c9b5"},
+    {file = "AlekSIS_Core-2.0a3.dev0+20201115135217.fa0090db-py3-none-any.whl", hash = "sha256:4a30a3c0419453ba3e5e1a3f200554c91972ec752d99a6cc0b13fba482e93aa3"},
 ]
 appdirs = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
@@ -2071,8 +2100,8 @@ calendarweek = [
     {file = "calendarweek-0.4.7.tar.gz", hash = "sha256:7655d6a4c3b4f6a4e01aa7d23b49cd121db0399050e9c08cd8d1210155be25dd"},
 ]
 celery-progress = [
-    {file = "celery-progress-0.0.12.tar.gz", hash = "sha256:df61d61ac2b29e51b61a2cbd070d28b69f9f538d31e5f4b8076d9721251d6c59"},
-    {file = "celery_progress-0.0.12-py3-none-any.whl", hash = "sha256:b3727b1b65c79ec072513eb42f1903eaec64a75d2f691b5664fa660f2bd319ad"},
+    {file = "celery-progress-0.0.14.tar.gz", hash = "sha256:002ead0d3fa3602bd74cf328206b8e2352994ab599711dc20058a5cf2b4db2d1"},
+    {file = "celery_progress-0.0.14-py3-none-any.whl", hash = "sha256:6d95c01fe044dd5dbb1e2d507724f9ace70bde796bc6db51ba19c8a95e94da07"},
 ]
 certifi = [
     {file = "certifi-2020.11.8-py2.py3-none-any.whl", hash = "sha256:1f422849db327d534e3d0c5f02a263458c3955ec0aae4ff09b95f195c59f4edd"},
@@ -2216,7 +2245,7 @@ django-image-cropping = [
     {file = "django_image_cropping-1.5.0-py3-none-any.whl", hash = "sha256:81dbcabb6421c5a1e88fac9d96f336d6109a23dcb8fa6c678329d3688c9973c4"},
 ]
 django-impersonate = [
-    {file = "django-impersonate-1.5.1.tar.gz", hash = "sha256:7c786ffaa7a5dd430f9277b53a64676c470b684eee5aa52c3b483298860d09b4"},
+    {file = "django-impersonate-1.7.tar.gz", hash = "sha256:1dadb5239a5cb79d4327ef3000cd989f9d4e76428a5e2a080496a53b41fa785f"},
 ]
 django-ipware = [
     {file = "django-ipware-3.0.2.tar.gz", hash = "sha256:c7df8e1410a8e5d6b1fbae58728402ea59950f043c3582e033e866f0f0cf5e94"},
@@ -2233,15 +2262,15 @@ django-jsonstore = [
     {file = "django-jsonstore-0.4.1.tar.gz", hash = "sha256:d6e42152af3f924e4657c99e80144ba9a6410799256f6134b5a4e9fa4282ec10"},
 ]
 django-maintenance-mode = [
-    {file = "django-maintenance-mode-0.15.0.tar.gz", hash = "sha256:f8c500b077045db5444d4d4eb613fd1085b51f960d6d61b13b1cce461e1d0102"},
-    {file = "django_maintenance_mode-0.15.0-py3-none-any.whl", hash = "sha256:54b5afe3282d450bc4161461c5d518b8097cbb29a5fdd0baf1b8c3a1e5f90c08"},
+    {file = "django-maintenance-mode-0.15.1.tar.gz", hash = "sha256:d07102cab88dd707a82232f0c552c287e62aa53af582a0ca4f2aa31f14f5ed27"},
+    {file = "django_maintenance_mode-0.15.1-py3-none-any.whl", hash = "sha256:8c45b400253076655562c99a2ffb88f8353fc1c84496c1b9de812cc8132aea6f"},
 ]
 django-material = [
-    {file = "django-material-1.7.1.tar.gz", hash = "sha256:77cfcc83da7724066b5b78bbb72cd4fbe752b38ffb20cb6ca36feb9657d9f19f"},
-    {file = "django_material-1.7.1-py2.py3-none-any.whl", hash = "sha256:2b70ef05d4c6805554e91efc81c34f71081a5287f016d0172b7368b0a465d759"},
+    {file = "django-material-1.7.3.tar.gz", hash = "sha256:00599cd87f19f3a66be065865b223801afa9da680744a5eac10c489a10d98eba"},
+    {file = "django_material-1.7.3-py2.py3-none-any.whl", hash = "sha256:6c010aa47618ceae2617f8a476b55aaed0884b1a4a6f5bdf969448a1ba72e352"},
 ]
 django-menu-generator = [
-    {file = "django-menu-generator-1.0.4.tar.gz", hash = "sha256:ce71a5055c16933c8aff64fb36c21e5cf8b6d505733aceed1252f8b99369a378"},
+    {file = "django-menu-generator-1.1.0.tar.gz", hash = "sha256:e8f9b808080c4b281f9c5962f39078c76c2007a5ef8ab1f7a81c81dbbe6a9848"},
 ]
 django-middleware-global-request = [
     {file = "django-middleware-global-request-0.1.2.tar.gz", hash = "sha256:f6490759bc9f7dbde4001709554e29ca715daf847f2222914b4e47117dca9313"},
@@ -2323,11 +2352,11 @@ dynaconf = [
     {file = "dynaconf-3.1.2.tar.gz", hash = "sha256:9b34ab2f811a81755f5eb4beac77a69e1e0887528c7e37fc4bc83fed52dcf502"},
 ]
 easy-thumbnails = [
-    {file = "easy-thumbnails-2.7.tar.gz", hash = "sha256:e4e7a0dd4001f56bfd4058428f2c91eafe27d33ef3b8b33ac4e013b159b9ff91"},
+    {file = "easy-thumbnails-2.7.1.tar.gz", hash = "sha256:f862949208d9066cd3d84ffcf9c2dbe9c7344ea6152b741e440f861eca46855c"},
 ]
 faker = [
-    {file = "Faker-4.14.2-py3-none-any.whl", hash = "sha256:ce1c38823eb0f927567cde5bf2e7c8ca565c7a70316139342050ce2ca74b4026"},
-    {file = "Faker-4.14.2.tar.gz", hash = "sha256:6afc461ab3f779c9c16e299fc731d775e39ea7e8e063b3053ee359ae198a15ca"},
+    {file = "Faker-4.17.1-py3-none-any.whl", hash = "sha256:5398268e1d751ffdb3ed36b8a790ed98659200599b368eec38a02eed15bce997"},
+    {file = "Faker-4.17.1.tar.gz", hash = "sha256:d4183b8f57316de3be27cd6c3b40e9f9343d27c95c96179f027316c58c2c239e"},
 ]
 flake8 = [
     {file = "flake8-3.8.4-py2.py3-none-any.whl", hash = "sha256:749dbbd6bfd0cf1318af27bf97a14e28e5ff548ef8e5b1566ccfb25a11e7c839"},
@@ -2391,8 +2420,8 @@ imagesize = [
     {file = "imagesize-1.2.0.tar.gz", hash = "sha256:b1f6b5a4eab1f73479a50fb79fcf729514a900c341d8503d62a62dbc4127a2b1"},
 ]
 importlib-metadata = [
-    {file = "importlib_metadata-2.0.0-py2.py3-none-any.whl", hash = "sha256:cefa1a2f919b866c5beb7c9f7b0ebb4061f30a8a9bf16d609b000e2dfaceb9c3"},
-    {file = "importlib_metadata-2.0.0.tar.gz", hash = "sha256:77a540690e24b0305878c37ffd421785a6f7e53c8b5720d211b211de8d0e95da"},
+    {file = "importlib_metadata-2.1.0-py2.py3-none-any.whl", hash = "sha256:030f3b1bdb823ecbe4a9659e14cc861ce5af403fe99863bae173ec5fe00ab132"},
+    {file = "importlib_metadata-2.1.0.tar.gz", hash = "sha256:caeee3603f5dcf567864d1be9b839b0bcfdf1383e3e7be33ce2dead8144ff19c"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -2532,6 +2561,8 @@ pillow = [
     {file = "Pillow-7.2.0-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:5e51ee2b8114def244384eda1c82b10e307ad9778dac5c83fb0943775a653cd8"},
     {file = "Pillow-7.2.0-cp38-cp38-win32.whl", hash = "sha256:725aa6cfc66ce2857d585f06e9519a1cc0ef6d13f186ff3447ab6dff0a09bc7f"},
     {file = "Pillow-7.2.0-cp38-cp38-win_amd64.whl", hash = "sha256:a060cf8aa332052df2158e5a119303965be92c3da6f2d93b6878f0ebca80b2f6"},
+    {file = "Pillow-7.2.0-pp36-pypy36_pp73-macosx_10_10_x86_64.whl", hash = "sha256:9c87ef410a58dd54b92424ffd7e28fd2ec65d2f7fc02b76f5e9b2067e355ebf6"},
+    {file = "Pillow-7.2.0-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:e901964262a56d9ea3c2693df68bc9860b8bdda2b04768821e4c44ae797de117"},
     {file = "Pillow-7.2.0-pp36-pypy36_pp73-win32.whl", hash = "sha256:25930fadde8019f374400f7986e8404c8b781ce519da27792cbe46eabec00c4d"},
     {file = "Pillow-7.2.0.tar.gz", hash = "sha256:97f9e7953a77d5a70f49b9a48da7776dc51e9b738151b22dacf101641594a626"},
 ]
@@ -2540,8 +2571,8 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 prometheus-client = [
-    {file = "prometheus_client-0.8.0-py2.py3-none-any.whl", hash = "sha256:983c7ac4b47478720db338f1491ef67a100b474e3bc7dafcbaefb7d0b8f9b01c"},
-    {file = "prometheus_client-0.8.0.tar.gz", hash = "sha256:c6e6b706833a6bd1fd51711299edee907857be10ece535126a158f911ee80915"},
+    {file = "prometheus_client-0.9.0-py2.py3-none-any.whl", hash = "sha256:b08c34c328e1bf5961f0b4352668e6c8f145b4a087e09b7296ef62cbe4693d35"},
+    {file = "prometheus_client-0.9.0.tar.gz", hash = "sha256:9da7b32f02439d8c04f7777021c304ed51d9ec180604700c1ba72a4d44dceb03"},
 ]
 psutil = [
     {file = "psutil-5.7.3-cp27-none-win32.whl", hash = "sha256:1cd6a0c9fb35ece2ccf2d1dd733c1e165b342604c67454fd56a4c12e0a106787"},
@@ -2732,7 +2763,7 @@ requests = [
     {file = "requests-2.25.0.tar.gz", hash = "sha256:7f1a0b932f4a60a1a65caa4263921bb7d9ee911957e0ae4a23a6dd08185ad5f8"},
 ]
 restructuredtext-lint = [
-    {file = "restructuredtext_lint-1.3.1.tar.gz", hash = "sha256:470e53b64817211a42805c3a104d2216f6f5834b22fe7adb637d1de4d6501fb8"},
+    {file = "restructuredtext_lint-1.3.2.tar.gz", hash = "sha256:d3b10a1fe2ecac537e51ae6d151b223b78de9fafdd50e5eb6b08c243df173c80"},
 ]
 "ruamel.yaml" = [
     {file = "ruamel.yaml-0.16.12-py2.py3-none-any.whl", hash = "sha256:012b9470a0ea06e4e44e99e7920277edf6b46eee0232a04487ea73a7386340a5"},
@@ -2760,8 +2791,6 @@ restructuredtext-lint = [
     {file = "ruamel.yaml.clib-0.2.2-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:5254af7d8bdf4d5484c089f929cb7f5bafa59b4f01d4f48adda4be41e6d29f99"},
     {file = "ruamel.yaml.clib-0.2.2-cp38-cp38-win32.whl", hash = "sha256:74161d827407f4db9072011adcfb825b5258a5ccb3d2cd518dd6c9edea9e30f1"},
     {file = "ruamel.yaml.clib-0.2.2-cp38-cp38-win_amd64.whl", hash = "sha256:058a1cc3df2a8aecc12f983a48bda99315cebf55a3b3a5463e37bb599b05727b"},
-    {file = "ruamel.yaml.clib-0.2.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:c6ac7e45367b1317e56f1461719c853fd6825226f45b835df7436bb04031fd8a"},
-    {file = "ruamel.yaml.clib-0.2.2-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:b4b0d31f2052b3f9f9b5327024dc629a253a83d8649d4734ca7f35b60ec3e9e5"},
     {file = "ruamel.yaml.clib-0.2.2.tar.gz", hash = "sha256:2d24bd98af676f4990c4d715bcdc2a60b19c56a3fb3a763164d2d8ca0e806ba7"},
 ]
 rules = [
@@ -2867,11 +2896,11 @@ toml = [
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 tqdm = [
-    {file = "tqdm-4.51.0-py2.py3-none-any.whl", hash = "sha256:9ad44aaf0fc3697c06f6e05c7cf025dd66bc7bcb7613c66d85f4464c47ac8fad"},
-    {file = "tqdm-4.51.0.tar.gz", hash = "sha256:ef54779f1c09f346b2b5a8e5c61f96fbcb639929e640e59f8cf810794f406432"},
+    {file = "tqdm-4.54.0-py2.py3-none-any.whl", hash = "sha256:9e7b8ab0ecbdbf0595adadd5f0ebbb9e69010e0bd48bbb0c15e550bf2a5292df"},
+    {file = "tqdm-4.54.0.tar.gz", hash = "sha256:5c0d04e06ccc0da1bd3fa5ae4550effcce42fcad947b4a6cafa77bdc9b09ff22"},
 ]
 twilio = [
-    {file = "twilio-6.47.0.tar.gz", hash = "sha256:effb4d6e9e9a9069065fbe21dea844597376ae6d6333626f14b05ba6b35bbb22"},
+    {file = "twilio-6.48.0.tar.gz", hash = "sha256:745f3dfe6685e001ddd2baa290b37377426388906ea6d3549e06fb2f669da7b3"},
 ]
 typed-ast = [
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:73d785a950fc82dd2a25897d525d003f6378d1cb23ab305578394694202a58c3"},
