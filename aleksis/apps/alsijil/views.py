@@ -745,11 +745,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
                     lesson_pks = request.POST.getlist("selected_notes")
 
-                    def convert_to_int_optional(x):
-                        with suppress(ValueError):
-                            return int(x)
-
-                    lesson_pks = [convert_to_int_optional(pk) for pk in lesson_pks]
+                    lesson_pks = filter(str.isnumeric, lesson_pks)
 
                     notes = person.personal_notes.filter(
                         pk__in=lesson_pks,
