@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-12-05 21:26+0100\n"
-"PO-Revision-Date: 2020-11-14 11:29+0000\n"
+"PO-Revision-Date: 2020-12-05 20:56+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.1.1\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #: forms.py:29
 msgid "Homework for the next lesson"
@@ -286,10 +287,8 @@ msgstr "Person"
 
 #: templates/alsijil/absences/register_confirm.html:5
 #: templates/alsijil/absences/register_confirm.html:6
-#, fuzzy
-#| msgid "Can register absence"
 msgid "Confirm: Register absence"
-msgstr "Kann eine Absenz registrieren"
+msgstr "Bestätigung: Abwesenheit eintragen"
 
 #: templates/alsijil/absences/register_confirm.html:10
 msgid ""
@@ -297,6 +296,9 @@ msgid ""
 "      Do you really want to register the following absence?\n"
 "    "
 msgstr ""
+"\n"
+"      Möchten Sie wirklich folgende Abwesenheit eintragen?\n"
+"    "
 
 #: templates/alsijil/absences/register_confirm.html:27
 msgid ""
@@ -305,34 +307,34 @@ msgid ""
 "                  please double check the correctness of your entry.\n"
 "                "
 msgstr ""
+"\n"
+"                  Da diese Abwesenheit über mehr als einen Tag geht, \n"
+"überprüfen Sie bitte die Richtigkeit Ihres Eintrags erneut.\n"
+"                "
 
 #: templates/alsijil/absences/register_confirm.html:37
 #, python-format
 msgid " %(count)s affected lessons "
-msgstr ""
+msgstr " %(count)s betroffene Stunden "
 
 #: templates/alsijil/absences/register_confirm.html:42
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "            There are no lessons for the selected group or teacher in this week.\n"
-#| "          "
 msgid ""
 "\n"
 "                  There are no affected lessons. Registering this absence won't have any effect.\n"
 "                "
 msgstr ""
 "\n"
-"            Es gibt keine Stunden für die ausgewählte Gruppe oder Lehrkraft in dieser Woche.\n"
-"          "
+"                  Es gibt keine betroffenen Stunden. Das Eintragen dieser "
+"Abwesenheit wird keinen Effekt haben.\n"
+"                "
 
 #: templates/alsijil/absences/register_confirm.html:59
 msgid "Reset status to 'not absent'"
-msgstr ""
+msgstr "Status auf \"nicht abwesend\" zurücksetzen"
 
 #: templates/alsijil/absences/register_confirm.html:81
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #: templates/alsijil/class_register/groups.html:21
 msgid "Students"
@@ -572,7 +574,9 @@ msgstr "Auswählen"
 msgid ""
 "CW %(week)s:\n"
 "      %(instance)s"
-msgstr "KW %(week)s: %(instance)s"
+msgstr ""
+"KW %(week)s: \n"
+"%(instance)s"
 
 #: templates/alsijil/class_register/week_view.html:84
 msgid "Period"
@@ -754,7 +758,8 @@ msgid ""
 msgstr ""
 "\n"
 "        Dieser Ausdruck ist für Archivierungszwecke gedacht. Die Hauptkopie\n"
-"            des Klassenbuches ist im AlekSIS-Schul-Informations-System gespeichert.\n"
+"            des Klassenbuches ist im \n"
+"AlekSIS-Schul-Informations-System gespeichert.\n"
 "      "
 
 #: templates/alsijil/print/full_register.html:45
