@@ -497,7 +497,7 @@ def my_students(request: HttpRequest) -> HttpResponse:
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
     context["groups"] = request.user.person.get_owner_groups_with_lessons().annotate(
-        students_count=Count("members")
+        students_count=Count("members", distinct=True)
     )
     return render(request, "alsijil/class_register/groups.html", context)
 
