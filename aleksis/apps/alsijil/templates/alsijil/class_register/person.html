@@ -47,8 +47,10 @@
               <li class="collection-item row" id="title">
                   <label class="col s12 xl2" id="select_all_container">
                       <input type="checkbox" id="select_all_box"
-                             form="excuse-multiple-form"/>
-                      <span id="select_all_span" >Select all</span>
+                             form="excuse-multiple-form" class="filled-in"/>
+                      <span id="select_all_span" class="secondary-color-text">
+                          <span id="select_all_box_text">Select all</span>
+                      </span>
                   </label>
                   <div class="col s12 xl10">
                       <form method="POST" id="excuse-multiple-form" class="right">
@@ -77,7 +79,7 @@
                   {% if can_edit_personal_note %}
                       <label class="left">
                           <input type="checkbox" name="selected_notes" value="{{ note.pk }}"
-                                 form="excuse-multiple-form"/>
+                                 form="excuse-multiple-form" class="filled-in"/>
                           <span></span>
                       </label>
                       <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
