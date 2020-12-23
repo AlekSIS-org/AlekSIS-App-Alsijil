@@ -58,3 +58,11 @@ class AllowOpenPeriodsOnSameDay(BooleanPreference):
     help_text = _(
         "Lessons in the past are not affected by this setting, you can open them whenever you want."
     )
+
+
+@site_preferences_registry.register
+class AllowEntriesInHolidays(BooleanPreference):
+    section = alsijil
+    name = "allow_entries_in_holidays"
+    default = False
+    verbose_name = _("Allow teachers to add data for lessons in holidays")
