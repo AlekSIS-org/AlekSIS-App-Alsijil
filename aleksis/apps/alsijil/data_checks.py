@@ -58,7 +58,6 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
-            sub = note.lesson_period.get_substitution(CalendarWeek(week=note.week, year=note.year))
             result = DataCheckResult.objects.get_or_create(
                 check=cls.name, content_type=ct, object_id=note.id
             )
