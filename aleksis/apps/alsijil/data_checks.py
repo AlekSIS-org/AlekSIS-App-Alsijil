@@ -56,11 +56,7 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
 
     @classmethod
     def check_data(cls):
-        from aleksis.core.models import DataCheckResult
-
         from .models import PersonalNote
-
-        ct = ContentType.objects.get_for_model(PersonalNote)
 
         personal_notes = PersonalNote.objects.filter(
             lesson_period__substitutions__cancelled=True,
@@ -70,9 +66,7 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
-            result = DataCheckResult.objects.get_or_create(
-                check=cls.name, content_type=ct, object_id=note.id
-            )
+            cls.register_result(note)
 
 
 @DATA_CHECK_REGISTRY.register
@@ -88,19 +82,13 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
 
     @classmethod
     def check_data(cls):
-        from aleksis.core.models import DataCheckResult
-
         from .models import PersonalNote
-
-        ct = ContentType.objects.get_for_model(PersonalNote)
 
         personal_notes = PersonalNote.objects.filter(groups_of_person__isnull=True)
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
-            result = DataCheckResult.objects.get_or_create(
-                check=cls.name, content_type=ct, object_id=note.id
-            )
+            cls.register_result(note)
 
 
 @DATA_CHECK_REGISTRY.register
@@ -121,11 +109,9 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
     @classmethod
     def check_data(cls):
         from aleksis.apps.chronos.models import Holiday
-        from aleksis.core.models import DataCheckResult
 
         from .models import LessonDocumentation
 
-        ct = ContentType.objects.get_for_model(LessonDocumentation)
         holidays = list(Holiday.objects.all())
 
         documentations = LessonDocumentation.objects.filter(
@@ -137,9 +123,7 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
             day = week_weekday_to_date(doc.calendar_week, doc.lesson_period.period.weekday)
             if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
                 logging.info("  ... on holidays")
-                result = DataCheckResult.objects.get_or_create(
-                    check=cls.name, content_type=ct, object_id=doc.id
-                )
+                cls.register_result(doc)
 
 
 @DATA_CHECK_REGISTRY.register
@@ -160,11 +144,9 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
     @classmethod
     def check_data(cls):
         from aleksis.apps.chronos.models import Holiday
-        from aleksis.core.models import DataCheckResult
 
         from .models import PersonalNote
 
-        ct = ContentType.objects.get_for_model(PersonalNote)
         holidays = list(Holiday.objects.all())
 
         personal_notes = PersonalNote.objects.filter(
@@ -176,9 +158,7 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
             day = week_weekday_to_date(note.calendar_week, note.lesson_period.period.weekday)
             if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
                 logging.info("  ... on holidays")
-                result = DataCheckResult.objects.get_or_create(
-                    check=cls.name, content_type=ct, object_id=note.id
-                )
+                cls.register_result(note)
 
 
 @DATA_CHECK_REGISTRY.register
@@ -193,16 +173,10 @@ class ExcusesWithoutAbsences(DataCheck):
 
     @classmethod
     def check_data(cls):
-        from aleksis.core.models import DataCheckResult
-
         from .models import PersonalNote
-
-        ct = ContentType.objects.get_for_model(PersonalNote)
 
         personal_notes = PersonalNote.objects.filter(excused=True, absent=False)
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
-            result = DataCheckResult.objects.get_or_create(
-                check=cls.name, content_type=ct, object_id=note.id
-            )
+            cls.register_result(note)
