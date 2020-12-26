@@ -32,6 +32,18 @@ class SetGroupsWithCurrentGroupsSolveOption(SolveOption):
         check_result.delete()
 
 
+class ResetPersonalNoteSolveOption(SolveOption):
+    name = "reset_personal_note"
+    verbose_name = _("Reset personal note to defaults")
+
+    @classmethod
+    def solve(cls, check_result: "DataCheckResult"):
+        note = check_result.related_object
+        note.reset_values()
+        note.save()
+        check_result.delete()
+
+
 @DATA_CHECK_REGISTRY.register
 class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
     name = "no_personal_notes_in_cancelled_lessons"
@@ -175,8 +187,7 @@ class ExcusesWithoutAbsences(DataCheck):
     verbose_name = _("Ensure that there are no excused personal notes without an absence")
     problem_name = _("The personal note is marked as excused, but not as absent.")
     solve_options = {
-        DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
-        # FIXME OPTION
+        ResetPersonalNoteSolveOption.name: ResetPersonalNoteSolveOption,
         IgnoreSolveOption.name: IgnoreSolveOption,
     }
 
@@ -188,8 +199,7 @@ class ExcusesWithoutAbsences(DataCheck):
 
         ct = ContentType.objects.get_for_model(PersonalNote)
 
-        personal_notes = PersonalNote.objects.filter(excused=True,
-                                                     absent=False)
+        personal_notes = PersonalNote.objects.filter(excused=True, absent=False)
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
