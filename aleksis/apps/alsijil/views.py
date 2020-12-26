@@ -16,7 +16,8 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import LessonPeriod, TimePeriod
+from aleksis.apps.chronos.models import Holiday, LessonPeriod, TimePeriod
+from aleksis.apps.chronos.util.build import build_weekdays
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
 from aleksis.core.models import Group, Person, SchoolTerm
@@ -90,6 +91,13 @@ def lesson(
             _("You are not allowed to create a lesson documentation for a lesson in the future.")
         )
 
+    holiday = Holiday.on_day(date_of_lesson)
+    blocked_because_holidays = (
+        holiday is not None and not get_site_preferences()["alsijil__allow_entries_in_holidays"]
+    )
+    context["blocked_because_holidays"] = blocked_because_holidays
+    context["holiday"] = holiday
+
     next_lesson = request.user.person.next_lesson(lesson_period, date_of_lesson)
     prev_lesson = request.user.person.previous_lesson(lesson_period, date_of_lesson)
 
@@ -98,69 +106,71 @@ def lesson(
     context["day"] = wanted_week[lesson_period.period.weekday]
     context["next_lesson_person"] = next_lesson
     context["prev_lesson_person"] = prev_lesson
+    context["prev_lesson"] = lesson_period.prev
+    context["next_lesson"] = lesson_period.next
 
-    # Create or get lesson documentation object; can be empty when first opening lesson
-    lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
-    lesson_documentation_form = LessonDocumentationForm(
-        request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
-    )
+    if not blocked_because_holidays:
 
-    # Create a formset that holds all personal notes for all persons in this lesson
-    if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
-        persons = Person.objects.filter(pk=request.user.person.pk)
-    else:
-        persons = Person.objects.all()
+        # Create or get lesson documentation object; can be empty when first opening lesson
+        lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
+        lesson_documentation_form = LessonDocumentationForm(
+            request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
+        )
 
-    persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
-    personal_note_formset = PersonalNoteFormSet(
-        request.POST or None, queryset=persons_qs, prefix="personal_notes"
-    )
+        # Create a formset that holds all personal notes for all persons in this lesson
+        if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
+            persons = Person.objects.filter(pk=request.user.person.pk)
+        else:
+            persons = Person.objects.all()
 
-    if request.method == "POST":
-        if lesson_documentation_form.is_valid() and request.user.has_perm(
-            "alsijil.edit_lessondocumentation", lesson_period
-        ):
-            with reversion.create_revision():
-                reversion.set_user(request.user)
-                lesson_documentation_form.save()
+        persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
+        personal_note_formset = PersonalNoteFormSet(
+            request.POST or None, queryset=persons_qs, prefix="personal_notes"
+        )
 
-            messages.success(request, _("The lesson documentation has been saved."))
-
-        substitution = lesson_period.get_substitution()
-        if (
-            not getattr(substitution, "cancelled", False)
-            or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
-        ):
-            if personal_note_formset.is_valid() and request.user.has_perm(
-                "alsijil.edit_lesson_personalnote", lesson_period
+        if request.method == "POST":
+            if lesson_documentation_form.is_valid() and request.user.has_perm(
+                "alsijil.edit_lessondocumentation", lesson_period
             ):
                 with reversion.create_revision():
                     reversion.set_user(request.user)
-                    instances = personal_note_formset.save()
+                    lesson_documentation_form.save()
 
-                # Iterate over personal notes and carry changed absences to following lessons
-                for instance in instances:
-                    instance.person.mark_absent(
-                        wanted_week[lesson_period.period.weekday],
-                        lesson_period.period.period + 1,
-                        instance.absent,
-                        instance.excused,
-                        instance.excuse_type,
-                    )
+                messages.success(request, _("The lesson documentation has been saved."))
 
-            messages.success(request, _("The personal notes have been saved."))
+            substitution = lesson_period.get_substitution()
+            if (
+                not getattr(substitution, "cancelled", False)
+                or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
+            ):
+                if personal_note_formset.is_valid() and request.user.has_perm(
+                    "alsijil.edit_lesson_personalnote", lesson_period
+                ):
+                    with reversion.create_revision():
+                        reversion.set_user(request.user)
+                        instances = personal_note_formset.save()
 
-            # Regenerate form here to ensure that programmatically
-            # changed data will be shown correctly
-            personal_note_formset = PersonalNoteFormSet(
-                None, queryset=persons_qs, prefix="personal_notes"
-            )
+                    # Iterate over personal notes and carry changed absences to following lessons
+                    for instance in instances:
+                        instance.person.mark_absent(
+                            wanted_week[lesson_period.period.weekday],
+                            lesson_period.period.period + 1,
+                            instance.absent,
+                            instance.excused,
+                            instance.excuse_type,
+                        )
 
-    context["lesson_documentation"] = lesson_documentation
-    context["lesson_documentation_form"] = lesson_documentation_form
-    context["personal_note_formset"] = personal_note_formset
-    context["prev_lesson"] = lesson_period.prev
-    context["next_lesson"] = lesson_period.next
+                messages.success(request, _("The personal notes have been saved."))
+
+                # Regenerate form here to ensure that programmatically
+                # changed data will be shown correctly
+                personal_note_formset = PersonalNoteFormSet(
+                    None, queryset=persons_qs, prefix="personal_notes"
+                )
+
+        context["lesson_documentation"] = lesson_documentation
+        context["lesson_documentation_form"] = lesson_documentation_form
+        context["personal_note_formset"] = personal_note_formset
 
     return render(request, "alsijil/class_register/lesson.html", context)
 
@@ -361,6 +371,7 @@ def week_view(
     context["group"] = group
     context["select_form"] = select_form
     context["instance"] = instance
+    context["weekdays"] = build_weekdays(TimePeriod.WEEKDAY_CHOICES, wanted_week)
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
@@ -497,7 +508,7 @@ def my_students(request: HttpRequest) -> HttpResponse:
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
     context["groups"] = request.user.person.get_owner_groups_with_lessons().annotate(
-        students_count=Count("members")
+        students_count=Count("members", distinct=True)
     )
     return render(request, "alsijil/class_register/groups.html", context)
 
@@ -677,6 +688,8 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     register_absence_form = RegisterAbsenceForm(request.POST or None)
 
     if request.method == "POST" and register_absence_form.is_valid():
+        confirmed = request.POST.get("confirmed", "0") == "1"
+
         # Get data from form
         # person = register_absence_form.cleaned_data["person"]
         start_date = register_absence_form.cleaned_data["date_start"]
@@ -689,18 +702,41 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
         remarks = register_absence_form.cleaned_data["remarks"]
 
         # Mark person as absent
+        affected_count = 0
         delta = end_date - start_date
         for i in range(delta.days + 1):
             from_period_on_day = from_period if i == 0 else TimePeriod.period_min
             to_period_on_day = to_period if i == delta.days else TimePeriod.period_max
             day = start_date + timedelta(days=i)
 
-            person.mark_absent(
-                day, from_period_on_day, absent, excused, excuse_type, remarks, to_period_on_day,
+            # Skip holidays if activated
+            if not get_site_preferences()["alsijil__allow_entries_in_holidays"]:
+                holiday = Holiday.on_day(day)
+                if holiday:
+                    continue
+
+            affected_count += person.mark_absent(
+                day,
+                from_period_on_day,
+                absent,
+                excused,
+                excuse_type,
+                remarks,
+                to_period_on_day,
+                dry_run=not confirmed,
             )
 
-        messages.success(request, _("The absence has been saved."))
-        return redirect("overview_person", person.pk)
+        if not confirmed:
+            # Show confirmation page
+            context = {}
+            context["affected_lessons"] = affected_count
+            context["person"] = person
+            context["form_data"] = register_absence_form.cleaned_data
+            context["form"] = register_absence_form
+            return render(request, "alsijil/absences/register_confirm.html", context)
+        else:
+            messages.success(request, _("The absence has been saved."))
+            return redirect("overview_person", person.pk)
 
     context["person"] = person
     context["register_absence_form"] = register_absence_form
