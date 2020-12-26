@@ -129,3 +129,42 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
                 result = DataCheckResult.objects.get_or_create(
                     check=cls.name, content_type=ct, object_id=doc.id
                 )
+
+
+@DATA_CHECK_REGISTRY.register
+class PersonalNoteOnHolidaysDataCheck(DataCheck):
+    """Checks for personal note objects on holidays.
+
+    This ignores empty personal notes as they are created by default.
+    """
+
+    name = "personal_note_on_holidays"
+    verbose_name = _("Ensure that there are no filled out personal notes on holidays")
+    problem_name = _("The personal note is on holidays.")
+    solve_options = {
+        DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
+        IgnoreSolveOption.name: IgnoreSolveOption,
+    }
+
+    @classmethod
+    def check_data(cls):
+        from aleksis.apps.chronos.models import Holiday
+        from aleksis.core.models import DataCheckResult
+
+        from .models import PersonalNote
+
+        ct = ContentType.objects.get_for_model(PersonalNote)
+        holidays = list(Holiday.objects.all())
+
+        personal_notes = PersonalNote.objects.filter(
+            ~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False)
+        )
+
+        for note in personal_notes:
+            logging.info(f"Check personal note {note}")
+            day = week_weekday_to_date(note.calendar_week, note.lesson_period.period.weekday)
+            if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
+                logging.info("  ... on holidays")
+                result = DataCheckResult.objects.get_or_create(
+                    check=cls.name, content_type=ct, object_id=note.id
+                )
