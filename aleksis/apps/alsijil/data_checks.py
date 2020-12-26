@@ -1,11 +1,8 @@
 import logging
 
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import F
 from django.db.models.query_utils import Q
 from django.utils.translation import gettext as _
-
-from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.data_checks import DATA_CHECK_REGISTRY, DataCheck, IgnoreSolveOption, SolveOption
