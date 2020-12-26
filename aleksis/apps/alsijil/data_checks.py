@@ -168,3 +168,32 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
                 result = DataCheckResult.objects.get_or_create(
                     check=cls.name, content_type=ct, object_id=note.id
                 )
+
+
+@DATA_CHECK_REGISTRY.register
+class ExcusesWithoutAbsences(DataCheck):
+    name = "excuses_without_absences"
+    verbose_name = _("Ensure that there are no excused personal notes without an absence")
+    problem_name = _("The personal note is marked as excused, but not as absent.")
+    solve_options = {
+        DeleteRelatedObjectSolveOption.name: DeleteRelatedObjectSolveOption,
+        # FIXME OPTION
+        IgnoreSolveOption.name: IgnoreSolveOption,
+    }
+
+    @classmethod
+    def check_data(cls):
+        from aleksis.core.models import DataCheckResult
+
+        from .models import PersonalNote
+
+        ct = ContentType.objects.get_for_model(PersonalNote)
+
+        personal_notes = PersonalNote.objects.filter(excused=True,
+                                                     absent=False)
+
+        for note in personal_notes:
+            logging.info(f"Check personal note {note}")
+            result = DataCheckResult.objects.get_or_create(
+                check=cls.name, content_type=ct, object_id=note.id
+            )
