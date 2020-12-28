@@ -5,7 +5,7 @@ from django.db.models.query_utils import Q
 from django.utils.translation import gettext as _
 
 from aleksis.apps.chronos.util.date import week_weekday_to_date
-from aleksis.core.data_checks import DATA_CHECK_REGISTRY, DataCheck, IgnoreSolveOption, SolveOption
+from aleksis.core.data_checks import DataCheck, IgnoreSolveOption, SolveOption
 
 
 class DeleteRelatedObjectSolveOption(SolveOption):
@@ -41,7 +41,6 @@ class ResetPersonalNoteSolveOption(SolveOption):
         check_result.delete()
 
 
-@DATA_CHECK_REGISTRY.register
 class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
     name = "no_personal_notes_in_cancelled_lessons"
     verbose_name = _("Ensure that there are no personal notes in cancelled lessons")
@@ -66,7 +65,6 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
             cls.register_result(note)
 
 
-@DATA_CHECK_REGISTRY.register
 class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
     name = "no_groups_of_persons_set_in_personal_notes"
     verbose_name = _("Ensure that 'groups_of_person' is set for every personal note")
@@ -88,7 +86,6 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
             cls.register_result(note)
 
 
-@DATA_CHECK_REGISTRY.register
 class LessonDocumentationOnHolidaysDataCheck(DataCheck):
     """Checks for lesson documentation objects on holidays.
 
@@ -123,7 +120,6 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
                 cls.register_result(doc)
 
 
-@DATA_CHECK_REGISTRY.register
 class PersonalNoteOnHolidaysDataCheck(DataCheck):
     """Checks for personal note objects on holidays.
 
@@ -158,7 +154,6 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
                 cls.register_result(note)
 
 
-@DATA_CHECK_REGISTRY.register
 class ExcusesWithoutAbsences(DataCheck):
     name = "excuses_without_absences"
     verbose_name = _("Ensure that there are no excused personal notes without an absence")

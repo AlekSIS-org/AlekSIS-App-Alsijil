@@ -5,6 +5,13 @@ from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.alsijil.data_checks import (
+    ExcusesWithoutAbsences,
+    LessonDocumentationOnHolidaysDataCheck,
+    NoGroupsOfPersonsSetInPersonalNotesDataCheck,
+    NoPersonalNotesInCancelledLessonsDataCheck,
+    PersonalNoteOnHolidaysDataCheck,
+)
 from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
@@ -45,6 +52,13 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     Used in the class register to note absences, excuses
     and remarks about a student in a single lesson period.
     """
+
+    data_checks = [
+        NoPersonalNotesInCancelledLessonsDataCheck,
+        NoGroupsOfPersonsSetInPersonalNotesDataCheck,
+        PersonalNoteOnHolidaysDataCheck,
+        ExcusesWithoutAbsences,
+    ]
 
     objects = PersonalNoteManager()
 
@@ -125,6 +139,8 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
     Non-personal, includes the topic and homework of the lesson.
     """
+
+    data_checks = [LessonDocumentationOnHolidaysDataCheck]
 
     week = models.IntegerField()
     year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
