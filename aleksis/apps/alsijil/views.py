@@ -6,7 +6,9 @@ from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 import reversion
@@ -679,6 +681,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     return render(request, "alsijil/class_register/person.html", context)
 
 
+@never_cache
 @permission_required("alsijil.register_absence", fn=objectgetter_optional(Person))
 def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
@@ -744,6 +747,7 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     return render(request, "alsijil/absences/register.html", context)
 
 
+@method_decorator(never_cache, name="dispatch")
 class DeletePersonalNoteView(PermissionRequiredMixin, DetailView):
     model = PersonalNote
     template_name = "core/pages/delete.html"
@@ -768,6 +772,7 @@ class ExtraMarkListView(PermissionRequiredMixin, SingleTableView):
     template_name = "alsijil/extra_mark/list.html"
 
 
+@method_decorator(never_cache, name="dispatch")
 class ExtraMarkCreateView(PermissionRequiredMixin, AdvancedCreateView):
     """Create view for extra marks."""
 
@@ -779,6 +784,7 @@ class ExtraMarkCreateView(PermissionRequiredMixin, AdvancedCreateView):
     success_message = _("The extra mark has been created.")
 
 
+@method_decorator(never_cache, name="dispatch")
 class ExtraMarkEditView(PermissionRequiredMixin, AdvancedEditView):
     """Edit view for extra marks."""
 
@@ -790,6 +796,7 @@ class ExtraMarkEditView(PermissionRequiredMixin, AdvancedEditView):
     success_message = _("The extra mark has been saved.")
 
 
+@method_decorator(never_cache, name="dispatch")
 class ExtraMarkDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
     """Delete view for extra marks."""
 
@@ -809,6 +816,7 @@ class ExcuseTypeListView(PermissionRequiredMixin, SingleTableView):
     template_name = "alsijil/excuse_type/list.html"
 
 
+@method_decorator(never_cache, name="dispatch")
 class ExcuseTypeCreateView(PermissionRequiredMixin, AdvancedCreateView):
     """Create view for excuse types."""
 
@@ -820,6 +828,7 @@ class ExcuseTypeCreateView(PermissionRequiredMixin, AdvancedCreateView):
     success_message = _("The excuse type has been created.")
 
 
+@method_decorator(never_cache, name="dispatch")
 class ExcuseTypeEditView(PermissionRequiredMixin, AdvancedEditView):
     """Edit view for excuse types."""
 
@@ -831,6 +840,7 @@ class ExcuseTypeEditView(PermissionRequiredMixin, AdvancedEditView):
     success_message = _("The excuse type has been saved.")
 
 
+@method_decorator(never_cache, "dispatch")
 class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
     """Delete view for excuse types."""
 
