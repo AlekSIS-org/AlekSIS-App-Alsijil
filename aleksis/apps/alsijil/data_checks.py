@@ -1,10 +1,12 @@
 import logging
 
 from django.db.models import F
+from django.db.models.expressions import ExpressionWrapper, Func, Value
+from django.db.models.fields import DateField
+from django.db.models.functions import Concat
 from django.db.models.query_utils import Q
 from django.utils.translation import gettext as _
 
-from aleksis.apps.chronos.util.date import week_weekday_to_date
 from aleksis.core.data_checks import DataCheck, IgnoreSolveOption, SolveOption
 
 
@@ -86,6 +88,15 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
             cls.register_result(note)
 
 
+weekday_to_date = ExpressionWrapper(
+    Func(
+        Concat(F("year"), F("week")), Value("IYYYIW"), output_field=DateField(), function="TO_DATE"
+    )
+    + F("lesson_period__period__weekday"),
+    output_field=DateField(),
+)
+
+
 class LessonDocumentationOnHolidaysDataCheck(DataCheck):
     """Checks for lesson documentation objects on holidays.
 
@@ -106,17 +117,18 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
 
         from .models import LessonDocumentation
 
-        holidays = list(Holiday.objects.all())
+        holidays = Holiday.objects.all()
 
         documentations = LessonDocumentation.objects.filter(
             ~Q(topic="") | ~Q(group_note="") | ~Q(homework="")
-        )
+        ).annotate(actual_date=weekday_to_date)
 
-        for doc in documentations:
-            logging.info(f"Check lesson documentation {doc}")
-            day = week_weekday_to_date(doc.calendar_week, doc.lesson_period.period.weekday)
-            if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
-                logging.info("  ... on holidays")
+        for holiday in holidays:
+            docs_filtered_by_date = documentations.filter(
+                actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end
+            )
+            for doc in docs_filtered_by_date:
+                logging.info(f"Lesson documentation {doc} is on holidays")
                 cls.register_result(doc)
 
 
@@ -140,17 +152,18 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
 
         from .models import PersonalNote
 
-        holidays = list(Holiday.objects.all())
+        holidays = Holiday.objects.all()
 
         personal_notes = PersonalNote.objects.filter(
             ~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False)
-        )
+        ).annotate(actual_date=weekday_to_date)
 
-        for note in personal_notes:
-            logging.info(f"Check personal note {note}")
-            day = week_weekday_to_date(note.calendar_week, note.lesson_period.period.weekday)
-            if len(list(filter(lambda h: h.date_start <= day <= h.date_end, holidays))) > 0:
-                logging.info("  ... on holidays")
+        for holiday in holidays:
+            notes_filtered_by_date = personal_notes.filter(
+                actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end
+            )
+            for note in notes_filtered_by_date:
+                logging.info(f"Personal note {note} is on holidays")
                 cls.register_result(note)
 
 
