@@ -123,13 +123,14 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
             ~Q(topic="") | ~Q(group_note="") | ~Q(homework="")
         ).annotate(actual_date=weekday_to_date)
 
+        q = Q()
         for holiday in holidays:
-            docs_filtered_by_date = documentations.filter(
-                actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end
-            )
-            for doc in docs_filtered_by_date:
-                logging.info(f"Lesson documentation {doc} is on holidays")
-                cls.register_result(doc)
+            q = q | Q(actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end)
+        documentations = documentations.filter(q)
+
+        for doc in documentations:
+            logging.info(f"Lesson documentation {doc} is on holidays")
+            cls.register_result(doc)
 
 
 class PersonalNoteOnHolidaysDataCheck(DataCheck):
@@ -158,13 +159,14 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
             ~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False)
         ).annotate(actual_date=weekday_to_date)
 
+        q = Q()
         for holiday in holidays:
-            notes_filtered_by_date = personal_notes.filter(
-                actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end
-            )
-            for note in notes_filtered_by_date:
-                logging.info(f"Personal note {note} is on holidays")
-                cls.register_result(note)
+            q = q | Q(actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end)
+        personal_notes = personal_notes.filter(q)
+
+        for note in personal_notes:
+            logging.info(f"Personal note {note} is on holidays")
+            cls.register_result(note)
 
 
 class ExcusesWithoutAbsences(DataCheck):
