@@ -1,9 +1,17 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.alsijil.data_checks import (
+    ExcusesWithoutAbsences,
+    LessonDocumentationOnHolidaysDataCheck,
+    NoGroupsOfPersonsSetInPersonalNotesDataCheck,
+    NoPersonalNotesInCancelledLessonsDataCheck,
+    PersonalNoteOnHolidaysDataCheck,
+)
 from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
@@ -44,6 +52,13 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     Used in the class register to note absences, excuses
     and remarks about a student in a single lesson period.
     """
+
+    data_checks = [
+        NoPersonalNotesInCancelledLessonsDataCheck,
+        NoGroupsOfPersonsSetInPersonalNotesDataCheck,
+        PersonalNoteOnHolidaysDataCheck,
+        ExcusesWithoutAbsences,
+    ]
 
     objects = PersonalNoteManager()
 
@@ -97,6 +112,14 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     def __str__(self):
         return f"{date_format(self.date)}, {self.lesson_period}, {self.person}"
 
+    def get_absolute_url(self):
+        return (
+            reverse(
+                "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
+            )
+            + "#personal-notes"
+        )
+
     class Meta:
         verbose_name = _("Personal note")
         verbose_name_plural = _("Personal notes")
@@ -116,6 +139,8 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
     Non-personal, includes the topic and homework of the lesson.
     """
+
+    data_checks = [LessonDocumentationOnHolidaysDataCheck]
 
     week = models.IntegerField()
     year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
@@ -159,6 +184,14 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
             if changed:
                 lesson_documentation.save()
+
+    def __str__(self):
+        return f"{self.lesson_period}, {date_format(self.date)}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
+        )
 
     def save(self, *args, **kwargs):
         if get_site_preferences()["alsijil__carry_over"] and (
