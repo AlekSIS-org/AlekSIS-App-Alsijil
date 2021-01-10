@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.constraints import CheckConstraint
+from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
@@ -46,6 +48,31 @@ class ExcuseType(ExtensibleModel):
         verbose_name_plural = _("Excuse types")
 
 
+lesson_related_constraint_q = (
+    Q(
+        lesson_period__isnull=False,
+        event__isnull=True,
+        extra_lesson__isnull=True,
+        week__isnull=False,
+        year__isnull=False,
+    )
+    | Q(
+        lesson_period__isnull=True,
+        event__isnull=False,
+        extra_lesson__isnull=True,
+        week__isnull=True,
+        year__isnull=True,
+    )
+    | Q(
+        lesson_period__isnull=True,
+        event__isnull=True,
+        extra_lesson__isnull=False,
+        week__isnull=True,
+        year__isnull=True,
+    )
+)
+
+
 class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     """A personal note about a single person.
 
@@ -65,11 +92,19 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     person = models.ForeignKey("core.Person", models.CASCADE, related_name="personal_notes")
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
-    week = models.IntegerField()
-    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+    week = models.IntegerField(blank=True, null=True)
+    year = models.IntegerField(
+        verbose_name=_("Year"), default=get_current_year, blank=True, null=True
+    )
 
     lesson_period = models.ForeignKey(
-        "chronos.LessonPeriod", models.CASCADE, related_name="personal_notes"
+        "chronos.LessonPeriod", models.CASCADE, related_name="personal_notes", blank=True, null=True
+    )
+    event = models.ForeignKey(
+        "chronos.Event", models.CASCADE, related_name="personal_notes", blank=True, null=True
+    )
+    extra_lesson = models.ForeignKey(
+        "chronos.ExtraLesson", models.CASCADE, related_name="personal_notes", blank=True, null=True
     )
 
     absent = models.BooleanField(default=False)
@@ -123,7 +158,6 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     class Meta:
         verbose_name = _("Personal note")
         verbose_name_plural = _("Personal notes")
-        unique_together = [["lesson_period", "week", "person"]]
         ordering = [
             "year",
             "week",
@@ -131,6 +165,11 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
             "lesson_period__period__period",
             "person__last_name",
             "person__first_name",
+        ]
+        constraints = [
+            CheckConstraint(
+                check=lesson_related_constraint_q, name="one_relation_only_personal_note"
+            )
         ]
 
 
@@ -142,11 +181,19 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
     data_checks = [LessonDocumentationOnHolidaysDataCheck]
 
-    week = models.IntegerField()
-    year = models.IntegerField(verbose_name=_("Year"), default=get_current_year)
+    week = models.IntegerField(blank=True, null=True)
+    year = models.IntegerField(
+        verbose_name=_("Year"), default=get_current_year, blank=True, null=True
+    )
 
     lesson_period = models.ForeignKey(
-        "chronos.LessonPeriod", models.CASCADE, related_name="documentations"
+        "chronos.LessonPeriod", models.CASCADE, related_name="documentations", blank=True, null=True
+    )
+    event = models.ForeignKey(
+        "chronos.Event", models.CASCADE, related_name="documentations", blank=True, null=True
+    )
+    extra_lesson = models.ForeignKey(
+        "chronos.ExtraLesson", models.CASCADE, related_name="documentations", blank=True, null=True
     )
 
     topic = models.CharField(verbose_name=_("Lesson topic"), max_length=200, blank=True)
@@ -203,12 +250,16 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
     class Meta:
         verbose_name = _("Lesson documentation")
         verbose_name_plural = _("Lesson documentations")
-        unique_together = [["lesson_period", "week"]]
         ordering = [
             "year",
             "week",
             "lesson_period__period__weekday",
             "lesson_period__period__period",
+        ]
+        constraints = [
+            CheckConstraint(
+                check=lesson_related_constraint_q, name="one_relation_only_lesson_documentation",
+            )
         ]
 
 
