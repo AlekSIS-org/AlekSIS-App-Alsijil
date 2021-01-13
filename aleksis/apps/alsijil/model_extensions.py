@@ -10,7 +10,7 @@ from calendarweek import CalendarWeek
 from django_global_request.middleware import get_request
 from reversion import set_user
 
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
@@ -184,6 +184,19 @@ def get_lesson_documentation(
         return None
 
 
+def get_lesson_documentation_simple(
+    self, week: Optional[CalendarWeek] = None
+) -> Union[LessonDocumentation, None]:
+    """Get lesson documentation object for this event/extra lesson."""
+    if self.documentations.exists():
+        return self.documentations.all()[0]
+    return None
+
+
+Event.method(get_lesson_documentation_simple, "get_lesson_documentation")
+ExtraLesson.method(get_lesson_documentation_simple, "get_lesson_documentation")
+
+
 @LessonPeriod.method
 def get_or_create_lesson_documentation(
     self, week: Optional[CalendarWeek] = None
@@ -195,6 +208,20 @@ def get_or_create_lesson_documentation(
         lesson_period=self, week=week.week, year=week.year
     )
     return lesson_documentation
+
+
+def get_or_create_lesson_documentation_simple(
+    self, week: Optional[CalendarWeek] = None
+) -> LessonDocumentation:
+    """Get or create lesson documentation object for this event/extra lesson."""
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+        **{"event" if isinstance(self, Event) else "extra_lesson": self}
+    )
+    return lesson_documentation
+
+
+Event.method(get_or_create_lesson_documentation_simple, "get_or_create_lesson_documentation")
+ExtraLesson.method(get_or_create_lesson_documentation_simple, "get_or_create_lesson_documentation")
 
 
 @LessonPeriod.method
@@ -209,12 +236,22 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     )
 
 
+def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> Iterator:
+    """Get all personal notes of absent persons for this event/extra lesson."""
+    return self.personal_notes.all()
+
+
 @LessonPeriod.method
 def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of excused absent persons for this lesson."""
     if not week:
         week = self.week
     return self.personal_notes.filter(week=week.week, year=week.year, absent=True, excused=True)
+
+
+def get_excused_absences_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of excused absent persons for this event/extra lesson."""
+    return self.personal_notes.filter(absent=True, excused=True)
 
 
 @LessonPeriod.method
@@ -225,12 +262,22 @@ def get_unexcused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySe
     return self.personal_notes.filter(week=week.week, year=week.year, absent=True, excused=False)
 
 
+def get_unexcused_absences_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of unexcused absent persons for this event/extra lesson."""
+    return self.personal_notes.filter(absent=True, excused=False)
+
+
 @LessonPeriod.method
 def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of late persons for this lesson."""
     if not week:
         week = self.week
     return self.personal_notes.filter(week=week.week, year=week.year, late__gt=0)
+
+
+def get_tardinesses_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of late persons for this event/extra lesson."""
+    return self.personal_notes.filter(late__gt=0)
 
 
 @LessonPeriod.method
@@ -242,6 +289,17 @@ def get_extra_marks(self, week: Optional[CalendarWeek] = None) -> Dict[ExtraMark
     stats = {}
     for extra_mark in ExtraMark.objects.all():
         qs = self.personal_notes.filter(week=week.week, year=week.year, extra_marks=extra_mark)
+        if qs:
+            stats[extra_mark] = qs
+
+    return stats
+
+
+def get_extra_marks_simple(self, week: Optional[CalendarWeek] = None) -> Dict[ExtraMark, QuerySet]:
+    """Get all statistics on extra marks for this event/extra lesson."""
+    stats = {}
+    for extra_mark in ExtraMark.objects.all():
+        qs = self.personal_notes.filter(extra_marks=extra_mark)
         if qs:
             stats[extra_mark] = qs
 
