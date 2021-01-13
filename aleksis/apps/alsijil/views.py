@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -18,7 +19,7 @@ from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import Holiday, LessonPeriod, TimePeriod
+from aleksis.apps.chronos.models import Event, ExtraLesson, Holiday, LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.build import build_weekdays
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
 from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
@@ -34,9 +35,14 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .models import ExcuseType, ExtraMark, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
-from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
+from .util.alsijil_helpers import (
+    annotate_documentations,
+    get_lesson_period_by_pk,
+    get_timetable_instance_by_pk,
+    register_objects_sorter,
+)
 
 
 @permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
@@ -199,8 +205,10 @@ def week_view(
         "lesson__groups__parent_groups",
         "lesson__groups__parent_groups__owners",
     )
+    events = Event.objects.in_week(wanted_week)
+    extra_lessons = ExtraLesson.objects.in_week(wanted_week)
 
-    lesson_periods_query_exists = True
+    query_exists = True
     if type_ and id_:
         if isinstance(instance, HttpResponseNotFound):
             return HttpResponseNotFound()
@@ -208,15 +216,26 @@ def week_view(
         type_ = TimetableType.from_string(type_)
 
         lesson_periods = lesson_periods.filter_from_type(type_, instance)
+        events = events.filter_from_type(type_, instance)
+        extra_lessons = extra_lessons.filter_from_Type(type_, instance)
+
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
             lesson_periods = lesson_periods.filter_teacher(request.user.person)
+            events = events.filter_teacher(request.user.person)
+            extra_lessons = extra_lessons.filter_teacher(request.user.person)
+
             type_ = TimetableType.TEACHER
         else:
             lesson_periods = lesson_periods.filter_participant(request.user.person)
+            events = events.filter_participant(request.user.person)
+            extra_lessons = extra_lessons.filter_participant(request.user.person)
+
     else:
-        lesson_periods_query_exists = False
+        query_exists = False
         lesson_periods = None
+        events = None
+        extra_lessons = None
 
     # Add a form to filter the view
     if type_:
@@ -245,35 +264,21 @@ def week_view(
 
     extra_marks = ExtraMark.objects.all()
 
-    if lesson_periods_query_exists:
+    if query_exists:
         lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
-        lesson_periods = (
-            LessonPeriod.objects.prefetch_related(
-                Prefetch(
-                    "documentations",
-                    queryset=LessonDocumentation.objects.filter(
-                        week=wanted_week.week, year=wanted_week.year
-                    ),
-                )
-            )
-            .filter(pk__in=lesson_periods_pk)
-            .annotate_week(wanted_week)
-            .annotate(
-                has_documentation=Exists(
-                    LessonDocumentation.objects.filter(
-                        ~Q(topic__exact=""),
-                        lesson_period=OuterRef("pk"),
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                    )
-                )
-            )
-            .order_by("period__weekday", "period__period")
-        )
+        lesson_periods = annotate_documentations(LessonPeriod, wanted_week, lesson_periods_pk)
+
+        events_pk = list(events.values_list("pk", flat=True))
+        events = annotate_documentations(Event, wanted_week, events_pk)
+
+        extra_lessons_pk = list(extra_lessons.values_list("pk", flat=True))
+        extra_lessons = annotate_documentations(ExtraLesson, wanted_week, extra_lessons_pk)
     else:
         lesson_periods_pk = []
+        events_pk = []
+        extra_lessons_pk = []
 
-    if lesson_periods_pk:
+    if lesson_periods_pk or events_pk or extra_lessons_pk:
         # Aggregate all personal notes for this group and week
         persons_qs = Person.objects.filter(is_active=True)
 
@@ -282,7 +287,29 @@ def week_view(
         elif group:
             persons_qs = persons_qs.filter(member_of=group)
         else:
-            persons_qs = persons_qs.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
+            persons_qs = persons_qs.filter(
+                Q(member_of__lessons__lesson_periods__in=lesson_periods_pk)
+                | Q(member_of__events__in=events_pk)
+                | Q(member_of__extra_lessons__in=extra_lessons_pk)
+            )
+
+        personal_notes_q = (
+            Q(
+                personal_notes__week=wanted_week.week,
+                personal_notes__year=wanted_week.year,
+                personal_notes__lesson_period__in=lesson_periods_pk,
+            )
+            | Q(
+                personal_notes__event__date_start__lte=wanted_week[6],
+                personal_notes__event__date_end__gte=wanted_week[0],
+                personal_notes__event__in=events_pk,
+            )
+            | Q(
+                personal_notes__extra_lesson__week=wanted_week.week,
+                personal_notes__extra_lesson__year=wanted_week.year,
+                personal_notes__extra_lesson__in=extra_lessons_pk,
+            )
+        )
 
         persons_qs = (
             persons_qs.distinct()
@@ -290,9 +317,21 @@ def week_view(
                 Prefetch(
                     "personal_notes",
                     queryset=PersonalNote.objects.filter(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
+                        Q(
+                            week=wanted_week.week,
+                            year=wanted_week.year,
+                            lesson_period__in=lesson_periods_pk,
+                        )
+                        | Q(
+                            event__date_start__lte=wanted_week[6],
+                            event__date_end__gte=wanted_week[0],
+                            event__in=events_pk,
+                        )
+                        | Q(
+                            extra_lesson__week=wanted_week.week,
+                            extra_lesson__year=wanted_week.year,
+                            extra_lesson__in=extra_lessons_pk,
+                        )
                     ),
                 ),
                 "member_of__owners",
@@ -300,44 +339,25 @@ def week_view(
             .annotate(
                 absences_count=Count(
                     "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                        personal_notes__absent=True,
-                    ),
+                    filter=personal_notes_q & Q(personal_notes__absent=True,),
                     distinct=True,
                 ),
                 unexcused_count=Count(
                     "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                        personal_notes__absent=True,
-                        personal_notes__excused=False,
-                    ),
+                    filter=personal_notes_q
+                    & Q(personal_notes__absent=True, personal_notes__excused=False,),
                     distinct=True,
                 ),
                 tardiness_sum=Subquery(
-                    Person.objects.filter(
-                        pk=OuterRef("pk"),
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                    )
+                    Person.objects.filter(personal_notes_q)
+                    .filter(pk=OuterRef("pk"),)
                     .distinct()
                     .annotate(tardiness_sum=Sum("personal_notes__late"))
                     .values("tardiness_sum")
                 ),
                 tardiness_count=Count(
                     "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                    )
-                    & ~Q(personal_notes__late=0),
+                    filter=personal_notes_q & ~Q(personal_notes__late=0),
                     distinct=True,
                 ),
             )
@@ -348,12 +368,7 @@ def week_view(
                 **{
                     extra_mark.count_label: Count(
                         "personal_notes",
-                        filter=Q(
-                            personal_notes__lesson_period__in=lesson_periods_pk,
-                            personal_notes__week=wanted_week.week,
-                            personal_notes__year=wanted_week.year,
-                            personal_notes__extra_marks=extra_mark,
-                        ),
+                        filter=personal_notes_q & Q(personal_notes__extra_marks=extra_mark,),
                         distinct=True,
                     )
                 }
@@ -368,12 +383,41 @@ def week_view(
     context["extra_marks"] = extra_marks
     context["week"] = wanted_week
     context["weeks"] = get_weeks_for_year(year=wanted_week.year)
+
     context["lesson_periods"] = lesson_periods
+    context["events"] = events
+    context["extra_lessons"] = extra_lessons
+
     context["persons"] = persons
     context["group"] = group
     context["select_form"] = select_form
     context["instance"] = instance
     context["weekdays"] = build_weekdays(TimePeriod.WEEKDAY_CHOICES, wanted_week)
+
+    regrouped_objects = {}
+
+    for register_object in list(lesson_periods) + list(extra_lessons):
+        regrouped_objects.setdefault(register_object.period.weekday, [])
+        regrouped_objects[register_object.period.weekday].append(register_object)
+
+    for event in events:
+        weekday_from = event.get_start_weekday(wanted_week)
+        weekday_to = event.get_end_weekday(wanted_week)
+        print(weekday_from, weekday_to)
+
+        for weekday in range(weekday_from, weekday_to + 1):
+            # Make a copy in order to keep the annotation only on this weekday
+            event_copy = deepcopy(event)
+            event.annotate_day(wanted_week[weekday])
+
+            regrouped_objects.setdefault(weekday, [])
+            regrouped_objects[weekday].append(event_copy)
+
+    # Sort register objects
+    for weekday in regrouped_objects.keys():
+        to_sort = regrouped_objects[weekday]
+        regrouped_objects[weekday] = sorted(to_sort, key=register_objects_sorter)
+    context["regrouped_objects"] = regrouped_objects
 
     week_prev = wanted_week - 1
     week_next = wanted_week + 1
