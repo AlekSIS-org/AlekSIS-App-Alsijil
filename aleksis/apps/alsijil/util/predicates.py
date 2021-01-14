@@ -113,11 +113,10 @@ def has_person_group_object_perm(perm: str):
     """
     name = f"has_person_group_object_perm:{perm}"
 
-    ct = get_content_type_by_perm(perm)
-    permissions = Permission.objects.filter(content_type=ct, codename=perm)
-
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
+        ct = get_content_type_by_perm(perm)
+        permissions = Permission.objects.filter(content_type=ct, codename=perm)
         groups = obj.member_of.all()
         qs = UserObjectPermission.objects.filter(
             object_pk__in=list(groups.values_list("pk", flat=True)),
@@ -151,13 +150,12 @@ def has_lesson_group_object_perm(perm: str):
     """
     name = f"has_lesson_group_object_perm:{perm}"
 
-    ct = get_content_type_by_perm(perm)
-    permissions = Permission.objects.filter(content_type=ct, codename=perm)
-
     @predicate(name)
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
             groups = obj.lesson.groups.all()
+            ct = get_content_type_by_perm(perm)
+            permissions = Permission.objects.filter(content_type=ct, codename=perm)
             qs = UserObjectPermission.objects.filter(
                 object_pk__in=list(groups.values_list("pk", flat=True)),
                 content_type=ct,
@@ -177,12 +175,11 @@ def has_personal_note_group_perm(perm: str):
     """
     name = f"has_personal_note_person_or_group_perm:{perm}"
 
-    ct = get_content_type_by_perm(perm)
-    permissions = Permission.objects.filter(content_type=ct, codename=perm)
-
     @predicate(name)
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
+            ct = get_content_type_by_perm(perm)
+            permissions = Permission.objects.filter(content_type=ct, codename=perm)
             groups = obj.person.member_of.all()
             qs = UserObjectPermission.objects.filter(
                 object_pk__in=list(groups.values_list("pk", flat=True)),
