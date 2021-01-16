@@ -81,9 +81,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
 
     remarks = models.CharField(max_length=200, blank=True)
 
-    extra_marks = models.ManyToManyField(
-        "ExtraMark", null=True, blank=True, verbose_name=_("Extra marks")
-    )
+    extra_marks = models.ManyToManyField("ExtraMark", blank=True, verbose_name=_("Extra marks"))
 
     def save(self, *args, **kwargs):
         if self.excuse_type:
