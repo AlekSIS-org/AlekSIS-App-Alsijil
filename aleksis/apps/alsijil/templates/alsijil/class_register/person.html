@@ -5,6 +5,7 @@
 {% load week_helpers %}
 {% load i18n %}
 {% load static %}
+{% load render_table from django_tables2 %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static "css/alsijil/person.css" %}">
@@ -38,8 +39,15 @@
   {% endif %}
 
   <div class="row">
-  <div class="col s12 m12 l6">
-
+    {% if stats %}
+    <div class="col s12">
+        <ul class="tabs">
+            <li class="tab col s6"><a href="#overview" class="active">{% trans "Overview" %}</a></li>
+            <li class="tab col s6"><a href="#statistics">{% trans "Statistics" %}</a></li>
+        </ul>
+    </div>
+    {% endif %}
+  <div class="col s12" id="statistics">
       <h5>{% trans "Unexcused absences" %}</h5>
 
       <ul class="collection">
@@ -82,7 +90,7 @@
                                  form="excuse-multiple-form" class="filled-in"/>
                           <span></span>
                       </label>
-                      <form action="" method="post" class="right hide-on-small-only" style="margin-top: -7px;">
+                      <form action="" method="post" class="right hide-on-small-only">
                           {% csrf_token %}
                           {% trans "Mark as" %}
                           <input type="hidden" value="{{ note.pk }}" name="personal_note">
@@ -164,8 +172,9 @@
       </ul>
     {% endif %}
   </div>
-  <div class="col s12 m12 l6">
+  <div class="col s12" id="overview">
     <h5>{% trans "Relevant personal notes" %}</h5>
+    {% render_table personal_notes_table %}
     <ul class="collapsible">
       <li>
         <div>
