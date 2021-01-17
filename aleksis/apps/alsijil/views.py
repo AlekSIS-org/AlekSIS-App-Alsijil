@@ -408,7 +408,7 @@ def week_view(
         for weekday in range(weekday_from, weekday_to + 1):
             # Make a copy in order to keep the annotation only on this weekday
             event_copy = deepcopy(event)
-            event.annotate_day(wanted_week[weekday])
+            event_copy.annotate_day(wanted_week[weekday])
 
             regrouped_objects.setdefault(weekday, [])
             regrouped_objects[weekday].append(event_copy)
