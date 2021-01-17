@@ -241,6 +241,10 @@ def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> Iterator:
     return self.personal_notes.all()
 
 
+Event.method(get_absences_simple, "get_absences")
+ExtraLesson.method(get_absences_simple, "get_absences")
+
+
 @LessonPeriod.method
 def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of excused absent persons for this lesson."""
@@ -252,6 +256,10 @@ def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
 def get_excused_absences_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of excused absent persons for this event/extra lesson."""
     return self.personal_notes.filter(absent=True, excused=True)
+
+
+Event.method(get_excused_absences_simple, "get_excused_absences")
+ExtraLesson.method(get_excused_absences_simple, "get_excused_absences")
 
 
 @LessonPeriod.method
@@ -267,6 +275,10 @@ def get_unexcused_absences_simple(self, week: Optional[CalendarWeek] = None) -> 
     return self.personal_notes.filter(absent=True, excused=False)
 
 
+Event.method(get_unexcused_absences_simple, "get_unexcused_absences")
+ExtraLesson.method(get_unexcused_absences_simple, "get_unexcused_absences")
+
+
 @LessonPeriod.method
 def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of late persons for this lesson."""
@@ -278,6 +290,10 @@ def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
 def get_tardinesses_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of late persons for this event/extra lesson."""
     return self.personal_notes.filter(late__gt=0)
+
+
+Event.method(get_tardinesses_simple, "get_tardinesses")
+ExtraLesson.method(get_tardinesses_simple, "get_tardinesses")
 
 
 @LessonPeriod.method
@@ -304,6 +320,10 @@ def get_extra_marks_simple(self, week: Optional[CalendarWeek] = None) -> Dict[Ex
             stats[extra_mark] = qs
 
     return stats
+
+
+Event.method(get_extra_marks_simple, "get_extra_marks")
+ExtraLesson.method(get_extra_marks_simple, "get_extra_marks")
 
 
 @Group.class_method
