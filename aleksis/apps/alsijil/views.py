@@ -63,6 +63,9 @@ from .util.alsijil_helpers import (
     get_timetable_instance_by_pk,
     register_objects_sorter,
 )
+from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .tables import ExcuseTypeTable, ExtraMarkTable, PersonalNoteTable
+from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
 @permission_required("alsijil.view_register_object", fn=get_register_object_by_pk)  # FIXME
@@ -868,6 +871,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
+
+    context["personal_notes_table"] = PersonalNoteTable(personal_notes)
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()
