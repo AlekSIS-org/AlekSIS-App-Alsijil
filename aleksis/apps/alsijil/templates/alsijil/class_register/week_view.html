@@ -119,10 +119,7 @@
                               {% if register_object.period %}
                                 {{ register_object.period.period }}.
                               {% else %}
-                                {{ register_object.date_start|date:"SHORT_DATE_FORMAT" }}
-                                {{ register_object.period_from.period }}.–<br/>
-                                {{ register_object.date_end|date:"SHORT_DATE_FORMAT" }}
-                                {{ register_object.period_to.period }}.
+                                {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
                               {% endif %}
                             </a>
                           </td>
@@ -188,7 +185,8 @@
               <ul class="collapsible hide-on-extra-large-only">
                 <li class="">
                   <div class="collapsible-header flow-text">
-                    {{ weekday }}, {{ advanced_weekday.date }} <i class="material-icons collapsible-icon-right">expand_more</i>
+                    {{ advanced_weekday.name }}, {{ advanced_weekday.date }} <i
+                      class="material-icons collapsible-icon-right">expand_more</i>
                   </div>
                   <div class="collapsible-body">
                     <div class="collection">
@@ -201,17 +199,42 @@
                             <table class="hide-on-med-and-down">
                               <tr>
                                 <th>{% trans "Subject" %}</th>
-                                <td>{{ register_object.period.period }}. {{ register_object.get_subject.name }}</td>
+                                <td>
+                                  {% if register_object.period %}
+                                    {{ register_object.period.period }}.
+                                  {% else %}
+                                    {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                                  {% endif %}
+                                  {% if register_object.get_subject %}
+                                    {{ register_object.get_subject.name }}
+                                  {% elif register_object.subject %}
+                                    {{ register_object.subject }}
+                                  {% else %}
+                                    {% trans "Event" %}
+                                  {% endif %}
+                                </td>
                               </tr>
                               {% if not group %}
                                 <tr>
-                                  <th>{% trans "Group" %}</th>
-                                  <td>{{ register_object.lesson.group_names }}</td>
+                                  <th>{% trans "Groups" %}</th>
+                                  <td>
+                                    {% if register_object.lesson %}
+                                      {{ register_object.lesson.group_names }}
+                                    {% else %}
+                                      {{ register_object.group_names }}
+                                    {% endif %}
+                                  </td>
                                 </tr>
                               {% endif %}
                               <tr>
                                 <th>{% trans "Teachers" %}</th>
-                                <td>{{ register_object.lesson.teacher_names }}</td>
+                                <td>
+                                  {% if register_object.get_teacher_names %}
+                                    {{ register_object.get_teacher_names }}
+                                  {% else %}
+                                    {{ register_object.teacher_names }}
+                                  {% endif %}
+                                </td>
                               </tr>
                               <tr>
                                 <th>{% trans "Lesson topic" %}</th>
@@ -235,17 +258,34 @@
                             <div class="hide-on-large-only">
                               <ul class="collection">
                                 <li class="collection-item">
-                                  {{ register_object.period.period }}. {{ register_object.get_subject.name }}
+                                  {% if register_object.period %}
+                                    {{ register_object.period.period }}.
+                                  {% else %}
+                                    {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                                  {% endif %}
+                                  {% if register_object.get_subject %}
+                                    {{ register_object.get_subject.name }}
+                                  {% elif register_object.subject %}
+                                    {{ register_object.subject }}
+                                  {% else %}
+                                    {% trans "Event" %}
+                                  {% endif %}
                                 </li>
                                 {% if not group %}
                                   <li class="collection-item">
-
-                                    {{ register_object.lesson.group_names }}
-
+                                    {% if register_object.lesson %}
+                                      {{ register_object.lesson.group_names }}
+                                    {% else %}
+                                      {{ register_object.group_names }}
+                                    {% endif %}
                                   </li>
                                 {% endif %}
                                 <li class="collection-item">
-                                  {{ register_object.lesson.teacher_names }}
+                                  {% if register_object.get_teacher_names %}
+                                    {{ register_object.get_teacher_names }}
+                                  {% else %}
+                                    {{ register_object.teacher_names }}
+                                  {% endif %}
                                 </li>
                                 <li class="collection-item">
                                   {{ register_object.get_lesson_documentation.topic }}
