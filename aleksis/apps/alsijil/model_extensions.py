@@ -282,7 +282,8 @@ def generate_person_list_with_class_register_statistics(
     persons = persons.filter(
         personal_notes__groups_of_person=self,
         personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
-    ).annotate(
+    ).distinct()
+    persons = persons.annotate(
         absences_count=Count(
             "personal_notes__absent",
             filter=Q(
