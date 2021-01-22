@@ -276,11 +276,14 @@ def generate_person_list_with_class_register_statistics(
     self: Group, persons: Optional[Iterable] = None
 ) -> QuerySet:
     """Get with class register statistics annotated list of all members."""
-    persons = persons or self.members.all()
+    if persons is None:
+        persons = self.members.all()
+
     persons = persons.filter(
         personal_notes__groups_of_person=self,
         personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
-    ).annotate(
+    ).distinct()
+    persons = persons.annotate(
         absences_count=Count(
             "personal_notes__absent",
             filter=Q(
