@@ -89,6 +89,17 @@ MENUS = {
                         ),
                     ],
                 },
+                {
+                    "name": _("Manage class roles"),
+                    "url": "class_roles",
+                    "icon": "support_agent",
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_classroles",
+                        ),
+                    ],
+                },
             ],
         }
     ]

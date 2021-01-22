@@ -27,6 +27,7 @@ from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
+    ClassRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
     LessonDocumentationForm,
@@ -34,8 +35,8 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
-from .tables import ExcuseTypeTable, ExtraMarkTable
+from .models import ClassRole, ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .tables import ClassRoleTable, ExcuseTypeTable, ExtraMarkTable
 from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
@@ -849,3 +850,47 @@ class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelet
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
+
+
+class ClassRoleListView(PermissionRequiredMixin, SingleTableView):
+    """Table of all class roles."""
+
+    model = ClassRole
+    table_class = ClassRoleTable
+    permission_required = "alsijil.view_classroles"
+    template_name = "alsijil/class_role/list.html"
+
+
+@method_decorator(never_cache, name="dispatch")
+class ClassRoleCreateView(PermissionRequiredMixin, AdvancedCreateView):
+    """Create view for class roles."""
+
+    model = ClassRole
+    form_class = ClassRoleForm
+    permission_required = "alsijil.add_classrole"
+    template_name = "alsijil/class_role/create.html"
+    success_url = reverse_lazy("class_roles")
+    success_message = _("The class role has been created.")
+
+
+@method_decorator(never_cache, name="dispatch")
+class ClassRoleEditView(PermissionRequiredMixin, AdvancedEditView):
+    """Edit view for class roles."""
+
+    model = ClassRole
+    form_class = ClassRoleForm
+    permission_required = "alsijil.edit_classrole"
+    template_name = "alsijil/class_role/edit.html"
+    success_url = reverse_lazy("class_roles")
+    success_message = _("The class role has been saved.")
+
+
+@method_decorator(never_cache, "dispatch")
+class ClassRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
+    """Delete view for class roles."""
+
+    model = ClassRole
+    permission_required = "alsijil.delete_classrole"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("class_roles")
+    success_message = _("The class role has been deleted.")

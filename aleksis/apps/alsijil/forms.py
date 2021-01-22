@@ -15,7 +15,7 @@ from aleksis.apps.chronos.models import TimePeriod
 from aleksis.core.models import Group, Person
 from aleksis.core.util.predicates import check_global_permission
 
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+from .models import ClassRole, ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -162,3 +162,11 @@ class ExcuseTypeForm(forms.ModelForm):
     class Meta:
         model = ExcuseType
         fields = ["short_name", "name"]
+
+
+class ClassRoleForm(forms.ModelForm):
+    layout = Layout("name", "icon", "colour")
+
+    class Meta:
+        model = ClassRole
+        fields = ["name", "icon", "colour"]

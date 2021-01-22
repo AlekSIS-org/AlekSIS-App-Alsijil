@@ -218,3 +218,26 @@ add_perm("alsijil.edit_extramark", edit_extramark_predicate)
 # Delete extra mark
 delete_extramark_predicate = view_extramarks_predicate & has_global_perm("alsijil.delete_extramark")
 add_perm("alsijil.delete_extramark", delete_extramark_predicate)
+
+
+# View class role list
+view_class_roles_predicate = (
+    has_person
+    & is_site_preference_set("alsijil", "activate_class_roles")
+    & has_global_perm("alsijil.view_classrole")
+)
+add_perm("alsijil.view_classroles", view_class_roles_predicate)
+
+# Add class role
+add_class_role_predicate = view_class_roles_predicate & has_global_perm("alsijil.add_classrole")
+add_perm("alsijil.add_classrole", add_class_role_predicate)
+
+# Edit class role
+edit_class_role_predicate = view_class_roles_predicate & has_global_perm("alsijil.change_classrole")
+add_perm("alsijil.edit_classrole", edit_class_role_predicate)
+
+# Delete class role
+delete_class_role_predicate = view_class_roles_predicate & has_global_perm(
+    "alsijil.delete_classrole"
+)
+add_perm("alsijil.delete_classrole", delete_class_role_predicate)

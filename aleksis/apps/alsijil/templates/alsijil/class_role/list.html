@@ -1,0 +1,22 @@
+{# -*- engine:django -*- #}
+
+{% extends "core/base.html" %}
+
+{% load i18n rules %}
+{% load render_table from django_tables2 %}
+
+{% block browser_title %}{% blocktrans %}Class roles{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans %}Class roles{% endblocktrans %}{% endblock %}
+
+{% block content %}
+  {% has_perm "alsijil.add_classrole" user as add_class_role %}
+  {% if add_class_role %}
+    <a class="btn green waves-effect waves-light" href="{% url 'create_class_role' %}">
+      <i class="material-icons left">add</i>
+      {% trans "Create class role" %}
+    </a>
+  {% endif %}
+
+  {% render_table table %}
+{% endblock %}
+

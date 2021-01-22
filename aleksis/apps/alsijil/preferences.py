@@ -66,3 +66,11 @@ class AllowEntriesInHolidays(BooleanPreference):
     name = "allow_entries_in_holidays"
     default = False
     verbose_name = _("Allow teachers to add data for lessons in holidays")
+
+
+@site_preferences_registry.register
+class ActivateClassRoles(BooleanPreference):
+    section = alsijil
+    name = "activate_class_roles"
+    default = True
+    verbose_name = _("Activate support for creating and assigning class roles")

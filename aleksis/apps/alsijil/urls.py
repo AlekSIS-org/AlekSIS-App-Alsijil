@@ -49,4 +49,12 @@ urlpatterns = [
         views.ExcuseTypeDeleteView.as_view(),
         name="delete_excuse_type",
     ),
+    path("class_roles/", views.ClassRoleListView.as_view(), name="class_roles"),
+    path("class_roles/create/", views.ClassRoleCreateView.as_view(), name="create_class_role"),
+    path("class_roles/<int:pk>/edit/", views.ClassRoleEditView.as_view(), name="edit_class_role",),
+    path(
+        "class_roles/<int:pk>/delete/",
+        views.ClassRoleDeleteView.as_view(),
+        name="delete_class_role",
+    ),
 ]
