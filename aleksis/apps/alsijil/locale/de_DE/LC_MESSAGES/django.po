@@ -8,83 +8,79 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-01-22 22:01+0100\n"
-"PO-Revision-Date: 2020-12-05 20:56+0000\n"
+"PO-Revision-Date: 2021-01-22 21:30+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.3.2\n"
+"X-Generator: Weblate 4.4\n"
 
 #: data_checks.py:15
-#, fuzzy
-#| msgid "Delete note"
 msgid "Delete object"
-msgstr "Notiz löschen"
+msgstr "Objekt löschen"
 
 #: data_checks.py:25
-#, fuzzy
-#| msgid "Students list: %(group)s"
 msgid "Set current groups"
-msgstr "Schüler*innenliste: %(group)s"
+msgstr "Aktuelle Gruppen setzen"
 
 #: data_checks.py:36
-#, fuzzy
-#| msgid "Relevant personal notes"
 msgid "Reset personal note to defaults"
-msgstr "Relevante persönliche Notizen"
+msgstr "Persönliche Notiz zurücksetzen"
 
 #: data_checks.py:48
-#, fuzzy
-#| msgid "Block adding personal notes for cancelled lessons"
 msgid "Ensure that there are no personal notes in cancelled lessons"
-msgstr "Blockiere das Hinzufügen von persönlichen Notizen für ausgefallene Stunden"
+msgstr ""
+"Sicherstellen, dass es keine persönlichen Notizen in ausgefallenen Stunden "
+"gibt"
 
 #: data_checks.py:49
-#, fuzzy
-#| msgid "Block adding personal notes for cancelled lessons"
 msgid "The personal note is related to a cancelled lesson."
-msgstr "Blockiere das Hinzufügen von persönlichen Notizen für ausgefallene Stunden"
+msgstr "Die persönliche Notiz ist einer ausgefallenen Stunde zugeordnet."
 
 #: data_checks.py:72
 msgid "Ensure that 'groups_of_person' is set for every personal note"
 msgstr ""
+"Sicherstellen, dass \"groups_of_person\" für alle persönlichen Notizen "
+"gesetzt ist"
 
 #: data_checks.py:73
 msgid "The personal note has no group in 'groups_of_person'."
-msgstr ""
+msgstr "Die persönliche Notiz hat keine Gruppe in \"groups_of_person\"."
 
 #: data_checks.py:107
 msgid "Ensure that there are no filled out lesson documentations on holidays"
 msgstr ""
+"Sicherstellen, dass es keine ausgefüllten Stundendokumentationen in den "
+"Ferien gibt"
 
 #: data_checks.py:108
-#, fuzzy
-#| msgid "The lesson documentation has been saved."
 msgid "The lesson documentation is on holidays."
-msgstr "Die Stunden-Dokumentation wurde gespeichert."
+msgstr "Die Stundendokumentation ist in den Ferien."
 
 #: data_checks.py:143
 msgid "Ensure that there are no filled out personal notes on holidays"
 msgstr ""
+"Sicherstellen, dass es keine ausgefüllten persönlichen Notizen in den Ferien "
+"gibt"
 
 #: data_checks.py:144
-#, fuzzy
-#| msgid "The personal note has been deleted."
 msgid "The personal note is on holidays."
-msgstr "Die persönliche Notiz wurde gelöscht."
+msgstr "Die persönliche Notiz ist in den Ferien."
 
 #: data_checks.py:174
 msgid "Ensure that there are no excused personal notes without an absence"
 msgstr ""
+"Sicherstellen, dass es keine entschuldigten persönlichen Notizen ohne eine "
+"Absenz gibt"
 
 #: data_checks.py:175
-#, fuzzy
-#| msgid "The personal notes have been saved."
 msgid "The personal note is marked as excused, but not as absent."
-msgstr "Die persönlichen Notizen wurden gespeichert."
+msgstr ""
+"Die persönliche Notiz ist als entschuldigt, aber nicht als abwesend markiert."
 
 #: forms.py:29
 msgid "Homework for the next lesson"
@@ -332,10 +328,8 @@ msgid "Lessons in the past are not affected by this setting, you can open them w
 msgstr "Unterrichtsstunden in der Vergangenheit werden nicht durch diese Einstellung beeinflusst, sie können immer geöffnet werden."
 
 #: preferences.py:68
-#, fuzzy
-#| msgid "Teachers and lessons in child groups"
 msgid "Allow teachers to add data for lessons in holidays"
-msgstr "Lehrkräfte und Fächer von Untergruppen"
+msgstr "Lehrkräften erlauben, Daten für Stunden in den Ferien hinzuzufügen"
 
 #: tables.py:16 tables.py:36
 msgid "Edit"
@@ -540,49 +534,37 @@ msgid "Tardiness (in m)"
 msgstr "Verspätung (in m)"
 
 #: templates/alsijil/class_register/lesson.html:364
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "          Previous %(subject)s lesson\n"
-#| "        "
+#, python-format
 msgid ""
 "\n"
 "            Previous %(subject)s lesson\n"
 "          "
 msgstr ""
 "\n"
-"          Vorherige %(subject)s Stunde\n"
-"        "
+"            Vorherige %(subject)s Stunde\n"
+"          "
 
 #: templates/alsijil/class_register/lesson.html:372
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "          Next %(subject)s lesson\n"
-#| "        "
+#, python-format
 msgid ""
 "\n"
 "            Next %(subject)s lesson\n"
 "          "
 msgstr ""
 "\n"
-"          Nächste %(subject)s Stunde\n"
-"        "
+"            Nächste %(subject)s Stunde\n"
+"          "
 
 #: templates/alsijil/class_register/lesson.html:387
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "                  There are no affected lessons. Registering this absence won't have any effect.\n"
-#| "                "
 msgid ""
 "\n"
 "                This lesson overlaps with holidays and can't be edited.\n"
 "              "
 msgstr ""
 "\n"
-"                  Es gibt keine betroffenen Stunden. Das Eintragen dieser Abwesenheit wird keinen Effekt haben.\n"
-"                "
+"                Diese Stunde ist in den Ferien und kann somit nicht "
+"bearbeitet werden.\n"
+"              "
 
 #: templates/alsijil/class_register/person.html:8
 msgid "Class register: person"
