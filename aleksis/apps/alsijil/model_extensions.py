@@ -5,10 +5,7 @@ from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
 from django.utils.translation import gettext as _
 
-import reversion
 from calendarweek import CalendarWeek
-from django_global_request.middleware import get_request
-from reversion import set_user
 
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.core.models import Group, Person
@@ -63,31 +60,25 @@ def mark_absent(
             if sub and sub.cancelled:
                 continue
 
-            with reversion.create_revision():
-                set_user(get_request().user)
-                personal_note, created = (
-                    PersonalNote.objects.select_related(None)
-                    .prefetch_related(None)
-                    .update_or_create(
-                        person=self,
-                        lesson_period=lesson_period,
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        defaults={
-                            "absent": absent,
-                            "excused": excused,
-                            "excuse_type": excuse_type,
-                        },
-                    )
+            personal_note, created = (
+                PersonalNote.objects.select_related(None)
+                .prefetch_related(None)
+                .update_or_create(
+                    person=self,
+                    lesson_period=lesson_period,
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type,},
                 )
-                personal_note.groups_of_person.set(self.member_of.all())
+            )
+            personal_note.groups_of_person.set(self.member_of.all())
 
-                if remarks:
-                    if personal_note.remarks:
-                        personal_note.remarks += "; %s" % remarks
-                    else:
-                        personal_note.remarks = remarks
-                    personal_note.save()
+            if remarks:
+                if personal_note.remarks:
+                    personal_note.remarks += "; %s" % remarks
+                else:
+                    personal_note.remarks = remarks
+                personal_note.save()
 
     return lesson_periods.count()
 
