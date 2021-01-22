@@ -407,7 +407,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         .prefetch_related(
             "lesson_period__substitutions", "lesson_period__lesson__teachers", "groups_of_person"
         )
-        .filter(~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False))
+        .not_empty()
         .filter(
             Q(lesson_period__lesson__groups=group)
             | Q(lesson_period__lesson__groups__parent_groups=group)
@@ -415,7 +415,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     )
     documentations = (
         LessonDocumentation.objects.select_related("lesson_period")
-        .filter(~Q(topic="") | ~Q(group_note="") | ~Q(homework=""))
+        .not_empty()
         .filter(
             Q(lesson_period__lesson__groups=group)
             | Q(lesson_period__lesson__groups__parent_groups=group)
@@ -625,9 +625,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
 
-    personal_notes = allowed_personal_notes.filter(
-        Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
-    ).order_by(
+    personal_notes = allowed_personal_notes.not_empty().order_by(
         "-lesson_period__lesson__validity__date_start",
         "-week",
         "lesson_period__period__weekday",

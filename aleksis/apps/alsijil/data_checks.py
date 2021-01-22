@@ -56,11 +56,15 @@ class NoPersonalNotesInCancelledLessonsDataCheck(DataCheck):
     def check_data(cls):
         from .models import PersonalNote
 
-        personal_notes = PersonalNote.objects.filter(
-            lesson_period__substitutions__cancelled=True,
-            lesson_period__substitutions__week=F("week"),
-            lesson_period__substitutions__year=F("year"),
-        ).prefetch_related("lesson_period", "lesson_period__substitutions")
+        personal_notes = (
+            PersonalNote.objects.not_empty()
+            .filter(
+                lesson_period__substitutions__cancelled=True,
+                lesson_period__substitutions__week=F("week"),
+                lesson_period__substitutions__year=F("year"),
+            )
+            .prefetch_related("lesson_period", "lesson_period__substitutions")
+        )
 
         for note in personal_notes:
             logging.info(f"Check personal note {note}")
@@ -119,9 +123,9 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
 
         holidays = Holiday.objects.all()
 
-        documentations = LessonDocumentation.objects.filter(
-            ~Q(topic="") | ~Q(group_note="") | ~Q(homework="")
-        ).annotate(actual_date=weekday_to_date)
+        documentations = LessonDocumentation.objects.not_empty().annotate(
+            actual_date=weekday_to_date
+        )
 
         q = Q()
         for holiday in holidays:
@@ -155,9 +159,7 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
 
         holidays = Holiday.objects.all()
 
-        personal_notes = PersonalNote.objects.filter(
-            ~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False)
-        ).annotate(actual_date=weekday_to_date)
+        personal_notes = PersonalNote.objects.not_empty().annotate(actual_date=weekday_to_date)
 
         q = Q()
         for holiday in holidays:
