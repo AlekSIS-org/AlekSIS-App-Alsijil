@@ -92,7 +92,7 @@ MENUS = {
                 {
                     "name": _("Manage class roles"),
                     "url": "class_roles",
-                    "icon": "support_agent",
+                    "icon": "assignment_ind",
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",

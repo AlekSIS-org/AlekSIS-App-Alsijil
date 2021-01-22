@@ -71,7 +71,7 @@ class ClassRoleTable(tables.Table):
 
     def render_name(self, value, record):
         colour = record.colour or "black"
-        icon_name = record.icon or "support_agent"
+        icon_name = record.icon or "assignment_ind"
         context = dict(content=value, icon=icon_name, classes=f"{colour} white-text")
         return render_to_string("components/materialize-chips.html", context)
 
