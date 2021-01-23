@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
-from django_global_request.middleware import get_request
 from django_select2.forms import Select2Widget
 from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
@@ -75,8 +74,8 @@ class SelectForm(forms.Form):
         data["instance"] = instance
         return data
 
-    def __init__(self, *args, **kwargs):
-        self.request = get_request()
+    def __init__(self, request, *args, **kwargs):
+        self.request = request
         super().__init__(*args, **kwargs)
 
         person = self.request.user.person
@@ -138,7 +137,6 @@ class RegisterAbsenceForm(forms.Form):
     remarks = forms.CharField(label=_("Remarks"), max_length=30, required=False)
 
     def __init__(self, *args, **kwargs):
-        self.request = get_request()
         super().__init__(*args, **kwargs)
         period_choices = TimePeriod.period_choices
 

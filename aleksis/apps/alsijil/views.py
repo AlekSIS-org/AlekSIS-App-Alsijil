@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -153,14 +154,16 @@ def lesson(
                         instances = personal_note_formset.save()
 
                     # Iterate over personal notes and carry changed absences to following lessons
-                    for instance in instances:
-                        instance.person.mark_absent(
-                            wanted_week[lesson_period.period.weekday],
-                            lesson_period.period.period + 1,
-                            instance.absent,
-                            instance.excused,
-                            instance.excuse_type,
-                        )
+                    with reversion.create_revision():
+                        reversion.set_user(request.user)
+                        for instance in instances:
+                            instance.person.mark_absent(
+                                wanted_week[lesson_period.period.weekday],
+                                lesson_period.period.period + 1,
+                                instance.absent,
+                                instance.excused,
+                                instance.excuse_type,
+                            )
 
                 messages.success(request, _("The personal notes have been saved."))
 
@@ -223,7 +226,7 @@ def week_view(
         initial = {type_.value: instance}
     else:
         initial = {}
-    select_form = SelectForm(request.POST or None, initial=initial)
+    select_form = SelectForm(request, request.POST or None, initial=initial)
 
     if request.method == "POST":
         if select_form.is_valid():
@@ -724,16 +727,17 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
                 if holiday:
                     continue
 
-            affected_count += person.mark_absent(
-                day,
-                from_period_on_day,
-                absent,
-                excused,
-                excuse_type,
-                remarks,
-                to_period_on_day,
-                dry_run=not confirmed,
-            )
+            with reversion.create_revision() if confirmed else nullcontext():
+                affected_count += person.mark_absent(
+                    day,
+                    from_period_on_day,
+                    absent,
+                    excused,
+                    excuse_type,
+                    remarks,
+                    to_period_on_day,
+                    dry_run=not confirmed,
+                )
 
         if not confirmed:
             # Show confirmation page
