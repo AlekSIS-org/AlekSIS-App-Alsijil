@@ -220,24 +220,24 @@ delete_extramark_predicate = view_extramarks_predicate & has_global_perm("alsiji
 add_perm("alsijil.delete_extramark", delete_extramark_predicate)
 
 
-# View class role list
-view_class_roles_predicate = (
+# View group role list
+view_group_roles_predicate = (
     has_person
-    & is_site_preference_set("alsijil", "activate_class_roles")
-    & has_global_perm("alsijil.view_classrole")
+    & is_site_preference_set("alsijil", "activate_group_roles")
+    & has_global_perm("alsijil.view_grouprole")
 )
-add_perm("alsijil.view_classroles", view_class_roles_predicate)
+add_perm("alsijil.view_grouproles", view_group_roles_predicate)
 
-# Add class role
-add_class_role_predicate = view_class_roles_predicate & has_global_perm("alsijil.add_classrole")
-add_perm("alsijil.add_classrole", add_class_role_predicate)
+# Add group role
+add_group_role_predicate = view_group_roles_predicate & has_global_perm("alsijil.add_grouprole")
+add_perm("alsijil.add_grouprole", add_group_role_predicate)
 
-# Edit class role
-edit_class_role_predicate = view_class_roles_predicate & has_global_perm("alsijil.change_classrole")
-add_perm("alsijil.edit_classrole", edit_class_role_predicate)
+# Edit group role
+edit_group_role_predicate = view_group_roles_predicate & has_global_perm("alsijil.change_grouprole")
+add_perm("alsijil.edit_grouprole", edit_group_role_predicate)
 
-# Delete class role
-delete_class_role_predicate = view_class_roles_predicate & has_global_perm(
-    "alsijil.delete_classrole"
+# Delete group role
+delete_group_role_predicate = view_group_roles_predicate & has_global_perm(
+    "alsijil.delete_grouprole"
 )
-add_perm("alsijil.delete_classrole", delete_class_role_predicate)
+add_perm("alsijil.delete_grouprole", delete_group_role_predicate)

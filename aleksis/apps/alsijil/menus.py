@@ -90,13 +90,13 @@ MENUS = {
                     ],
                 },
                 {
-                    "name": _("Manage class roles"),
-                    "url": "class_roles",
+                    "name": _("Manage group roles"),
+                    "url": "group_roles",
                     "icon": "assignment_ind",
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_classroles",
+                            "alsijil.view_grouproles",
                         ),
                     ],
                 },

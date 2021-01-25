@@ -233,7 +233,7 @@ class ExtraMark(ExtensibleModel):
         verbose_name_plural = _("Extra marks")
 
 
-class ClassRole(ExtensibleModel):
+class GroupRole(ExtensibleModel):
     name = models.CharField(max_length=255, verbose_name=_("Name"))
     icon = models.CharField(max_length=50, blank=True, choices=ICONS, verbose_name=_("Icon"))
     colour = models.CharField(max_length=50, blank=True, choices=COLOURS, verbose_name=_("Colour"))
@@ -242,30 +242,27 @@ class ClassRole(ExtensibleModel):
         return self.name
 
     class Meta:
-        verbose_name = _("Class role")
-        verbose_name_plural = _("Class roles")
+        verbose_name = _("Group role")
+        verbose_name_plural = _("Group roles")
 
 
-class ClassRoleAssignment(ExtensibleModel):
+class GroupRoleAssignment(ExtensibleModel):
     role = models.ForeignKey(
-        ClassRole,
+        GroupRole,
         on_delete=models.CASCADE,
         related_name="assignments",
-        verbose_name=_("Class role"),
+        verbose_name=_("Group role"),
     )
     person = models.ForeignKey(
         "core.Person",
         on_delete=models.CASCADE,
-        related_name="class_roles",
+        related_name="group_roles",
         verbose_name=_("Assigned person"),
     )
-    group = models.ForeignKey(
+    groups = models.ManyToManyField(
         "core.Group",
-        on_delete=models.CASCADE,
-        related_name="class_roles",
-        verbose_name=_("Group"),
-        blank=True,
-        null=True,
+        related_name="group_roles",
+        verbose_name=_("Groups"),
     )
     date_start = models.DateField(verbose_name=_("Start date"))
     date_end = models.DateField(
@@ -280,8 +277,8 @@ class ClassRoleAssignment(ExtensibleModel):
         return f"{self.role}: {self.person}, {date_format(self.date_start)}–{date_end}"
 
     class Meta:
-        verbose_name = _("Class role assignment")
-        verbose_name_plural = _("Class role assignments")
+        verbose_name = _("Group role assignment")
+        verbose_name_plural = _("Group role assignments")
 
 
 class AlsijilGlobalPermissions(ExtensibleModel):

@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
@@ -27,7 +27,8 @@ from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
-    ClassRoleForm,
+    AssignGroupRoleForm,
+    GroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
     LessonDocumentationForm,
@@ -35,8 +36,15 @@ from .forms import (
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ClassRole, ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
-from .tables import ClassRoleTable, ExcuseTypeTable, ExtraMarkTable
+from .models import (
+    GroupRole,
+    GroupRoleAssignment,
+    ExcuseType,
+    ExtraMark,
+    LessonDocumentation,
+    PersonalNote,
+)
+from .tables import GroupRoleTable, ExcuseTypeTable, ExtraMarkTable
 from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
@@ -852,45 +860,45 @@ class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelet
     success_message = _("The excuse type has been deleted.")
 
 
-class ClassRoleListView(PermissionRequiredMixin, SingleTableView):
-    """Table of all class roles."""
+class GroupRoleListView(PermissionRequiredMixin, SingleTableView):
+    """Table of all group roles."""
 
-    model = ClassRole
-    table_class = ClassRoleTable
-    permission_required = "alsijil.view_classroles"
-    template_name = "alsijil/class_role/list.html"
-
-
-@method_decorator(never_cache, name="dispatch")
-class ClassRoleCreateView(PermissionRequiredMixin, AdvancedCreateView):
-    """Create view for class roles."""
-
-    model = ClassRole
-    form_class = ClassRoleForm
-    permission_required = "alsijil.add_classrole"
-    template_name = "alsijil/class_role/create.html"
-    success_url = reverse_lazy("class_roles")
-    success_message = _("The class role has been created.")
+    model = GroupRole
+    table_class = GroupRoleTable
+    permission_required = "alsijil.view_grouproles"
+    template_name = "alsijil/group_role/list.html"
 
 
 @method_decorator(never_cache, name="dispatch")
-class ClassRoleEditView(PermissionRequiredMixin, AdvancedEditView):
-    """Edit view for class roles."""
+class GroupRoleCreateView(PermissionRequiredMixin, AdvancedCreateView):
+    """Create view for group roles."""
 
-    model = ClassRole
-    form_class = ClassRoleForm
-    permission_required = "alsijil.edit_classrole"
-    template_name = "alsijil/class_role/edit.html"
-    success_url = reverse_lazy("class_roles")
-    success_message = _("The class role has been saved.")
+    model = GroupRole
+    form_class = GroupRoleForm
+    permission_required = "alsijil.add_grouprole"
+    template_name = "alsijil/group_role/create.html"
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been created.")
+
+
+@method_decorator(never_cache, name="dispatch")
+class GroupRoleEditView(PermissionRequiredMixin, AdvancedEditView):
+    """Edit view for group roles."""
+
+    model = GroupRole
+    form_class = GroupRoleForm
+    permission_required = "alsijil.edit_grouprole"
+    template_name = "alsijil/group_role/edit.html"
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been saved.")
 
 
 @method_decorator(never_cache, "dispatch")
-class ClassRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
-    """Delete view for class roles."""
+class GroupRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
+    """Delete view for group roles."""
 
-    model = ClassRole
-    permission_required = "alsijil.delete_classrole"
+    model = GroupRole
+    permission_required = "alsijil.delete_grouprole"
     template_name = "core/pages/delete.html"
-    success_url = reverse_lazy("class_roles")
-    success_message = _("The class role has been deleted.")
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been deleted.")
