@@ -74,3 +74,13 @@ class ActivateGroupRoles(BooleanPreference):
     name = "activate_group_roles"
     default = True
     verbose_name = _("Activate support for creating and assigning group roles")
+
+
+@site_preferences_registry.register
+class GroupOwnersCanAssignRolesToParents(BooleanPreference):
+    section = alsijil
+    name = "group_owners_can_assign_roles_to_parents"
+    default = False
+    verbose_name = _(
+        "Allow group owners to assign group roles to the parents of the group's members"
+    )

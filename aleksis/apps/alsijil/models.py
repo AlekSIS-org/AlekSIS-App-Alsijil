@@ -13,6 +13,7 @@ from aleksis.apps.alsijil.data_checks import (
     PersonalNoteOnHolidaysDataCheck,
 )
 from aleksis.apps.alsijil.managers import PersonalNoteManager
+from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.date import get_current_year
@@ -246,7 +247,7 @@ class GroupRole(ExtensibleModel):
         verbose_name_plural = _("Group roles")
 
 
-class GroupRoleAssignment(ExtensibleModel):
+class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
     role = models.ForeignKey(
         GroupRole,
         on_delete=models.CASCADE,
@@ -260,9 +261,7 @@ class GroupRoleAssignment(ExtensibleModel):
         verbose_name=_("Assigned person"),
     )
     groups = models.ManyToManyField(
-        "core.Group",
-        related_name="group_roles",
-        verbose_name=_("Groups"),
+        "core.Group", related_name="group_roles", verbose_name=_("Groups"),
     )
     date_start = models.DateField(verbose_name=_("Start date"))
     date_end = models.DateField(

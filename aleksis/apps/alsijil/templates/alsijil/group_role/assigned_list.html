@@ -1,0 +1,144 @@
+{# -*- engine:django -*- #}
+
+{% extends "core/base.html" %}
+
+{% load i18n rules any_js material_form static %}
+{% load render_table from django_tables2 %}
+
+{% block browser_title %}
+  {% blocktrans with group=object.name %}Group roles for {{ group }}{% endblocktrans %}
+{% endblock %}
+{% block page_title %}
+  {% blocktrans with group=object.name %}Group roles for {{ group }}{% endblocktrans %}
+{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static "css/alsijil/alsijil.css" %}"/>
+{% endblock %}
+
+{% block content %}
+  {% url "assigned_group_roles" object.pk as back_url %}
+
+  <p>
+    {% has_perm "alsijil.view_my_groups" user as can_view_group_overview %}
+    {% if can_view_group_overview %}
+      <a class="btn waves-effect waves-light" href="{% url "my_groups" %}">
+        <i class="material-icons left">arrow_back</i>
+        {% trans "Back to my groups" %}
+      </a>
+    {% endif %}
+
+    {% has_perm "alsijil.assign_grouprole_for_group" user object as can_assign_group_role %}
+    {% if can_assign_group_role %}
+      <a class="btn green waves-effect waves-light" href="{% url "assign_group_role" object.pk %}">
+        <i class="material-icons left">assignment_ind</i>
+        {% trans "Assign a role to a person" %}
+      </a>
+    {% endif %}
+  </p>
+
+  <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab">
+          <a class="active" href="#current">{% trans "Current roles" %} ({{ today|date:"SHORT_DATE_FORMAT" }})</a>
+        </li>
+        <li class="tab">
+          <a href="#all">{% trans "All assignments" %}</a>
+        </li>
+      </ul>
+    </div>
+
+    <div id="current" class="col s12">
+      <div class="collection">
+        {% for role in roles %}
+          <div class="collection-item">
+            <div class="row no-margin">
+              <div class="col s12 m5 l4 xl3 no-padding">
+                {% if can_assign_group_role %}
+                  <a class="btn waves-effect waves-light right hide-on-med-and-up"
+                     href="{% url "assign_group_role" object.pk role.pk %}">
+                    <i class="material-icons center">add</i>
+                  </a>
+                {% endif %}
+
+                <div class="btn-margin">
+                  {% include "alsijil/group_role/chip.html" with role=role %}
+                </div>
+              </div>
+
+              <div class="col s12 m7 l8 xl9 no-padding">
+                {% if can_assign_group_role %}
+                  <a class="btn waves-effect waves-light right hide-on-small-only"
+                     href="{% url "assign_group_role" object.pk role.pk %}">
+                    <i class="material-icons center">add</i>
+                  </a>
+                {% endif %}
+
+                {% for assignment in role.assignments.all %}
+                  <a class="chip dropdown-trigger" href="#"
+                     data-target="dropdown-{{ assignment.pk }}" title="{{ assignment }}">{{ assignment.person }}
+                    {% if object not in assignment.groups.all %}
+                      <small>({{ assignment.group_names }})</small>
+                    {% endif %}
+                  </a>
+
+                  {% include "alsijil/group_role/assignment_options.html" with assignment=assignment back_url=back_url %}
+                  {% empty %}
+                  <div class="grey-text darken-3">{% trans "No one assigned." %}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="alert primary">
+        <div>
+          <i class="material-icons left">info</i>
+          {% blocktrans %}
+            You can get some additional actions for each group role assignment if you click on the name of the
+            corresponding person.
+          {% endblocktrans %}
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col s12 " id="all">
+      <table class="responsive-table">
+        <thead>
+        <tr>
+          <th class="chip-height">{% trans "Group role" %}</th>
+          <th>{% trans "Person" %}</th>
+          <th>{% trans "Start date" %}</th>
+          <th>{% trans "End date" %}</th>
+          <th>{% trans "Actions" %}</th>
+        </tr>
+        </thead>
+        {% for assignment in assignments %}
+          <tr>
+            <td>
+              {% include "alsijil/group_role/chip.html" with role=assignment.role %}
+            </td>
+            <td>
+              {{ assignment.person }}
+            </td>
+            <td>{{ assignment.date_start }}</td>
+            <td>{{ assignment.date_end|default:"–" }}</td>
+            <td>
+              <a class="btn waves-effect waves-light dropdown-trigger" href="#"
+                 data-target="dropdown-{{ assignment.pk }}-d2">
+                <i class="material-icons left">list</i>
+                {% trans "Actions" %}
+              </a>
+              {% include "alsijil/group_role/assignment_options.html" with assignment=assignment back_url=back_url suffix="-d2" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

@@ -6,6 +6,7 @@ from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
@@ -21,30 +22,36 @@ from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import Holiday, LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.build import build_weekdays
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
-from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
+from aleksis.core.mixins import (
+    AdvancedCreateView,
+    AdvancedDeleteView,
+    AdvancedEditView,
+    SuccessNextMixin,
+)
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
     AssignGroupRoleForm,
-    GroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
+    GroupRoleAssignmentEditForm,
+    GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
 from .models import (
-    GroupRole,
-    GroupRoleAssignment,
     ExcuseType,
     ExtraMark,
+    GroupRole,
+    GroupRoleAssignment,
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import GroupRoleTable, ExcuseTypeTable, ExtraMarkTable
+from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable
 from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
@@ -902,3 +909,117 @@ class GroupRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelete
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("group_roles")
     success_message = _("The group role has been deleted.")
+
+
+class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
+    permission_required = "alsijil.view_assigned_grouproles"
+    model = Group
+    template_name = "alsijil/group_role/assigned_list.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data()
+
+        today = timezone.now().date()
+        context["today"] = today
+
+        self.roles = GroupRole.objects.prefetch_related(
+            Prefetch(
+                "assignments",
+                queryset=GroupRoleAssignment.objects.filter(
+                    Q(date_start__lte=today) & (Q(date_end__gte=today) | Q(date_end__isnull=True))
+                )
+                .filter(Q(groups=self.object) | Q(groups__child_groups=self.object))
+                .distinct(),
+            )
+        )
+        context["roles"] = self.roles
+        assignments = (
+            GroupRoleAssignment.objects.filter(
+                Q(groups=self.object) | Q(groups__child_groups=self.object)
+            )
+            .distinct()
+            .order_by("-date_start")
+        )
+        context["assignments"] = assignments
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class AssignGroupRoleView(PermissionRequiredMixin, AdvancedCreateView):
+    model = GroupRoleAssignment
+    form_class = AssignGroupRoleForm
+    permission_required = "alsijil.assign_grouprole_for_group"
+    template_name = "alsijil/group_role/assign.html"
+    success_message = _("The group role has been assigned.")
+
+    def get_success_url(self) -> str:
+        return reverse("assigned_group_roles", args=[self.group.pk])
+
+    def get_permission_object(self):
+        self.group = get_object_or_404(Group, pk=self.kwargs.get("pk"))
+        try:
+            self.role = GroupRole.objects.get(pk=self.kwargs.get("role_pk"))
+        except GroupRole.DoesNotExist:
+            self.role = None
+        return self.group
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        kwargs["initial"] = {"role": self.role, "groups": [self.group]}
+        return kwargs
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["role"] = self.role
+        context["group"] = self.group
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, AdvancedEditView):
+    """Edit view for group role assignments."""
+
+    model = GroupRoleAssignment
+    form_class = GroupRoleAssignmentEditForm
+    permission_required = "alsijil.edit_grouproleassignment"
+    template_name = "alsijil/group_role/edit_assignment.html"
+    success_message = _("The group role assignment has been saved.")
+
+    def get_default_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])
+
+
+@method_decorator(never_cache, "dispatch")
+class GroupRoleAssignmentStopView(PermissionRequiredMixin, SuccessNextMixin, DetailView):
+    model = GroupRoleAssignment
+    permission_required = "alsijil.stop_grouproleassignment"
+
+    def get_default_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.date_end:
+            self.object.date_end = timezone.now().date()
+            self.object.save()
+            messages.success(request, _("The group role assignment has been stopped."))
+        return redirect(self.get_success_url())
+
+
+@method_decorator(never_cache, "dispatch")
+class GroupRoleAssignmentDeleteView(
+    PermissionRequiredMixin, RevisionMixin, SuccessNextMixin, AdvancedDeleteView
+):
+    """Delete view for group role assignments."""
+
+    model = GroupRoleAssignment
+    permission_required = "alsijil.delete_grouproleassignment"
+    template_name = "core/pages/delete.html"
+    success_message = _("The group role assignment has been deleted.")
+
+    def get_default_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])

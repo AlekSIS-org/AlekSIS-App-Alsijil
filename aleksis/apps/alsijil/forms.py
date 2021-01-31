@@ -6,20 +6,21 @@ from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
 from django_global_request.middleware import get_request
-from django_select2.forms import Select2Widget
+from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget, Select2Widget
 from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import TimePeriod
 from aleksis.core.models import Group, Person
+from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
 from .models import (
-    GroupRole,
-    GroupRoleAssignment,
     ExcuseType,
     ExtraMark,
+    GroupRole,
+    GroupRoleAssignment,
     LessonDocumentation,
     PersonalNote,
 )
@@ -177,3 +178,76 @@ class GroupRoleForm(forms.ModelForm):
     class Meta:
         model = GroupRole
         fields = ["name", "icon", "colour"]
+
+
+class AssignGroupRoleForm(forms.ModelForm):
+    layout_base = ["groups", "person", "role", Row("date_start", "date_end")]
+
+    groups = forms.ModelMultipleChoiceField(
+        label=_("Group"),
+        required=True,
+        queryset=Group.objects.all(),
+        widget=ModelSelect2MultipleWidget(
+            model=Group,
+            search_fields=["name__icontains", "short_name__icontains"],
+            attrs={"data-minimum-input-length": 0, "class": "browser-default",},
+        ),
+    )
+    person = forms.ModelChoiceField(
+        label=_("Person"),
+        required=True,
+        queryset=Person.objects.all(),
+        widget=ModelSelect2Widget(
+            model=Person,
+            dependent_fields={"groups": "member_of"},
+            search_fields=[
+                "first_name__icontains",
+                "last_name__icontains",
+                "short_name__icontains",
+            ],
+            attrs={"data-minimum-input-length": 0, "class": "browser-default"},
+        ),
+    )
+
+    def __init__(self, request, *args, **kwargs):
+        self.request = request
+        initial = kwargs.get("initial", {})
+
+        # Build layout with or without groups field
+        base_layout = self.layout_base[:]
+        if "groups" in initial:
+            base_layout.remove("groups")
+        self.layout = Layout(*base_layout)
+
+        super().__init__(*args, **kwargs)
+
+        if "groups" in initial:
+            self.fields["groups"].required = False
+
+        # Filter persons by permissions
+        if not self.request.user.has_perm("alsijil.assign_grouprole"):  # Global permission
+            persons = Person.objects
+            if initial.get("groups"):
+                persons = persons.filter(member_of__in=initial["groups"])
+            if get_site_preferences()["alsijil__group_owners_can_assign_roles_to_parents"]:
+                persons = persons.filter(
+                    Q(member_of__owners=self.request.user.person)
+                    | Q(children__member_of__owners=self.request.user.person)
+                )
+            else:
+                persons = persons.filter(member_of__owners=self.request.user.person)
+            self.fields["person"].queryset = persons
+
+    def clean_groups(self):
+        """Ensure that only permitted groups are used."""
+        return self.initial["groups"] if "groups" in self.initial else self.cleaned_data["groups"]
+
+    class Meta:
+        model = GroupRoleAssignment
+        fields = ["groups", "person", "role", "date_start", "date_end"]
+
+
+class GroupRoleAssignmentEditForm(forms.ModelForm):
+    class Meta:
+        model = GroupRoleAssignment
+        fields = ["date_start", "date_end"]
