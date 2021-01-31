@@ -1,3 +1,6 @@
+from django.db.models import QuerySet
+from django.db.models.query_utils import Q
+
 from aleksis.core.managers import CurrentSiteManagerWithoutMigrations
 
 
@@ -21,3 +24,21 @@ class PersonalNoteManager(CurrentSiteManagerWithoutMigrations):
             )
             .prefetch_related("extra_marks")
         )
+
+
+class PersonalNoteQuerySet(QuerySet):
+    def not_empty(self):
+        """Get all not empty personal notes."""
+        return self.filter(
+            ~Q(remarks="") | Q(absent=True) | ~Q(late=0) | Q(extra_marks__isnull=False)
+        )
+
+
+class LessonDocumentationManager(CurrentSiteManagerWithoutMigrations):
+    pass
+
+
+class LessonDocumentationQuerySet(QuerySet):
+    def not_empty(self):
+        """Get all not empty lesson documentations."""
+        return self.filter(~Q(topic="") | ~Q(group_note="") | ~Q(homework=""))

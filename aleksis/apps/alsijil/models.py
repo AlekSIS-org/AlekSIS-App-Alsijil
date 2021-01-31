@@ -12,7 +12,12 @@ from aleksis.apps.alsijil.data_checks import (
     NoPersonalNotesInCancelledLessonsDataCheck,
     PersonalNoteOnHolidaysDataCheck,
 )
-from aleksis.apps.alsijil.managers import PersonalNoteManager
+from aleksis.apps.alsijil.managers import (
+    LessonDocumentationManager,
+    LessonDocumentationQuerySet,
+    PersonalNoteManager,
+    PersonalNoteQuerySet,
+)
 from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
@@ -62,7 +67,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
         ExcusesWithoutAbsences,
     ]
 
-    objects = PersonalNoteManager()
+    objects = PersonalNoteManager.from_queryset(PersonalNoteQuerySet)()
 
     person = models.ForeignKey("core.Person", models.CASCADE, related_name="personal_notes")
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
@@ -139,6 +144,8 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
 
     Non-personal, includes the topic and homework of the lesson.
     """
+
+    objects = LessonDocumentationManager.from_queryset(LessonDocumentationQuerySet)()
 
     data_checks = [LessonDocumentationOnHolidaysDataCheck]
 

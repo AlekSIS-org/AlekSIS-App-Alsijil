@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -169,14 +170,16 @@ def lesson(
                         instances = personal_note_formset.save()
 
                     # Iterate over personal notes and carry changed absences to following lessons
-                    for instance in instances:
-                        instance.person.mark_absent(
-                            wanted_week[lesson_period.period.weekday],
-                            lesson_period.period.period + 1,
-                            instance.absent,
-                            instance.excused,
-                            instance.excuse_type,
-                        )
+                    with reversion.create_revision():
+                        reversion.set_user(request.user)
+                        for instance in instances:
+                            instance.person.mark_absent(
+                                wanted_week[lesson_period.period.weekday],
+                                lesson_period.period.period + 1,
+                                instance.absent,
+                                instance.excused,
+                                instance.excuse_type,
+                            )
 
                 messages.success(request, _("The personal notes have been saved."))
 
@@ -239,7 +242,7 @@ def week_view(
         initial = {type_.value: instance}
     else:
         initial = {}
-    select_form = SelectForm(request.POST or None, initial=initial)
+    select_form = SelectForm(request, request.POST or None, initial=initial)
 
     if request.method == "POST":
         if select_form.is_valid():
@@ -418,19 +421,28 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     group = get_object_or_404(Group, pk=id_)
 
-    # Get all lesson periods for the selected group
-    lesson_periods = (
-        LessonPeriod.objects.filter_group(group)
-        .distinct()
+    personal_notes = (
+        PersonalNote.objects.select_related("lesson_period")
         .prefetch_related(
-            "documentations",
-            "personal_notes",
-            "personal_notes__excuse_type",
-            "personal_notes__extra_marks",
-            "personal_notes__person",
-            "personal_notes__groups_of_person",
+            "lesson_period__substitutions", "lesson_period__lesson__teachers", "groups_of_person"
+        )
+        .not_empty()
+        .filter(
+            Q(lesson_period__lesson__groups=group)
+            | Q(lesson_period__lesson__groups__parent_groups=group)
         )
     )
+    documentations = (
+        LessonDocumentation.objects.select_related("lesson_period")
+        .not_empty()
+        .filter(
+            Q(lesson_period__lesson__groups=group)
+            | Q(lesson_period__lesson__groups__parent_groups=group)
+        )
+    )
+
+    # Get all lesson periods for the selected group
+    lesson_periods = LessonPeriod.objects.filter_group(group).distinct()
 
     weeks = CalendarWeek.weeks_within(group.school_term.date_start, group.school_term.date_end,)
 
@@ -444,39 +456,38 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 <= day
                 <= lesson_period.lesson.validity.date_end
             ):
-                documentations = list(
+                filtered_documentations = list(
                     filter(
-                        lambda d: d.week == week.week and d.year == week.year,
-                        lesson_period.documentations.all(),
+                        lambda d: d.week == week.week
+                        and d.year == week.year
+                        and d.lesson_period == lesson_period,
+                        documentations,
                     )
                 )
-                notes = list(
+                filtered_personal_notes = list(
                     filter(
-                        lambda d: d.week == week.week and d.year == week.year,
-                        lesson_period.personal_notes.all(),
+                        lambda d: d.week == week.week
+                        and d.year == week.year
+                        and d.lesson_period == lesson_period,
+                        personal_notes,
                     )
                 )
                 substitution = lesson_period.get_substitution(week)
 
                 periods_by_day.setdefault(day, []).append(
-                    (lesson_period, documentations, notes, substitution)
+                    (lesson_period, filtered_documentations, filtered_personal_notes, substitution)
                 )
 
-    persons = Person.objects.prefetch_related(
-        "personal_notes",
-        "personal_notes__excuse_type",
-        "personal_notes__extra_marks",
-        "personal_notes__lesson_period__lesson__subject",
-        "personal_notes__lesson_period__substitutions",
-        "personal_notes__lesson_period__substitutions__subject",
-        "personal_notes__lesson_period__substitutions__teachers",
-        "personal_notes__lesson_period__lesson__teachers",
-        "personal_notes__lesson_period__period",
-    )
+    persons = Person.objects.prefetch_related(None).select_related(None)
     persons = group.generate_person_list_with_class_register_statistics(persons)
 
+    prefetched_persons = []
+    for person in persons:
+        person.filtered_notes = list(filter(lambda d: d.person == person, personal_notes))
+        prefetched_persons.append(person)
+
     context["school_term"] = group.school_term
-    context["persons"] = persons
+    context["persons"] = prefetched_persons
     context["excuse_types"] = ExcuseType.objects.all()
     context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
@@ -633,9 +644,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
 
-    personal_notes = allowed_personal_notes.filter(
-        Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
-    ).order_by(
+    personal_notes = allowed_personal_notes.not_empty().order_by(
         "-lesson_period__lesson__validity__date_start",
         "-week",
         "lesson_period__period__weekday",
@@ -734,16 +743,17 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
                 if holiday:
                     continue
 
-            affected_count += person.mark_absent(
-                day,
-                from_period_on_day,
-                absent,
-                excused,
-                excuse_type,
-                remarks,
-                to_period_on_day,
-                dry_run=not confirmed,
-            )
+            with reversion.create_revision() if confirmed else nullcontext():
+                affected_count += person.mark_absent(
+                    day,
+                    from_period_on_day,
+                    absent,
+                    excused,
+                    excuse_type,
+                    remarks,
+                    to_period_on_day,
+                    dry_run=not confirmed,
+                )
 
         if not confirmed:
             # Show confirmation page
