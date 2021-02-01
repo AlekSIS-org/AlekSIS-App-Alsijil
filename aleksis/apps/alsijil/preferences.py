@@ -47,6 +47,14 @@ class CarryOverDataToNextPeriods(BooleanPreference):
 
 
 @site_preferences_registry.register
+class CarryOverPersonalNotesToNextPeriods(BooleanPreference):
+    section = alsijil
+    name = "carry_over_personal_notes"
+    default = True
+    verbose_name = _("Carry over personal notes to all following lesson periods on the same day.")
+
+
+@site_preferences_registry.register
 class AllowOpenPeriodsOnSameDay(BooleanPreference):
     section = alsijil
     name = "open_periods_same_day"

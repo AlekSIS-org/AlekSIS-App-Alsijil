@@ -153,17 +153,19 @@ def lesson(
                         reversion.set_user(request.user)
                         instances = personal_note_formset.save()
 
-                    # Iterate over personal notes and carry changed absences to following lessons
-                    with reversion.create_revision():
-                        reversion.set_user(request.user)
-                        for instance in instances:
-                            instance.person.mark_absent(
-                                wanted_week[lesson_period.period.weekday],
-                                lesson_period.period.period + 1,
-                                instance.absent,
-                                instance.excused,
-                                instance.excuse_type,
-                            )
+                    if get_site_preferences()["alsijil__carry_over_personal_notes"]:
+                        # Iterate over personal notes
+                        # and carry changed absences to following lessons
+                        with reversion.create_revision():
+                            reversion.set_user(request.user)
+                            for instance in instances:
+                                instance.person.mark_absent(
+                                    wanted_week[lesson_period.period.weekday],
+                                    lesson_period.period.period + 1,
+                                    instance.absent,
+                                    instance.excused,
+                                    instance.excuse_type,
+                                )
 
                 messages.success(request, _("The personal notes have been saved."))
 
