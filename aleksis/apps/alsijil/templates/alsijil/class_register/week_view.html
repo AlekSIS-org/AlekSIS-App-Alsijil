@@ -75,7 +75,7 @@
       <div class="col s12" id="week-overview">
         {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
         {% for weekday, periods in periods_by_day %}
-          {% with weekdays|get_dict:forloop.counter0 as advanced_weekday %}
+          {% with weekdays|get_dict:periods.0.period.weekday as advanced_weekday %}
             {% weekday_to_date week periods.0.period.weekday as current_date %}
 
             {% if advanced_weekday.holiday and not request.site.preferences.alsijil__allow_entries_in_holidays %}
