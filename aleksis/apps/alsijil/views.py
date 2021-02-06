@@ -242,8 +242,13 @@ def week_view(
     # Add a form to filter the view
     if type_:
         initial = {type_.value: instance}
+        back_url = reverse(
+            "week_view_by_week", args=[wanted_week.year, wanted_week.week, type_.value, instance.pk]
+        )
     else:
         initial = {}
+        back_url = reverse("week_view_by_week", args=[wanted_week.year, wanted_week.week])
+    context["back_url"] = back_url
     select_form = SelectForm(request, request.POST or None, initial=initial)
 
     if request.method == "POST":
@@ -263,6 +268,14 @@ def week_view(
         group = instance
     else:
         group = None
+
+    # Group roles
+    show_group_roles = (
+        group and request.user.person.preferences["alsijil__group_roles_in_week_view"]
+    )
+    if show_group_roles:
+        group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
+        context["group_roles"] = group_roles
 
     extra_marks = ExtraMark.objects.all()
 
@@ -305,63 +318,70 @@ def week_view(
         else:
             persons_qs = persons_qs.filter(member_of__lessons__lesson_periods__in=lesson_periods_pk)
 
-        persons_qs = (
-            persons_qs.distinct()
-            .prefetch_related(
+        persons_qs = persons_qs.distinct().prefetch_related(
+            Prefetch(
+                "personal_notes",
+                queryset=PersonalNote.objects.filter(
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    lesson_period__in=lesson_periods_pk,
+                ),
+            ),
+            "member_of__owners",
+        )
+
+        # Annotate group roles
+        if show_group_roles:
+            persons_qs = persons_qs.prefetch_related(
                 Prefetch(
-                    "personal_notes",
-                    queryset=PersonalNote.objects.filter(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
-                    ),
-                ),
-                "member_of__owners",
-            )
-            .annotate(
-                absences_count=Count(
-                    "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                        personal_notes__absent=True,
-                    ),
-                    distinct=True,
-                ),
-                unexcused_count=Count(
-                    "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                        personal_notes__absent=True,
-                        personal_notes__excused=False,
-                    ),
-                    distinct=True,
-                ),
-                tardiness_sum=Subquery(
-                    Person.objects.filter(
-                        pk=OuterRef("pk"),
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                    )
-                    .distinct()
-                    .annotate(tardiness_sum=Sum("personal_notes__late"))
-                    .values("tardiness_sum")
-                ),
-                tardiness_count=Count(
-                    "personal_notes",
-                    filter=Q(
-                        personal_notes__lesson_period__in=lesson_periods_pk,
-                        personal_notes__week=wanted_week.week,
-                        personal_notes__year=wanted_week.year,
-                    )
-                    & ~Q(personal_notes__late=0),
-                    distinct=True,
+                    "group_roles",
+                    queryset=GroupRoleAssignment.objects.in_week(wanted_week).for_group(group),
                 ),
             )
+
+        persons_qs = persons_qs.annotate(
+            absences_count=Count(
+                "personal_notes",
+                filter=Q(
+                    personal_notes__lesson_period__in=lesson_periods_pk,
+                    personal_notes__week=wanted_week.week,
+                    personal_notes__year=wanted_week.year,
+                    personal_notes__absent=True,
+                ),
+                distinct=True,
+            ),
+            unexcused_count=Count(
+                "personal_notes",
+                filter=Q(
+                    personal_notes__lesson_period__in=lesson_periods_pk,
+                    personal_notes__week=wanted_week.week,
+                    personal_notes__year=wanted_week.year,
+                    personal_notes__absent=True,
+                    personal_notes__excused=False,
+                ),
+                distinct=True,
+            ),
+            tardiness_sum=Subquery(
+                Person.objects.filter(
+                    pk=OuterRef("pk"),
+                    personal_notes__lesson_period__in=lesson_periods_pk,
+                    personal_notes__week=wanted_week.week,
+                    personal_notes__year=wanted_week.year,
+                )
+                .distinct()
+                .annotate(tardiness_sum=Sum("personal_notes__late"))
+                .values("tardiness_sum")
+            ),
+            tardiness_count=Count(
+                "personal_notes",
+                filter=Q(
+                    personal_notes__lesson_period__in=lesson_periods_pk,
+                    personal_notes__week=wanted_week.week,
+                    personal_notes__year=wanted_week.year,
+                )
+                & ~Q(personal_notes__late=0),
+                distinct=True,
+            ),
         )
 
         for extra_mark in extra_marks:
