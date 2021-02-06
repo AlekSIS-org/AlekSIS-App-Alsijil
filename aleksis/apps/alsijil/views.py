@@ -968,14 +968,14 @@ class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
 
 
 @method_decorator(never_cache, name="dispatch")
-class AssignGroupRoleView(PermissionRequiredMixin, AdvancedCreateView):
+class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
     model = GroupRoleAssignment
     form_class = AssignGroupRoleForm
     permission_required = "alsijil.assign_grouprole_for_group"
     template_name = "alsijil/group_role/assign.html"
     success_message = _("The group role has been assigned.")
 
-    def get_success_url(self) -> str:
+    def get_default_success_url(self) -> str:
         return reverse("assigned_group_roles", args=[self.group.pk])
 
     def get_permission_object(self):
