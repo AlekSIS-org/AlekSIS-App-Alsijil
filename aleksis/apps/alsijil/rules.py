@@ -20,6 +20,7 @@ from .util.predicates import (
     is_lesson_teacher,
     is_none,
     is_own_personal_note,
+    is_owner_of_any_group,
     is_person_group_owner,
     is_person_primary_group_owner,
     is_personal_note_lesson_parent_group_owner,
@@ -257,6 +258,11 @@ assign_group_role_person_predicate = group_roles_activated_predicate & (
     is_person_group_owner | has_global_perm("alsjil.assign_grouprole")
 )
 add_perm("alsijil.assign_grouprole_to_person", assign_group_role_person_predicate)
+
+assign_group_role_for_multiple_predicate = group_roles_activated_predicate & (
+    is_owner_of_any_group | has_global_perm("alsjil.assign_grouprole")
+)
+add_perm("alsijil.assign_grouprole_for_multiple", assign_group_role_for_multiple_predicate)
 
 assign_group_role_group_predicate = view_assigned_group_roles_predicate
 add_perm("alsijil.assign_grouprole_for_group", assign_group_role_group_predicate)

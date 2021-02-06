@@ -261,3 +261,9 @@ def is_group_role_assignment_group_owner(user: User, obj: Union[Group, Person]) 
             if user.person in list(group.owners.all()):
                 return True
     return False
+
+
+@predicate
+def is_owner_of_any_group(user: User, obj):
+    """Predicate which checks if the person is group owner of any group."""
+    return Group.objects.filter(owners=user.person).exists()

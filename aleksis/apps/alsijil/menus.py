@@ -68,6 +68,17 @@ MENUS = {
                     ],
                 },
                 {
+                    "name": _("Assign group role"),
+                    "url": "assign_group_role_multiple",
+                    "icon": "assignment_ind",
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.assign_grouprole_for_multiple",
+                        ),
+                    ],
+                },
+                {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",

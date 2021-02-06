@@ -1025,6 +1025,23 @@ class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCre
 
 
 @method_decorator(never_cache, name="dispatch")
+class AssignGroupRoleMultipleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
+    model = GroupRoleAssignment
+    form_class = AssignGroupRoleForm
+    permission_required = "alsijil.assign_grouprole_for_multiple"
+    template_name = "alsijil/group_role/assign.html"
+    success_message = _("The group role has been assigned.")
+
+    def get_default_success_url(self) -> str:
+        return reverse("assign_group_role_multiple")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
+@method_decorator(never_cache, name="dispatch")
 class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, AdvancedEditView):
     """Edit view for group role assignments."""
 

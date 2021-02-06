@@ -5,10 +5,18 @@
 {% load i18n rules any_js material_form %}
 
 {% block browser_title %}
-  {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% if group %}
+    {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% else %}
+    {% trans "Assign group role" %}
+  {% endif %}
 {% endblock %}
 {% block page_title %}
-  {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% if group %}
+    {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% else %}
+    {% trans "Assign group role" %}
+  {% endif %}
 {% endblock %}
 
 {% block extra_head %}

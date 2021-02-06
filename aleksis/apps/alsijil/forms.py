@@ -222,7 +222,7 @@ class AssignGroupRoleForm(forms.ModelForm):
         if "groups" in initial:
             self.fields["groups"].required = False
 
-        # Filter persons by permissions
+        # Filter persons and groups by permissions
         if not self.request.user.has_perm("alsijil.assign_grouprole"):  # Global permission
             persons = Person.objects
             if initial.get("groups"):
@@ -235,6 +235,12 @@ class AssignGroupRoleForm(forms.ModelForm):
             else:
                 persons = persons.filter(member_of__owners=self.request.user.person)
             self.fields["person"].queryset = persons
+
+            if "groups" not in initial:
+                groups = Group.objects.for_current_school_term_or_all().filter(
+                    owners=self.request.user.person
+                )
+                self.fields["groups"].queryset = groups
 
     def clean_groups(self):
         """Ensure that only permitted groups are used."""

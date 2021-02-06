@@ -87,4 +87,9 @@ urlpatterns = [
         views.GroupRoleAssignmentDeleteView.as_view(),
         name="delete_group_role_assignment",
     ),
+    path(
+        "group_roles/assignments/assign/",
+        views.AssignGroupRoleMultipleView.as_view(),
+        name="assign_group_role_multiple",
+    ),
 ]
