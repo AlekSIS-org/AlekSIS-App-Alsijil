@@ -111,6 +111,11 @@
                 <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
               </li>
             {% endif %}
+            {% if group_roles %}
+              <li class="tab">
+                <a href="#group-roles">{% trans "Group roles" %}</a>
+              </li>
+            {% endif %}
             <li class="tab">
               <a href="#version-history">{% trans "Change history" %}</a>
             </li>
@@ -257,7 +262,13 @@
                     {% if can_edit_lesson_personalnote %}
                       <tr>
                         {{ form.id }}
-                        <td>{{ form.person_name }}{{ form.person_name.value }}</td>
+                        <td>{{ form.person_name }}{{ form.person_name.value }}
+                          <p>
+                            {% for assignment in form.instance.person.group_roles.all %}
+                              {% include "alsijil/group_role/chip.html" with role=assignment.role %}
+                            {% endfor %}
+                          </p>
+                        </td>
                         <td class="center-align">
                           <label>
                             {{ form.absent }}
@@ -310,7 +321,13 @@
                       </tr>
                     {% else %}
                       <tr>
-                        <td>{{ form.person_name.value }}</td>
+                        <td>{{ form.person_name.value }}
+                          <p>
+                            {% for assignment in form.instance.person.group_roles.all %}
+                              {% include "alsijil/group_role/chip.html" with role=assignment.role %}
+                            {% endfor %}
+                          </p>
+                        </td>
                         <td><i class="material-icons center">{{ form.absent.value|yesno:"check,clear" }}</i></td>
                         <td>
                           <i class="material-icons center">{{ form.late.value|yesno:"check,clear" }}</i>
@@ -335,6 +352,12 @@
                 </table>
               </div>
             </div>
+          </div>
+        {% endif %}
+
+        {% if group_roles %}
+          <div class="col s12" id="group-roles">
+            {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=lesson_period.lesson.groups.first back_url=back_url %}
           </div>
         {% endif %}
 

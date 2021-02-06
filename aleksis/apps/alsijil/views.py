@@ -117,6 +117,11 @@ def lesson(
     context["blocked_because_holidays"] = blocked_because_holidays
     context["holiday"] = holiday
 
+    back_url = reverse(
+        "lesson_by_week_and_period", args=[wanted_week.year, wanted_week.week, lesson_period.pk]
+    )
+    context["back_url"] = back_url
+
     next_lesson = request.user.person.next_lesson(lesson_period, date_of_lesson)
     prev_lesson = request.user.person.previous_lesson(lesson_period, date_of_lesson)
 
@@ -129,6 +134,14 @@ def lesson(
     context["next_lesson"] = lesson_period.next
 
     if not blocked_because_holidays:
+        # Group roles
+        show_group_roles = request.user.person.preferences[
+            "alsijil__group_roles_in_lesson_view"
+        ] and request.user.has_perm("alsijil.view_assigned_grouproles", lesson_period)
+        if show_group_roles:
+            groups = lesson_period.lesson.groups.all()
+            group_roles = GroupRole.objects.with_assignments(date_of_lesson, groups)
+            context["group_roles"] = group_roles
 
         # Create or get lesson documentation object; can be empty when first opening lesson
         lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
@@ -143,6 +156,16 @@ def lesson(
             persons = Person.objects.all()
 
         persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
+
+        # Annotate group roles
+        if show_group_roles:
+            persons_qs = persons_qs.prefetch_related(
+                Prefetch(
+                    "person__group_roles",
+                    queryset=GroupRoleAssignment.objects.on_day(date_of_lesson).for_groups(groups),
+                ),
+            )
+
         personal_note_formset = PersonalNoteFormSet(
             request.POST or None, queryset=persons_qs, prefix="personal_notes"
         )
