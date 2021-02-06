@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-01-22 22:01+0100\n"
-"PO-Revision-Date: 2021-01-22 21:30+0000\n"
-"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"PO-Revision-Date: 2021-02-06 22:49+0000\n"
+"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -173,7 +173,7 @@ msgstr "Meine Übersicht"
 #: menus.py:60 templates/alsijil/class_register/persons.html:5
 #: templates/alsijil/class_register/persons.html:9
 msgid "My students"
-msgstr "Meine Schüler*innen"
+msgstr "Meine Schülerinnen und Schüler"
 
 #: menus.py:71 models.py:46 templates/alsijil/excuse_type/list.html:8
 #: templates/alsijil/excuse_type/list.html:9
@@ -404,14 +404,14 @@ msgstr "Abbrechen"
 
 #: templates/alsijil/class_register/groups.html:21
 msgid "Students"
-msgstr "Schüler*innen"
+msgstr "Schülerinnen und Schüler"
 
 #: templates/alsijil/class_register/groups.html:35
 #: templates/alsijil/class_register/groups.html:69
 #: templates/alsijil/class_register/week_view.html:40
 #: templates/alsijil/class_register/week_view.html:51
 msgid "Students list"
-msgstr "Schüler*innenliste"
+msgstr "Liste der Schülerinnen und Schüler"
 
 #: templates/alsijil/class_register/groups.html:39
 #: templates/alsijil/class_register/groups.html:75
@@ -441,7 +441,7 @@ msgstr "Keine Gruppen verfügbar."
 
 #: templates/alsijil/class_register/groups.html:64
 msgid "students"
-msgstr "Schüler*innen"
+msgstr "Schülerinnen und Schüler"
 
 #: templates/alsijil/class_register/lesson.html:5
 msgid "Lesson"
@@ -660,7 +660,7 @@ msgstr "%(late)s' verspätet"
 #: templates/alsijil/class_register/students_list.html:12
 #, python-format
 msgid "Students list: %(group)s"
-msgstr "Schüler*innenliste: %(group)s"
+msgstr "Liste der Schülerinnen und Schüler: %(group)s"
 
 #: templates/alsijil/class_register/week_view.html:23
 msgid "Select"
@@ -813,7 +813,7 @@ msgstr "e"
 
 #: templates/alsijil/partials/persons_with_stats.html:7
 msgid "No students available."
-msgstr "Keine Schüler*innen verfügbar."
+msgstr "Keine Schülerinnen und Schüler verfügbar."
 
 #: templates/alsijil/partials/persons_with_stats.html:15
 #: templates/alsijil/partials/persons_with_stats.html:25
