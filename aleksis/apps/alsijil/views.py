@@ -271,7 +271,9 @@ def week_view(
 
     # Group roles
     show_group_roles = (
-        group and request.user.person.preferences["alsijil__group_roles_in_week_view"]
+        group
+        and request.user.person.preferences["alsijil__group_roles_in_week_view"]
+        and request.user.has_perm("alsijil.view_assigned_grouproles", group)
     )
     if show_group_roles:
         group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
