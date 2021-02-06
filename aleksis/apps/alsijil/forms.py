@@ -197,7 +197,6 @@ class AssignGroupRoleForm(forms.ModelForm):
         queryset=Person.objects.all(),
         widget=ModelSelect2Widget(
             model=Person,
-            dependent_fields={"groups": "member_of"},
             search_fields=[
                 "first_name__icontains",
                 "last_name__icontains",
