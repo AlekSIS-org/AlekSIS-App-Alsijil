@@ -51,58 +51,7 @@
     </div>
 
     <div id="current" class="col s12">
-      <div class="collection">
-        {% for role in roles %}
-          <div class="collection-item">
-            <div class="row no-margin">
-              <div class="col s12 m5 l4 xl3 no-padding">
-                {% if can_assign_group_role %}
-                  <a class="btn waves-effect waves-light right hide-on-med-and-up"
-                     href="{% url "assign_group_role" object.pk role.pk %}">
-                    <i class="material-icons center">add</i>
-                  </a>
-                {% endif %}
-
-                <div class="btn-margin">
-                  {% include "alsijil/group_role/chip.html" with role=role %}
-                </div>
-              </div>
-
-              <div class="col s12 m7 l8 xl9 no-padding">
-                {% if can_assign_group_role %}
-                  <a class="btn waves-effect waves-light right hide-on-small-only"
-                     href="{% url "assign_group_role" object.pk role.pk %}">
-                    <i class="material-icons center">add</i>
-                  </a>
-                {% endif %}
-
-                {% for assignment in role.assignments.all %}
-                  <a class="chip dropdown-trigger" href="#"
-                     data-target="dropdown-{{ assignment.pk }}" title="{{ assignment }}">{{ assignment.person }}
-                    {% if object not in assignment.groups.all %}
-                      <small>({{ assignment.group_names }})</small>
-                    {% endif %}
-                  </a>
-
-                  {% include "alsijil/group_role/assignment_options.html" with assignment=assignment back_url=back_url %}
-                  {% empty %}
-                  <div class="grey-text darken-3">{% trans "No one assigned." %}</div>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="alert primary">
-        <div>
-          <i class="material-icons left">info</i>
-          {% blocktrans %}
-            You can get some additional actions for each group role assignment if you click on the name of the
-            corresponding person.
-          {% endblocktrans %}
-        </div>
-      </div>
+      {% include "alsijil/group_role/partials/assigned_roles.html" with roles=roles group=object back_url=back_url %}
     </div>
 
 
@@ -133,7 +82,7 @@
                 <i class="material-icons left">list</i>
                 {% trans "Actions" %}
               </a>
-              {% include "alsijil/group_role/assignment_options.html" with assignment=assignment back_url=back_url suffix="-d2" %}
+              {% include "alsijil/group_role/partials/assignment_options.html" with assignment=assignment back_url=back_url suffix="-d2" %}
             </td>
           </tr>
         {% endfor %}

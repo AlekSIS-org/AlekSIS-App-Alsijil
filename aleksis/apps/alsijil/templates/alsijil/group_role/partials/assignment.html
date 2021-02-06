@@ -1,0 +1,8 @@
+<a class="chip dropdown-trigger" href="#"
+   data-target="dropdown-{{ assignment.pk }}" title="{{ assignment }}">{{ assignment.person }}
+  {% if group not in assignment.groups.all %}
+    <small>({{ assignment.group_names }})</small>
+  {% endif %}
+</a>
+
+{% include "alsijil/group_role/partials/assignment_options.html" with assignment=assignment back_url=back_url %}
