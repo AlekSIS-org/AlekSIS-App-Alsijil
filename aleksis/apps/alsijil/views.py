@@ -934,16 +934,7 @@ class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
         today = timezone.now().date()
         context["today"] = today
 
-        self.roles = GroupRole.objects.prefetch_related(
-            Prefetch(
-                "assignments",
-                queryset=GroupRoleAssignment.objects.filter(
-                    Q(date_start__lte=today) & (Q(date_end__gte=today) | Q(date_end__isnull=True))
-                )
-                .filter(Q(groups=self.object) | Q(groups__child_groups=self.object))
-                .distinct(),
-            )
-        )
+        self.roles = GroupRole.objects.with_assignments(today, [self.object])
         context["roles"] = self.roles
         assignments = (
             GroupRoleAssignment.objects.filter(

@@ -13,6 +13,10 @@ from aleksis.apps.alsijil.data_checks import (
     PersonalNoteOnHolidaysDataCheck,
 )
 from aleksis.apps.alsijil.managers import (
+    GroupRoleAssignmentManager,
+    GroupRoleAssignmentQuerySet,
+    GroupRoleManager,
+    GroupRoleQuerySet,
     LessonDocumentationManager,
     LessonDocumentationQuerySet,
     PersonalNoteManager,
@@ -242,6 +246,8 @@ class ExtraMark(ExtensibleModel):
 
 
 class GroupRole(ExtensibleModel):
+    objects = GroupRoleManager.from_queryset(GroupRoleQuerySet)()
+
     name = models.CharField(max_length=255, verbose_name=_("Name"))
     icon = models.CharField(max_length=50, blank=True, choices=ICONS, verbose_name=_("Icon"))
     colour = models.CharField(max_length=50, blank=True, choices=COLOURS, verbose_name=_("Colour"))
@@ -255,6 +261,8 @@ class GroupRole(ExtensibleModel):
 
 
 class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
+    objects = GroupRoleAssignmentManager.from_queryset(GroupRoleAssignmentQuerySet)()
+
     role = models.ForeignKey(
         GroupRole,
         on_delete=models.CASCADE,
@@ -281,6 +289,13 @@ class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
     def __str__(self):
         date_end = date_format(self.date_end) if self.date_end else "?"
         return f"{self.role}: {self.person}, {date_format(self.date_start)}–{date_end}"
+
+    @property
+    def date_range(self) -> str:
+        if not self.date_end:
+            return f"{date_format(self.date_start)}–?"
+        else:
+            return f"{date_format(self.date_start)}–{date_format(self.date_end)}"
 
     class Meta:
         verbose_name = _("Group role assignment")
