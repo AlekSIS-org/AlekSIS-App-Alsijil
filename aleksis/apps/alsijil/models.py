@@ -4,6 +4,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
+from colorfield.fields import ColorField
 
 from aleksis.apps.alsijil.data_checks import (
     ExcusesWithoutAbsences,
@@ -28,7 +29,7 @@ from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.date import get_current_year
 from aleksis.core.mixins import ExtensibleModel
 from aleksis.core.util.core_helpers import get_site_preferences
-from aleksis.core.util.model_helpers import COLOURS, ICONS
+from aleksis.core.util.model_helpers import ICONS
 
 
 def isidentifier(value: str) -> bool:
@@ -250,7 +251,7 @@ class GroupRole(ExtensibleModel):
 
     name = models.CharField(max_length=255, verbose_name=_("Name"))
     icon = models.CharField(max_length=50, blank=True, choices=ICONS, verbose_name=_("Icon"))
-    colour = models.CharField(max_length=50, blank=True, choices=COLOURS, verbose_name=_("Colour"))
+    colour = ColorField(blank=True, verbose_name=_("Colour"))
 
     def __str__(self):
         return self.name

@@ -70,10 +70,8 @@ class GroupRoleTable(tables.Table):
     )
 
     def render_name(self, value, record):
-        colour = record.colour or "black"
-        icon_name = record.icon or "assignment_ind"
-        context = dict(content=value, icon=icon_name, classes=f"{colour} white-text")
-        return render_to_string("components/materialize-chips.html", context)
+        context = dict(role=record)
+        return render_to_string("alsijil/group_role/chip.html", context)
 
     def before_render(self, request):
         if not request.user.has_perm("alsijil.edit_grouprole"):
