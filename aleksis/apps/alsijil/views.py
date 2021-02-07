@@ -1000,7 +1000,7 @@ class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCre
     template_name = "alsijil/group_role/assign.html"
     success_message = _("The group role has been assigned.")
 
-    def get_default_success_url(self) -> str:
+    def get_success_url(self) -> str:
         return reverse("assigned_group_roles", args=[self.group.pk])
 
     def get_permission_object(self):
@@ -1032,7 +1032,7 @@ class AssignGroupRoleMultipleView(PermissionRequiredMixin, SuccessNextMixin, Adv
     template_name = "alsijil/group_role/assign.html"
     success_message = _("The group role has been assigned.")
 
-    def get_default_success_url(self) -> str:
+    def get_success_url(self) -> str:
         return reverse("assign_group_role_multiple")
 
     def get_form_kwargs(self):
@@ -1051,7 +1051,7 @@ class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, Adv
     template_name = "alsijil/group_role/edit_assignment.html"
     success_message = _("The group role assignment has been saved.")
 
-    def get_default_success_url(self) -> str:
+    def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
 
@@ -1061,7 +1061,7 @@ class GroupRoleAssignmentStopView(PermissionRequiredMixin, SuccessNextMixin, Det
     model = GroupRoleAssignment
     permission_required = "alsijil.stop_grouproleassignment"
 
-    def get_default_success_url(self) -> str:
+    def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
 
@@ -1085,6 +1085,6 @@ class GroupRoleAssignmentDeleteView(
     template_name = "core/pages/delete.html"
     success_message = _("The group role assignment has been deleted.")
 
-    def get_default_success_url(self) -> str:
+    def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
