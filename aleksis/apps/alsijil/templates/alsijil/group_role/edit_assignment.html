@@ -1,0 +1,18 @@
+{# -*- engine:django -*- #}
+
+{% extends "core/base.html" %}
+
+{% load i18n rules material_form %}
+
+{% block browser_title %}{% blocktrans %}Edit group role assignment{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans %}Edit group role assignment{% endblocktrans %}{% endblock %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% form form=form %}{% endform %}
+
+    {% include "core/partials/save_button.html" %}
+  </form>
+{% endblock %}
+

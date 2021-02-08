@@ -1,0 +1,41 @@
+{# -*- engine:django -*- #}
+
+{% extends "core/base.html" %}
+
+{% load i18n rules any_js material_form %}
+
+{% block browser_title %}
+  {% if group %}
+    {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% else %}
+    {% trans "Assign group role" %}
+  {% endif %}
+{% endblock %}
+{% block page_title %}
+  {% if group %}
+    {% blocktrans with group=group.name %}Assign group role for {{ group }}{% endblocktrans %}
+  {% else %}
+    {% trans "Assign group role" %}
+  {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+  {{ form.media.css }}
+  {% include_css "select2-materialize" %}
+{% endblock %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% form form=form %}{% endform %}
+
+    <button type="submit" class="btn green waves-effect waves-light">
+      <i class="material-icons left">assignment_ind</i>
+      {% trans "Assign" %}
+    </button>
+  </form>
+
+  {% include_js "select2-materialize" %}
+  {{ form.media.js }}
+{% endblock %}
+

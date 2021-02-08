@@ -1,0 +1,47 @@
+{% load i18n rules %}
+{% has_perm "alsijil.assign_grouprole_for_group" user group as can_assign_group_role %}
+<div class="collection">
+  {% for role in roles %}
+    <div class="collection-item">
+      <div class="row no-margin">
+        <div class="col s12 m5 l4 xl3 no-padding">
+          {% if can_assign_group_role %}
+            <a class="btn waves-effect waves-light right hide-on-med-and-up"
+               href="{% url "assign_group_role" group.pk role.pk %}?next={{ back_url }}">
+              <i class="material-icons center">add</i>
+            </a>
+          {% endif %}
+
+          <div class="btn-margin">
+            {% include "alsijil/group_role/chip.html" with role=role %}
+          </div>
+        </div>
+
+        <div class="col s12 m7 l8 xl9 no-padding">
+          {% if can_assign_group_role %}
+            <a class="btn waves-effect waves-light right hide-on-small-only"
+               href="{% url "assign_group_role" group.pk role.pk %}?next={{ back_url }}">
+              <i class="material-icons center">add</i>
+            </a>
+          {% endif %}
+
+          {% for assignment in role.assignments.all %}
+            {% include "alsijil/group_role/partials/assignment.html" with assignment=assignment group=group back_url=back_url %}
+            {% empty %}
+            <div class="grey-text darken-3">{% trans "No one assigned." %}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="alert primary">
+  <div>
+    <i class="material-icons left">info</i>
+    {% blocktrans %}
+      You can get some additional actions for each group role assignment if you click on the name of the
+      corresponding person.
+    {% endblocktrans %}
+  </div>
+</div>

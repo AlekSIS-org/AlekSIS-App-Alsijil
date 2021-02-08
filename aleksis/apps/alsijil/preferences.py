@@ -3,7 +3,7 @@ from django.utils.translation import gettext as _
 from dynamic_preferences.preferences import Section
 from dynamic_preferences.types import BooleanPreference
 
-from aleksis.core.registries import site_preferences_registry
+from aleksis.core.registries import person_preferences_registry, site_preferences_registry
 
 alsijil = Section("alsijil", verbose_name=_("Class register"))
 
@@ -74,3 +74,30 @@ class AllowEntriesInHolidays(BooleanPreference):
     name = "allow_entries_in_holidays"
     default = False
     verbose_name = _("Allow teachers to add data for lessons in holidays")
+
+
+@site_preferences_registry.register
+class GroupOwnersCanAssignRolesToParents(BooleanPreference):
+    section = alsijil
+    name = "group_owners_can_assign_roles_to_parents"
+    default = False
+    verbose_name = _(
+        "Allow group owners to assign group roles to the parents of the group's members"
+    )
+
+
+@person_preferences_registry.register
+class ShowGroupRolesInWeekView(BooleanPreference):
+    section = alsijil
+    name = "group_roles_in_week_view"
+    default = True
+    verbose_name = _("Show assigned group roles in week view")
+    help_text = _("Only week view of groups")
+
+
+@person_preferences_registry.register
+class ShowGroupRolesInLessonView(BooleanPreference):
+    section = alsijil
+    name = "group_roles_in_lesson_view"
+    default = True
+    verbose_name = _("Show assigned group roles in lesson view")

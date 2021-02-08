@@ -1,0 +1,9 @@
+{# -*- engine:django -*- #}
+
+<div class="chip white-text" style="background-color: {{ role.colour|default:"black" }};">
+  <i class="material-icons left">{{ role.icon|default:"assignment_ind" }}</i>
+  {{ role.name }}
+  {% if small %}
+    <small>({{ small }})</small>
+  {% endif %}
+</div>

@@ -4,6 +4,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from calendarweek import CalendarWeek
+from colorfield.fields import ColorField
 
 from aleksis.apps.alsijil.data_checks import (
     ExcusesWithoutAbsences,
@@ -13,16 +14,22 @@ from aleksis.apps.alsijil.data_checks import (
     PersonalNoteOnHolidaysDataCheck,
 )
 from aleksis.apps.alsijil.managers import (
+    GroupRoleAssignmentManager,
+    GroupRoleAssignmentQuerySet,
+    GroupRoleManager,
+    GroupRoleQuerySet,
     LessonDocumentationManager,
     LessonDocumentationQuerySet,
     PersonalNoteManager,
     PersonalNoteQuerySet,
 )
+from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import LessonPeriod
 from aleksis.apps.chronos.util.date import get_current_year
 from aleksis.core.mixins import ExtensibleModel
 from aleksis.core.util.core_helpers import get_site_preferences
+from aleksis.core.util.model_helpers import ICONS
 
 
 def isidentifier(value: str) -> bool:
@@ -237,6 +244,63 @@ class ExtraMark(ExtensibleModel):
         ordering = ["short_name"]
         verbose_name = _("Extra mark")
         verbose_name_plural = _("Extra marks")
+
+
+class GroupRole(ExtensibleModel):
+    objects = GroupRoleManager.from_queryset(GroupRoleQuerySet)()
+
+    name = models.CharField(max_length=255, verbose_name=_("Name"))
+    icon = models.CharField(max_length=50, blank=True, choices=ICONS, verbose_name=_("Icon"))
+    colour = ColorField(blank=True, verbose_name=_("Colour"))
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Group role")
+        verbose_name_plural = _("Group roles")
+
+
+class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
+    objects = GroupRoleAssignmentManager.from_queryset(GroupRoleAssignmentQuerySet)()
+
+    role = models.ForeignKey(
+        GroupRole,
+        on_delete=models.CASCADE,
+        related_name="assignments",
+        verbose_name=_("Group role"),
+    )
+    person = models.ForeignKey(
+        "core.Person",
+        on_delete=models.CASCADE,
+        related_name="group_roles",
+        verbose_name=_("Assigned person"),
+    )
+    groups = models.ManyToManyField(
+        "core.Group", related_name="group_roles", verbose_name=_("Groups"),
+    )
+    date_start = models.DateField(verbose_name=_("Start date"))
+    date_end = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("End date"),
+        help_text=_("Can be left empty if end date is not clear yet"),
+    )
+
+    def __str__(self):
+        date_end = date_format(self.date_end) if self.date_end else "?"
+        return f"{self.role}: {self.person}, {date_format(self.date_start)}–{date_end}"
+
+    @property
+    def date_range(self) -> str:
+        if not self.date_end:
+            return f"{date_format(self.date_start)}–?"
+        else:
+            return f"{date_format(self.date_start)}–{date_format(self.date_end)}"
+
+    class Meta:
+        verbose_name = _("Group role assignment")
+        verbose_name_plural = _("Group role assignments")
 
 
 class AlsijilGlobalPermissions(ExtensibleModel):
