@@ -77,14 +77,6 @@ class AllowEntriesInHolidays(BooleanPreference):
 
 
 @site_preferences_registry.register
-class ActivateGroupRoles(BooleanPreference):
-    section = alsijil
-    name = "activate_group_roles"
-    default = True
-    verbose_name = _("Activate support for creating and assigning group roles")
-
-
-@site_preferences_registry.register
 class GroupOwnersCanAssignRolesToParents(BooleanPreference):
     section = alsijil
     name = "group_owners_can_assign_roles_to_parents"
