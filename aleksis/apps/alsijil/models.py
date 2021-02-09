@@ -1,7 +1,9 @@
+from datetime import date
+from typing import Optional, Union
+
 from django.db import models
 from django.db.models.constraints import CheckConstraint
 from django.db.models.query_utils import Q
-from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
@@ -16,8 +18,7 @@ from aleksis.apps.alsijil.data_checks import (
 )
 from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
-from aleksis.apps.chronos.models import LessonPeriod
-from aleksis.apps.chronos.util.date import get_current_year
+from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.mixins import ExtensibleModel
 from aleksis.core.util.core_helpers import get_site_preferences
 
@@ -73,7 +74,46 @@ lesson_related_constraint_q = (
 )
 
 
-class PersonalNote(ExtensibleModel, WeekRelatedMixin):
+class RegisterObjectRelatedMixin(WeekRelatedMixin):
+    @property
+    def register_object(self) -> Union[LessonPeriod, Event, ExtraLesson]:
+        if self.lesson_period:
+            return self.lesson_period
+        elif self.event:
+            return self.event
+        else:
+            return self.extra_lesson
+
+    @property
+    def calendar_week(self) -> CalendarWeek:
+        if self.lesson_period:
+            return CalendarWeek(week=self.week, year=self.year,)
+        elif self.extra_lesson:
+            return self.extra_lesson.calendar_week
+        else:
+            return CalendarWeek.from_date(self.register_object.date_start)
+
+    @property
+    def date(self) -> Optional[date]:
+        if self.lesson_period:
+            return super().date
+        elif self.extra_lesson:
+            return self.extra_lesson.date
+        return None
+
+    @property
+    def date_formatted(self) -> str:
+        return (
+            date_format(self.date)
+            if self.date
+            else f"{self.event.date_start}–{self.event.date_end}"
+        )
+
+    def get_absolute_url(self) -> str:
+        return self.register_object.alsijil_url
+
+
+class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
     """A personal note about a single person.
 
     Used in the class register to note absences, excuses
@@ -93,9 +133,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
     groups_of_person = models.ManyToManyField("core.Group", related_name="+")
 
     week = models.IntegerField(blank=True, null=True)
-    year = models.IntegerField(
-        verbose_name=_("Year"), default=get_current_year, blank=True, null=True
-    )
+    year = models.IntegerField(verbose_name=_("Year"), blank=True, null=True)
 
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="personal_notes", blank=True, null=True
@@ -144,16 +182,11 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
         self.remarks = defaults.remarks
         self.extra_marks.clear()
 
-    def __str__(self):
-        return f"{date_format(self.date)}, {self.lesson_period}, {self.person}"
+    def __str__(self) -> str:
+        return f"{self.date_formatted}, {self.lesson_period}, {self.person}"
 
-    def get_absolute_url(self):
-        return (
-            reverse(
-                "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
-            )
-            + "#personal-notes"
-        )
+    def get_absolute_url(self) -> str:
+        return super().get_absolute_url() + "#personal-notes"
 
     class Meta:
         verbose_name = _("Personal note")
@@ -173,7 +206,7 @@ class PersonalNote(ExtensibleModel, WeekRelatedMixin):
         ]
 
 
-class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
+class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
     """A documentation on a single lesson period.
 
     Non-personal, includes the topic and homework of the lesson.
@@ -182,9 +215,7 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
     data_checks = [LessonDocumentationOnHolidaysDataCheck]
 
     week = models.IntegerField(blank=True, null=True)
-    year = models.IntegerField(
-        verbose_name=_("Year"), default=get_current_year, blank=True, null=True
-    )
+    year = models.IntegerField(verbose_name=_("Year"), blank=True, null=True)
 
     lesson_period = models.ForeignKey(
         "chronos.LessonPeriod", models.CASCADE, related_name="documentations", blank=True, null=True
@@ -233,16 +264,13 @@ class LessonDocumentation(ExtensibleModel, WeekRelatedMixin):
                 lesson_documentation.save()
 
     def __str__(self):
-        return f"{self.lesson_period}, {date_format(self.date)}"
-
-    def get_absolute_url(self):
-        return reverse(
-            "lesson_by_week_and_period", args=[self.year, self.week, self.lesson_period.pk],
-        )
+        return f"{self.lesson_period}, {self.date_formatted}"
 
     def save(self, *args, **kwargs):
-        if get_site_preferences()["alsijil__carry_over"] and (
-            self.topic or self.homework or self.group_note
+        if (
+            get_site_preferences()["alsijil__carry_over"]
+            and (self.topic or self.homework or self.group_note)
+            and self.lesson_period
         ):
             self._carry_over_data()
         super().save(*args, **kwargs)

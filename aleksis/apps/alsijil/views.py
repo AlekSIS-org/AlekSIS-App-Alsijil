@@ -39,36 +39,37 @@ from .models import ExcuseType, ExtraMark, PersonalNote
 from .tables import ExcuseTypeTable, ExtraMarkTable
 from .util.alsijil_helpers import (
     annotate_documentations,
-    get_lesson_period_by_pk,
+    get_register_object_by_pk,
     get_timetable_instance_by_pk,
     register_objects_sorter,
 )
 
 
-@permission_required("alsijil.view_lesson", fn=get_lesson_period_by_pk)
-def lesson(
+@permission_required("alsijil.view_register_object", fn=get_register_object_by_pk)  # FIXME
+def register_object(
     request: HttpRequest,
+    model: Optional[str] = None,
     year: Optional[int] = None,
     week: Optional[int] = None,
-    period_id: Optional[int] = None,
+    id_: Optional[int] = None,
 ) -> HttpResponse:
     context = {}
 
-    lesson_period = get_lesson_period_by_pk(request, year, week, period_id)
+    register_object = get_register_object_by_pk(request, model, year, week, id_)
 
-    if period_id:
+    if id_ and model == "lesson":
         wanted_week = CalendarWeek(year=year, week=week)
+    elif id_ and model == "extra_lesson":
+        wanted_week = register_object.calendar_week
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         wanted_week = CalendarWeek()
     else:
         wanted_week = None
 
-    if not all((year, week, period_id)):
-        if lesson_period:
-            return redirect(
-                "lesson_by_week_and_period", wanted_week.year, wanted_week.week, lesson_period.pk,
-            )
-        else:
+    if not all((year, week, id_)):
+        if register_object and model == "lesson":
+            return redirect("lesson", wanted_week.year, wanted_week.week, register_object.pk,)
+        elif not register_object:
             raise Http404(
                 _(
                     "You either selected an invalid lesson or "
@@ -76,22 +77,30 @@ def lesson(
                 )
             )
 
-    date_of_lesson = week_weekday_to_date(wanted_week, lesson_period.period.weekday)
+    date_of_lesson = (
+        week_weekday_to_date(wanted_week, register_object.period.weekday)
+        if not isinstance(register_object, Event)
+        else register_object.date_start
+    )
+    start_time = (
+        register_object.period.time_start
+        if not isinstance(register_object, Event)
+        else register_object.period_from.time_start
+    )
 
-    if (
-        date_of_lesson < lesson_period.lesson.validity.date_start
-        or date_of_lesson > lesson_period.lesson.validity.date_end
+    if isinstance(register_object, Event):
+        register_object.annotate_day(date_of_lesson)
+    if isinstance(register_object, LessonPeriod) and (
+        date_of_lesson < register_object.lesson.validity.date_start
+        or date_of_lesson > register_object.lesson.validity.date_end
     ):
         return HttpResponseNotFound()
 
     if (
-        datetime.combine(
-            wanted_week[lesson_period.period.weekday], lesson_period.period.time_start,
-        )
-        > datetime.now()
+        datetime.combine(date_of_lesson, start_time) > datetime.now()
         and not (
             get_site_preferences()["alsijil__open_periods_same_day"]
-            and wanted_week[lesson_period.period.weekday] <= datetime.now().date()
+            and date_of_lesson <= datetime.now().date()
         )
         and not request.user.is_superuser
     ):
@@ -106,39 +115,51 @@ def lesson(
     context["blocked_because_holidays"] = blocked_because_holidays
     context["holiday"] = holiday
 
-    next_lesson = request.user.person.next_lesson(lesson_period, date_of_lesson)
-    prev_lesson = request.user.person.previous_lesson(lesson_period, date_of_lesson)
+    next_lesson = (
+        request.user.person.next_lesson(register_object, date_of_lesson)
+        if isinstance(register_object, LessonPeriod)
+        else None
+    )
+    prev_lesson = (
+        request.user.person.previous_lesson(register_object, date_of_lesson)
+        if isinstance(register_object, LessonPeriod)
+        else None
+    )
 
-    context["lesson_period"] = lesson_period
+    context["register_object"] = register_object
     context["week"] = wanted_week
-    context["day"] = wanted_week[lesson_period.period.weekday]
+    context["day"] = date_of_lesson
     context["next_lesson_person"] = next_lesson
     context["prev_lesson_person"] = prev_lesson
-    context["prev_lesson"] = lesson_period.prev
-    context["next_lesson"] = lesson_period.next
+    context["prev_lesson"] = (
+        register_object.prev if isinstance(register_object, LessonPeriod) else None
+    )
+    context["next_lesson"] = (
+        register_object.next if isinstance(register_object, LessonPeriod) else None
+    )
 
     if not blocked_because_holidays:
 
         # Create or get lesson documentation object; can be empty when first opening lesson
-        lesson_documentation = lesson_period.get_or_create_lesson_documentation(wanted_week)
+        lesson_documentation = register_object.get_or_create_lesson_documentation(wanted_week)
         lesson_documentation_form = LessonDocumentationForm(
             request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
         )
 
         # Create a formset that holds all personal notes for all persons in this lesson
-        if not request.user.has_perm("alsijil.view_lesson_personalnote", lesson_period):
+        if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
             persons = Person.objects.filter(pk=request.user.person.pk)
         else:
             persons = Person.objects.all()
 
-        persons_qs = lesson_period.get_personal_notes(persons, wanted_week)
+        persons_qs = register_object.get_personal_notes(persons, wanted_week)
         personal_note_formset = PersonalNoteFormSet(
             request.POST or None, queryset=persons_qs, prefix="personal_notes"
         )
 
         if request.method == "POST":
             if lesson_documentation_form.is_valid() and request.user.has_perm(
-                "alsijil.edit_lessondocumentation", lesson_period
+                "alsijil.edit_lessondocumentation", register_object
             ):
                 with reversion.create_revision():
                     reversion.set_user(request.user)
@@ -146,27 +167,33 @@ def lesson(
 
                 messages.success(request, _("The lesson documentation has been saved."))
 
-            substitution = lesson_period.get_substitution()
+            substitution = (
+                register_object.get_substitution()
+                if isinstance(register_object, LessonPeriod)
+                else None
+            )
             if (
                 not getattr(substitution, "cancelled", False)
                 or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
             ):
                 if personal_note_formset.is_valid() and request.user.has_perm(
-                    "alsijil.edit_lesson_personalnote", lesson_period
+                    "alsijil.edit_register_object_personalnote", register_object
                 ):
                     with reversion.create_revision():
                         reversion.set_user(request.user)
                         instances = personal_note_formset.save()
 
-                    # Iterate over personal notes and carry changed absences to following lessons
-                    for instance in instances:
-                        instance.person.mark_absent(
-                            wanted_week[lesson_period.period.weekday],
-                            lesson_period.period.period + 1,
-                            instance.absent,
-                            instance.excused,
-                            instance.excuse_type,
-                        )
+                    if not isinstance(register_object, Event):
+                        # Iterate over personal notes
+                        # and carry changed absences to following lessons
+                        for instance in instances:
+                            instance.person.mark_absent(
+                                wanted_week[register_object.period.weekday],
+                                register_object.period.period + 1,
+                                instance.absent,
+                                instance.excused,
+                                instance.excuse_type,
+                            )
 
                 messages.success(request, _("The personal notes have been saved."))
 
@@ -376,7 +403,12 @@ def week_view(
 
         persons = []
         for person in persons_qs:
-            persons.append({"person": person, "personal_notes": list(person.personal_notes.all())})
+            personal_notes = []
+            for note in person.personal_notes.all():
+                if note.lesson_period:
+                    note.lesson_period.annotate_week(wanted_week)
+                personal_notes.append(note)
+            persons.append({"person": person, "personal_notes": personal_notes})
     else:
         persons = None
 

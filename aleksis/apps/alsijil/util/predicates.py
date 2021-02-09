@@ -5,7 +5,7 @@ from django.contrib.auth.models import Permission, User
 from guardian.models import UserObjectPermission
 from rules import predicate
 
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
 from aleksis.core.util.core_helpers import get_content_type_by_perm
 
@@ -19,17 +19,17 @@ def is_none(user: User, obj: Any) -> bool:
 
 
 @predicate
-def is_lesson_teacher(user: User, obj: LessonPeriod) -> bool:
+def is_lesson_teacher(user: User, obj: Union[LessonPeriod, Event, ExtraLesson]) -> bool:
     """Predicate for teachers of a lesson.
 
     Checks whether the person linked to the user is a teacher
     in the lesson or the substitution linked to the given LessonPeriod.
     """
     if obj:
-        sub = obj.get_substitution()
+        sub = obj.get_substitution() if isinstance(obj, LessonPeriod) else None
         if sub and sub in user.person.lesson_substitutions.all():
             return True
-        return user.person in obj.lesson.teachers.all()
+        return user.person in obj.get_teachers().all()
     return False
 
 
@@ -40,8 +40,8 @@ def is_lesson_participant(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is a member in
     the groups linked to the given LessonPeriod.
     """
-    if hasattr(obj, "lesson"):
-        for group in obj.lesson.groups.all():
+    if hasattr(obj, "lesson") or hasattr(obj, "groups"):
+        for group in obj.get_groups().all():
             if user.person in list(group.members.all()):
                 return True
     return False
@@ -55,8 +55,8 @@ def is_lesson_parent_group_owner(user: User, obj: LessonPeriod) -> bool:
     Checks whether the person linked to the user is the owner of
     any parent groups of any groups of the given LessonPeriods lesson.
     """
-    if hasattr(obj, "lesson"):
-        for group in obj.lesson.groups.all():
+    if hasattr(obj, "lesson") or hasattr(obj, "groups"):
+        for group in obj.get_groups().all():
             for parent_group in group.parent_groups.all():
                 if user.person in list(parent_group.owners.all()):
                     return True

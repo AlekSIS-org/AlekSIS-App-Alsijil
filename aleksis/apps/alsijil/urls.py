@@ -3,12 +3,20 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("lesson", views.lesson, name="lesson"),
+    path("lesson", views.register_object, {"model": "lesson"}, name="lesson_period"),
     path(
-        "lesson/<int:year>/<int:week>/<int:period_id>",
-        views.lesson,
-        name="lesson_by_week_and_period",
+        "lesson/<int:year>/<int:week>/<int:id_>",
+        views.register_object,
+        {"model": "lesson"},
+        name="lesson_period",
     ),
+    path(
+        "extra_lesson/<int:id_>/",
+        views.register_object,
+        {"model": "extra_lesson"},
+        name="extra_lesson",
+    ),
+    path("event/<int:id_>/", views.register_object, {"model": "event"}, name="event",),
     path("week/", views.week_view, name="week_view"),
     path("week/<int:year>/<int:week>/", views.week_view, name="week_view_by_week"),
     path("week/year/cw/", views.week_view, name="week_view_placeholders"),

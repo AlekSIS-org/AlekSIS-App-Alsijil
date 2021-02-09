@@ -27,7 +27,7 @@ from .util.predicates import (
 )
 
 # View lesson
-view_lesson_predicate = has_person & (
+view_register_object_predicate = has_person & (
     is_none  # View is opened as "Current lesson"
     | is_lesson_teacher
     | is_lesson_participant
@@ -35,19 +35,19 @@ view_lesson_predicate = has_person & (
     | has_global_perm("alsijil.view_lesson")
     | has_lesson_group_object_perm("core.view_week_class_register_group")
 )
-add_perm("alsijil.view_lesson", view_lesson_predicate)
+add_perm("alsijil.view_register_object", view_register_object_predicate)
 
 # View lesson in menu
 add_perm("alsijil.view_lesson_menu", has_person)
 
 # View lesson personal notes
-view_lesson_personal_notes_predicate = view_lesson_predicate & (
+view_lesson_personal_notes_predicate = view_register_object_predicate & (
     ~is_lesson_participant
     | is_lesson_teacher
     | has_global_perm("alsijil.view_personalnote")
     | has_lesson_group_object_perm("core.view_personalnote_group")
 )
-add_perm("alsijil.view_lesson_personalnote", view_lesson_personal_notes_predicate)
+add_perm("alsijil.view_register_object_personalnote", view_lesson_personal_notes_predicate)
 
 # Edit personal note
 edit_lesson_personal_note_predicate = view_lesson_personal_notes_predicate & (
@@ -55,7 +55,7 @@ edit_lesson_personal_note_predicate = view_lesson_personal_notes_predicate & (
     | has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
 )
-add_perm("alsijil.edit_lesson_personalnote", edit_lesson_personal_note_predicate)
+add_perm("alsijil.edit_register_object_personalnote", edit_lesson_personal_note_predicate)
 
 # View personal note
 view_personal_note_predicate = has_person & (
@@ -76,11 +76,11 @@ edit_personal_note_predicate = view_personal_note_predicate & (
 add_perm("alsijil.edit_personalnote", edit_personal_note_predicate)
 
 # View lesson documentation
-view_lesson_documentation_predicate = view_lesson_predicate
+view_lesson_documentation_predicate = view_register_object_predicate
 add_perm("alsijil.view_lessondocumentation", view_lesson_documentation_predicate)
 
 # Edit lesson documentation
-edit_lesson_documentation_predicate = view_lesson_predicate & (
+edit_lesson_documentation_predicate = view_register_object_predicate & (
     is_lesson_teacher
     | has_global_perm("alsijil.change_lessondocumentation")
     | has_lesson_group_object_perm("core.edit_lessondocumentation_group")

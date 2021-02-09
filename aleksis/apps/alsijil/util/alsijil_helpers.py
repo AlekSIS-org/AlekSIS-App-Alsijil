@@ -12,28 +12,33 @@ from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.apps.chronos.util.chronos_helpers import get_el_by_pk
 
 
-def get_lesson_period_by_pk(
+def get_register_object_by_pk(
     request: HttpRequest,
+    model: Optional[str] = None,
     year: Optional[int] = None,
     week: Optional[int] = None,
-    period_id: Optional[int] = None,
-):
-    """Get LessonPeriod object either by given object_id or by time and current person."""
+    id_: Optional[int] = None,
+) -> Optional[Union[LessonPeriod, Event, ExtraLesson]]:
+    """Get register object either by given object_id or by time and current person."""
     wanted_week = CalendarWeek(year=year, week=week)
-    if period_id:
-        lesson_period = LessonPeriod.objects.annotate_week(wanted_week).get(pk=period_id)
+    if id_ and model == "lesson":
+        register_object = LessonPeriod.objects.annotate_week(wanted_week).get(pk=id_)
+    elif id_ and model == "event":
+        register_object = Event.objects.get(pk=id_)
+    elif id_ and model == "extra_lesson":
+        register_object = ExtraLesson.objects.get(pk=id_)
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
-            lesson_period = (
+            register_object = (
                 LessonPeriod.objects.at_time().filter_teacher(request.user.person).first()
             )
         else:
-            lesson_period = (
+            register_object = (
                 LessonPeriod.objects.at_time().filter_participant(request.user.person).first()
             )
     else:
-        lesson_period = None
-    return lesson_period
+        register_object = None
+    return register_object
 
 
 def get_timetable_instance_by_pk(
@@ -53,14 +58,18 @@ def get_timetable_instance_by_pk(
 def annotate_documentations(
     klass: Union[Event, LessonPeriod, ExtraLesson], wanted_week: CalendarWeek, pks: List[int]
 ) -> QuerySet:
-    instances = klass.objects.prefetch_related(
-        Prefetch(
+
+    if isinstance(klass, LessonPeriod):
+        prefetch = Prefetch(
             "documentations",
             queryset=LessonDocumentation.objects.filter(
                 week=wanted_week.week, year=wanted_week.year
             ),
         )
-    ).filter(pk__in=pks)
+    else:
+        prefetch = Prefetch("documentations")
+    instances = klass.objects.prefetch_related(prefetch).filter(pk__in=pks)
+
     if klass == LessonPeriod:
         instances = instances.annotate_week(wanted_week)
     if klass in (LessonPeriod, ExtraLesson):

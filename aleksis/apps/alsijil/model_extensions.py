@@ -3,6 +3,7 @@ from typing import Dict, Iterable, Iterator, Optional, Union
 
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 import reversion
@@ -14,6 +15,18 @@ from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+
+
+def alsijil_url(self):
+    if isinstance(self, LessonPeriod):
+        return reverse("lesson_period", args=[self.week.year, self.week.week, self.pk])
+    else:
+        return reverse(self.label_, args=[self.pk])
+
+
+LessonPeriod.property_(alsijil_url)
+Event.property_(alsijil_url)
+ExtraLesson.property_(alsijil_url)
 
 
 @Person.method
@@ -52,16 +65,32 @@ def mark_absent(
         .filter(period__period__gte=from_period)
         .annotate_week(wanted_week)
     )
+    extra_lessons = (
+        ExtraLesson.objects.filter(groups__members=self)
+        .on_day(day)
+        .filter(period__period__gte=from_period)
+    )
 
     if to_period:
         lesson_periods = lesson_periods.filter(period__period__lte=to_period)
+        extra_lessons = extra_lessons.filter(period__period__lte=to_period)
 
     # Create and update all personal notes for the discovered lesson periods
     if not dry_run:
-        for lesson_period in lesson_periods:
-            sub = lesson_period.get_substitution()
+        for register_object in list(lesson_periods) + list(extra_lessons):
+            sub = (
+                register_object.get_substitution()
+                if isinstance(register_object, LessonPeriod)
+                else None
+            )
             if sub and sub.cancelled:
                 continue
+
+            q_attrs = (
+                dict(week=wanted_week.week, year=wanted_week.year, lesson_period=register_object)
+                if isinstance(register_object, LessonPeriod)
+                else dict(extra_lesson=register_object)
+            )
 
             with reversion.create_revision():
                 set_user(get_request().user)
@@ -70,14 +99,12 @@ def mark_absent(
                     .prefetch_related(None)
                     .update_or_create(
                         person=self,
-                        lesson_period=lesson_period,
-                        week=wanted_week.week,
-                        year=wanted_week.year,
                         defaults={
                             "absent": absent,
                             "excused": excused,
                             "excuse_type": excuse_type,
                         },
+                        **q_attrs,
                     )
                 )
                 personal_note.groups_of_person.set(self.member_of.all())
@@ -89,11 +116,10 @@ def mark_absent(
                         personal_note.remarks = remarks
                     personal_note.save()
 
-    return lesson_periods.count()
+    return lesson_periods.count() + extra_lessons.count()
 
 
-@LessonPeriod.method
-def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
+def get_personal_notes(self, persons: QuerySet, wanted_week: Optional[CalendarWeek] = None):
     """Get all personal notes for that lesson in a specified week.
 
     Returns all linked `PersonalNote` objects, filtered by the given weeek,
@@ -106,43 +132,40 @@ def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
         - Dominik George <dominik.george@teckids.org>
     """
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
+    if isinstance(self, LessonPeriod):
+        q_attrs = dict(week=wanted_week.week, year=wanted_week.year, lesson_period=self)
+    elif isinstance(self, Event):
+        q_attrs = dict(event=self)
+    else:
+        q_attrs = dict(extra_lesson=self)
+
     missing_persons = persons.annotate(
-        no_personal_notes=~Exists(
-            PersonalNote.objects.filter(
-                week=wanted_week.week,
-                year=wanted_week.year,
-                lesson_period=self,
-                person__pk=OuterRef("pk"),
-            )
-        )
+        no_personal_notes=~Exists(PersonalNote.objects.filter(person__pk=OuterRef("pk"), **q_attrs))
     ).filter(
-        member_of__in=Group.objects.filter(pk__in=self.lesson.groups.all()),
+        member_of__in=Group.objects.filter(pk__in=self.get_groups().all()),
         is_active=True,
         no_personal_notes=True,
     )
 
     # Create all missing personal notes
-    new_personal_notes = [
-        PersonalNote(
-            person=person, lesson_period=self, week=wanted_week.week, year=wanted_week.year,
-        )
-        for person in missing_persons
-    ]
+    new_personal_notes = [PersonalNote(person=person, **q_attrs,) for person in missing_persons]
     PersonalNote.objects.bulk_create(new_personal_notes)
 
     for personal_note in new_personal_notes:
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
     return (
-        PersonalNote.objects.filter(
-            lesson_period=self, week=wanted_week.week, year=wanted_week.year, person__in=persons,
-        )
+        PersonalNote.objects.filter(**q_attrs, person__in=persons)
         .select_related(None)
         .prefetch_related(None)
         .select_related("person", "excuse_type")
         .prefetch_related("extra_marks")
     )
 
+
+LessonPeriod.method(get_personal_notes)
+Event.method(get_personal_notes)
+ExtraLesson.method(get_personal_notes)
 
 # Dynamically add extra permissions to Group and Person models in core
 # Note: requires migrate afterwards
@@ -214,9 +237,7 @@ def get_or_create_lesson_documentation_simple(
     self, week: Optional[CalendarWeek] = None
 ) -> LessonDocumentation:
     """Get or create lesson documentation object for this event/extra lesson."""
-    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
-        **{"event" if isinstance(self, Event) else "extra_lesson": self}
-    )
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create({self.label_: self})
     return lesson_documentation
 
 
