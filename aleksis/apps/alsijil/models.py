@@ -20,6 +20,7 @@ from aleksis.apps.alsijil.managers import PersonalNoteManager
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.mixins import ExtensibleModel
+from aleksis.core.models import SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 
 
@@ -94,6 +95,13 @@ class RegisterObjectRelatedMixin(WeekRelatedMixin):
             return CalendarWeek.from_date(self.register_object.date_start)
 
     @property
+    def school_term(self) -> SchoolTerm:
+        if self.lesson_period:
+            return self.lesson_period.lesson.validity.school_term
+        else:
+            return self.register_object.school_term
+
+    @property
     def date(self) -> Optional[date]:
         if self.lesson_period:
             return super().date
@@ -110,7 +118,7 @@ class RegisterObjectRelatedMixin(WeekRelatedMixin):
         )
 
     def get_absolute_url(self) -> str:
-        return self.register_object.alsijil_url
+        return self.register_object.get_alsijil_url(self.calendar_week)
 
 
 class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):

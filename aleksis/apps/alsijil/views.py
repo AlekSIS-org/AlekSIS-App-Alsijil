@@ -4,6 +4,8 @@ from typing import Optional
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models.expressions import Case, When
+from django.db.models.functions import Extract
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -641,13 +643,17 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                         ):
                             raise PermissionDenied()
 
-                        notes = person.personal_notes.filter(
-                            week=date.isocalendar()[1],
-                            lesson_period__period__weekday=date.weekday(),
-                            lesson_period__lesson__validity__date_start__lte=date,
-                            lesson_period__lesson__validity__date_end__gte=date,
-                            absent=True,
-                            excused=False,
+                        notes = person.personal_notes.filter(absent=True, excused=False,).filter(
+                            Q(
+                                week=date.isocalendar()[1],
+                                lesson_period__period__weekday=date.weekday(),
+                                lesson_period__lesson__validity__date_start__lte=date,
+                                lesson_period__lesson__validity__date_end__gte=date,
+                            )
+                            | Q(
+                                extra_lesson__week=date.isocalendar()[1],
+                                extra_lesson__period__weekday=date.weekday(),
+                            )
                         )
                         for note in notes:
                             note.excused = True
@@ -687,19 +693,51 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         allowed_personal_notes = person_personal_notes.all()
     else:
         allowed_personal_notes = person_personal_notes.filter(
-            lesson_period__lesson__groups__owners=request.user.person
+            Q(lesson_period__lesson__groups__owners=request.user.person)
+            | Q(extra_lesson__groups__owners=request.user.person)
+            | Q(event__groups__owners=request.user.person)
         )
 
     unexcused_absences = allowed_personal_notes.filter(absent=True, excused=False)
     context["unexcused_absences"] = unexcused_absences
 
-    personal_notes = allowed_personal_notes.filter(
-        Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
-    ).order_by(
-        "-lesson_period__lesson__validity__date_start",
-        "-week",
-        "lesson_period__period__weekday",
-        "lesson_period__period__period",
+    personal_notes = (
+        allowed_personal_notes.filter(
+            Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
+        )
+        .annotate(
+            school_term_start=Case(
+                When(event__isnull=False, then="event__school_term__date_start"),
+                When(extra_lesson__isnull=False, then="extra_lesson__school_term__date_start"),
+                When(
+                    lesson_period__isnull=False,
+                    then="lesson_period__lesson__validity__school_term__date_start",
+                ),
+            ),
+            order_year=Case(
+                When(event__isnull=False, then=Extract("event__date_start", "year")),
+                When(extra_lesson__isnull=False, then="extra_lesson__year"),
+                When(lesson_period__isnull=False, then="year"),
+            ),
+            order_week=Case(
+                When(event__isnull=False, then=Extract("event__date_start", "week")),
+                When(extra_lesson__isnull=False, then="extra_lesson__week"),
+                When(lesson_period__isnull=False, then="week"),
+            ),
+            order_weekday=Case(
+                When(event__isnull=False, then="event__period_from__weekday"),
+                When(extra_lesson__isnull=False, then="extra_lesson__period__weekday"),
+                When(lesson_period__isnull=False, then="lesson_period__period__weekday"),
+            ),
+            order_period=Case(
+                When(event__isnull=False, then="event__period_from__period"),
+                When(extra_lesson__isnull=False, then="extra_lesson__period__period"),
+                When(lesson_period__isnull=False, then="lesson_period__period__period"),
+            ),
+        )
+        .order_by(
+            "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
+        )
     )
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
@@ -711,8 +749,10 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         stats = []
         for school_term in school_terms:
             stat = {}
-            personal_notes = PersonalNote.objects.filter(
-                person=person, lesson_period__lesson__validity__school_term=school_term
+            personal_notes = PersonalNote.objects.filter(person=person,).filter(
+                Q(lesson_period__lesson__validity__school_term=school_term)
+                | Q(extra_lesson__school_term=school_term)
+                | Q(event__school_term=school_term)
             )
 
             if not personal_notes.exists():

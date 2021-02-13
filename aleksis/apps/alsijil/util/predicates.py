@@ -211,15 +211,15 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
     Checks whether the person linked to the user is a teacher
     in the lesson or the substitution linked to the LessonPeriod of the given PersonalNote.
     """
-    if hasattr(obj, "lesson_period"):
-        if hasattr(obj.lesson_period, "lesson"):
+    if hasattr(obj, "register_object"):
+        if getattr(obj, "lesson_period", None):
             sub = obj.lesson_period.get_substitution()
             if sub and user.person in Person.objects.filter(
                 lesson_substitutions=obj.lesson_period.get_substitution()
             ):
                 return True
 
-            return user.person in obj.lesson_period.lesson.teachers.all()
+        return user.person in obj.register_object.get_teachers().all()
 
         return False
     return False
@@ -233,12 +233,11 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
     Checks whether the person linked to the user is the owner of
     any parent groups of any groups of the given LessonPeriod lesson of the given PersonalNote.
     """
-    if hasattr(obj, "lesson_period"):
-        if hasattr(obj.lesson_period, "lesson"):
-            for group in obj.lesson_period.lesson.groups.all():
-                for parent_group in group.parent_groups.all():
-                    if user.person in list(parent_group.owners.all()):
-                        return True
+    if hasattr(obj, "register_object"):
+        for group in obj.register_object.get_groups().all():
+            for parent_group in group.parent_groups.all():
+                if user.person in list(parent_group.owners.all()):
+                    return True
     return False
 
 
