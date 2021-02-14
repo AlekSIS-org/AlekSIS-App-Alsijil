@@ -544,25 +544,24 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
     group = get_object_or_404(Group, pk=id_)
-
+    groups_q = (
+        Q(lesson_period__lesson__groups=group)
+        | Q(lesson_period__lesson__groups__parent_groups=group)
+        | Q(extra_lesson__groups=group)
+        | Q(extra_lesson__groups__parent_groups=group)
+        | Q(event__groups=group)
+        | Q(event__groups__parent_groups=group)
+    )
     personal_notes = (
         PersonalNote.objects.select_related("lesson_period")
         .prefetch_related(
             "lesson_period__substitutions", "lesson_period__lesson__teachers", "groups_of_person"
         )
         .not_empty()
-        .filter(
-            Q(lesson_period__lesson__groups=group)
-            | Q(lesson_period__lesson__groups__parent_groups=group)
-        )
+        .filter(groups_q)
     )
     documentations = (
-        LessonDocumentation.objects.select_related("lesson_period")
-        .not_empty()
-        .filter(
-            Q(lesson_period__lesson__groups=group)
-            | Q(lesson_period__lesson__groups__parent_groups=group)
-        )
+        LessonDocumentation.objects.select_related("lesson_period").not_empty().filter(groups_q)
     )
     # Get all lesson periods for the selected group
     lesson_periods = LessonPeriod.objects.filter_group(group).distinct()
@@ -576,8 +575,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         register_objects_by_day.setdefault(day, []).append(
             (
                 extra_lesson,
-                list(extra_lesson.documentations.all()),
-                list(extra_lesson.personal_notes.all()),
+                list(filter(lambda d: d.extra_lesson == extra_lesson, documentations)),
+                list(filter(lambda d: d.extra_lesson == extra_lesson, personal_notes)),
                 None,
             )
         )
@@ -591,8 +590,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             register_objects_by_day.setdefault(day, []).append(
                 (
                     event_copy,
-                    list(event_copy.documentations.all()),
-                    list(event_copy.personal_notes.all()),
+                    list(filter(lambda d: d.event == event, documentations)),
+                    list(filter(lambda d: d.event == event, personal_notes)),
                     None,
                 )
             )
