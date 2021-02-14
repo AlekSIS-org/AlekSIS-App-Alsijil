@@ -493,10 +493,59 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
             "personal_notes__groups_of_person",
         )
     )
+    events = (
+        Event.objects.filter_group(group)
+        .distinct()
+        .prefetch_related(
+            "documentations",
+            "personal_notes",
+            "personal_notes__excuse_type",
+            "personal_notes__extra_marks",
+            "personal_notes__person",
+            "personal_notes__groups_of_person",
+        )
+    )
+    extra_lessons = (
+        ExtraLesson.objects.filter_group(group)
+        .distinct()
+        .prefetch_related(
+            "documentations",
+            "personal_notes",
+            "personal_notes__excuse_type",
+            "personal_notes__extra_marks",
+            "personal_notes__person",
+            "personal_notes__groups_of_person",
+        )
+    )
+    weeks = CalendarWeek.weeks_within(group.school_term.date_start, group.school_term.date_end)
 
-    weeks = CalendarWeek.weeks_within(group.school_term.date_start, group.school_term.date_end,)
+    register_objects_by_day = {}
+    for extra_lesson in extra_lessons:
+        day = extra_lesson.date
+        register_objects_by_day.setdefault(day, []).append(
+            (
+                extra_lesson,
+                list(extra_lesson.documentations.all()),
+                list(extra_lesson.personal_notes.all()),
+                None,
+            )
+        )
 
-    periods_by_day = {}
+    for event in events:
+        day_number = (event.date_end - event.date_start).days + 1
+        for i in range(day_number):
+            day = event.date_start + timedelta(days=i)
+            event_copy = deepcopy(event)
+            event_copy.annotate_day(day)
+            register_objects_by_day.setdefault(day, []).append(
+                (
+                    event_copy,
+                    list(event_copy.documentations.all()),
+                    list(event_copy.personal_notes.all()),
+                    None,
+                )
+            )
+
     for lesson_period in lesson_periods:
         for week in weeks:
             day = week[lesson_period.period.weekday]
@@ -520,7 +569,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
                 substitution = lesson_period.get_substitution(week)
 
-                periods_by_day.setdefault(day, []).append(
+                register_objects_by_day.setdefault(day, []).append(
                     (lesson_period, documentations, notes, substitution)
                 )
 
@@ -543,8 +592,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
     context["weeks"] = weeks
-    context["periods_by_day"] = periods_by_day
-    context["lesson_periods"] = lesson_periods
+    context["register_objects_by_day"] = register_objects_by_day
+    context["register_objects"] = list(lesson_periods) + list(events) + list(extra_lessons)
     context["today"] = date.today()
     context["lessons"] = (
         group.lessons.all()

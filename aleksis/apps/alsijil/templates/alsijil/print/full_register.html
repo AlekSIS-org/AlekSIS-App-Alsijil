@@ -317,14 +317,26 @@
 
       <tbody>
       {% for note in person.personal_notes.all %}
-        {% if note.lesson_period in lesson_periods %}
+        {% if note.register_object in register_objects %}
           {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
-              {% weekday_to_date note.calendar_week note.lesson_period.period.weekday as note_date %}
             <tr>
-              <td>{{ note_date }}</td>
-              <td>{{ note.lesson_period.period.period }}</td>
-              <td>{{ note.lesson_period.get_subject.short_name }} </td>
-              <td>{{ note.lesson_period.get_teachers.first.short_name }}</td>
+              {% if note.date %}
+                <td>{{ note.date }}</td>
+                <td>{{ note.register_object.period.period }}</td>
+              {% else %}
+                <td colspan="2">
+                  {{ note.register_object.date_start }} {{ note.register_object.period_from.period }}.–{{ note.register_object.date_end }}
+                  {{ note.register_object.period_to.period }}.
+                </td>
+              {% endif %}
+              <td>
+                {% if note.register_object.label_ != "event" %}
+                  {{ note.register_object.get_subject.short_name }}
+                {% else %}
+                  {% trans "Event" %}
+                {% endif %}
+              </td>
+              <td>{{ note.register_object.teacher_short_names }}</td>
               <td>
                 {% if note.absent %}
                   {% trans 'Yes' %}
@@ -376,8 +388,8 @@
       </thead>
       <tbody>
       {% for day in week %}
-        {% with periods_by_day|get_dict:day as periods %}
-          {% for period, documentations, notes, substitution in periods %}
+        {% with register_objects_by_day|get_dict:day as register_objects %}
+          {% for register_object, documentations, notes, substitution in register_objects %}
             <tr class="
                     {% if substitution %}
                       {% if substitution.cancelled %}
@@ -391,18 +403,28 @@
                     {% endif %}
                   ">
               {% if forloop.first %}
-                <th rowspan="{{ periods|length }}" class="lessons-day-head">{{ day }}</th>
+                <th rowspan="{{ register_objects|length }}" class="lessons-day-head">{{ day }}</th>
               {% endif %}
-              <td class="lesson-pe">{{ period.period.period }}</td>
+              <td class="lesson-pe">
+                {% if register_object.label_ != "event" %}
+                  {{ register_object.period.period }}
+                {% else %}
+                  {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                {% endif %}
+              </td>
               <td class="lesson-subj">
-                {% if substitution %}
+                {% if register_object.label_ == "event" %}
+                  <strong>{% trans "Event" %}</strong>
+                  {% elif substitution %}
                   {% include "chronos/partials/subs/subject.html" with type="substitution" el=substitution %}
                 {% else %}
-                  {% include "chronos/partials/subject.html" with subject=period.lesson.subject %}
+                  {% include "chronos/partials/subject.html" with subject=register_object.get_subject %}
                 {% endif %}
               </td>
               <td class="lesson-topic">
-                {% if substitution.cancelled %}
+                {% if register_object.label_ == "event" %}
+                  {{ register_object.title }}: {{ documentations.0.topic }}
+                {% elif substitution.cancelled %}
                   {% trans 'Lesson cancelled' %}
                 {% else %}
                   {{ documentations.0.topic }}
@@ -453,7 +475,7 @@
               </td>
               <td class="lesson-te">
                 {% if documentations.0.topic %}
-                  {{ substitution.teachers.first.short_name|default:period.lesson.teachers.first.short_name }}
+                  {{ substitution.teachers.first.short_name|default:register_object.get_teachers.first.short_name }}
                 {% endif %}
               </td>
             </tr>
