@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('chronos', '0004_substitution_extra_lesson_year'),
-        ('alsijil', '0007_personal_note_lesson_documentation_year'),
+        ('alsijil', '0009_group_roles'),
     ]
 
     operations = [
