@@ -317,34 +317,33 @@
 
       <tbody>
       {% for note in person.filtered_notes %}
-          {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
-            <tr>
-              {% if note.date %}
-                <td>{{ note.date }}</td>
-                <td>{{ note.register_object.period.period }}</td>
-              {% else %}
-                <td colspan="2">
-                  {{ note.register_object.date_start }} {{ note.register_object.period_from.period }}.–{{ note.register_object.date_end }}
-                  {{ note.register_object.period_to.period }}.
-                </td>
-              {% endif %}
-              <td>
-                {% if note.register_object.label_ != "event" %}
-                  {{ note.register_object.get_subject.short_name }}
-                {% else %}
-                  {% trans "Event" %}
-                {% endif %}
+        {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
+          <tr>
+            {% if note.date %}
+              <td>{{ note.date }}</td>
+              <td>{{ note.register_object.period.period }}</td>
+            {% else %}
+              <td colspan="2">
+                {{ note.register_object.date_start }} {{ note.register_object.period_from.period }}.–{{ note.register_object.date_end }}
+                {{ note.register_object.period_to.period }}.
               </td>
-              <td>{{ note.register_object.teacher_short_names }}</td>
-              <td>
-                {% if note.absent %}
-                  {% trans 'Yes' %}
-                  {% if note.excused %}
-                    {% if note.excuse_type %}
-                      ({{ note.excuse_type.short_name }})
-                    {% else %}
-                      ({% trans 'e' %})
-                    {% endif %}
+            {% endif %}
+            <td>
+              {% if note.register_object.label_ != "event" %}
+                {{ note.register_object.get_subject.short_name }}
+              {% else %}
+                {% trans "Event" %}
+              {% endif %}
+            </td>
+            <td>{{ note.register_object.teacher_short_names }}</td>
+            <td>
+              {% if note.absent %}
+                {% trans 'Yes' %}
+                {% if note.excused %}
+                  {% if note.excuse_type %}
+                    ({{ note.excuse_type.short_name }})
+                  {% else %}
+                    ({% trans 'e' %})
                   {% endif %}
                 {% endif %}
               {% endif %}
