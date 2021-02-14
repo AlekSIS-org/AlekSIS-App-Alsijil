@@ -245,3 +245,24 @@ def is_personal_note_lesson_parent_group_owner(user: User, obj: PersonalNote) ->
 def is_teacher(user: User, obj: Person) -> bool:
     """Predicate which checks if the provided object is a teacher."""
     return user.person.is_teacher
+
+
+@predicate
+def is_group_role_assignment_group_owner(user: User, obj: Union[Group, Person]) -> bool:
+    """Predicate for group owners of a group role assignment.
+
+    Checks whether the person linked to the user is the owner of the groups
+    linked to the given group role assignment.
+    If there isn't provided a group role assignment, it will return `False`.
+    """
+    if obj:
+        for group in obj.groups.all():
+            if user.person in list(group.owners.all()):
+                return True
+    return False
+
+
+@predicate
+def is_owner_of_any_group(user: User, obj):
+    """Predicate which checks if the person is group owner of any group."""
+    return Group.objects.filter(owners=user.person).exists()

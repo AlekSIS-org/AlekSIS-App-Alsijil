@@ -7,10 +7,7 @@ from django.db.models.expressions import Subquery
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-import reversion
 from calendarweek import CalendarWeek
-from django_global_request.middleware import get_request
-from reversion import set_user
 
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
@@ -97,29 +94,23 @@ def mark_absent(
                 else dict(extra_lesson=register_object)
             )
 
-            with reversion.create_revision():
-                set_user(get_request().user)
-                personal_note, created = (
-                    PersonalNote.objects.select_related(None)
-                    .prefetch_related(None)
-                    .update_or_create(
-                        person=self,
-                        defaults={
-                            "absent": absent,
-                            "excused": excused,
-                            "excuse_type": excuse_type,
-                        },
-                        **q_attrs,
-                    )
+            personal_note, created = (
+                PersonalNote.objects.select_related(None)
+                .prefetch_related(None)
+                .update_or_create(
+                    person=self,
+                    defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type,},
+                    **q_attrs,
                 )
-                personal_note.groups_of_person.set(self.member_of.all())
+            )
+            personal_note.groups_of_person.set(self.member_of.all())
 
-                if remarks:
-                    if personal_note.remarks:
-                        personal_note.remarks += "; %s" % remarks
-                    else:
-                        personal_note.remarks = remarks
-                    personal_note.save()
+            if remarks:
+                if personal_note.remarks:
+                    personal_note.remarks += "; %s" % remarks
+                else:
+                    personal_note.remarks = remarks
+                personal_note.save()
 
     return lesson_periods.count() + extra_lessons.count()
 
@@ -380,7 +371,8 @@ def generate_person_list_with_class_register_statistics(
     self: Group, persons: Optional[Iterable] = None
 ) -> QuerySet:
     """Get with class register statistics annotated list of all members."""
-    persons = persons or self.members.all()
+    if persons is None:
+        persons = self.members.all()
     school_term_q = (
         Q(personal_notes__lesson_period__lesson__validity__school_term=self.school_term)
         | Q(personal_notes__extra_lesson__school_term=self.school_term)

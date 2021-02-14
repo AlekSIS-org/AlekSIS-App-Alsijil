@@ -1,6 +1,6 @@
 {# -*- engine:django -*- #}
 {% extends "core/base.html" %}
-{% load i18n static %}
+{% load i18n static rules %}
 
 {% block browser_title %}{% blocktrans %}My groups{% endblocktrans %}{% endblock %}
 
@@ -38,6 +38,13 @@
               <i class="material-icons left">view_week</i>
               {% trans "Week view" %}
             </a>
+            {% has_perm "alsijil.view_assigned_grouproles" user group as can_view_assigned_group_roles %}
+            {% if can_view_assigned_group_roles %}
+              <a class="btn primary waves-effect waves-light" href="{% url 'assigned_group_roles' group.pk %}">
+                <i class="material-icons left">assignment_ind</i>
+                {% trans "Roles" %}
+              </a>
+            {% endif %}
             <a class="btn primary waves-effect waves-light" href="{% url "full_register_group" group.pk %}"
                target="_blank">
               <i class="material-icons left">print</i>
@@ -75,6 +82,15 @@
               {% trans "Week view" %}
             </a>
           </p>
+          {% has_perm "alsijil.view_assigned_grouproles" user group as can_view_assigned_group_roles %}
+          {% if can_view_assigned_group_roles %}
+            <p>
+              <a class="btn primary waves-effect waves-light" href="{% url 'assigned_group_roles' group.pk %}">
+                <i class="material-icons left">assignment_ind</i>
+                {% trans "Roles" %}
+              </a>
+            </p>
+          {% endif %}
           <p>
             <a class="btn primary waves-effect waves-light" href="{% url "full_register_group" group.pk %}"
                target="_blank">

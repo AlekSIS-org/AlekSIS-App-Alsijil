@@ -64,12 +64,17 @@
     <div class="row">
       <div class="col s12">
         <ul class="tabs">
-          <li class="tab col s6">
+          <li class="tab col">
             <a class="active" href="#week-overview">{% trans "Lesson documentations" %}</a>
           </li>
-          <li class="tab col s6">
-            <a class="active" href="#personal-notes">{% trans "Personal notes" %}</a>
+          <li class="tab col">
+            <a href="#personal-notes">{% trans "Personal notes" %}</a>
           </li>
+          {% if group_roles %}
+            <li class="tab col">
+              <a href="#group-roles">{% trans "Group roles" %}</a>
+            </li>
+          {% endif %}
         </ul>
       </div>
       <div class="col s12" id="week-overview">
@@ -328,6 +333,11 @@
                   </a>
                 {% endif %}
               </h5>
+              <p>
+                {% for assignment in person.person.group_roles.all %}
+                  {% include "alsijil/group_role/chip.html" with role=assignment.role small=assignment.date_range %}
+                {% endfor %}
+              </p>
               <p class="card-text">
                 {% trans "Absent" %}: {{ person.person.absences_count }}
                 ({{ person.person.unexcused_count }} {% trans "unexcused" %})
@@ -360,6 +370,11 @@
           </div>
         </div>
       </div>
+      {% if group_roles %}
+        <div class="col s12" id="group-roles">
+          {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=group back_url=back_url %}
+        </div>
+      {% endif %}
     </div>
   {% else %}
     <div class="card red darken-1">

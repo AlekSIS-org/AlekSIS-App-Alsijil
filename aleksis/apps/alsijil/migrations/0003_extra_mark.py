@@ -64,7 +64,6 @@ class Migration(migrations.Migration):
             name="extra_marks",
             field=models.ManyToManyField(
                 blank=True,
-                null=True,
                 to="alsijil.ExtraMark",
                 verbose_name="Extra marks",
             ),

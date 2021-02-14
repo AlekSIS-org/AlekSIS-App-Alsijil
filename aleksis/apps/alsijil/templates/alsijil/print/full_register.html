@@ -316,8 +316,7 @@
       </thead>
 
       <tbody>
-      {% for note in person.personal_notes.all %}
-        {% if note.register_object in register_objects %}
+      {% for note in person.filtered_notes %}
           {% if note.absent or note.late or note.remarks or note.extra_marks.all %}
             <tr>
               {% if note.date %}
@@ -348,20 +347,20 @@
                     {% endif %}
                   {% endif %}
                 {% endif %}
-              </td>
-              <td>
-                {% if note.late %}
-                  {{ note.late }}'
-                {% endif %}
-              </td>
-              <td>
-                {% for extra_mark in note.extra_marks.all %}
-                  {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </td>
-              <td>{{ note.remarks }}</td>
-            </tr>
-          {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% if note.late %}
+                {{ note.late }}'
+              {% endif %}
+            </td>
+            <td>
+              {% for extra_mark in note.extra_marks.all %}
+                {{ extra_mark.short_name }}{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            </td>
+            <td>{{ note.remarks }}</td>
+          </tr>
         {% endif %}
       {% endfor %}
       </tbody>

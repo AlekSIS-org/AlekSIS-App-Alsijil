@@ -1,6 +1,7 @@
+from contextlib import nullcontext
 from copy import deepcopy
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
@@ -9,6 +10,7 @@ from django.db.models.functions import Extract
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
@@ -24,21 +26,36 @@ from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import Event, ExtraLesson, Holiday, LessonPeriod, TimePeriod
 from aleksis.apps.chronos.util.build import build_weekdays
 from aleksis.apps.chronos.util.date import get_weeks_for_year, week_weekday_to_date
-from aleksis.core.mixins import AdvancedCreateView, AdvancedDeleteView, AdvancedEditView
+from aleksis.core.mixins import (
+    AdvancedCreateView,
+    AdvancedDeleteView,
+    AdvancedEditView,
+    SuccessNextMixin,
+)
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 
 from .forms import (
+    AssignGroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
+    GroupRoleAssignmentEditForm,
+    GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
 )
-from .models import ExcuseType, ExtraMark, PersonalNote
-from .tables import ExcuseTypeTable, ExtraMarkTable
+from .models import (
+    ExcuseType,
+    ExtraMark,
+    GroupRole,
+    GroupRoleAssignment,
+    LessonDocumentation,
+    PersonalNote,
+)
+from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable
 from .util.alsijil_helpers import (
     annotate_documentations,
     get_register_object_by_pk,
@@ -127,6 +144,10 @@ def register_object(
         if isinstance(register_object, LessonPeriod)
         else None
     )
+    back_url = reverse(
+        "lesson_by_week_and_period", args=[wanted_week.year, wanted_week.week, lesson_period.pk]
+    )
+    context["back_url"] = back_url
 
     context["register_object"] = register_object
     context["week"] = wanted_week
@@ -141,6 +162,14 @@ def register_object(
     )
 
     if not blocked_because_holidays:
+        # Group roles
+        show_group_roles = request.user.person.preferences[
+            "alsijil__group_roles_in_lesson_view"
+        ] and request.user.has_perm("alsijil.view_assigned_grouproles", lesson_period)
+        if show_group_roles:
+            groups = lesson_period.lesson.groups.all()
+            group_roles = GroupRole.objects.with_assignments(date_of_lesson, groups)
+            context["group_roles"] = group_roles
 
         # Create or get lesson documentation object; can be empty when first opening lesson
         lesson_documentation = register_object.get_or_create_lesson_documentation(wanted_week)
@@ -155,6 +184,16 @@ def register_object(
             persons = Person.objects.all()
 
         persons_qs = register_object.get_personal_notes(persons, wanted_week)
+
+        # Annotate group roles
+        if show_group_roles:
+            persons_qs = persons_qs.prefetch_related(
+                Prefetch(
+                    "person__group_roles",
+                    queryset=GroupRoleAssignment.objects.on_day(date_of_lesson).for_groups(groups),
+                ),
+            )
+
         personal_note_formset = PersonalNoteFormSet(
             request.POST or None, queryset=persons_qs, prefix="personal_notes"
         )
@@ -185,17 +224,22 @@ def register_object(
                         reversion.set_user(request.user)
                         instances = personal_note_formset.save()
 
-                    if not isinstance(register_object, Event):
+                    if (
+                        not isinstance(register_object, Event)
+                        and get_site_preferences()["alsijil__carry_over_personal_notes"]
+                    ):
                         # Iterate over personal notes
                         # and carry changed absences to following lessons
-                        for instance in instances:
-                            instance.person.mark_absent(
-                                wanted_week[register_object.period.weekday],
-                                register_object.period.period + 1,
-                                instance.absent,
-                                instance.excused,
-                                instance.excuse_type,
-                            )
+                        with reversion.create_revision():
+                            reversion.set_user(request.user)
+                            for instance in instances:
+                                instance.person.mark_absent(
+                                    wanted_week[lesson_period.period.weekday],
+                                    lesson_period.period.period + 1,
+                                    instance.absent,
+                                    instance.excused,
+                                    instance.excuse_type,
+                                )
 
                 messages.success(request, _("The personal notes have been saved."))
 
@@ -269,9 +313,14 @@ def week_view(
     # Add a form to filter the view
     if type_:
         initial = {type_.value: instance}
+        back_url = reverse(
+            "week_view_by_week", args=[wanted_week.year, wanted_week.week, type_.value, instance.pk]
+        )
     else:
         initial = {}
-    select_form = SelectForm(request.POST or None, initial=initial)
+        back_url = reverse("week_view_by_week", args=[wanted_week.year, wanted_week.week])
+    context["back_url"] = back_url
+    select_form = SelectForm(request, request.POST or None, initial=initial)
 
     if request.method == "POST":
         if select_form.is_valid():
@@ -290,6 +339,16 @@ def week_view(
         group = instance
     else:
         group = None
+
+    # Group roles
+    show_group_roles = (
+        group
+        and request.user.person.preferences["alsijil__group_roles_in_week_view"]
+        and request.user.has_perm("alsijil.view_assigned_grouproles", group)
+    )
+    if show_group_roles:
+        group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
+        context["group_roles"] = group_roles
 
     extra_marks = ExtraMark.objects.all()
 
@@ -340,56 +399,62 @@ def week_view(
             )
         )
 
-        persons_qs = (
-            persons_qs.distinct()
-            .prefetch_related(
+        persons_qs = persons_qs.distinct().prefetch_related(
+            Prefetch(
+                "personal_notes",
+                queryset=PersonalNote.objects.filter(
+                    Q(
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        lesson_period__in=lesson_periods_pk,
+                    )
+                    | Q(
+                        event__date_start__lte=wanted_week[6],
+                        event__date_end__gte=wanted_week[0],
+                        event__in=events_pk,
+                    )
+                    | Q(
+                        extra_lesson__week=wanted_week.week,
+                        extra_lesson__year=wanted_week.year,
+                        extra_lesson__in=extra_lessons_pk,
+                    )
+                ),
+            ),
+            "member_of__owners",
+        )
+
+        # Annotate group roles
+        if show_group_roles:
+            persons_qs = persons_qs.prefetch_related(
                 Prefetch(
-                    "personal_notes",
-                    queryset=PersonalNote.objects.filter(
-                        Q(
-                            week=wanted_week.week,
-                            year=wanted_week.year,
-                            lesson_period__in=lesson_periods_pk,
-                        )
-                        | Q(
-                            event__date_start__lte=wanted_week[6],
-                            event__date_end__gte=wanted_week[0],
-                            event__in=events_pk,
-                        )
-                        | Q(
-                            extra_lesson__week=wanted_week.week,
-                            extra_lesson__year=wanted_week.year,
-                            extra_lesson__in=extra_lessons_pk,
-                        )
-                    ),
-                ),
-                "member_of__owners",
-            )
-            .annotate(
-                absences_count=Count(
-                    "personal_notes",
-                    filter=personal_notes_q & Q(personal_notes__absent=True,),
-                    distinct=True,
-                ),
-                unexcused_count=Count(
-                    "personal_notes",
-                    filter=personal_notes_q
-                    & Q(personal_notes__absent=True, personal_notes__excused=False,),
-                    distinct=True,
-                ),
-                tardiness_sum=Subquery(
-                    Person.objects.filter(personal_notes_q)
-                    .filter(pk=OuterRef("pk"),)
-                    .distinct()
-                    .annotate(tardiness_sum=Sum("personal_notes__late"))
-                    .values("tardiness_sum")
-                ),
-                tardiness_count=Count(
-                    "personal_notes",
-                    filter=personal_notes_q & ~Q(personal_notes__late=0),
-                    distinct=True,
+                    "group_roles",
+                    queryset=GroupRoleAssignment.objects.in_week(wanted_week).for_group(group),
                 ),
             )
+        persons_qs = persons_qs.annotate(
+            absences_count=Count(
+                "personal_notes",
+                filter=personal_notes_q & Q(personal_notes__absent=True,),
+                distinct=True,
+            ),
+            unexcused_count=Count(
+                "personal_notes",
+                filter=personal_notes_q
+                & Q(personal_notes__absent=True, personal_notes__excused=False,),
+                distinct=True,
+            ),
+            tardiness_sum=Subquery(
+                Person.objects.filter(personal_notes_q)
+                .filter(pk=OuterRef("pk"),)
+                .distinct()
+                .annotate(tardiness_sum=Sum("personal_notes__late"))
+                .values("tardiness_sum")
+            ),
+            tardiness_count=Count(
+                "personal_notes",
+                filter=personal_notes_q & ~Q(personal_notes__late=0),
+                distinct=True,
+            ),
         )
 
         for extra_mark in extra_marks:
@@ -480,43 +545,29 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
 
     group = get_object_or_404(Group, pk=id_)
 
+    personal_notes = (
+        PersonalNote.objects.select_related("lesson_period")
+        .prefetch_related(
+            "lesson_period__substitutions", "lesson_period__lesson__teachers", "groups_of_person"
+        )
+        .not_empty()
+        .filter(
+            Q(lesson_period__lesson__groups=group)
+            | Q(lesson_period__lesson__groups__parent_groups=group)
+        )
+    )
+    documentations = (
+        LessonDocumentation.objects.select_related("lesson_period")
+        .not_empty()
+        .filter(
+            Q(lesson_period__lesson__groups=group)
+            | Q(lesson_period__lesson__groups__parent_groups=group)
+        )
+    )
     # Get all lesson periods for the selected group
-    lesson_periods = (
-        LessonPeriod.objects.filter_group(group)
-        .distinct()
-        .prefetch_related(
-            "documentations",
-            "personal_notes",
-            "personal_notes__excuse_type",
-            "personal_notes__extra_marks",
-            "personal_notes__person",
-            "personal_notes__groups_of_person",
-        )
-    )
-    events = (
-        Event.objects.filter_group(group)
-        .distinct()
-        .prefetch_related(
-            "documentations",
-            "personal_notes",
-            "personal_notes__excuse_type",
-            "personal_notes__extra_marks",
-            "personal_notes__person",
-            "personal_notes__groups_of_person",
-        )
-    )
-    extra_lessons = (
-        ExtraLesson.objects.filter_group(group)
-        .distinct()
-        .prefetch_related(
-            "documentations",
-            "personal_notes",
-            "personal_notes__excuse_type",
-            "personal_notes__extra_marks",
-            "personal_notes__person",
-            "personal_notes__groups_of_person",
-        )
-    )
+    lesson_periods = LessonPeriod.objects.filter_group(group).distinct()
+    events = Event.objects.filter_group(group).distinct()
+    extra_lessons = ExtraLesson.objects.filter_group(group).distinct()
     weeks = CalendarWeek.weeks_within(group.school_term.date_start, group.school_term.date_end)
 
     register_objects_by_day = {}
@@ -546,6 +597,8 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 )
             )
 
+    weeks = CalendarWeek.weeks_within(group.school_term.date_start, group.school_term.date_end,)
+
     for lesson_period in lesson_periods:
         for week in weeks:
             day = week[lesson_period.period.weekday]
@@ -555,39 +608,38 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                 <= day
                 <= lesson_period.lesson.validity.date_end
             ):
-                documentations = list(
+                filtered_documentations = list(
                     filter(
-                        lambda d: d.week == week.week and d.year == week.year,
-                        lesson_period.documentations.all(),
+                        lambda d: d.week == week.week
+                        and d.year == week.year
+                        and d.lesson_period == lesson_period,
+                        documentations,
                     )
                 )
-                notes = list(
+                filtered_personal_notes = list(
                     filter(
-                        lambda d: d.week == week.week and d.year == week.year,
-                        lesson_period.personal_notes.all(),
+                        lambda d: d.week == week.week
+                        and d.year == week.year
+                        and d.lesson_period == lesson_period,
+                        personal_notes,
                     )
                 )
                 substitution = lesson_period.get_substitution(week)
 
                 register_objects_by_day.setdefault(day, []).append(
-                    (lesson_period, documentations, notes, substitution)
+                    (lesson_period, filtered_documentations, filtered_personal_notes, substitution)
                 )
 
-    persons = Person.objects.prefetch_related(
-        "personal_notes",
-        "personal_notes__excuse_type",
-        "personal_notes__extra_marks",
-        "personal_notes__lesson_period__lesson__subject",
-        "personal_notes__lesson_period__substitutions",
-        "personal_notes__lesson_period__substitutions__subject",
-        "personal_notes__lesson_period__substitutions__teachers",
-        "personal_notes__lesson_period__lesson__teachers",
-        "personal_notes__lesson_period__period",
-    )
+    persons = Person.objects.prefetch_related(None).select_related(None)
     persons = group.generate_person_list_with_class_register_statistics(persons)
 
+    prefetched_persons = []
+    for person in persons:
+        person.filtered_notes = list(filter(lambda d: d.person == person, personal_notes))
+        prefetched_persons.append(person)
+
     context["school_term"] = group.school_term
-    context["persons"] = persons
+    context["persons"] = prefetched_persons
     context["excuse_types"] = ExcuseType.objects.all()
     context["extra_marks"] = ExtraMark.objects.all()
     context["group"] = group
@@ -751,9 +803,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["unexcused_absences"] = unexcused_absences
 
     personal_notes = (
-        allowed_personal_notes.filter(
-            Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False)
-        )
+        allowed_personal_notes.not_empty()
+        .filter(Q(absent=True) | Q(late__gt=0) | ~Q(remarks="") | Q(extra_marks__isnull=False))
         .annotate(
             school_term_start=Case(
                 When(event__isnull=False, then="event__school_term__date_start"),
@@ -883,16 +934,17 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
                 if holiday:
                     continue
 
-            affected_count += person.mark_absent(
-                day,
-                from_period_on_day,
-                absent,
-                excused,
-                excuse_type,
-                remarks,
-                to_period_on_day,
-                dry_run=not confirmed,
-            )
+            with reversion.create_revision() if confirmed else nullcontext():
+                affected_count += person.mark_absent(
+                    day,
+                    from_period_on_day,
+                    absent,
+                    excused,
+                    excuse_type,
+                    remarks,
+                    to_period_on_day,
+                    dry_run=not confirmed,
+                )
 
         if not confirmed:
             # Show confirmation page
@@ -1014,3 +1066,169 @@ class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelet
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
+
+
+class GroupRoleListView(PermissionRequiredMixin, SingleTableView):
+    """Table of all group roles."""
+
+    model = GroupRole
+    table_class = GroupRoleTable
+    permission_required = "alsijil.view_grouproles"
+    template_name = "alsijil/group_role/list.html"
+
+
+@method_decorator(never_cache, name="dispatch")
+class GroupRoleCreateView(PermissionRequiredMixin, AdvancedCreateView):
+    """Create view for group roles."""
+
+    model = GroupRole
+    form_class = GroupRoleForm
+    permission_required = "alsijil.add_grouprole"
+    template_name = "alsijil/group_role/create.html"
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been created.")
+
+
+@method_decorator(never_cache, name="dispatch")
+class GroupRoleEditView(PermissionRequiredMixin, AdvancedEditView):
+    """Edit view for group roles."""
+
+    model = GroupRole
+    form_class = GroupRoleForm
+    permission_required = "alsijil.edit_grouprole"
+    template_name = "alsijil/group_role/edit.html"
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been saved.")
+
+
+@method_decorator(never_cache, "dispatch")
+class GroupRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDeleteView):
+    """Delete view for group roles."""
+
+    model = GroupRole
+    permission_required = "alsijil.delete_grouprole"
+    template_name = "core/pages/delete.html"
+    success_url = reverse_lazy("group_roles")
+    success_message = _("The group role has been deleted.")
+
+
+class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
+    permission_required = "alsijil.view_assigned_grouproles"
+    model = Group
+    template_name = "alsijil/group_role/assigned_list.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data()
+
+        today = timezone.now().date()
+        context["today"] = today
+
+        self.roles = GroupRole.objects.with_assignments(today, [self.object])
+        context["roles"] = self.roles
+        assignments = (
+            GroupRoleAssignment.objects.filter(
+                Q(groups=self.object) | Q(groups__child_groups=self.object)
+            )
+            .distinct()
+            .order_by("-date_start")
+        )
+        context["assignments"] = assignments
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
+    model = GroupRoleAssignment
+    form_class = AssignGroupRoleForm
+    permission_required = "alsijil.assign_grouprole_for_group"
+    template_name = "alsijil/group_role/assign.html"
+    success_message = _("The group role has been assigned.")
+
+    def get_success_url(self) -> str:
+        return reverse("assigned_group_roles", args=[self.group.pk])
+
+    def get_permission_object(self):
+        self.group = get_object_or_404(Group, pk=self.kwargs.get("pk"))
+        try:
+            self.role = GroupRole.objects.get(pk=self.kwargs.get("role_pk"))
+        except GroupRole.DoesNotExist:
+            self.role = None
+        return self.group
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        kwargs["initial"] = {"role": self.role, "groups": [self.group]}
+        return kwargs
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["role"] = self.role
+        context["group"] = self.group
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class AssignGroupRoleMultipleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
+    model = GroupRoleAssignment
+    form_class = AssignGroupRoleForm
+    permission_required = "alsijil.assign_grouprole_for_multiple"
+    template_name = "alsijil/group_role/assign.html"
+    success_message = _("The group role has been assigned.")
+
+    def get_success_url(self) -> str:
+        return reverse("assign_group_role_multiple")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
+@method_decorator(never_cache, name="dispatch")
+class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, AdvancedEditView):
+    """Edit view for group role assignments."""
+
+    model = GroupRoleAssignment
+    form_class = GroupRoleAssignmentEditForm
+    permission_required = "alsijil.edit_grouproleassignment"
+    template_name = "alsijil/group_role/edit_assignment.html"
+    success_message = _("The group role assignment has been saved.")
+
+    def get_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])
+
+
+@method_decorator(never_cache, "dispatch")
+class GroupRoleAssignmentStopView(PermissionRequiredMixin, SuccessNextMixin, DetailView):
+    model = GroupRoleAssignment
+    permission_required = "alsijil.stop_grouproleassignment"
+
+    def get_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.date_end:
+            self.object.date_end = timezone.now().date()
+            self.object.save()
+            messages.success(request, _("The group role assignment has been stopped."))
+        return redirect(self.get_success_url())
+
+
+@method_decorator(never_cache, "dispatch")
+class GroupRoleAssignmentDeleteView(
+    PermissionRequiredMixin, RevisionMixin, SuccessNextMixin, AdvancedDeleteView
+):
+    """Delete view for group role assignments."""
+
+    model = GroupRoleAssignment
+    permission_required = "alsijil.delete_grouproleassignment"
+    template_name = "core/pages/delete.html"
+    success_message = _("The group role assignment has been deleted.")
+
+    def get_success_url(self) -> str:
+        pk = self.object.groups.first().pk
+        return reverse("assigned_group_roles", args=[pk])
