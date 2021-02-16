@@ -88,8 +88,13 @@ lesson_related_constraint_q = (
 
 
 class RegisterObjectRelatedMixin(WeekRelatedMixin):
+    """Mixin with common API for lesson documentations and personal notes."""
+
     @property
-    def register_object(self) -> Union[LessonPeriod, Event, ExtraLesson]:
+    def register_object(
+        self: Union["LessonDocumentation", "PersonalNote"]
+    ) -> Union[LessonPeriod, Event, ExtraLesson]:
+        """Get the object related to this lesson documentation or personal note."""
         if self.lesson_period:
             return self.lesson_period
         elif self.event:
@@ -98,23 +103,38 @@ class RegisterObjectRelatedMixin(WeekRelatedMixin):
             return self.extra_lesson
 
     @property
-    def calendar_week(self) -> CalendarWeek:
+    def calendar_week(self: Union["LessonDocumentation", "PersonalNote"]) -> CalendarWeek:
+        """Get the calendar week of this lesson documentation or personal note.
+
+        .. note::
+
+            As events can be longer than one week,
+            this will return the week of the start date for events.
+        """
         if self.lesson_period:
-            return CalendarWeek(week=self.week, year=self.year,)
+            return CalendarWeek(week=self.week, year=self.year)
         elif self.extra_lesson:
             return self.extra_lesson.calendar_week
         else:
             return CalendarWeek.from_date(self.register_object.date_start)
 
     @property
-    def school_term(self) -> SchoolTerm:
+    def school_term(self: Union["LessonDocumentation", "PersonalNote"]) -> SchoolTerm:
+        """Get the school term of the related register object."""
         if self.lesson_period:
             return self.lesson_period.lesson.validity.school_term
         else:
             return self.register_object.school_term
 
     @property
-    def date(self) -> Optional[date]:
+    def date(self: Union["LessonDocumentation", "PersonalNote"]) -> Optional[date]:
+        """Get the date of this lesson documentation or personal note.
+
+        :: warning::
+
+            As events can be longer than one day,
+            this will return `None` for events.
+        """
         if self.lesson_period:
             return super().date
         elif self.extra_lesson:
@@ -122,14 +142,20 @@ class RegisterObjectRelatedMixin(WeekRelatedMixin):
         return None
 
     @property
-    def date_formatted(self) -> str:
+    def date_formatted(self: Union["LessonDocumentation", "PersonalNote"]) -> str:
+        """Get a formatted version of the date of this object.
+
+        Lesson periods, extra lessons: formatted date
+        Events: formatted date range
+        """
         return (
             date_format(self.date)
             if self.date
-            else f"{self.event.date_start}–{self.event.date_end}"
+            else f"{date_format(self.event.date_start)}–{date_format(self.event.date_end)}"
         )
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self: Union["LessonDocumentation", "PersonalNote"]) -> str:
+        """Get the absolute url of the detail view for the related register object."""
         return self.register_object.get_alsijil_url(self.calendar_week)
 
 
@@ -204,6 +230,7 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
         return f"{self.date_formatted}, {self.lesson_period}, {self.person}"
 
     def get_absolute_url(self) -> str:
+        """Get the absolute url of the detail view for the related register object."""
         return super().get_absolute_url() + "#personal-notes"
 
     class Meta:
@@ -283,7 +310,7 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
             if changed:
                 lesson_documentation.save()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.lesson_period}, {self.date_formatted}"
 
     def save(self, *args, **kwargs):

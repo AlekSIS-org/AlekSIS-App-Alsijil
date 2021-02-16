@@ -58,7 +58,7 @@ def get_timetable_instance_by_pk(
 def annotate_documentations(
     klass: Union[Event, LessonPeriod, ExtraLesson], wanted_week: CalendarWeek, pks: List[int]
 ) -> QuerySet:
-
+    """Return a annotated queryset of all provided register objects."""
     if isinstance(klass, LessonPeriod):
         prefetch = Prefetch(
             "documentations",

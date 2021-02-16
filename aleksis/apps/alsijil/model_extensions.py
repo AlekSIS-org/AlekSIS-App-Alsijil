@@ -9,13 +9,22 @@ from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
+from aleksis.apps.alsijil.managers import PersonalNoteQuerySet
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
-def alsijil_url(self, week: Optional[CalendarWeek] = None):
+def alsijil_url(
+    self: Union[LessonPeriod, Event, ExtraLesson], week: Optional[CalendarWeek] = None
+) -> str:
+    """Build URL for the detail page of register objects.
+
+    Works with `LessonPeriod`, `Event` and `ExtraLesson`.
+
+    On `LessonPeriod` objects, it will work with annotated or passed weeks.
+    """
     if isinstance(self, LessonPeriod):
         week = week or self.week
         return reverse("lesson_period", args=[week.year, week.week, self.pk])
@@ -45,8 +54,8 @@ def mark_absent(
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
 
-    This function creates `PersonalNote` objects for every `LessonPeriod` the person
-    participates in on the selected day and marks them as absent/excused.
+    This function creates `PersonalNote` objects for every `LessonPeriod` and `ExtraLesson`
+    the person participates in on the selected day and marks them as absent/excused.
 
     :param dry_run: With this activated, the function won't change any data
         and just return the count of affected lessons
@@ -115,10 +124,15 @@ def mark_absent(
     return lesson_periods.count() + extra_lessons.count()
 
 
-def get_personal_notes(self, persons: QuerySet, wanted_week: Optional[CalendarWeek] = None):
-    """Get all personal notes for that lesson in a specified week.
+def get_personal_notes(
+    self, persons: QuerySet, wanted_week: Optional[CalendarWeek] = None
+) -> PersonalNoteQuerySet:
+    """Get all personal notes for that register object in a specified week.
 
-    Returns all linked `PersonalNote` objects, filtered by the given weeek,
+    The week is optional for extra lessons and events as they have own date information.
+
+    Returns all linked `PersonalNote` objects,
+    filtered by the given week for `LessonPeriod` objects,
     creating those objects that haven't been created yet.
 
     ..note:: Only available when AlekSIS-App-Alsijil is installed.
@@ -253,7 +267,7 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     )
 
 
-def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> Iterator:
+def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> PersonalNoteQuerySet:
     """Get all personal notes of absent persons for this event/extra lesson."""
     return self.personal_notes.all()
 
