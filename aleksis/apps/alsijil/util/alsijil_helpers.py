@@ -76,12 +76,12 @@ def annotate_documentations(
         instances = instances.order_by("period__weekday", "period__period")
     else:
         instances = instances.order_by("period_from__weekday", "period_from__period")
-    args = {Event: "event", LessonPeriod: "lesson_period", ExtraLesson: "extra_lesson"}
+
     instances = instances.annotate(
         has_documentation=Exists(
             LessonDocumentation.objects.filter(
                 ~Q(topic__exact=""), week=wanted_week.week, year=wanted_week.year,
-            ).filter(**{args[klass]: OuterRef("pk")})
+            ).filter(**{klass.label_: OuterRef("pk")})
         )
     )
 
