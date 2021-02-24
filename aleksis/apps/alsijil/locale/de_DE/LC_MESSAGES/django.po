@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-24 12:02+0100\n"
-"PO-Revision-Date: 2021-02-24 11:55+0000\n"
+"PO-Revision-Date: 2021-02-24 11:58+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
@@ -315,7 +315,7 @@ msgstr "Gruppenrollen"
 
 #: models.py:392
 msgid "Assigned person"
-msgstr "Zugeordnete Person"
+msgstr "Zugewiesene Person"
 
 #: models.py:395 templates/alsijil/class_register/week_view.html:104
 #: templates/alsijil/class_register/week_view.html:220
@@ -392,7 +392,7 @@ msgstr ""
 
 #: preferences.py:94
 msgid "Show assigned group roles in week view"
-msgstr "Zugeordnete Gruppenrollen in der Wochenansicht zeigen"
+msgstr "Zugewiesene Gruppenrollen in der Wochenansicht zeigen"
 
 #: preferences.py:95
 msgid "Only week view of groups"
@@ -400,7 +400,7 @@ msgstr "Nur Wochenansicht von Gruppen"
 
 #: preferences.py:103
 msgid "Show assigned group roles in lesson view"
-msgstr "Zugeordnete Gruppenrollen in der Stundenansicht anzeigen"
+msgstr "Zugewiesene Gruppenrollen in der Stundenansicht anzeigen"
 
 #: tables.py:17 tables.py:37 tables.py:62
 #: templates/alsijil/group_role/partials/assignment_options.html:13
