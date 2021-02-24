@@ -78,17 +78,14 @@
         </ul>
       </div>
       <div class="col s12" id="week-overview">
-        {% regroup lesson_periods by period.get_weekday_display as periods_by_day %}
-        {% for weekday, periods in periods_by_day %}
-          {% with weekdays|get_dict:periods.0.period.weekday as advanced_weekday %}
-            {% weekday_to_date week periods.0.period.weekday as current_date %}
-
+        {% for weekday, objects in regrouped_objects.items %}
+          {% with weekdays|get_dict:forloop.counter0 as advanced_weekday %}
             {% if advanced_weekday.holiday and not request.site.preferences.alsijil__allow_entries_in_holidays %}
               <div class="card">
                 <div class="card-content">
-                  {% weekday_to_date week periods.0.period.weekday as current_date %}
                   <span class="card-title">
-                    {{ weekday }}, {{ current_date }} <span class="badge new blue no-float">{{ advanced_weekday.holiday }}</span>
+                    {{ advanced_weekday.name }}, {{ advanced_weekday.date }} <span
+                      class="badge new blue no-float">{{ advanced_weekday.holiday }}</span>
                   </span>
                 </div>
               </div>
@@ -96,7 +93,7 @@
               <div class="card show-on-extra-large">
                 <div class="card-content">
                   <span class="card-title">
-                    {{ weekday }}, {{ current_date }}
+                    {{ advanced_weekday.name }}, {{ advanced_weekday.date }}
                   </span>
                   <table class="striped datatable">
                     <thead>
@@ -114,55 +111,69 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for period in periods %}
-                      {% has_perm "alsijil.view_lessondocumentation" user period as can_view_lesson_documentation %}
+                    {% for register_object in objects %}
+                      {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
                       {% if can_view_lesson_documentation %}
                         <tr>
                           <td class="center-align">
-                            {% include "alsijil/partials/lesson_status_icon.html" with period=period %}
+                            {% include "alsijil/partials/lesson_status_icon.html" with register_object=register_object %}
                           </td>
                           <td class="tr-link">
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {{ period.period.period }}.
+                               href="{{ register_object.alsijil_url }}">
+                              {% if register_object.period %}
+                                {{ register_object.period.period }}.
+                              {% else %}
+                                {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                              {% endif %}
                             </a>
                           </td>
                           {% if not group %}
                             <td>
                               <a class="tr-link"
-                                 href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                                {{ period.lesson.group_names }}
+                                 href="{{ register_object.alsijil_url }}">
+                                {% if register_object.lesson %}
+                                  {{ register_object.lesson.group_names }}
+                                {% else %}
+                                  {{ register_object.group_names }}
+                                {% endif %}
                               </a>
                             </td>
                           {% endif %}
                           <td>
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {{ period.get_subject.name }}
+                               href="{{ register_object.alsijil_url }}">
+                              {% if register_object.get_subject %}
+                                {{ register_object.get_subject.name }}
+                              {% elif register_object.subject %}
+                                {{ register_object.subject }}
+                              {% else %}
+                                {% trans "Event" %} ({{ register_object.title }})
+                              {% endif %}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {{ period.get_teacher_names }}
+                               href="{{ register_object.alsijil_url }}">
+                                {{ register_object.teacher_names }}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {% firstof period.get_lesson_documentation.topic "–" %}
+                               href="{{ register_object.alsijil_url }}">
+                              {% firstof register_object.get_lesson_documentation.topic "–" %}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {% firstof period.get_lesson_documentation.homework "–" %}
+                               href="{{ register_object.alsijil_url }}">
+                              {% firstof register_object.get_lesson_documentation.homework "–" %}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                              {% firstof period.get_lesson_documentation.group_note "–" %}
+                               href="{{ register_object.alsijil_url }}">
+                              {% firstof register_object.get_lesson_documentation.group_note "–" %}
                             </a>
                           </td>
                         </tr>
@@ -174,48 +185,69 @@
               </div>
               <ul class="collapsible hide-on-extra-large-only">
                 <li class="">
-                  {% weekday_to_date week periods.0.period.weekday as current_date %}
                   <div class="collapsible-header flow-text">
-                    {{ weekday }}, {{ current_date }} <i class="material-icons collapsible-icon-right">expand_more</i>
+                    {{ advanced_weekday.name }}, {{ advanced_weekday.date }} <i
+                      class="material-icons collapsible-icon-right">expand_more</i>
                   </div>
                   <div class="collapsible-body">
                     <div class="collection">
-                      {% for period in periods %}
-                        {% has_perm "alsijil.view_lessondocumentation" user period as can_view_lesson_documentation %}
+                      {% for register_object in objects %}
+                        {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
                         {% if can_view_lesson_documentation %}
                           <a class="collection-item avatar"
-                             href="{% url 'lesson_by_week_and_period' week.year week.week period.id %}">
-                            {% include "alsijil/partials/lesson_status_icon.html" with period=period css_class="materialize-circle" color_suffix=" " %}
+                             href="{{ register_object.alsijil_url }}">
+                            {% include "alsijil/partials/lesson_status_icon.html" with register_object=register_object css_class="materialize-circle" color_suffix=" " %}
                             <table class="hide-on-med-and-down">
                               <tr>
                                 <th>{% trans "Subject" %}</th>
-                                <td>{{ period.period.period }}. {{ period.get_subject.name }}</td>
+                                <td>
+                                  {% if register_object.period %}
+                                    {{ register_object.period.period }}.
+                                  {% else %}
+                                    {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                                  {% endif %}
+                                  {% if register_object.get_subject %}
+                                    {{ register_object.get_subject.name }}
+                                  {% elif register_object.subject %}
+                                    {{ register_object.subject }}
+                                  {% else %}
+                                    {% trans "Event" %}
+                                  {% endif %}
+                                </td>
                               </tr>
                               {% if not group %}
                                 <tr>
-                                  <th>{% trans "Group" %}</th>
-                                  <td>{{ period.lesson.group_names }}</td>
+                                  <th>{% trans "Groups" %}</th>
+                                  <td>
+                                    {% if register_object.lesson %}
+                                      {{ register_object.lesson.group_names }}
+                                    {% else %}
+                                      {{ register_object.group_names }}
+                                    {% endif %}
+                                  </td>
                                 </tr>
                               {% endif %}
                               <tr>
                                 <th>{% trans "Teachers" %}</th>
-                                <td>{{ period.lesson.teacher_names }}</td>
+                                <td>
+                                    {{ register_object.teacher_names }}
+                                </td>
                               </tr>
                               <tr>
                                 <th>{% trans "Lesson topic" %}</th>
-                                <td>{% firstof period.get_lesson_documentation.topic "–" %}</td>
+                                <td>{% firstof register_object.get_lesson_documentation.topic "–" %}</td>
                               </tr>
                               {% with period.get_lesson_documentation as lesson_documentation %}
                                 {% if lesson_documentation.homework %}
                                   <tr>
                                     <th>{% trans "Homework" %}</th>
-                                    <td>{% firstof period.get_lesson_documentation.homework "–" %}</td>
+                                    <td>{% firstof register_object.get_lesson_documentation.homework "–" %}</td>
                                   </tr>
                                 {% endif %}
                                 {% if lesson_documentation.group_note %}
                                   <tr>
                                     <th>{% trans "Group note" %}</th>
-                                    <td>{% firstof period.get_lesson_documentation.group_note "–" %}</td>
+                                    <td>{% firstof register_object.get_lesson_documentation.group_note "–" %}</td>
                                   </tr>
                                 {% endif %}
                               {% endwith %}
@@ -223,32 +255,45 @@
                             <div class="hide-on-large-only">
                               <ul class="collection">
                                 <li class="collection-item">
-                                  {{ period.period.period }}. {{ period.get_subject.name }}
+                                  {% if register_object.period %}
+                                    {{ register_object.period.period }}.
+                                  {% else %}
+                                    {{ register_object.period_from_on_day }}.–{{ register_object.period_to_on_day }}.
+                                  {% endif %}
+                                  {% if register_object.get_subject %}
+                                    {{ register_object.get_subject.name }}
+                                  {% elif register_object.subject %}
+                                    {{ register_object.subject }}
+                                  {% else %}
+                                    {% trans "Event" %} ({{ register_object.title }})
+                                  {% endif %}
                                 </li>
                                 {% if not group %}
                                   <li class="collection-item">
-
-                                    {{ period.lesson.group_names }}
-
+                                    {% if register_object.lesson %}
+                                      {{ register_object.lesson.group_names }}
+                                    {% else %}
+                                      {{ register_object.group_names }}
+                                    {% endif %}
                                   </li>
                                 {% endif %}
                                 <li class="collection-item">
-                                  {{ period.lesson.teacher_names }}
+                                    {{ register_object.teacher_names }}
                                 </li>
                                 <li class="collection-item">
-                                  {{ period.get_lesson_documentation.topic }}
+                                  {{ register_object.get_lesson_documentation.topic }}
                                 </li>
                                 {% with period.get_lesson_documentation as lesson_documentation %}
                                   {% if lesson_documentation.homework %}
                                     <li class="collection-item">
                                       <strong>{% trans "Homework" %}</strong>
-                                      {% firstof period.get_lesson_documentation.homework "–" %}
+                                      {% firstof register_object.get_lesson_documentation.homework "–" %}
                                     </li>
                                   {% endif %}
                                   {% if lesson_documentation.group_note %}
                                     <li class="collection-item">
                                       <strong>{% trans "Group note" %}</strong>
-                                      {% firstof period.get_lesson_documentation.group_note "–" %}
+                                      {% firstof register_object.get_lesson_documentation.group_note "–" %}
                                     </li>
                                   {% endif %}
                                 {% endwith %}
@@ -312,10 +357,10 @@
                 {% if note.remarks %}
                   <blockquote>
                     {{ note.remarks }}
-                    {% weekday_to_date week note.lesson_period.period.weekday as note_date %}
+                    {% weekday_to_date week note.register_object.period.weekday as note_date %}
                     <em class="right">
-                      <a href="{% url 'lesson_by_week_and_period' week.year week.week note.lesson_period.id %}">
-                        {{ note_date }}, {{ note.lesson_period.get_subject.name }}
+                      <a href="{{ note.register_object.alsijil_url }}">
+                        {{ note.date }}, {{ note.register_object.get_subject.name }}
                       </a>
                     </em>
                   </blockquote>

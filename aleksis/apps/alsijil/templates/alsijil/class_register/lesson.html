@@ -10,21 +10,21 @@
 {% endblock %}
 
 {% block content %}
-  {% if next_lesson_person or prev_lesson_person %}
+  {% if next_lesson_person or prev_lesson_person or lesson_documentation %}
     <div class="row no-margin">
       <div class="col s12 no-padding">
         {# Back to week view #}
-        {% with lesson_period.get_lesson_documentation as lesson_doc %}
-          <a href="{% url "week_view_by_week" lesson_doc.year lesson_doc.week "group" lesson_period.lesson.groups.all.0.pk %}"
+        {% if lesson_documentation %}
+          <a href="{% url "week_view_by_week" lesson_documentation.calendar_week.year lesson_documentation.calendar_week.week "group" register_object.get_groups.all.0.pk %}"
              class="btn primary-color waves-light waves-effect alsijil-top-button">
             <i class="material-icons left">chevron_left</i> {% trans "Back to week view" %}
           </a>
-        {% endwith %}
+        {% endif %}
 
         {# Next lesson #}
         {% if prev_lesson_person %}
           <a class="btn primary waves-effect waves-light alsijil-top-button"
-             href="{% url "lesson_by_week_and_period" prev_lesson_person.week.year prev_lesson_person.week.week prev_lesson_person.id %}">
+             href="{% url "lesson_period" prev_lesson_person.week.year prev_lesson_person.week.week prev_lesson_person.id %}">
             <i class="material-icons left">arrow_back</i>
             {% trans "My previous lesson" %}
           </a>
@@ -33,7 +33,7 @@
         {# Previous lesson #}
         {% if next_lesson_person %}
           <a class="btn primary right waves-effect waves-light alsijil-top-button"
-             href="{% url "lesson_by_week_and_period" next_lesson_person.week.year next_lesson_person.week.week next_lesson_person.id %}">
+             href="{% url "lesson_period" next_lesson_person.week.year next_lesson_person.week.week next_lesson_person.id %}">
             <i class="material-icons right">arrow_forward</i>
             {% trans "My next lesson" %}
           </a>
@@ -43,51 +43,60 @@
   {% endif %}
 
   <h4>
-    {{ day }}, {% blocktrans with period=lesson_period.period.period %}{{ period }}. period{% endblocktrans %} –
+    {% if register_object.label_ == "event" %}
+      {{ register_object.date_start }} {{ register_object.period_from.period }}.–{{ register_object.date_end }}
+      {{ register_object.period_to.period }}.,
+    {% else %}
+      {{ day }}, {% blocktrans with period=register_object.period.period %}{{ period }}. period{% endblocktrans %} –
+    {% endif %}
 
-    {% for group in lesson_period.get_groups.all %}
-      <span>{{ group.name }}</span>,
-    {% endfor %}
+    {{ register_object.group_names }},
 
-    {{ lesson_period.get_subject.name }},
+    {% if register_object.label_ == "event" %}
+      {% trans "Event" %} ({{ register_object.title }})
+    {% else %}
+      {{ register_object.get_subject.name }}
+    {% endif %},
 
-    {% for teacher in lesson_period.get_teachers.all %}
-      {{ teacher.short_name }}
-    {% endfor %}
+    {{ register_object.teacher_short_names }}
 
     <span class="right">
-    {% include "alsijil/partials/lesson_status_icon.html" with period=lesson_period css_class="medium" %}
-  </span>
+      {% include "alsijil/partials/lesson_status_icon.html" with register_object=register_object css_class="medium" %}
+    </span>
   </h4>
   <br/>
 
-  {% has_perm "alsijil.view_lessondocumentation" user lesson_period as can_view_lesson_documentation %}
-  {% has_perm "alsijil.edit_lessondocumentation" user lesson_period as can_edit_lesson_documentation %}
-  {% has_perm "alsijil.edit_lesson_personalnote" user lesson_period as can_edit_lesson_personalnote %}
+  {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
+  {% has_perm "alsijil.edit_lessondocumentation" user register_object as can_edit_lesson_documentation %}
+  {% has_perm "alsijil.edit_register_object_personalnote" user register_object as can_edit_register_object_personalnote %}
 
   <form method="post" class="row">
     <p>
       {% if not blocked_because_holidays %}
-        {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% if can_edit_lesson_documentation or can_edit_register_object_personalnote %}
           {% include "core/partials/save_button.html" %}
         {% endif %}
       {% endif %}
 
-      <a class="btn waves-effect waves-light primary"
-         href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
-        <i class="material-icons left">arrow_back</i>
-        {% blocktrans with subject=lesson_period.get_subject.name %}
-          Previous {{ subject }} lesson
-        {% endblocktrans %}
-      </a>
+      {% if prev_lesson %}
+        <a class="btn waves-effect waves-light primary"
+           href="{% url "lesson_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+          <i class="material-icons left">arrow_back</i>
+          {% blocktrans with subject=register_object.get_subject.name %}
+            Previous {{ subject }} lesson
+          {% endblocktrans %}
+        </a>
+      {% endif %}
 
-      <a class="btn right waves-effect waves-light primary"
-         href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
-        <i class="material-icons right">arrow_forward</i>
-        {% blocktrans with subject=lesson_period.get_subject.name %}
-          Next {{ subject }} lesson
-        {% endblocktrans %}
-      </a>
+      {% if next_lesson %}
+        <a class="btn right waves-effect waves-light primary"
+           href="{% url "lesson_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+          <i class="material-icons right">arrow_forward</i>
+          {% blocktrans with subject=register_object.get_subject.name %}
+            Next {{ subject }} lesson
+          {% endblocktrans %}
+        </a>
+      {% endif %}
     </p>
 
     {% csrf_token %}
@@ -100,13 +109,13 @@
             <li class="tab">
               <a href="#lesson-documentation">{% trans "Lesson documentation" %}</a>
             </li>
-            {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+            {% if register_object.label_ != "lesson_period" or not register_object.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
               <li class="tab">
                 <a href="#personal-notes">{% trans "Personal notes" %}</a>
               </li>
             {% endif %}
-            {% has_perm "alsijil.view_lessondocumentation" user lesson_period.prev as can_view_prev_lesson_documentation %}
-            {% if lesson_period.prev.get_lesson_documentation and can_view_prev_lesson_documentation %}
+            {% has_perm "alsijil.view_lessondocumentation" user register_object.prev as can_view_prev_lesson_documentation %}
+            {% if register_object.prev.get_lesson_documentation and can_view_prev_lesson_documentation %}
               <li class="tab">
                 <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
               </li>
@@ -163,7 +172,7 @@
           </div>
         </div>
 
-        {% with prev_lesson=lesson_period.prev prev_doc=prev_lesson.get_lesson_documentation %}
+        {% with prev_lesson=register_object.prev prev_doc=prev_lesson.get_lesson_documentation %}
           {% with absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
             {% if prev_doc and can_view_prev_lesson_documentation %}
@@ -234,14 +243,14 @@
           {% endwith %}
         {% endwith %}
 
-        {% if not lesson_period.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
+        {% if register_object.label_ != "lesson_period" or not register_object.get_substitution.cancelled or not request.site.preferences.alsijil__block_personal_notes_for_cancelled %}
           <div class="col s12" id="personal-notes">
             <div class="card">
               <div class="card-content">
                 <span class="card-title">
                   {% blocktrans %}Personal notes{% endblocktrans %}
                 </span>
-                {% if can_edit_lesson_personalnote %}
+                {% if can_edit_register_object_personalnote %}
                   {% form form=personal_note_formset.management_form %}{% endform %}
                 {% endif %}
 
@@ -259,7 +268,7 @@
                   </thead>
                   <tbody>
                   {% for form in personal_note_formset %}
-                    {% if can_edit_lesson_personalnote %}
+                    {% if can_edit_register_object_personalnote %}
                       <tr>
                         {{ form.id }}
                         <td>{{ form.person_name }}{{ form.person_name.value }}
@@ -357,7 +366,7 @@
 
         {% if group_roles %}
           <div class="col s12" id="group-roles">
-            {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=lesson_period.lesson.groups.first back_url=back_url %}
+            {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=register_object.get_groups.first back_url=back_url %}
           </div>
         {% endif %}
 
@@ -377,25 +386,29 @@
 
 
       <p>
-        {% if can_edit_lesson_documentation or can_edit_lesson_personalnote %}
+        {% if can_edit_lesson_documentation or can_edit_register_object_personalnote %}
           {% include "core/partials/save_button.html" %}
         {% endif %}
 
-        <a class="btn primary waves-effect waves-light"
-           href="{% url "lesson_by_week_and_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
-          <i class="material-icons left">arrow_back</i>
-          {% blocktrans with subject=lesson_period.get_subject.name %}
-            Previous {{ subject }} lesson
-          {% endblocktrans %}
-        </a>
+        {% if prev_lesson %}
+          <a class="btn primary waves-effect waves-light"
+             href="{% url "lesson_period" prev_lesson.week.year prev_lesson.week.week prev_lesson.id %}">
+            <i class="material-icons left">arrow_back</i>
+            {% blocktrans with subject=register_object.get_subject.name %}
+              Previous {{ subject }} lesson
+            {% endblocktrans %}
+          </a>
+        {% endif %}
 
-        <a class="btn primary right waves-effect waves-light"
-           href="{% url "lesson_by_week_and_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
-          <i class="material-icons right">arrow_forward</i>
-          {% blocktrans with subject=lesson_period.get_subject.name %}
-            Next {{ subject }} lesson
-          {% endblocktrans %}
-        </a>
+        {% if next_lesson %}
+          <a class="btn primary right waves-effect waves-light"
+             href="{% url "lesson_period" next_lesson.week.year next_lesson.week.week next_lesson.id %}">
+            <i class="material-icons right">arrow_forward</i>
+            {% blocktrans with subject=register_object.get_subject.name %}
+              Next {{ subject }} lesson
+            {% endblocktrans %}
+          </a>
+        {% endif %}
       </p>
 
     {% else %}

@@ -3,14 +3,41 @@ from typing import Dict, Iterable, Iterator, Optional, Union
 
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
+from django.db.models.expressions import Subquery
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
-from aleksis.apps.chronos.models import LessonPeriod
+from aleksis.apps.alsijil.managers import PersonalNoteQuerySet
+from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
 
 from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
+
+
+def alsijil_url(
+    self: Union[LessonPeriod, Event, ExtraLesson], week: Optional[CalendarWeek] = None
+) -> str:
+    """Build URL for the detail page of register objects.
+
+    Works with `LessonPeriod`, `Event` and `ExtraLesson`.
+
+    On `LessonPeriod` objects, it will work with annotated or passed weeks.
+    """
+    if isinstance(self, LessonPeriod):
+        week = week or self.week
+        return reverse("lesson_period", args=[week.year, week.week, self.pk])
+    else:
+        return reverse(self.label_, args=[self.pk])
+
+
+LessonPeriod.property_(alsijil_url)
+LessonPeriod.method(alsijil_url, "get_alsijil_url")
+Event.property_(alsijil_url)
+Event.method(alsijil_url, "get_alsijil_url")
+ExtraLesson.property_(alsijil_url)
+ExtraLesson.method(alsijil_url, "get_alsijil_url")
 
 
 @Person.method
@@ -27,8 +54,8 @@ def mark_absent(
 ):
     """Mark a person absent for all lessons in a day, optionally starting with a selected period number.
 
-    This function creates `PersonalNote` objects for every `LessonPeriod` the person
-    participates in on the selected day and marks them as absent/excused.
+    This function creates `PersonalNote` objects for every `LessonPeriod` and `ExtraLesson`
+    the person participates in on the selected day and marks them as absent/excused.
 
     :param dry_run: With this activated, the function won't change any data
         and just return the count of affected lessons
@@ -49,14 +76,28 @@ def mark_absent(
         .filter(period__period__gte=from_period)
         .annotate_week(wanted_week)
     )
+    extra_lessons = (
+        ExtraLesson.objects.filter(groups__members=self)
+        .on_day(day)
+        .filter(period__period__gte=from_period)
+    )
 
     if to_period:
         lesson_periods = lesson_periods.filter(period__period__lte=to_period)
+        extra_lessons = extra_lessons.filter(period__period__lte=to_period)
 
     # Create and update all personal notes for the discovered lesson periods
     if not dry_run:
-        for lesson_period in lesson_periods:
-            sub = lesson_period.get_substitution()
+        for register_object in list(lesson_periods) + list(extra_lessons):
+            if isinstance(register_object, LessonPeriod):
+                sub = register_object.get_substitution()
+                q_attrs = dict(
+                    week=wanted_week.week, year=wanted_week.year, lesson_period=register_object
+                )
+            else:
+                sub = None
+                q_attrs = dict(extra_lesson=register_object)
+
             if sub and sub.cancelled:
                 continue
 
@@ -65,10 +106,8 @@ def mark_absent(
                 .prefetch_related(None)
                 .update_or_create(
                     person=self,
-                    lesson_period=lesson_period,
-                    week=wanted_week.week,
-                    year=wanted_week.year,
                     defaults={"absent": absent, "excused": excused, "excuse_type": excuse_type,},
+                    **q_attrs,
                 )
             )
             personal_note.groups_of_person.set(self.member_of.all())
@@ -80,14 +119,18 @@ def mark_absent(
                     personal_note.remarks = remarks
                 personal_note.save()
 
-    return lesson_periods.count()
+    return lesson_periods.count() + extra_lessons.count()
 
 
-@LessonPeriod.method
-def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
-    """Get all personal notes for that lesson in a specified week.
+def get_personal_notes(
+    self, persons: QuerySet, wanted_week: Optional[CalendarWeek] = None
+) -> PersonalNoteQuerySet:
+    """Get all personal notes for that register object in a specified week.
 
-    Returns all linked `PersonalNote` objects, filtered by the given weeek,
+    The week is optional for extra lessons and events as they have own date information.
+
+    Returns all linked `PersonalNote` objects,
+    filtered by the given week for `LessonPeriod` objects,
     creating those objects that haven't been created yet.
 
     ..note:: Only available when AlekSIS-App-Alsijil is installed.
@@ -97,43 +140,40 @@ def get_personal_notes(self, persons: QuerySet, wanted_week: CalendarWeek):
         - Dominik George <dominik.george@teckids.org>
     """
     # Find all persons in the associated groups that do not yet have a personal note for this lesson
+    if isinstance(self, LessonPeriod):
+        q_attrs = dict(week=wanted_week.week, year=wanted_week.year, lesson_period=self)
+    elif isinstance(self, Event):
+        q_attrs = dict(event=self)
+    else:
+        q_attrs = dict(extra_lesson=self)
+
     missing_persons = persons.annotate(
-        no_personal_notes=~Exists(
-            PersonalNote.objects.filter(
-                week=wanted_week.week,
-                year=wanted_week.year,
-                lesson_period=self,
-                person__pk=OuterRef("pk"),
-            )
-        )
+        no_personal_notes=~Exists(PersonalNote.objects.filter(person__pk=OuterRef("pk"), **q_attrs))
     ).filter(
-        member_of__in=Group.objects.filter(pk__in=self.lesson.groups.all()),
+        member_of__in=Group.objects.filter(pk__in=self.get_groups().all()),
         is_active=True,
         no_personal_notes=True,
     )
 
     # Create all missing personal notes
-    new_personal_notes = [
-        PersonalNote(
-            person=person, lesson_period=self, week=wanted_week.week, year=wanted_week.year,
-        )
-        for person in missing_persons
-    ]
+    new_personal_notes = [PersonalNote(person=person, **q_attrs,) for person in missing_persons]
     PersonalNote.objects.bulk_create(new_personal_notes)
 
     for personal_note in new_personal_notes:
         personal_note.groups_of_person.set(personal_note.person.member_of.all())
 
     return (
-        PersonalNote.objects.filter(
-            lesson_period=self, week=wanted_week.week, year=wanted_week.year, person__in=persons,
-        )
+        PersonalNote.objects.filter(**q_attrs, person__in=persons)
         .select_related(None)
         .prefetch_related(None)
         .select_related("person", "excuse_type")
         .prefetch_related("extra_marks")
     )
 
+
+LessonPeriod.method(get_personal_notes)
+Event.method(get_personal_notes)
+ExtraLesson.method(get_personal_notes)
 
 # Dynamically add extra permissions to Group and Person models in core
 # Note: requires migrate afterwards
@@ -175,6 +215,19 @@ def get_lesson_documentation(
         return None
 
 
+def get_lesson_documentation_single(
+    self, week: Optional[CalendarWeek] = None
+) -> Union[LessonDocumentation, None]:
+    """Get lesson documentation object for this event/extra lesson."""
+    if self.documentations.exists():
+        return self.documentations.all()[0]
+    return None
+
+
+Event.method(get_lesson_documentation_single, "get_lesson_documentation")
+ExtraLesson.method(get_lesson_documentation_single, "get_lesson_documentation")
+
+
 @LessonPeriod.method
 def get_or_create_lesson_documentation(
     self, week: Optional[CalendarWeek] = None
@@ -182,10 +235,22 @@ def get_or_create_lesson_documentation(
     """Get or create lesson documentation object for this lesson."""
     if not week:
         week = self.week
-    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+    lesson_documentation, __ = LessonDocumentation.objects.get_or_create(
         lesson_period=self, week=week.week, year=week.year
     )
     return lesson_documentation
+
+
+def get_or_create_lesson_documentation_single(
+    self, week: Optional[CalendarWeek] = None
+) -> LessonDocumentation:
+    """Get or create lesson documentation object for this event/extra lesson."""
+    lesson_documentation, created = LessonDocumentation.objects.get_or_create(**{self.label_: self})
+    return lesson_documentation
+
+
+Event.method(get_or_create_lesson_documentation_single, "get_or_create_lesson_documentation")
+ExtraLesson.method(get_or_create_lesson_documentation_single, "get_or_create_lesson_documentation")
 
 
 @LessonPeriod.method
@@ -200,12 +265,30 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     )
 
 
+def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> Iterator:
+    """Get all personal notes of absent persons for this event/extra lesson."""
+    return filter(lambda p: p.absent, self.personal_notes.all())
+
+
+Event.method(get_absences_simple, "get_absences")
+ExtraLesson.method(get_absences_simple, "get_absences")
+
+
 @LessonPeriod.method
 def get_excused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of excused absent persons for this lesson."""
     if not week:
         week = self.week
     return self.personal_notes.filter(week=week.week, year=week.year, absent=True, excused=True)
+
+
+def get_excused_absences_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of excused absent persons for this event/extra lesson."""
+    return self.personal_notes.filter(absent=True, excused=True)
+
+
+Event.method(get_excused_absences_simple, "get_excused_absences")
+ExtraLesson.method(get_excused_absences_simple, "get_excused_absences")
 
 
 @LessonPeriod.method
@@ -216,12 +299,30 @@ def get_unexcused_absences(self, week: Optional[CalendarWeek] = None) -> QuerySe
     return self.personal_notes.filter(week=week.week, year=week.year, absent=True, excused=False)
 
 
+def get_unexcused_absences_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of unexcused absent persons for this event/extra lesson."""
+    return self.personal_notes.filter(absent=True, excused=False)
+
+
+Event.method(get_unexcused_absences_simple, "get_unexcused_absences")
+ExtraLesson.method(get_unexcused_absences_simple, "get_unexcused_absences")
+
+
 @LessonPeriod.method
 def get_tardinesses(self, week: Optional[CalendarWeek] = None) -> QuerySet:
     """Get all personal notes of late persons for this lesson."""
     if not week:
         week = self.week
     return self.personal_notes.filter(week=week.week, year=week.year, late__gt=0)
+
+
+def get_tardinesses_simple(self, week: Optional[CalendarWeek] = None) -> QuerySet:
+    """Get all personal notes of late persons for this event/extra lesson."""
+    return self.personal_notes.filter(late__gt=0)
+
+
+Event.method(get_tardinesses_simple, "get_tardinesses")
+ExtraLesson.method(get_tardinesses_simple, "get_tardinesses")
 
 
 @LessonPeriod.method
@@ -237,6 +338,21 @@ def get_extra_marks(self, week: Optional[CalendarWeek] = None) -> Dict[ExtraMark
             stats[extra_mark] = qs
 
     return stats
+
+
+def get_extra_marks_simple(self, week: Optional[CalendarWeek] = None) -> Dict[ExtraMark, QuerySet]:
+    """Get all statistics on extra marks for this event/extra lesson."""
+    stats = {}
+    for extra_mark in ExtraMark.objects.all():
+        qs = self.personal_notes.filter(extra_marks=extra_mark)
+        if qs:
+            stats[extra_mark] = qs
+
+    return stats
+
+
+Event.method(get_extra_marks_simple, "get_extra_marks")
+ExtraLesson.method(get_extra_marks_simple, "get_extra_marks")
 
 
 @Group.class_method
@@ -270,62 +386,59 @@ def generate_person_list_with_class_register_statistics(
     if persons is None:
         persons = self.members.all()
 
-    persons = persons.filter(
-        personal_notes__groups_of_person=self,
-        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
-    ).distinct()
+    # Build reusable Q objects for filtering by school term and by groups
+    # Necessary for the following annotations
+    school_term_q = (
+        Q(personal_notes__lesson_period__lesson__validity__school_term=self.school_term)
+        | Q(personal_notes__extra_lesson__school_term=self.school_term)
+        | Q(personal_notes__event__school_term=self.school_term)
+    )
+    groups_q = (
+        Q(personal_notes__lesson_period__lesson__groups=self)
+        | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
+        | Q(personal_notes__extra_lesson__groups=self)
+        | Q(personal_notes__extra_lesson__groups__parent_groups=self)
+        | Q(personal_notes__event__groups=self)
+        | Q(personal_notes__event__groups__parent_groups=self)
+    )
+
+    persons = persons.filter(personal_notes__groups_of_person=self).filter(school_term_q).distinct()
+
     persons = persons.annotate(
         absences_count=Count(
-            "personal_notes__absent",
-            filter=Q(
-                personal_notes__absent=True,
-                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
-            )
-            & (
-                Q(personal_notes__lesson_period__lesson__groups=self)
-                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-            ),
+            "personal_notes",
+            filter=Q(personal_notes__absent=True) & school_term_q & groups_q,
+            distinct=True,
         ),
         excused=Count(
-            "personal_notes__absent",
+            "personal_notes",
             filter=Q(
                 personal_notes__absent=True,
                 personal_notes__excused=True,
                 personal_notes__excuse_type__isnull=True,
-                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
             )
-            & (
-                Q(personal_notes__lesson_period__lesson__groups=self)
-                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-            ),
+            & school_term_q
+            & groups_q,
+            distinct=True,
         ),
         unexcused=Count(
-            "personal_notes__absent",
-            filter=Q(
-                personal_notes__absent=True,
-                personal_notes__excused=False,
-                personal_notes__lesson_period__lesson__validity__school_term=self.school_term,
-            )
-            & (
-                Q(personal_notes__lesson_period__lesson__groups=self)
-                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-            ),
+            "personal_notes",
+            filter=Q(personal_notes__absent=True, personal_notes__excused=False)
+            & school_term_q
+            & groups_q,
+            distinct=True,
         ),
-        tardiness=Sum(
-            "personal_notes__late",
-            filter=(
-                Q(personal_notes__lesson_period__lesson__groups=self)
-                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-            ),
+        tardiness=Subquery(
+            Person.objects.filter(school_term_q & groups_q)
+            .filter(pk=OuterRef("pk"),)
+            .distinct()
+            .annotate(tardiness=Sum("personal_notes__late"))
+            .values("tardiness")
         ),
         tardiness_count=Count(
             "personal_notes",
-            filter=~Q(personal_notes__late=0)
-            & Q(personal_notes__lesson_period__lesson__validity__school_term=self.school_term,)
-            & (
-                Q(personal_notes__lesson_period__lesson__groups=self)
-                | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-            ),
+            filter=~Q(personal_notes__late=0) & school_term_q & groups_q,
+            distinct=True,
         ),
     )
 
@@ -334,14 +447,7 @@ def generate_person_list_with_class_register_statistics(
             **{
                 extra_mark.count_label: Count(
                     "personal_notes",
-                    filter=Q(
-                        personal_notes__extra_marks=extra_mark,
-                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,  # noqa
-                    )
-                    & (
-                        Q(personal_notes__lesson_period__lesson__groups=self)
-                        | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-                    ),
+                    filter=Q(personal_notes__extra_marks=extra_mark) & school_term_q & groups_q,
                 )
             }
         )
@@ -351,15 +457,9 @@ def generate_person_list_with_class_register_statistics(
             **{
                 excuse_type.count_label: Count(
                     "personal_notes__absent",
-                    filter=Q(
-                        personal_notes__absent=True,
-                        personal_notes__excuse_type=excuse_type,
-                        personal_notes__lesson_period__lesson__validity__school_term=self.school_term,  # noqa
-                    )
-                    & (
-                        Q(personal_notes__lesson_period__lesson__groups=self)
-                        | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-                    ),
+                    filter=Q(personal_notes__absent=True, personal_notes__excuse_type=excuse_type,)
+                    & school_term_q
+                    & groups_q,
                 )
             }
         )

@@ -2,19 +2,30 @@
 
 {% now_datetime as now_dt %}
 
-{% if period.has_documentation %}
+{% if register_object.has_documentation %}
   <i class="material-icons green{% firstof color_suffix "-text"%} tooltipped {{ css_class }}" data-position="bottom" data-tooltip="{% trans "Data complete" %}" title="{% trans "Data complete" %}">check_circle</i>
-{% else %}
-  {% period_to_time_start week period.period as time_start %}
-  {% period_to_time_end week period.period as time_end %}
+{% elif not register_object.period %}
+  {% period_to_time_start week register_object.raw_period_from_on_day as time_start %}
+  {% period_to_time_end week register_object.raw_period_to_on_day as time_end %}
 
-  {% if period.get_substitution.cancelled %}
+  {% if now_dt > time_end %}
+    <i class="material-icons red{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Missing data" %}" title="{% trans "Missing data" %}">history</i>
+  {% elif now_dt > time_start and now_dt < time_end %}
+    <i class="material-icons orange{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Pending" %}" title="{% trans "Pending" %}">more_horiz</i>
+  {% else %}
+    <i class="material-icons purple{% firstof color_suffix "-text"%} tooltipped {{ css_class }}" data-position="bottom" data-tooltip="{% trans "Event" %}" title="{% trans "Event" %}">event</i>
+  {% endif %}
+{% else %}
+  {% period_to_time_start week register_object.period as time_start %}
+  {% period_to_time_end week register_object.period as time_end %}
+
+  {% if register_object.get_substitution.cancelled %}
     <i class="material-icons red{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Lesson cancelled" %}" title="{% trans "Lesson cancelled" %}">cancel</i>
   {% elif now_dt > time_end %}
     <i class="material-icons red{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Missing data" %}" title="{% trans "Missing data" %}">history</i>
   {% elif now_dt > time_start and now_dt < time_end %}
     <i class="material-icons orange{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Pending" %}" title="{% trans "Pending" %}">more_horiz</i>
-  {% elif period.get_substitution %}
+  {% elif register_object.get_substitution %}
     <i class="material-icons orange{% firstof color_suffix "-text"%} tooltipped {{ css_class }}"  data-position="bottom" data-tooltip="{% trans "Substitution" %}" title="{% trans "Substitution" %}">update</i>
   {% endif %}
 {% endif %}
