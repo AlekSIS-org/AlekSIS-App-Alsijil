@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Optional, Union
+from urllib.parse import urlparse
 
 from django.db import models
 from django.db.models.constraints import CheckConstraint
@@ -231,7 +232,7 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
 
     def get_absolute_url(self) -> str:
         """Get the absolute url of the detail view for the related register object."""
-        return super().get_absolute_url() + "#personal-notes"
+        return urlparse(super().get_absolute_url())._replace(fragment="personal-notes").geturl()
 
     class Meta:
         verbose_name = _("Personal note")
