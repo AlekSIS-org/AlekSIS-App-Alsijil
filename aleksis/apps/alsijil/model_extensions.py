@@ -89,19 +89,17 @@ def mark_absent(
     # Create and update all personal notes for the discovered lesson periods
     if not dry_run:
         for register_object in list(lesson_periods) + list(extra_lessons):
-            sub = (
-                register_object.get_substitution()
-                if isinstance(register_object, LessonPeriod)
-                else None
-            )
+            if isinstance(register_object, LessonPeriod):
+                sub = register_object.get_substitution()
+                q_attrs = dict(
+                    week=wanted_week.week, year=wanted_week.year, lesson_period=register_object
+                )
+            else:
+                sub = None
+                q_attrs = dict(extra_lesson=register_object)
+
             if sub and sub.cancelled:
                 continue
-
-            q_attrs = (
-                dict(week=wanted_week.week, year=wanted_week.year, lesson_period=register_object)
-                if isinstance(register_object, LessonPeriod)
-                else dict(extra_lesson=register_object)
-            )
 
             personal_note, created = (
                 PersonalNote.objects.select_related(None)

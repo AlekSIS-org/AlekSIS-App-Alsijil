@@ -224,10 +224,9 @@ def register_object(
                         reversion.set_user(request.user)
                         instances = personal_note_formset.save()
 
-                    if (
-                        not isinstance(register_object, Event)
-                        and get_site_preferences()["alsijil__carry_over_personal_notes"]
-                    ):
+                    if (not isinstance(register_object, Event)) and get_site_preferences()[
+                        "alsijil__carry_over_personal_notes"
+                    ]:
                         # Iterate over personal notes
                         # and carry changed absences to following lessons
                         with reversion.create_revision():

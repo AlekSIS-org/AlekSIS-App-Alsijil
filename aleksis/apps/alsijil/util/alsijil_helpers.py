@@ -72,7 +72,7 @@ def annotate_documentations(
 
     if klass == LessonPeriod:
         instances = instances.annotate_week(wanted_week)
-    if klass in (LessonPeriod, ExtraLesson):
+    elif klass in (LessonPeriod, ExtraLesson):
         instances = instances.order_by("period__weekday", "period__period")
     else:
         instances = instances.order_by("period_from__weekday", "period_from__period")
