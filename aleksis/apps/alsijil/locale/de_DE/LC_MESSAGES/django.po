@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-24 12:02+0100\n"
-"PO-Revision-Date: 2021-02-24 11:54+0000\n"
+"PO-Revision-Date: 2021-02-24 11:55+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/"
 "aleksis-app-alsijil/de/>\n"
@@ -174,7 +174,7 @@ msgstr "Meine Schülerinnen und Schüler"
 #: menus.py:71 templates/alsijil/group_role/assign.html:11
 #: templates/alsijil/group_role/assign.html:18
 msgid "Assign group role"
-msgstr "Gruppenrolle"
+msgstr "Gruppenrolle zuweisen"
 
 #: menus.py:82 models.py:63 templates/alsijil/excuse_type/list.html:8
 #: templates/alsijil/excuse_type/list.html:9
