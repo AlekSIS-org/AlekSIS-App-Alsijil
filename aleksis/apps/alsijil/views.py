@@ -87,7 +87,9 @@ def register_object(
 
     if not all((year, week, id_)):
         if register_object and model == "lesson":
-            return redirect("lesson", wanted_week.year, wanted_week.week, register_object.pk,)
+            return redirect(
+                "lesson_period", wanted_week.year, wanted_week.week, register_object.pk,
+            )
         elif not register_object:
             raise Http404(
                 _(
