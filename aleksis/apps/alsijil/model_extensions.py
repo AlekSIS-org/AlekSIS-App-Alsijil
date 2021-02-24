@@ -385,6 +385,9 @@ def generate_person_list_with_class_register_statistics(
     """Get with class register statistics annotated list of all members."""
     if persons is None:
         persons = self.members.all()
+
+    # Build reusable Q objects for filtering by school term and by groups
+    # Necessary for the following annotations
     school_term_q = (
         Q(personal_notes__lesson_period__lesson__validity__school_term=self.school_term)
         | Q(personal_notes__extra_lesson__school_term=self.school_term)

@@ -89,7 +89,10 @@ def annotate_documentations(
 
 
 def register_objects_sorter(register_object: Union[LessonPeriod, Event, ExtraLesson]) -> int:
-    """Sort key for sorted/sort for sorting a list of class register objects."""
+    """Sort key for sorted/sort for sorting a list of class register objects.
+
+    This will sort the objects by the start period.
+    """
     if hasattr(register_object, "period"):
         return register_object.period.period
     elif isinstance(register_object, Event):
