@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-24 12:02+0100\n"
-"PO-Revision-Date: 2021-02-06 22:49+0000\n"
-"Last-Translator: Dominik George <dominik.george@teckids.org>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"PO-Revision-Date: 2021-02-24 11:54+0000\n"
+"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -172,10 +173,8 @@ msgstr "Meine Schülerinnen und Schüler"
 
 #: menus.py:71 templates/alsijil/group_role/assign.html:11
 #: templates/alsijil/group_role/assign.html:18
-#, fuzzy
-#| msgid "Persons in group"
 msgid "Assign group role"
-msgstr "Personen in der Gruppe"
+msgstr "Gruppenrolle"
 
 #: menus.py:82 models.py:63 templates/alsijil/excuse_type/list.html:8
 #: templates/alsijil/excuse_type/list.html:9
@@ -194,10 +193,8 @@ msgid "Extra marks"
 msgstr "Zusätzliche Markierungen"
 
 #: menus.py:104
-#, fuzzy
-#| msgid "Manage personal note filters"
 msgid "Manage group roles"
-msgstr "Filter für persönliche Notizen verwalten"
+msgstr "Gruppenrollen verwalten"
 
 #: model_extensions.py:181
 msgid "Can view week overview of group class register"
@@ -298,33 +295,27 @@ msgstr "Zusätzliche Markierung"
 
 #: models.py:368
 msgid "Icon"
-msgstr ""
+msgstr "Symbol"
 
 #: models.py:369
 msgid "Colour"
-msgstr ""
+msgstr "Farbe"
 
 #: models.py:375 models.py:386
 #: templates/alsijil/group_role/assigned_list.html:62
-#, fuzzy
-#| msgid "Group note"
 msgid "Group role"
-msgstr "Gruppennotiz"
+msgstr "Gruppenrolle"
 
 #: models.py:376 templates/alsijil/class_register/lesson.html:125
 #: templates/alsijil/class_register/week_view.html:75
 #: templates/alsijil/group_role/list.html:8
 #: templates/alsijil/group_role/list.html:9
-#, fuzzy
-#| msgid "Group note"
 msgid "Group roles"
-msgstr "Gruppennotiz"
+msgstr "Gruppenrollen"
 
 #: models.py:392
-#, fuzzy
-#| msgid "Absent persons:"
 msgid "Assigned person"
-msgstr "Abwesende Personen:"
+msgstr "Zugeordnete Person"
 
 #: models.py:395 templates/alsijil/class_register/week_view.html:104
 #: templates/alsijil/class_register/week_view.html:220
@@ -333,15 +324,15 @@ msgstr "Gruppen"
 
 #: models.py:402
 msgid "Can be left empty if end date is not clear yet"
-msgstr ""
+msgstr "Kann freigelassen werden, wenn das Enddatum noch nicht feststeht"
 
 #: models.py:417
 msgid "Group role assignment"
-msgstr ""
+msgstr "Gruppenrollenzuweisung"
 
 #: models.py:418
 msgid "Group role assignments"
-msgstr ""
+msgstr "Gruppenrollenzuweisungen"
 
 #: models.py:425
 msgid "Can view week overview"
@@ -376,10 +367,10 @@ msgid "This will carry over data only if the data in the following periods are e
 msgstr "Dies wird die Daten nur übernehmen, wenn die Daten in den Folgestunden leer sind."
 
 #: preferences.py:54
-#, fuzzy
-#| msgid "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
 msgid "Carry over personal notes to all following lesson periods on the same day."
-msgstr "Daten von der ersten Stunde zu weiteren folgenden Stunden übernehmen"
+msgstr ""
+"Persönliche Notizen zu allen folgenden Unterrichtsstunden am gleichen Tag "
+"übernehmen."
 
 #: preferences.py:63
 msgid "Allow teachers to open lesson periods on the same day and not just at the beginning of the period"
@@ -396,20 +387,20 @@ msgstr "Lehrkräften erlauben, Daten für Stunden in den Ferien hinzuzufügen"
 #: preferences.py:85
 msgid "Allow group owners to assign group roles to the parents of the group's members"
 msgstr ""
+"Erlaube Gruppenbesitzern, Gruppenrollen für Eltern von Gruppenmitgliedern "
+"zuzuweisen"
 
 #: preferences.py:94
 msgid "Show assigned group roles in week view"
-msgstr ""
+msgstr "Zugeordnete Gruppenrollen in der Wochenansicht zeigen"
 
 #: preferences.py:95
-#, fuzzy
-#| msgid "Can view week overview of group class register"
 msgid "Only week view of groups"
-msgstr "Kann Wochenübersicht des Gruppenklassenbuches sehen"
+msgstr "Nur Wochenansicht von Gruppen"
 
 #: preferences.py:103
 msgid "Show assigned group roles in lesson view"
-msgstr ""
+msgstr "Zugeordnete Gruppenrollen in der Stundenansicht anzeigen"
 
 #: tables.py:17 tables.py:37 tables.py:62
 #: templates/alsijil/group_role/partials/assignment_options.html:13
@@ -504,7 +495,7 @@ msgstr "Wochenansicht"
 #: templates/alsijil/class_register/groups.html:45
 #: templates/alsijil/class_register/groups.html:90
 msgid "Roles"
-msgstr ""
+msgstr "Rollen"
 
 #: templates/alsijil/class_register/groups.html:51
 #: templates/alsijil/class_register/groups.html:98
@@ -557,7 +548,7 @@ msgstr "%(period)s. Stunde"
 #: templates/alsijil/print/full_register.html:335
 #: templates/alsijil/print/full_register.html:415
 msgid "Event"
-msgstr ""
+msgstr "Veranstaltung"
 
 #: templates/alsijil/class_register/lesson.html:85
 #, python-format
@@ -628,34 +619,26 @@ msgid "Tardiness (in m)"
 msgstr "Verspätung (in m)"
 
 #: templates/alsijil/class_register/lesson.html:397
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "            Previous %(subject)s lesson\n"
-#| "          "
+#, python-format
 msgid ""
 "\n"
 "              Previous %(subject)s lesson\n"
 "            "
 msgstr ""
 "\n"
-"            Vorherige %(subject)s Stunde\n"
-"          "
+"              Vorherige %(subject)s Stunde\n"
+"            "
 
 #: templates/alsijil/class_register/lesson.html:407
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "            Next %(subject)s lesson\n"
-#| "          "
+#, python-format
 msgid ""
 "\n"
 "              Next %(subject)s lesson\n"
 "            "
 msgstr ""
 "\n"
-"            Nächste %(subject)s Stunde\n"
-"          "
+"              Nächste %(subject)s Stunde\n"
+"            "
 
 #: templates/alsijil/class_register/lesson.html:423
 msgid ""
@@ -858,65 +841,58 @@ msgstr "Zusätzliche Markierung bearbeiten"
 #: templates/alsijil/group_role/assign.html:16
 #, python-format
 msgid "Assign group role for %(group)s"
-msgstr ""
+msgstr "Gruppenrolle für %(group)s zuweisen"
 
 #: templates/alsijil/group_role/assign.html:34
 msgid "Assign"
-msgstr ""
+msgstr "Zuweisen"
 
 #: templates/alsijil/group_role/assigned_list.html:9
 #: templates/alsijil/group_role/assigned_list.html:12
-#, fuzzy, python-format
-#| msgid "Group notes for previous lesson:"
+#, python-format
 msgid "Group roles for %(group)s"
-msgstr "Gruppennotizen für die vorherige Stunde:"
+msgstr "Gruppenrollen für %(group)s"
 
 #: templates/alsijil/group_role/assigned_list.html:28
-#, fuzzy
-#| msgid "My groups"
 msgid "Back to my groups"
-msgstr "Meine Gruppen"
+msgstr "Zurück zu meinen Gruppen"
 
 #: templates/alsijil/group_role/assigned_list.html:36
 msgid "Assign a role to a person"
-msgstr ""
+msgstr "Eine Rolle zu einer Person zuweisen"
 
 #: templates/alsijil/group_role/assigned_list.html:45
-#, fuzzy
-#| msgid "Current lesson"
 msgid "Current roles"
-msgstr "Aktuelle Unterrichtsstunde"
+msgstr "Aktuelle Rollen"
 
 #: templates/alsijil/group_role/assigned_list.html:48
 msgid "All assignments"
-msgstr ""
+msgstr "Alle Zuweisungen"
 
 #: templates/alsijil/group_role/assigned_list.html:66
 #: templates/alsijil/group_role/assigned_list.html:83
-#, fuzzy
-#| msgid "Abbreviations"
 msgid "Actions"
-msgstr "Abkürzungen"
+msgstr "Aktionen"
 
 #: templates/alsijil/group_role/create.html:6
 #: templates/alsijil/group_role/create.html:7
 #: templates/alsijil/group_role/list.html:16
 msgid "Create group role"
-msgstr ""
+msgstr "Gruppenrolle erstellen"
 
 #: templates/alsijil/group_role/edit.html:6
 #: templates/alsijil/group_role/edit.html:7
 msgid "Edit group role"
-msgstr ""
+msgstr "Gruppenrolle bearbeiten"
 
 #: templates/alsijil/group_role/edit_assignment.html:7
 #: templates/alsijil/group_role/edit_assignment.html:8
 msgid "Edit group role assignment"
-msgstr ""
+msgstr "Gruppenrollenzuweisung bearbeiten"
 
 #: templates/alsijil/group_role/partials/assigned_roles.html:31
 msgid "No one assigned."
-msgstr ""
+msgstr "Niemand zugewiesen."
 
 #: templates/alsijil/group_role/partials/assigned_roles.html:42
 msgid ""
@@ -925,10 +901,15 @@ msgid ""
 "      corresponding person.\n"
 "    "
 msgstr ""
+"\n"
+"      Sie können zusätzliche Aktionen für jede Gruppenrollenzuweisung "
+"aufrufen, \n"
+"wenn Sie auf den Namen der entsprechenden Person klicken.\n"
+"    "
 
 #: templates/alsijil/group_role/partials/assignment_options.html:21
 msgid "Stop"
-msgstr ""
+msgstr "Beenden"
 
 #: templates/alsijil/partials/absences.html:6
 #: templates/alsijil/partials/persons_with_stats.html:27
@@ -1242,46 +1223,32 @@ msgid "The excuse type has been deleted."
 msgstr "Die Entschuldigungsart wurde gelöscht."
 
 #: views.py:1089
-#, fuzzy
-#| msgid "The extra mark has been created."
 msgid "The group role has been created."
-msgstr "Die zusätzliche Markierung wurde erstellt."
+msgstr "Die Gruppenrolle wurde erstellt."
 
 #: views.py:1101
-#, fuzzy
-#| msgid "The extra mark has been saved."
 msgid "The group role has been saved."
-msgstr "Die zusätzliche Markierung wurde gespeichert."
+msgstr "Die Gruppenrolle wurde gespeichert."
 
 #: views.py:1112
-#, fuzzy
-#| msgid "The personal note has been deleted."
 msgid "The group role has been deleted."
-msgstr "Die persönliche Notiz wurde gelöscht."
+msgstr "Die Gruppenrolle wurde gelöscht."
 
 #: views.py:1145 views.py:1177
-#, fuzzy
-#| msgid "The extra mark has been saved."
 msgid "The group role has been assigned."
-msgstr "Die zusätzliche Markierung wurde gespeichert."
+msgstr "Die Gruppenrolle wurde zugewiesen."
 
 #: views.py:1196
-#, fuzzy
-#| msgid "The lesson documentation has been saved."
 msgid "The group role assignment has been saved."
-msgstr "Die Stunden-Dokumentation wurde gespeichert."
+msgstr "Die Gruppenrollenzuweisung wurde gespeichert."
 
 #: views.py:1217
-#, fuzzy
-#| msgid "The lesson documentation has been saved."
 msgid "The group role assignment has been stopped."
-msgstr "Die Stunden-Dokumentation wurde gespeichert."
+msgstr "Die Gruppenrollenzuweisung wurde beendet."
 
 #: views.py:1230
-#, fuzzy
-#| msgid "The personal note has been deleted."
 msgid "The group role assignment has been deleted."
-msgstr "Die persönliche Notiz wurde gelöscht."
+msgstr "Die Gruppenrollenzuweisung wurde gelöscht."
 
 #~ msgid ""
 #~ "\n"
