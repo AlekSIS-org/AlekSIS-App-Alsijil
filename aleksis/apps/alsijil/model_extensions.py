@@ -265,9 +265,9 @@ def get_absences(self, week: Optional[CalendarWeek] = None) -> Iterator:
     )
 
 
-def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> PersonalNoteQuerySet:
+def get_absences_simple(self, week: Optional[CalendarWeek] = None) -> Iterator:
     """Get all personal notes of absent persons for this event/extra lesson."""
-    return self.personal_notes.all()
+    return filter(lambda p: p.absent, self.personal_notes.all())
 
 
 Event.method(get_absences_simple, "get_absences")
