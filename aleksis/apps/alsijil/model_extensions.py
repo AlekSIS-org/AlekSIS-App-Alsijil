@@ -215,7 +215,7 @@ def get_lesson_documentation(
         return None
 
 
-def get_lesson_documentation_simple(
+def get_lesson_documentation_single(
     self, week: Optional[CalendarWeek] = None
 ) -> Union[LessonDocumentation, None]:
     """Get lesson documentation object for this event/extra lesson."""
@@ -224,8 +224,8 @@ def get_lesson_documentation_simple(
     return None
 
 
-Event.method(get_lesson_documentation_simple, "get_lesson_documentation")
-ExtraLesson.method(get_lesson_documentation_simple, "get_lesson_documentation")
+Event.method(get_lesson_documentation_single, "get_lesson_documentation")
+ExtraLesson.method(get_lesson_documentation_single, "get_lesson_documentation")
 
 
 @LessonPeriod.method
@@ -235,13 +235,13 @@ def get_or_create_lesson_documentation(
     """Get or create lesson documentation object for this lesson."""
     if not week:
         week = self.week
-    lesson_documentation, created = LessonDocumentation.objects.get_or_create(
+    lesson_documentation, __ = LessonDocumentation.objects.get_or_create(
         lesson_period=self, week=week.week, year=week.year
     )
     return lesson_documentation
 
 
-def get_or_create_lesson_documentation_simple(
+def get_or_create_lesson_documentation_single(
     self, week: Optional[CalendarWeek] = None
 ) -> LessonDocumentation:
     """Get or create lesson documentation object for this event/extra lesson."""
@@ -249,8 +249,8 @@ def get_or_create_lesson_documentation_simple(
     return lesson_documentation
 
 
-Event.method(get_or_create_lesson_documentation_simple, "get_or_create_lesson_documentation")
-ExtraLesson.method(get_or_create_lesson_documentation_simple, "get_or_create_lesson_documentation")
+Event.method(get_or_create_lesson_documentation_single, "get_or_create_lesson_documentation")
+ExtraLesson.method(get_or_create_lesson_documentation_single, "get_or_create_lesson_documentation")
 
 
 @LessonPeriod.method

@@ -562,6 +562,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     documentations = (
         LessonDocumentation.objects.select_related("lesson_period").not_empty().filter(groups_q)
     )
+
     # Get all lesson periods for the selected group
     lesson_periods = LessonPeriod.objects.filter_group(group).distinct()
     events = Event.objects.filter_group(group).distinct()
