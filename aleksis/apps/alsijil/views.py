@@ -503,7 +503,6 @@ def week_view(
     for event in events:
         weekday_from = event.get_start_weekday(wanted_week)
         weekday_to = event.get_end_weekday(wanted_week)
-        print(weekday_from, weekday_to)
 
         for weekday in range(weekday_from, weekday_to + 1):
             # Make a copy in order to keep the annotation only on this weekday
