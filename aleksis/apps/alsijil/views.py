@@ -147,7 +147,7 @@ def register_object(
         else None
     )
     back_url = reverse(
-        "lesson_by_week_and_period", args=[wanted_week.year, wanted_week.week, lesson_period.pk]
+        "lesson_period", args=[wanted_week.year, wanted_week.week, register_object.pk]
     )
     context["back_url"] = back_url
 
@@ -167,9 +167,9 @@ def register_object(
         # Group roles
         show_group_roles = request.user.person.preferences[
             "alsijil__group_roles_in_lesson_view"
-        ] and request.user.has_perm("alsijil.view_assigned_grouproles", lesson_period)
+        ] and request.user.has_perm("alsijil.view_assigned_grouproles", register_object)
         if show_group_roles:
-            groups = lesson_period.lesson.groups.all()
+            groups = register_object.get_groups().all()
             group_roles = GroupRole.objects.with_assignments(date_of_lesson, groups)
             context["group_roles"] = group_roles
 

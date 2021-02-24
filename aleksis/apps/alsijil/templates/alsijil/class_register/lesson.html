@@ -366,7 +366,7 @@
 
         {% if group_roles %}
           <div class="col s12" id="group-roles">
-            {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=lesson_period.lesson.groups.first back_url=back_url %}
+            {% include "alsijil/group_role/partials/assigned_roles.html" with roles=group_roles group=register_object.get_groups.first back_url=back_url %}
           </div>
         {% endif %}
 
