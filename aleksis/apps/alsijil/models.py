@@ -193,7 +193,7 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
     )
 
     absent = models.BooleanField(default=False)
-    late = models.IntegerField(default=0)
+    late = models.PositiveSmallIntegerField(default=0)
     excused = models.BooleanField(default=False)
     excuse_type = models.ForeignKey(
         ExcuseType, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Excuse type"),
