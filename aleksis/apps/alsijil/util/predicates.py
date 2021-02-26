@@ -15,7 +15,7 @@ from ..models import PersonalNote
 @predicate
 def is_none(user: User, obj: Any) -> bool:
     """Predicate that checks if the provided object is None-like."""
-    return bool(obj)
+    return not bool(obj)
 
 
 @predicate
