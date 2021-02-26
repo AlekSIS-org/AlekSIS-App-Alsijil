@@ -3,6 +3,11 @@
 from django.db import migrations, models
 
 
+def fix_negative_tardiness(apps, schema_editor):
+    PersonalNote = apps.get_model("alsijil", "PersonalNote")
+    PersonalNote.objects.filter(late__lt=0).update(late=0)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +15,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(fix_negative_tardiness),
         migrations.AlterField(
             model_name='personalnote',
             name='late',
