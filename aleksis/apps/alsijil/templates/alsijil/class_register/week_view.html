@@ -79,7 +79,7 @@
       </div>
       <div class="col s12" id="week-overview">
         {% for weekday, objects in regrouped_objects.items %}
-          {% with weekdays|get_dict:forloop.counter0 as advanced_weekday %}
+          {% with weekdays|get_dict:objects.0.weekday as advanced_weekday %}
             {% if advanced_weekday.holiday and not request.site.preferences.alsijil__allow_entries_in_holidays %}
               <div class="card">
                 <div class="card-content">
