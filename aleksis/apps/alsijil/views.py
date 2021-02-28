@@ -497,6 +497,7 @@ def week_view(
     regrouped_objects = {}
 
     for register_object in list(lesson_periods) + list(extra_lessons):
+        register_object.weekday = register_object.period.weekday
         regrouped_objects.setdefault(register_object.period.weekday, [])
         regrouped_objects[register_object.period.weekday].append(register_object)
 
@@ -508,6 +509,7 @@ def week_view(
             # Make a copy in order to keep the annotation only on this weekday
             event_copy = deepcopy(event)
             event_copy.annotate_day(wanted_week[weekday])
+            event_copy.weekday = weekday
 
             regrouped_objects.setdefault(weekday, [])
             regrouped_objects[weekday].append(event_copy)
