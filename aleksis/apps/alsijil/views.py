@@ -291,7 +291,7 @@ def week_view(
 
         lesson_periods = lesson_periods.filter_from_type(type_, instance)
         events = events.filter_from_type(type_, instance)
-        extra_lessons = extra_lessons.filter_from_Type(type_, instance)
+        extra_lessons = extra_lessons.filter_from_type(type_, instance)
 
     elif hasattr(request, "user") and hasattr(request.user, "person"):
         if request.user.person.lessons_as_teacher.exists():
