@@ -448,6 +448,7 @@ def generate_person_list_with_class_register_statistics(
                 extra_mark.count_label: Count(
                     "personal_notes",
                     filter=Q(personal_notes__extra_marks=extra_mark) & school_term_q & groups_q,
+                    distinct=True,
                 )
             }
         )
@@ -460,6 +461,7 @@ def generate_person_list_with_class_register_statistics(
                     filter=Q(personal_notes__absent=True, personal_notes__excuse_type=excuse_type,)
                     & school_term_q
                     & groups_q,
+                    distinct=True,
                 )
             }
         )
