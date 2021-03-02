@@ -14,7 +14,7 @@ MENUS = {
             "submenu": [
                 {
                     "name": _("Current lesson"),
-                    "url": "lesson",
+                    "url": "lesson_period",
                     "icon": "alarm",
                     "validators": [
                         (
