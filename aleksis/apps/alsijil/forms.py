@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget, Select2Widget
@@ -10,8 +11,8 @@ from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import TimePeriod
-from aleksis.core.models import Group, Person
+from aleksis.apps.chronos.models import Subject, TimePeriod
+from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
@@ -254,3 +255,64 @@ class GroupRoleAssignmentEditForm(forms.ModelForm):
     class Meta:
         model = GroupRoleAssignment
         fields = ["date_start", "date_end"]
+
+
+class FilterRegisterObjectForm(forms.Form):
+    layout = Layout(
+        Row("school_term", "date_start", "date_end"), Row("has_documentation", "group", "subject")
+    )
+    school_term = forms.ModelChoiceField(queryset=None, label=_("School term"))
+    has_documentation = forms.NullBooleanField(label=_("Has lesson documentation"))
+    group = forms.ModelChoiceField(queryset=None, label=_("Group"), required=False)
+    subject = forms.ModelChoiceField(queryset=None, label=_("Subject"), required=False)
+    date_start = forms.DateField(label=_("Start date"))
+    date_end = forms.DateField(label=_("End date"))
+
+    @classmethod
+    def get_initial(cls):
+        date_end = timezone.now().date()
+        date_start = date_end - timedelta(days=30)
+        return {
+            "school_term": SchoolTerm.current,
+            "date_start": date_start,
+            "date_end": date_end,
+        }
+
+    def __init__(self, request, for_person=True, *args, **kwargs):
+        self.request = request
+        person = self.request.user.person
+
+        # Fill in initial data
+        kwargs["initial"] = self.get_initial()
+        super().__init__(*args, **kwargs)
+
+        # Build querysets
+        self.fields["school_term"].queryset = SchoolTerm.objects.all()
+
+        # Filter selectable groups by permissions
+        group_qs = Group.objects.all()
+        if for_person:
+            group_qs = group_qs.filter(
+                Q(lessons__teachers=person)
+                | Q(lessons__lesson_periods__substitutions__teachers=person)
+                | Q(events__teachers=person)
+                | Q(extra_lessons__teachers=person)
+            )
+        elif not check_global_permission(self.request.user, "alsijil.view_full_register"):
+            group_qs = group_qs.union(
+                group_qs.filter(
+                    pk__in=get_objects_for_user(
+                        self.request.user, "core.view_full_register_group", Group
+                    ).values_list("pk", flat=True)
+                )
+            )
+
+        # Flatten query by filtering groups by pk
+        groups_flat = Group.objects.filter(pk__in=list(group_qs.values_list("pk", flat=True)))
+        self.fields["group"].queryset = groups_flat
+
+        # Filter subjects by selectable groups
+        subject_qs = Subject.objects.filter(
+            Q(lessons__groups__in=groups_flat) | Q(extra_lessons__groups__in=groups_flat)
+        ).distinct()
+        self.fields["subject"].queryset = subject_qs

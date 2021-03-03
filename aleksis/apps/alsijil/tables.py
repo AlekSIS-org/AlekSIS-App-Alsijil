@@ -78,3 +78,28 @@ class GroupRoleTable(tables.Table):
             self.columns.hide("edit")
         if not request.user.has_perm("alsijil.delete_grouprole"):
             self.columns.hide("delete")
+
+
+class RegisterObjectTable(tables.Table):
+    class Meta:
+        attrs = {"class": "highlight responsive-table"}
+
+    status = tables.Column(accessor="register_object")
+    date = tables.Column(order_by="date_sort")
+    period = tables.Column(order_by="period_sort")
+    groups = tables.Column()
+    subject = tables.Column()
+    topic = tables.Column()
+    homework = tables.Column()
+    group_note = tables.Column()
+
+    def render_status(self, value, record):
+        return render_to_string(
+            "alsijil/partials/lesson_status_icon.html",
+            dict(
+                week=record.get("week"),
+                has_documentation=record.get("has_documentation", False),
+                substitution=record.get("substitution"),
+                register_object=value,
+            ),
+        )

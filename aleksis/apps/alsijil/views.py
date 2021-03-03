@@ -18,7 +18,7 @@ from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
-from django_tables2 import SingleTableView
+from django_tables2 import RequestConfig, SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -40,6 +40,7 @@ from .forms import (
     AssignGroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
+    FilterRegisterObjectForm,
     GroupRoleAssignmentEditForm,
     GroupRoleForm,
     LessonDocumentationForm,
@@ -55,9 +56,10 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable
+from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable, RegisterObjectTable
 from .util.alsijil_helpers import (
     annotate_documentations,
+    generate_list_of_all_register_objects,
     get_register_object_by_pk,
     get_timetable_instance_by_pk,
     register_objects_sorter,
@@ -894,6 +896,16 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["excuse_types"] = excuse_types
     context["extra_marks"] = extra_marks
 
+    # Build filter with own form and logic as django-filter can't work with different models
+    filter_form = FilterRegisterObjectForm(request, True, request.GET or None)
+    filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+    filter_dict["person"] = person
+    context["filter_form"] = filter_form
+    register_objects = generate_list_of_all_register_objects(filter_dict)
+    if register_objects:
+        table = RegisterObjectTable(register_objects)
+        RequestConfig(request,).configure(table)  # paginate={"per_page": 100}
+        context["register_object_table"] = table
     return render(request, "alsijil/class_register/person.html", context)
 
 
