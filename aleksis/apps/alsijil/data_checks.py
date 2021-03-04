@@ -1,9 +1,6 @@
 import logging
 
 from django.db.models import F
-from django.db.models.expressions import ExpressionWrapper, Func, Value
-from django.db.models.fields import DateField
-from django.db.models.functions import Concat
 from django.db.models.query_utils import Q
 from django.utils.translation import gettext as _
 
@@ -92,15 +89,6 @@ class NoGroupsOfPersonsSetInPersonalNotesDataCheck(DataCheck):
             cls.register_result(note)
 
 
-weekday_to_date = ExpressionWrapper(
-    Func(
-        Concat(F("year"), F("week")), Value("IYYYIW"), output_field=DateField(), function="TO_DATE"
-    )
-    + F("lesson_period__period__weekday"),
-    output_field=DateField(),
-)
-
-
 class LessonDocumentationOnHolidaysDataCheck(DataCheck):
     """Checks for lesson documentation objects on holidays.
 
@@ -123,13 +111,11 @@ class LessonDocumentationOnHolidaysDataCheck(DataCheck):
 
         holidays = Holiday.objects.all()
 
-        documentations = LessonDocumentation.objects.not_empty().annotate(
-            actual_date=weekday_to_date
-        )
+        documentations = LessonDocumentation.objects.not_empty().annotate_date_range()
 
         q = Q()
         for holiday in holidays:
-            q = q | Q(actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end)
+            q = q | Q(day_end__gte=holiday.date_start, day_start__lte=holiday.date_end)
         documentations = documentations.filter(q)
 
         for doc in documentations:
@@ -159,11 +145,11 @@ class PersonalNoteOnHolidaysDataCheck(DataCheck):
 
         holidays = Holiday.objects.all()
 
-        personal_notes = PersonalNote.objects.not_empty().annotate(actual_date=weekday_to_date)
+        personal_notes = PersonalNote.objects.not_empty().annotate_date_range()
 
         q = Q()
         for holiday in holidays:
-            q = q | Q(actual_date__gte=holiday.date_start, actual_date__lte=holiday.date_end)
+            q = q | Q(day_end__gte=holiday.date_start, day_start__lte=holiday.date_end)
         personal_notes = personal_notes.filter(q)
 
         for note in personal_notes:

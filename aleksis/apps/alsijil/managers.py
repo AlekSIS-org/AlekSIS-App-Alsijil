@@ -1,7 +1,9 @@
 from datetime import date, datetime
 from typing import Optional, Sequence, Union
 
-from django.db.models import QuerySet
+from django.db.models import Case, ExpressionWrapper, F, Func, QuerySet, Value, When
+from django.db.models.fields import DateField
+from django.db.models.functions import Concat
 from django.db.models.query import Prefetch
 from django.db.models.query_utils import Q
 
@@ -9,6 +11,65 @@ from calendarweek import CalendarWeek
 
 from aleksis.apps.chronos.managers import DateRangeQuerySetMixin
 from aleksis.core.managers import CurrentSiteManagerWithoutMigrations
+
+
+class RegisterObjectRelatedQuerySet(QuerySet):
+    """Common queryset for personal notes and lesson documentations with shared API."""
+
+    def _get_weekday_to_date(self, weekday_name, year_name="year", week_name="week"):
+        """Get a ORM function which converts a weekday, a week and a year to a date."""
+        return ExpressionWrapper(
+            Func(
+                Concat(F(year_name), F(week_name)),
+                Value("IYYYIW"),
+                output_field=DateField(),
+                function="TO_DATE",
+            )
+            + F(weekday_name),
+            output_field=DateField(),
+        )
+
+    def annotate_day(self) -> QuerySet:
+        """Annotate every personal note/lesson documentation with the real date.
+
+        Attribute name: ``day``
+
+        .. note::
+            For events, this will annotate ``None``.
+        """
+        return self.annotate(
+            day=Case(
+                When(
+                    lesson_period__isnull=False,
+                    then=self._get_weekday_to_date("lesson_period__period__weekday"),
+                ),
+                When(
+                    extra_lesson__isnull=False,
+                    then=self._get_weekday_to_date(
+                        "extra_lesson__period__weekday", "extra_lesson__year", "extra_lesson__week"
+                    ),
+                ),
+            )
+        )
+
+    def annotate_date_range(self) -> QuerySet:
+        """Annotate every personal note/lesson documentation with the real date.
+
+        Attribute names: ``day_start``, ``day_end``
+
+        .. note::
+            For lesson periods and extra lessons,
+            this will annotate the same date for start and end day.
+        """
+        return self.annotate_day().annotate(
+            day_start=Case(
+                When(day__isnull=False, then="day"),
+                When(day__isnull=True, then="event__date_start"),
+            ),
+            day_end=Case(
+                When(day__isnull=False, then="day"), When(day__isnull=True, then="event__date_end"),
+            ),
+        )
 
 
 class PersonalNoteManager(CurrentSiteManagerWithoutMigrations):
@@ -33,7 +94,7 @@ class PersonalNoteManager(CurrentSiteManagerWithoutMigrations):
         )
 
 
-class PersonalNoteQuerySet(QuerySet):
+class PersonalNoteQuerySet(RegisterObjectRelatedQuerySet, QuerySet):
     def not_empty(self):
         """Get all not empty personal notes."""
         return self.filter(
@@ -45,7 +106,7 @@ class LessonDocumentationManager(CurrentSiteManagerWithoutMigrations):
     pass
 
 
-class LessonDocumentationQuerySet(QuerySet):
+class LessonDocumentationQuerySet(RegisterObjectRelatedQuerySet, QuerySet):
     def not_empty(self):
         """Get all not empty lesson documentations."""
         return self.filter(~Q(topic="") | ~Q(group_note="") | ~Q(homework=""))
