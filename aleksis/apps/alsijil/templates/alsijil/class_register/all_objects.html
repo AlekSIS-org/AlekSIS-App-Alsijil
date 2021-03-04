@@ -1,0 +1,30 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load i18n rules static django_tables2 material_form %}
+
+{% block browser_title %}{% blocktrans %}All lessons{% endblocktrans %}{% endblock %}
+
+{% block page_title %}
+  {% blocktrans %}All lessons{% endblocktrans %}
+{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}"/>
+{% endblock %}
+
+{% block content %}
+  <h5>{% trans "Lesson filter" %}</h5>
+  <form action="" method="get">
+    {% form form=filter_form %}{% endform %}
+    <button type="submit" class="btn waves-effect waves-light">
+      <i class="material-icons left">refresh</i>
+      {% trans "Update filters" %}
+    </button>
+  </form>
+  <h5>{% trans "Lesson table" %}</h5>
+  {% if table %}
+  {% render_table table %}
+
+  {% endif %}
+{% endblock %}

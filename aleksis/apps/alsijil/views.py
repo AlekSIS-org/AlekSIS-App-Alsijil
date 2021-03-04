@@ -13,12 +13,14 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
+from django.views import View
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig, SingleTableView
+from guardian.shortcuts import get_objects_for_user
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -35,6 +37,7 @@ from aleksis.core.mixins import (
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
+from aleksis.core.util.predicates import check_global_permission
 
 from .forms import (
     AssignGroupRoleForm,
@@ -899,10 +902,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["extra_marks"] = extra_marks
 
     # Build filter with own form and logic as django-filter can't work with different models
-    filter_form = FilterRegisterObjectForm(request, True, request.GET or None)
+    filter_form = FilterRegisterObjectForm(request, request.GET or None, for_person=True)
     filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
     filter_dict["person"] = person
     context["filter_form"] = filter_form
+
     register_objects = generate_list_of_all_register_objects(filter_dict)
     if register_objects:
         table = RegisterObjectTable(register_objects)
@@ -1246,3 +1250,32 @@ class GroupRoleAssignmentDeleteView(
     def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
+
+
+class AllRegisterObjectsView(PermissionRequiredMixin, View):
+    permission_required = "alsijil.view_register_objects_list"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        context = {}
+        # Filter selectable groups by permissions
+        groups = Group.objects.all()
+        if not check_global_permission(request.user, "alsijil.view_full_register"):
+            allowed_groups = get_objects_for_user(
+                self.request.user, "core.view_full_register_group", Group
+            ).values_list("pk", flat=True)
+            groups = groups.filter(Q(parent_groups__in=allowed_groups) | Q(pk__in=allowed_groups))
+
+        # Build filter with own form and logic as django-filter can't work with different models
+        filter_form = FilterRegisterObjectForm(
+            request, request.GET or None, for_person=False, groups=groups
+        )
+        filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+        filter_dict["groups"] = groups
+        context["filter_form"] = filter_form
+
+        register_objects = generate_list_of_all_register_objects(filter_dict)
+        if register_objects:
+            table = RegisterObjectTable(register_objects)
+            RequestConfig(request,).configure(table)  # paginate={"per_page": 100}
+            context["table"] = table
+        return render(request, "alsijil/class_register/all_objects.html", context)

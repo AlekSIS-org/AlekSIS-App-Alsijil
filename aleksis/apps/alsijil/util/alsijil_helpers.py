@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import Prefetch, QuerySet
@@ -112,7 +112,7 @@ def register_objects_sorter(register_object: Union[LessonPeriod, Event, ExtraLes
         return 0
 
 
-def generate_list_of_all_register_objects(filter_dict: dict) -> List[dict]:
+def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[dict]:
     # Get data for filtering
     initial_filter_data = FilterRegisterObjectForm.get_initial()
     # Always force a selected school term so that queries won't get to big
@@ -120,6 +120,7 @@ def generate_list_of_all_register_objects(filter_dict: dict) -> List[dict]:
     filter_person = filter_dict.get("person")
     should_have_documentation = filter_dict.get("has_documentation")
     filter_group = filter_dict.get("group")
+    filter_groups = filter_dict.get("groups")
     filter_subject = filter_dict.get("subject")
     filter_date_start = filter_dict.get("date_start", initial_filter_data.get("date_start"))
     filter_date_end = filter_dict.get("date_end", initial_filter_data.get("date_end"))
@@ -166,6 +167,10 @@ def generate_list_of_all_register_objects(filter_dict: dict) -> List[dict]:
         lesson_periods = lesson_periods.filter_group(filter_group)
         events = events.filter_group(filter_group)
         extra_lessons = extra_lessons.filter_group(filter_group)
+    if filter_groups:
+        lesson_periods = lesson_periods.filter_groups(filter_groups)
+        events = events.filter_groups(filter_groups)
+        extra_lessons = extra_lessons.filter_groups(filter_groups)
     if filter_subject:
         lesson_periods = lesson_periods.filter(
             Q(lesson__subject=filter_subject) | Q(substitutions__subject=filter_subject)
@@ -293,7 +298,7 @@ def generate_list_of_all_register_objects(filter_dict: dict) -> List[dict]:
                     f"{date_format(register_object.date_start)}"
                     f"–{date_format(register_object.date_end)}"
                 )
-                day_sort = (register_object.date_start,)
+                day_sort = register_object.date_start
                 period = (
                     f"{register_object.period_from.period}.–{register_object.period_to.period}."
                 )

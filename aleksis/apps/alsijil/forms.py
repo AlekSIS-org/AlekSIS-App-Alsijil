@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from typing import Optional, Sequence
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
+from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -278,41 +280,35 @@ class FilterRegisterObjectForm(forms.Form):
             "date_end": date_end,
         }
 
-    def __init__(self, request, for_person=True, *args, **kwargs):
+    def __init__(
+        self,
+        request: HttpRequest,
+        *args,
+        for_person: bool = True,
+        groups: Optional[Sequence[Group]] = None,
+        **kwargs
+    ):
         self.request = request
         person = self.request.user.person
 
-        # Fill in initial data
         kwargs["initial"] = self.get_initial()
         super().__init__(*args, **kwargs)
 
-        # Build querysets
         self.fields["school_term"].queryset = SchoolTerm.objects.all()
 
-        # Filter selectable groups by permissions
-        group_qs = Group.objects.all()
-        if for_person:
-            group_qs = group_qs.filter(
+        if not groups and for_person:
+            groups = Group.objects.filter(
                 Q(lessons__teachers=person)
                 | Q(lessons__lesson_periods__substitutions__teachers=person)
                 | Q(events__teachers=person)
                 | Q(extra_lessons__teachers=person)
             )
-        elif not check_global_permission(self.request.user, "alsijil.view_full_register"):
-            group_qs = group_qs.union(
-                group_qs.filter(
-                    pk__in=get_objects_for_user(
-                        self.request.user, "core.view_full_register_group", Group
-                    ).values_list("pk", flat=True)
-                )
-            )
-
-        # Flatten query by filtering groups by pk
-        groups_flat = Group.objects.filter(pk__in=list(group_qs.values_list("pk", flat=True)))
-        self.fields["group"].queryset = groups_flat
+        elif not for_person:
+            groups = Group.objects.all()
+        self.fields["group"].queryset = groups
 
         # Filter subjects by selectable groups
         subject_qs = Subject.objects.filter(
-            Q(lessons__groups__in=groups_flat) | Q(extra_lessons__groups__in=groups_flat)
+            Q(lessons__groups__in=groups) | Q(extra_lessons__groups__in=groups)
         ).distinct()
         self.fields["subject"].queryset = subject_qs

@@ -1,6 +1,8 @@
 from rules import add_perm
 
+from aleksis.core.models import Group
 from aleksis.core.util.predicates import (
+    has_any_object,
     has_global_perm,
     has_object_perm,
     has_person,
@@ -273,3 +275,9 @@ delete_group_role_assignment_predicate = (
     has_global_perm("alsjil.assign_grouprole") | is_group_role_assignment_group_owner
 )
 add_perm("alsijil.delete_grouproleassignment", delete_group_role_assignment_predicate)
+
+view_register_objects_list_predicate = has_person & (
+    has_any_object("core.view_full_register_group", Group)
+    | has_global_perm("core.view_full_register")
+)
+add_perm("alsijil.view_register_objects_list", view_register_objects_list_predicate)
