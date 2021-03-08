@@ -19,7 +19,7 @@ from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
-from django_tables2 import SingleTableView
+from django_tables2 import SingleTableView, RequestConfig
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -47,6 +47,7 @@ from .forms import (
     PersonalNoteFormSet,
     RegisterAbsenceForm,
     SelectForm,
+    PersonOverviewForm,
 )
 from .models import (
     ExcuseType,
@@ -724,96 +725,6 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )
     context["person"] = person
 
-    if request.method == "POST":
-        if request.POST.get("excuse_type"):
-            # Get excuse type
-            excuse_type = request.POST["excuse_type"]
-            found = False
-            if excuse_type == "e":
-                excuse_type = None
-                found = True
-            else:
-                try:
-                    excuse_type = ExcuseType.objects.get(pk=int(excuse_type))
-                    found = True
-                except (ExcuseType.DoesNotExist, ValueError):
-                    pass
-
-            if found:
-                if request.POST.get("excuse_multiple") and request.POST.get("selected_notes"):
-                    if not request.user.has_perm(
-                            "alsijil.edit_person_overview_personalnote", person
-                    ):
-                        raise PermissionDenied()
-
-                    lesson_pks = request.POST.getlist("selected_notes")
-
-                    lesson_pks = filter(str.isnumeric, lesson_pks)
-
-                    notes = person.personal_notes.filter(
-                        pk__in=lesson_pks,
-                        absent=True,
-                        excused=False,
-                    )
-                    for note in notes:
-                        note.excused = True
-                        note.excuse_type = excuse_type
-                        with reversion.create_revision():
-                            reversion.set_user(request.user)
-                            note.save()
-
-                    messages.success(request, _("The absences have been marked as excused."))
-
-                elif request.POST.get("date"):
-                    # Mark absences on date as excused
-                    try:
-                        date = datetime.strptime(request.POST["date"], "%Y-%m-%d").date()
-
-                        if not request.user.has_perm(
-                            "alsijil.edit_person_overview_personalnote", person
-                        ):
-                            raise PermissionDenied()
-
-                        notes = person.personal_notes.filter(absent=True, excused=False,).filter(
-                            Q(
-                                week=date.isocalendar()[1],
-                                lesson_period__period__weekday=date.weekday(),
-                                lesson_period__lesson__validity__date_start__lte=date,
-                                lesson_period__lesson__validity__date_end__gte=date,
-                            )
-                            | Q(
-                                extra_lesson__week=date.isocalendar()[1],
-                                extra_lesson__period__weekday=date.weekday(),
-                            )
-                        )
-                        for note in notes:
-                            note.excused = True
-                            note.excuse_type = excuse_type
-                            with reversion.create_revision():
-                                reversion.set_user(request.user)
-                                note.save()
-
-                        messages.success(request, _("The absences have been marked as excused."))
-                    except ValueError:
-                        pass
-                elif request.POST.get("personal_note"):
-                    # Mark specific absence as excused
-                    try:
-                        note = PersonalNote.objects.get(pk=int(request.POST["personal_note"]))
-                        if not request.user.has_perm("alsijil.edit_personalnote", note):
-                            raise PermissionDenied()
-                        if note.absent:
-                            note.excused = True
-                            note.excuse_type = excuse_type
-                            with reversion.create_revision():
-                                reversion.set_user(request.user)
-                                note.save()
-                            messages.success(request, _("The absence has been marked as excused."))
-                    except (PersonalNote.DoesNotExist, ValueError):
-                        pass
-
-                person.refresh_from_db()
-
     person_personal_notes = person.personal_notes.all().prefetch_related(
         "lesson_period__lesson__groups",
         "lesson_period__lesson__teachers",
@@ -872,7 +783,18 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["personal_notes"] = personal_notes
     context["excuse_types"] = ExcuseType.objects.all()
 
-    context["personal_notes_table"] = PersonalNoteTable(personal_notes)
+    form = PersonOverviewForm(request, request.POST or None, queryset=personal_notes)
+    if request.method == "POST":
+        if form.is_valid():
+            with reversion.create_revision():
+                reversion.set_user(request.user)
+                form.execute()
+        person.refresh_from_db()
+    context["action_form"] = form
+    table = PersonalNoteTable(personal_notes)
+    RequestConfig(request, paginate={"per_page": 20}).configure(table)
+    context["personal_notes_table"] = table
+    print(table.columns, table.rows, sep="\n"*3)
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()

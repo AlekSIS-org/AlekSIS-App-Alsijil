@@ -1,12 +1,12 @@
 {% load i18n %}
-<button type="submit" class="btn-flat tooltipped" name="excuse_type" value="e" title="{% trans "Excused" %}"
-        data-position="bottom" data-tooltip="{% trans "Excused" %}" style="width: 50px;">
-  {% trans "e" %}
+<span class="input-field inline">
+    <select class="inline" name="excuse_type">
+        <option value="e" selected>{% trans "Excused" %}</option>
+        {% for excuse_type in excuse_types %}
+            <option value="{{ excuse_type.pk }}">{{ excuse_type.name }}</option>
+        {% endfor %}
+    </select>
+</span>
+<button type="submit" class="btn secondary-color">
+    {% trans "Submit" %}<i class="material-icons right">send</i>
 </button>
-{% for excuse_type in excuse_types %}
-  <button type="submit" class="btn-flat tooltipped" value="{{ excuse_type.pk }}" name="excuse_type"
-          title="{{ excuse_type.name }}" data-position="bottom" data-tooltip="{{ excuse_type.name }}"
-          style="width: 50px;">
-    {{ excuse_type.short_name }}
-  </button>
-{% endfor %}
