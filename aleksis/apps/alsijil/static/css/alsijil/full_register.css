@@ -25,7 +25,7 @@ tr.lessons-day-first {
     border-top: 3px solid rgba(0, 0, 0, 0.3);
 }
 
-th.lessons-day-head, td.rotate, th.rotate {
+td.rotate, th.rotate {
     text-align: center;
     transform: rotate(-90deg);
 }
