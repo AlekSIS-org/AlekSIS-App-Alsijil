@@ -1,6 +1,5 @@
 from contextlib import nullcontext
 from copy import deepcopy
-from contextlib import suppress
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -19,7 +18,7 @@ from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
-from django_tables2 import SingleTableView, RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -45,9 +44,9 @@ from .forms import (
     GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
+    PersonOverviewForm,
     RegisterAbsenceForm,
     SelectForm,
-    PersonOverviewForm,
 )
 from .models import (
     ExcuseType,
@@ -57,16 +56,13 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable
+from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable, PersonalNoteTable
 from .util.alsijil_helpers import (
     annotate_documentations,
     get_register_object_by_pk,
     get_timetable_instance_by_pk,
     register_objects_sorter,
 )
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
-from .tables import ExcuseTypeTable, ExtraMarkTable, PersonalNoteTable
-from .util.alsijil_helpers import get_lesson_period_by_pk, get_timetable_instance_by_pk
 
 
 @permission_required("alsijil.view_register_object", fn=get_register_object_by_pk)  # FIXME
@@ -799,7 +795,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     table = PersonalNoteTable(personal_notes)
     RequestConfig(request, paginate={"per_page": 20}).configure(table)
     context["personal_notes_table"] = table
-    print(table.columns, table.rows, sep="\n"*3)
+    print(table.columns, table.rows, sep="\n" * 3)
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()

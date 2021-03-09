@@ -16,6 +16,7 @@ from aleksis.core.models import Group, Person
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
+from .actions import delete_personal_note, mark_as_excuse_type_generator, mark_as_excused
 from .models import (
     ExcuseType,
     ExtraMark,
@@ -24,8 +25,6 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .actions import *
-from .models import ExcuseType, ExtraMark, LessonDocumentation, PersonalNote
 
 
 class LessonDocumentationForm(forms.ModelForm):
@@ -264,4 +263,3 @@ class GroupRoleAssignmentEditForm(forms.ModelForm):
     class Meta:
         model = GroupRoleAssignment
         fields = ["date_start", "date_end"]
-

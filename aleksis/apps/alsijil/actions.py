@@ -22,4 +22,5 @@ def mark_as_excuse_type_generator(excuse_type) -> Callable:
 def delete_personal_note(modeladmin, request, queryset):
     queryset.delete()
 
+
 delete_personal_note.short_description = _("Delete")

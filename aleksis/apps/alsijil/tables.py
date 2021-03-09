@@ -1,13 +1,12 @@
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 import django_tables2 as tables
 from django_tables2.utils import A
 
-from aleksis.core.tables import MaterializeCheckboxColumn
 from aleksis.apps.chronos.models import Event, LessonPeriod
+from aleksis.core.tables import MaterializeCheckboxColumn
 
 from .models import PersonalNote
 
@@ -85,6 +84,8 @@ class GroupRoleTable(tables.Table):
             self.columns.hide("edit")
         if not request.user.has_perm("alsijil.delete_grouprole"):
             self.columns.hide("delete")
+
+
 class PersonalNoteTable(tables.Table):
     selected = MaterializeCheckboxColumn(
         attrs={"input": {"name": "selected_objects"}}, accessor=A("pk")
@@ -119,7 +120,9 @@ class PersonalNoteTable(tables.Table):
             return value
 
     def render_absent(self, value):
-        return render_to_string("components/materialize-chips.html", dict(content="Absent", classes="red white-text"))
+        return render_to_string(
+            "components/materialize-chips.html", dict(content="Absent", classes="red white-text")
+        )
 
     def render_excused(self, value, record):
         if record.absent:
@@ -145,8 +148,10 @@ class PersonalNoteTable(tables.Table):
             badges = ""
             for extra_mark in value:
                 content = extra_mark.name
-                badges += render_to_string("components/materialize-chips.html", context=dict(content=content))
-            return mark_safe(badges)
+                badges += render_to_string(
+                    "components/materialize-chips.html", context=dict(content=content)
+                )
+            return mark_safe(badges)  # noqa
         else:
             return "–"
 
