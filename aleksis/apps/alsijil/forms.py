@@ -173,6 +173,13 @@ class ExcuseTypeForm(forms.ModelForm):
         fields = ["short_name", "name"]
 
 
+class PersonOverviewForm(ActionForm):
+    def get_actions(self):
+        return [mark_as_excused, delete_personal_note] + [
+            mark_as_excuse_type_generator(excuse_type) for excuse_type in ExcuseType.objects.all()
+        ]
+
+
 class GroupRoleForm(forms.ModelForm):
     layout = Layout("name", "icon", "colour")
 
@@ -257,11 +264,4 @@ class GroupRoleAssignmentEditForm(forms.ModelForm):
     class Meta:
         model = GroupRoleAssignment
         fields = ["date_start", "date_end"]
-class PersonOverviewForm(ActionForm):
-    def get_actions(self):
-        return [
-            mark_as_excused,
-            delete_personal_note
-        ] + [
-            mark_as_excuse_type_generator(excuse_type) for excuse_type in ExcuseType.models.all()
-        ]
+

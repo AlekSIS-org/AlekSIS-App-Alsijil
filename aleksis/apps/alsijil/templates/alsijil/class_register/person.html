@@ -148,10 +148,10 @@
     <h5>{% trans "Relevant personal notes" %}</h5>
   <form action="" method="post">
       {% csrf_token %}
-  {%  form form=action_form %}{% endform %}
-  <button type="submit">Enter</button>
-  </form>
-    {% render_table personal_notes_table %}
+      {% form form=action_form %}{% endform %}
+      <button type="submit" class="btn waves-effect waves-light">Enter</button>
+      {% render_table personal_notes_table %}
+    </form>
     <ul class="collapsible">
       <li>
         <div>
