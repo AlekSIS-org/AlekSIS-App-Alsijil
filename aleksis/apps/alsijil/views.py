@@ -725,10 +725,14 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )
     context["person"] = person
 
-    person_personal_notes = person.personal_notes.all().prefetch_related(
-        "lesson_period__lesson__groups",
-        "lesson_period__lesson__teachers",
-        "lesson_period__substitutions",
+    person_personal_notes = (
+        person.personal_notes.all()
+        .prefetch_related(
+            "lesson_period__lesson__groups",
+            "lesson_period__lesson__teachers",
+            "lesson_period__substitutions",
+        )
+        .annotate_date_range()
     )
 
     if request.user.has_perm("alsijil.view_person_overview_personalnote", person):

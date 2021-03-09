@@ -7,6 +7,7 @@ import django_tables2 as tables
 from django_tables2.utils import A
 
 from aleksis.core.tables import MaterializeCheckboxColumn
+from aleksis.apps.chronos.models import Event, LessonPeriod
 
 from .models import PersonalNote
 
@@ -85,31 +86,37 @@ class GroupRoleTable(tables.Table):
         if not request.user.has_perm("alsijil.delete_grouprole"):
             self.columns.hide("delete")
 class PersonalNoteTable(tables.Table):
-    selected = MaterializeCheckboxColumn(verbose_name=_("Gay"), attrs={"name": "selected_objects"})
-    lesson_period_lesson = tables.Column(verbose_name=_("Lesson"), accessor=A("lesson_period"))
-    # lesson_period_teacher = tables.Column(verbose_name=_("Teacher"), accessor=A("lesson_period__get_teacher_names"))
-    personal_note_date = tables.Column(verbose_name=_("Date"), accessor=A("date"))
-    lesson_period_period = tables.Column(verbose_name=_("Period"), accessor=A("lesson_period__period__period"))
-    # lesson_period_subject = tables.Column(verbose_name=_("Subject"), accessor=A("lesson_period__get_subject__name"))
-    # absent = tables.Column(attrs={"td": {"class": "material-icons"}})
+    selected = MaterializeCheckboxColumn(
+        attrs={"input": {"name": "selected_objects"}}, accessor=A("pk")
+    )
+    date = tables.Column(
+        verbose_name=_("Date"), accessor=A("date_formatted"), order_by=A("day_start")
+    )
+    period = tables.Column(
+        verbose_name=_("Period"), accessor=A("period_formatted"), order_by=A("period")
+    )
+    groups = tables.Column(verbose_name=_("Groups"), accessor=A("register_object__group_names"))
+    teachers = tables.Column(
+        verbose_name=_("Teachers"), accessor=A("register_object__teacher_names")
+    )
+    subject = tables.Column(
+        verbose_name=_("Subject"), accessor=A("register_object__get_subject__name")
+    )
+    absent = tables.Column()
     excused = tables.Column(verbose_name=_("Excuse"))
     extra_marks = tables.Column(verbose_name="Extra marks", accessor=A("extra_marks__all"))
 
-    def render_lesson_period_period(self, value):
-        return str(value) + "."
+    def render_groups(self, value, record):
+        if isinstance(record.register_object, LessonPeriod):
+            return record.register_object.lesson.group_names
+        else:
+            return value
 
-    def render_lesson_period_lesson(self, value, record):
-        teachers = value.get_teacher_names()
-        subject = value.get_subject().name
-        pk = value.pk
-        week = record.week
-        year = record.year
-
-        url = reverse("lesson_by_week_and_period", args=[year, week, pk])
-
-        context = dict(subject=subject, teachers=teachers, url=url)
-
-        return render_to_string("alsijil/partials/personal_note_link.html", context)
+    def render_subject(self, value, record):
+        if isinstance(record.register_object, Event):
+            return _("Event")
+        else:
+            return value
 
     def render_absent(self, value):
         return render_to_string("components/materialize-chips.html", dict(content="Absent", classes="red white-text"))
@@ -145,9 +152,5 @@ class PersonalNoteTable(tables.Table):
 
     class Meta:
         model = PersonalNote
-        sequence = (
-            "selected", "year", "week", "personal_note_date", "lesson_period_period",
-            "lesson_period_lesson", "absent", "excused", "late", "extra_marks", "remarks"
-        )
-        exclude = ("site", "id", "extended_data", "person", "lesson_period", "excuse_type")
+        fields = ()
         template_name = "django_tables2/materialize.html"
