@@ -241,12 +241,18 @@ add_perm("alsijil.delete_grouprole", delete_group_role_predicate)
 
 view_assigned_group_roles_predicate = (
     is_group_owner
-    | is_lesson_teacher
-    | is_lesson_parent_group_owner
     | has_global_perm("alsjil.assign_grouprole")
-    | has_object_perm("alsijil.assign_grouprole")
+    | has_object_perm("core.assign_grouprole")
 )
 add_perm("alsijil.view_assigned_grouproles", view_assigned_group_roles_predicate)
+
+view_assigned_group_roles_register_object_predicate = (
+    is_lesson_teacher | is_lesson_parent_group_owner | has_global_perm("alsjil.assign_grouprole")
+)
+add_perm(
+    "alsijil.view_assigned_grouproles_for_register_object",
+    view_assigned_group_roles_register_object_predicate,
+)
 
 assign_group_role_person_predicate = is_person_group_owner | has_global_perm(
     "alsjil.assign_grouprole"
