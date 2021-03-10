@@ -247,8 +247,8 @@ def register_object(
                             reversion.set_user(request.user)
                             for instance in instances:
                                 instance.person.mark_absent(
-                                    wanted_week[lesson_period.period.weekday],
-                                    lesson_period.period.period + 1,
+                                    wanted_week[register_object.period.weekday],
+                                    register_object.period.period + 1,
                                     instance.absent,
                                     instance.excused,
                                     instance.excuse_type,
