@@ -14,17 +14,46 @@
 {% endblock %}
 
 {% block content %}
-  <h5>{% trans "Lesson filter" %}</h5>
-  <form action="" method="get">
-    {% form form=filter_form %}{% endform %}
-    <button type="submit" class="btn waves-effect waves-light">
-      <i class="material-icons left">refresh</i>
-      {% trans "Update filters" %}
-    </button>
-  </form>
-  <h5>{% trans "Lesson table" %}</h5>
-  {% if table %}
-  {% render_table table %}
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">{% trans "Lesson filter" %}</div>
+      <form action="" method="get">
+        {% form form=filter_form %}{% endform %}
+        <button type="submit" class="btn waves-effect waves-light">
+          <i class="material-icons left">refresh</i>
+          {% trans "Update filters" %}
+        </button>
+      </form>
+    </div>
+  </div>
 
+  {% if table %}
+    <div class="card">
+      <div class="card-content">
+        <form action="" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col s12 m4 l4 xl6">
+              <div class="card-title">{% trans "Lesson table" %}</div>
+            </div>
+            <div class="col s12 m8 l8 xl6">
+              <div class="col s12 m8">
+                {% form form=action_form %}{% endform %}</div>
+              <div class="col s12 m4">
+
+                <button type="submit" class="btn waves-effect waves-primary">
+                  {% trans "Execute" %}
+                  <i class="material-icons right">send</i>
+                </button>
+              </div>
+            </div>
+          </div>
+          {% render_table table %}
+
+        </form>
+      </div>
+    </div>
   {% endif %}
+
+  <script src="{% static "js/multi_select.js" %}"></script>
 {% endblock %}

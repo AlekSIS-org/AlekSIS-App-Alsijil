@@ -255,6 +255,7 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[d
 
                     # Build table entry
                     entry = {
+                        "pk": f"{lesson_period.pk}_{week.year}_{week.week}",
                         "week": week,
                         "has_documentation": has_documentation,
                         "substitution": sub,
@@ -306,6 +307,7 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[d
 
             # Build table entry
             entry = {
+                "pk": str(register_object.pk),
                 "has_documentation": has_documentation,
                 "register_object": register_object,
                 "date": day,

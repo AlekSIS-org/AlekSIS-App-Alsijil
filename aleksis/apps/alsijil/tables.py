@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 import django_tables2 as tables
 from django_tables2.utils import A
 
+from aleksis.core.tables import SelectColumn
+
 
 class ExtraMarkTable(tables.Table):
     class Meta:
@@ -81,6 +83,12 @@ class GroupRoleTable(tables.Table):
 
 
 class RegisterObjectTable(tables.Table):
+    """Table to show all register objects in an overview.
+
+    .. warning::
+        Works only with ``generate_list_of_all_register_objects``.
+    """
+
     class Meta:
         attrs = {"class": "highlight responsive-table"}
 
@@ -103,3 +111,15 @@ class RegisterObjectTable(tables.Table):
                 register_object=value,
             ),
         )
+
+
+class RegisterObjectSelectTable(RegisterObjectTable):
+    """Table to show all register objects with multi-select support.
+
+    More information at ``RegisterObjectTable``
+    """
+
+    selected = SelectColumn()
+
+    class Meta(RegisterObjectTable.Meta):
+        sequence = ("selected", "...")

@@ -49,6 +49,7 @@ from .forms import (
     LessonDocumentationForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
+    RegisterObjectActionForm,
     SelectForm,
 )
 from .models import (
@@ -59,7 +60,13 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable, RegisterObjectTable
+from .tables import (
+    ExcuseTypeTable,
+    ExtraMarkTable,
+    GroupRoleTable,
+    RegisterObjectSelectTable,
+    RegisterObjectTable,
+)
 from .util.alsijil_helpers import (
     annotate_documentations,
     generate_list_of_all_register_objects,
@@ -1255,7 +1262,7 @@ class GroupRoleAssignmentDeleteView(
 class AllRegisterObjectsView(PermissionRequiredMixin, View):
     permission_required = "alsijil.view_register_objects_list"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def get_context_data(self, request):
         context = {}
         # Filter selectable groups by permissions
         groups = Group.objects.all()
@@ -1274,8 +1281,22 @@ class AllRegisterObjectsView(PermissionRequiredMixin, View):
         context["filter_form"] = filter_form
 
         register_objects = generate_list_of_all_register_objects(filter_dict)
+
+        self.action_form = RegisterObjectActionForm(request, register_objects, request.POST or None)
+        context["action_form"] = self.action_form
+
         if register_objects:
-            table = RegisterObjectTable(register_objects)
-            RequestConfig(request,).configure(table)  # paginate={"per_page": 100}
-            context["table"] = table
+            self.table = RegisterObjectSelectTable(register_objects)
+            RequestConfig(request, paginate={"per_page": 100}).configure(self.table)
+            context["table"] = self.table
+        return context
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        context = self.get_context_data(request)
+        return render(request, "alsijil/class_register/all_objects.html", context)
+
+    def post(self, request: HttpRequest):
+        context = self.get_context_data(request)
+        if self.action_form.is_valid():
+            self.action_form.execute()
         return render(request, "alsijil/class_register/all_objects.html", context)

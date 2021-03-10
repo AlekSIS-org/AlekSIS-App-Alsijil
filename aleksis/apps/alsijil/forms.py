@@ -14,10 +14,12 @@ from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import Subject, TimePeriod
+from aleksis.core.forms import ListActionForm
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
+from .actions import send_request_to_check_entry
 from .models import (
     ExcuseType,
     ExtraMark,
@@ -312,3 +314,7 @@ class FilterRegisterObjectForm(forms.Form):
             Q(lessons__groups__in=groups) | Q(extra_lessons__groups__in=groups)
         ).distinct()
         self.fields["subject"].queryset = subject_qs
+
+
+class RegisterObjectActionForm(ListActionForm):
+    actions = [send_request_to_check_entry]
