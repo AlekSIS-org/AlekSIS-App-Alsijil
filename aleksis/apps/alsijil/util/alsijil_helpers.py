@@ -232,7 +232,11 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[d
                     sub = filtered_substitutions[0] if filtered_substitutions else None
 
                     subject = sub.subject if sub and sub.subject else lesson_period.lesson.subject
-
+                    teachers = (
+                        sub.teacher_names
+                        if sub and sub.teachers.all()
+                        else lesson_period.lesson.teacher_names
+                    )
                     if filter_subject and filter_subject != subject:
                         continue
 
@@ -265,6 +269,7 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[d
                         "period": f"{lesson_period.period.period}.",
                         "period_sort": lesson_period.period.period,
                         "groups": lesson_period.lesson.group_names,
+                        "teachers": teachers,
                         "subject": subject.name,
                     }
                     if has_documentation:
@@ -315,6 +320,7 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[d
                 "period": period,
                 "period_sort": period_sort,
                 "groups": register_object.group_names,
+                "teachers": register_object.teacher_names,
                 "subject": register_object.subject.name
                 if isinstance(register_object, ExtraLesson)
                 else _("Event"),
