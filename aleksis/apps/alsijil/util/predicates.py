@@ -26,8 +26,7 @@ def is_lesson_teacher(user: User, obj: Union[LessonPeriod, Event, ExtraLesson]) 
     in the lesson or the substitution linked to the given LessonPeriod.
     """
     if obj:
-        sub = obj.get_substitution() if isinstance(obj, LessonPeriod) else None
-        if sub and sub in user.person.lesson_substitutions.all():
+        if isinstance(obj, LessonPeriod) and user.person in obj.lesson.teachers.all():
             return True
         return user.person in obj.get_teachers().all()
     return False
@@ -212,16 +211,13 @@ def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
     in the lesson or the substitution linked to the LessonPeriod of the given PersonalNote.
     """
     if hasattr(obj, "register_object"):
-        if getattr(obj, "lesson_period", None):
-            sub = obj.lesson_period.get_substitution()
-            if sub and user.person in Person.objects.filter(
-                lesson_substitutions=obj.lesson_period.get_substitution()
-            ):
-                return True
+        if (
+            isinstance(obj.register_object, LessonPeriod)
+            and user.person in obj.lesson_period.lesson.teachers.all()
+        ):
+            return True
 
         return user.person in obj.register_object.get_teachers().all()
-
-        return False
     return False
 
 
