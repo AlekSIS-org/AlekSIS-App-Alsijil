@@ -179,7 +179,9 @@ def register_object(
         # Group roles
         show_group_roles = request.user.person.preferences[
             "alsijil__group_roles_in_lesson_view"
-        ] and request.user.has_perm("alsijil.view_assigned_grouproles", register_object)
+        ] and request.user.has_perm(
+            "alsijil.view_assigned_grouproles_for_register_object", register_object
+        )
         if show_group_roles:
             groups = register_object.get_groups().all()
             group_roles = GroupRole.objects.with_assignments(date_of_lesson, groups)
