@@ -15,6 +15,7 @@ from .util.predicates import (
     is_group_member,
     is_group_owner,
     is_group_role_assignment_group_owner,
+    is_lesson_original_teacher,
     is_lesson_parent_group_owner,
     is_lesson_participant,
     is_lesson_teacher,
@@ -23,6 +24,7 @@ from .util.predicates import (
     is_owner_of_any_group,
     is_person_group_owner,
     is_person_primary_group_owner,
+    is_personal_note_lesson_original_teacher,
     is_personal_note_lesson_parent_group_owner,
     is_personal_note_lesson_teacher,
     is_teacher,
@@ -32,6 +34,7 @@ from .util.predicates import (
 view_register_object_predicate = has_person & (
     is_none  # View is opened as "Current lesson"
     | is_lesson_teacher
+    | is_lesson_original_teacher
     | is_lesson_participant
     | is_lesson_parent_group_owner
     | has_global_perm("alsijil.view_lesson")
@@ -46,6 +49,7 @@ add_perm("alsijil.view_lesson_menu", has_person)
 view_lesson_personal_notes_predicate = view_register_object_predicate & (
     ~is_lesson_participant
     | is_lesson_teacher
+    | is_lesson_original_teacher
     | has_global_perm("alsijil.view_personalnote")
     | has_lesson_group_object_perm("core.view_personalnote_group")
 )
@@ -54,6 +58,10 @@ add_perm("alsijil.view_register_object_personalnote", view_lesson_personal_notes
 # Edit personal note
 edit_lesson_personal_note_predicate = view_lesson_personal_notes_predicate & (
     is_lesson_teacher
+    | (
+        is_lesson_original_teacher
+        & is_site_preference_set("alsijil", "edit_lesson_documentation_as_original_teacher")
+    )
     | has_global_perm("alsijil.change_personalnote")
     | has_lesson_group_object_perm("core.edit_personalnote_group")
 )
@@ -63,6 +71,7 @@ add_perm("alsijil.edit_register_object_personalnote", edit_lesson_personal_note_
 view_personal_note_predicate = has_person & (
     (is_own_personal_note & is_site_preference_set("alsijil", "view_own_personal_notes"))
     | is_personal_note_lesson_teacher
+    | is_personal_note_lesson_original_teacher
     | is_personal_note_lesson_parent_group_owner
     | has_global_perm("alsijil.view_personalnote")
     | has_personal_note_group_perm("core.view_personalnote_group")
@@ -72,6 +81,10 @@ add_perm("alsijil.view_personalnote", view_personal_note_predicate)
 # Edit personal note
 edit_personal_note_predicate = view_personal_note_predicate & (
     ~is_own_personal_note
+    & ~(
+        is_personal_note_lesson_original_teacher
+        or not is_site_preference_set("alsijil", "edit_lesson_documentation_as_original_teacher")
+    )
     | has_global_perm("alsijil.view_personalnote")
     | has_personal_note_group_perm("core.edit_personalnote_group")
 )
@@ -84,6 +97,10 @@ add_perm("alsijil.view_lessondocumentation", view_lesson_documentation_predicate
 # Edit lesson documentation
 edit_lesson_documentation_predicate = view_register_object_predicate & (
     is_lesson_teacher
+    | (
+        is_lesson_original_teacher
+        & is_site_preference_set("alsijil", "edit_lesson_documentation_as_original_teacher")
+    )
     | has_global_perm("alsijil.change_lessondocumentation")
     | has_lesson_group_object_perm("core.edit_lessondocumentation_group")
 )
@@ -242,6 +259,7 @@ add_perm("alsijil.delete_grouprole", delete_group_role_predicate)
 view_assigned_group_roles_predicate = (
     is_group_owner
     | is_lesson_teacher
+    | is_lesson_original_teacher
     | is_lesson_parent_group_owner
     | has_global_perm("alsjil.assign_grouprole")
     | has_object_perm("alsijil.assign_grouprole")

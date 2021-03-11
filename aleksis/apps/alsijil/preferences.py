@@ -35,6 +35,14 @@ class RegisterAbsenceAsPrimaryGroupOwner(BooleanPreference):
 
 
 @site_preferences_registry.register
+class EditLessonDocumentationAsOriginalTeacher(BooleanPreference):
+    section = alsijil
+    name = "edit_lesson_documentation_as_original_teacher"
+    default = True
+    verbose_name = _("Allow original teachers to edit their lessons although they are substituted")
+
+
+@site_preferences_registry.register
 class CarryOverDataToNextPeriods(BooleanPreference):
     section = alsijil
     name = "carry_over"
