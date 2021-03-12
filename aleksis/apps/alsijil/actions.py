@@ -34,16 +34,17 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
             date = entry["date"]
             msg += f"- {reg_object} ({date})\n"
 
-        Notification.objects.create(
+        n = Notification(
             title=title,
             description=msg,
             sender=request.user.person.addressing_name,
             recipient=teacher,
             link=request.build_absolute_uri(reverse("overview_me")),
         )
+        n.save()
 
     count_teachers = len(grouped_by_teachers.keys())
-    count_items = len(list)
+    count_items = len(selected_items)
     messages.success(
         request,
         _(
