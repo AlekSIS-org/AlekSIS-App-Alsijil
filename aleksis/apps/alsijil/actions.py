@@ -3,6 +3,7 @@ from typing import Sequence
 from django.contrib import messages
 from django.contrib.humanize.templatetags.humanize import apnumber
 from django.http import HttpRequest
+from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -22,17 +23,13 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
             grouped_by_teachers.setdefault(teacher, [])
             grouped_by_teachers[teacher].append(entry)
 
+    template = get_template("alsijil/notifications/check.html")
     for teacher, items in grouped_by_teachers.items():
+        msg = template.render({"items": items})
+
         title = _(
             f"{request.user.person.addressing_name} wants you to check some class register entries."
         )
-        msg = _("Please check if the following class register entries are complete and correct:\n")
-
-        # Add one line for each entry to check
-        for entry in items:
-            reg_object = entry["register_object"]
-            date = entry["date"]
-            msg += f"- {reg_object} ({date})\n"
 
         n = Notification(
             title=title,
