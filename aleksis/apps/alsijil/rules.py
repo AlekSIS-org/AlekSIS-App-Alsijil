@@ -85,7 +85,7 @@ edit_personal_note_predicate = view_personal_note_predicate & (
     ~is_own_personal_note
     & ~(
         is_personal_note_lesson_original_teacher
-        or not is_site_preference_set("alsijil", "edit_lesson_documentation_as_original_teacher")
+        | ~is_site_preference_set("alsijil", "edit_lesson_documentation_as_original_teacher")
     )
     | has_global_perm("alsijil.view_personalnote")
     | has_personal_note_group_perm("core.edit_personalnote_group")
