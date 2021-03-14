@@ -27,8 +27,8 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
     for teacher, items in grouped_by_teachers.items():
         msg = template.render({"items": items})
 
-        title = _(
-            f"{request.user.person.addressing_name} wants you to check some class register entries."
+        title = _("{} wants you to check some class register entries.").format(
+            request.user.person.addressing_name
         )
 
         n = Notification(
@@ -45,9 +45,9 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
     messages.success(
         request,
         _(
-            f"We have successfully sent notifications to "
-            f"{apnumber(count_teachers)} persons for {apnumber(count_items)} lessons."
-        ),
+            "We have successfully sent notifications to "
+            "{count_teachers} persons for {count_items} lessons."
+        ).format(count_teachers=apnumber(count_teachers), count_items=apnumber(count_items)),
     )
 
 
