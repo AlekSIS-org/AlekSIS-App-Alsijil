@@ -1,0 +1,43 @@
+{% load i18n material_form django_tables2 %}
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">{% trans "Lesson filter" %}</div>
+    <form action="" method="get">
+      {% form form=filter_form %}{% endform %}
+      <button type="submit" class="btn waves-effect waves-light">
+        <i class="material-icons left">refresh</i>
+        {% trans "Update filters" %}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if table %}
+  <div class="card">
+    <div class="card-content">
+      <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col s12 {% if action_form %}m4 l4 xl6{% endif %}">
+            <div class="card-title">{% trans "Lesson table" %}</div>
+          </div>
+          {% if action_form %}
+            <div class="col s12 m8 l8 xl6">
+              <div class="col s12 m8">
+                {% form form=action_form %}{% endform %}
+              </div>
+              <div class="col s12 m4">
+                <button type="submit" class="btn waves-effect waves-primary">
+                  {% trans "Execute" %}
+                  <i class="material-icons right">send</i>
+                </button>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        {% render_table table %}
+
+      </form>
+    </div>
+  </div>
+{% endif %}

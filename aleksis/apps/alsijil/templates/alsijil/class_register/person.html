@@ -9,7 +9,7 @@
   {% has_perm "alsijil.view_my_students" user as has_students %}
   {% if has_students %}
     <a href="{% url "my_students" %}"
-    class="btn-flat primary-color-text waves-light waves-effect">
+       class="btn-flat primary-color-text waves-light waves-effect">
       <i class="material-icons left">chevron_left</i> {% trans "Back" %}
     </a>
   {% endif %}
@@ -34,16 +34,7 @@
   </div>
   {% if register_object_table %}
     <div class="col s12" id="lesson-documentations">
-      <h5>{% trans "Lesson filter" %}</h5>
-      <form action="" method="get">
-        {% form form=filter_form %}{% endform %}
-        <button type="submit" class="btn waves-effect waves-light">
-          <i class="material-icons left">refresh</i>
-          {% trans "Update filters" %}
-        </button>
-      </form>
-      <h5>{% trans "Lesson table" %}</h5>
-      {% render_table register_object_table %}
+      {% include "alsijil/partials/objects_table.html" with table=register_object_table filter_form=filter_form %}
     </div>
   {% endif %}
   <div class="col s12" id="personal-notes">
