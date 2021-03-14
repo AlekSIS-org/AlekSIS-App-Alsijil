@@ -919,7 +919,10 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     register_objects = generate_list_of_all_register_objects(filter_dict)
     if register_objects:
         table = RegisterObjectTable(register_objects)
-        RequestConfig(request,).configure(table)  # paginate={"per_page": 100}
+        items_per_page = request.user.person.preferences[
+            "alsijil__register_objects_table_items_per_page"
+        ]
+        RequestConfig(request, paginate={"per_page": items_per_page}).configure(table)
         context["register_object_table"] = table
     return render(request, "alsijil/class_register/person.html", context)
 
@@ -1289,7 +1292,10 @@ class AllRegisterObjectsView(PermissionRequiredMixin, View):
 
         if register_objects:
             self.table = RegisterObjectSelectTable(register_objects)
-            RequestConfig(request, paginate={"per_page": 100}).configure(self.table)
+            items_per_page = request.user.person.preferences[
+                "alsijil__register_objects_table_items_per_page"
+            ]
+            RequestConfig(request, paginate={"per_page": items_per_page}).configure(self.table)
             context["table"] = self.table
         return context
 
