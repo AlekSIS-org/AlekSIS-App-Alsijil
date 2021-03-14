@@ -82,7 +82,7 @@ class GroupRoleTable(tables.Table):
             self.columns.hide("delete")
 
 
-def get_link(value, record):
+def _get_link(value, record):
     return record["register_object"].get_alsijil_url(record.get("week"))
 
 
@@ -97,14 +97,14 @@ class RegisterObjectTable(tables.Table):
         attrs = {"class": "highlight responsive-table"}
 
     status = tables.Column(accessor="register_object")
-    date = tables.Column(order_by="date_sort", linkify=get_link)
-    period = tables.Column(order_by="period_sort", linkify=get_link)
-    groups = tables.Column(linkify=get_link)
-    teachers = tables.Column(linkify=get_link)
-    subject = tables.Column(linkify=get_link)
-    topic = tables.Column(linkify=get_link)
-    homework = tables.Column(linkify=get_link)
-    group_note = tables.Column(linkify=get_link)
+    date = tables.Column(order_by="date_sort", linkify=_get_link)
+    period = tables.Column(order_by="period_sort", linkify=_get_link)
+    groups = tables.Column(linkify=_get_link)
+    teachers = tables.Column(linkify=_get_link)
+    subject = tables.Column(linkify=_get_link)
+    topic = tables.Column(linkify=_get_link)
+    homework = tables.Column(linkify=_get_link)
+    group_note = tables.Column(linkify=_get_link)
 
     def render_status(self, value, record):
         return render_to_string(
