@@ -1265,6 +1265,8 @@ class GroupRoleAssignmentDeleteView(
 
 
 class AllRegisterObjectsView(PermissionRequiredMixin, View):
+    """Provide overview of all register objects for coordinators."""
+
     permission_required = "alsijil.view_register_objects_list"
 
     def get_context_data(self, request):
