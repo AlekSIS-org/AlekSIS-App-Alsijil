@@ -262,6 +262,8 @@ class GroupRoleAssignmentEditForm(forms.ModelForm):
 
 
 class FilterRegisterObjectForm(forms.Form):
+    """Form for filtering register objects in ``RegisterObjectTable``."""
+
     layout = Layout(
         Row("school_term", "date_start", "date_end"), Row("has_documentation", "group", "subject")
     )
@@ -317,4 +319,6 @@ class FilterRegisterObjectForm(forms.Form):
 
 
 class RegisterObjectActionForm(ListActionForm):
+    """Action form for managing register objects for use with ``RegisterObjectTable``."""
+
     actions = [send_request_to_check_entry]

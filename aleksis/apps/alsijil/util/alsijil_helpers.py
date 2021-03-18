@@ -111,6 +111,7 @@ def _filter_register_objects_by_dict(
     register_objects: QuerySet[Union[LessonPeriod, Event, ExtraLesson]],
     label_: str,
 ) -> QuerySet[Union[LessonPeriod, Event, ExtraLesson]]:
+    """Filter register objects by a dictionary generated through ``FilterRegisterObjectForm``."""
     if label_ == LessonPeriod.label_:
         register_objects = register_objects.filter(
             lesson__validity__school_term=filter_dict.get("school_term")

@@ -114,6 +114,8 @@ class ShowGroupRolesInLessonView(BooleanPreference):
 
 @person_preferences_registry.register
 class RegisterObjectsTableItemsPerPage(IntegerPreference):
+    """Preference how many items are shown per page in ``RegisterObjectTable``."""
+
     section = alsijil
     name = "register_objects_table_items_per_page"
     default = 100
