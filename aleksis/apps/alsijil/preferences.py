@@ -1,7 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
 from dynamic_preferences.preferences import Section
-from dynamic_preferences.types import BooleanPreference
+from dynamic_preferences.types import BooleanPreference, IntegerPreference
 
 from aleksis.core.registries import person_preferences_registry, site_preferences_registry
 
@@ -109,3 +110,17 @@ class ShowGroupRolesInLessonView(BooleanPreference):
     name = "group_roles_in_lesson_view"
     default = True
     verbose_name = _("Show assigned group roles in lesson view")
+
+
+@person_preferences_registry.register
+class RegisterObjectsTableItemsPerPage(IntegerPreference):
+    """Preference how many items are shown per page in ``RegisterObjectTable``."""
+
+    section = alsijil
+    name = "register_objects_table_items_per_page"
+    default = 100
+    verbose_name = _("Items per page in lessons table")
+
+    def validate(self, value):
+        if value < 1:
+            raise ValidationError(_("Each page must show at least one item."))

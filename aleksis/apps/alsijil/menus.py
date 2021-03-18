@@ -79,6 +79,17 @@ MENUS = {
                     ],
                 },
                 {
+                    "name": _("All lessons"),
+                    "url": "all_register_objects",
+                    "icon": "list",
+                    "validators": [
+                        (
+                            "aleksis.core.util.predicates.permission_validator",
+                            "alsijil.view_register_objects_list",
+                        ),
+                    ],
+                },
+                {
                     "name": _("Excuse types"),
                     "url": "excuse_types",
                     "icon": "label",

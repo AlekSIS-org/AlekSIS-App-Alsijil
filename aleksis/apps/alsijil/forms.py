@@ -1,8 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Optional, Sequence
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
+from django.http import HttpRequest
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget, Select2Widget
@@ -10,11 +13,13 @@ from guardian.shortcuts import get_objects_for_user
 from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
-from aleksis.apps.chronos.models import TimePeriod
-from aleksis.core.models import Group, Person
+from aleksis.apps.chronos.models import Subject, TimePeriod
+from aleksis.core.forms import ListActionForm
+from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
+from .actions import send_request_to_check_entry
 from .models import (
     ExcuseType,
     ExtraMark,
@@ -254,3 +259,66 @@ class GroupRoleAssignmentEditForm(forms.ModelForm):
     class Meta:
         model = GroupRoleAssignment
         fields = ["date_start", "date_end"]
+
+
+class FilterRegisterObjectForm(forms.Form):
+    """Form for filtering register objects in ``RegisterObjectTable``."""
+
+    layout = Layout(
+        Row("school_term", "date_start", "date_end"), Row("has_documentation", "group", "subject")
+    )
+    school_term = forms.ModelChoiceField(queryset=None, label=_("School term"))
+    has_documentation = forms.NullBooleanField(label=_("Has lesson documentation"))
+    group = forms.ModelChoiceField(queryset=None, label=_("Group"), required=False)
+    subject = forms.ModelChoiceField(queryset=None, label=_("Subject"), required=False)
+    date_start = forms.DateField(label=_("Start date"))
+    date_end = forms.DateField(label=_("End date"))
+
+    @classmethod
+    def get_initial(cls):
+        date_end = timezone.now().date()
+        date_start = date_end - timedelta(days=30)
+        return {
+            "school_term": SchoolTerm.current,
+            "date_start": date_start,
+            "date_end": date_end,
+        }
+
+    def __init__(
+        self,
+        request: HttpRequest,
+        *args,
+        for_person: bool = True,
+        groups: Optional[Sequence[Group]] = None,
+        **kwargs
+    ):
+        self.request = request
+        person = self.request.user.person
+
+        kwargs["initial"] = self.get_initial()
+        super().__init__(*args, **kwargs)
+
+        self.fields["school_term"].queryset = SchoolTerm.objects.all()
+
+        if not groups and for_person:
+            groups = Group.objects.filter(
+                Q(lessons__teachers=person)
+                | Q(lessons__lesson_periods__substitutions__teachers=person)
+                | Q(events__teachers=person)
+                | Q(extra_lessons__teachers=person)
+            )
+        elif not for_person:
+            groups = Group.objects.all()
+        self.fields["group"].queryset = groups
+
+        # Filter subjects by selectable groups
+        subject_qs = Subject.objects.filter(
+            Q(lessons__groups__in=groups) | Q(extra_lessons__groups__in=groups)
+        ).distinct()
+        self.fields["subject"].queryset = subject_qs
+
+
+class RegisterObjectActionForm(ListActionForm):
+    """Action form for managing register objects for use with ``RegisterObjectTable``."""
+
+    actions = [send_request_to_check_entry]

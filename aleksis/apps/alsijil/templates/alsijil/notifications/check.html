@@ -1,0 +1,4 @@
+{% load i18n %}{% trans "Please check if the following class register entries are complete and correct:" %}
+{% for entry in items %}
+- {{ entry.register_object }} ({{ entry.date }})
+{% endfor %}

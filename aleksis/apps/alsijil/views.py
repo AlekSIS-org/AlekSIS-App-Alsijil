@@ -13,12 +13,14 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
+from django.views import View
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
-from django_tables2 import SingleTableView
+from django_tables2 import RequestConfig, SingleTableView
+from guardian.shortcuts import get_objects_for_user
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -35,16 +37,19 @@ from aleksis.core.mixins import (
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
+from aleksis.core.util.predicates import check_global_permission
 
 from .forms import (
     AssignGroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
+    FilterRegisterObjectForm,
     GroupRoleAssignmentEditForm,
     GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
     RegisterAbsenceForm,
+    RegisterObjectActionForm,
     SelectForm,
 )
 from .models import (
@@ -55,9 +60,16 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable
+from .tables import (
+    ExcuseTypeTable,
+    ExtraMarkTable,
+    GroupRoleTable,
+    RegisterObjectSelectTable,
+    RegisterObjectTable,
+)
 from .util.alsijil_helpers import (
     annotate_documentations,
+    generate_list_of_all_register_objects,
     get_register_object_by_pk,
     get_timetable_instance_by_pk,
     register_objects_sorter,
@@ -898,6 +910,20 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["excuse_types"] = excuse_types
     context["extra_marks"] = extra_marks
 
+    # Build filter with own form and logic as django-filter can't work with different models
+    filter_form = FilterRegisterObjectForm(request, request.GET or None, for_person=True)
+    filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+    filter_dict["person"] = person
+    context["filter_form"] = filter_form
+
+    register_objects = generate_list_of_all_register_objects(filter_dict)
+    if register_objects:
+        table = RegisterObjectTable(register_objects)
+        items_per_page = request.user.person.preferences[
+            "alsijil__register_objects_table_items_per_page"
+        ]
+        RequestConfig(request, paginate={"per_page": items_per_page}).configure(table)
+        context["register_object_table"] = table
     return render(request, "alsijil/class_register/person.html", context)
 
 
@@ -1236,3 +1262,51 @@ class GroupRoleAssignmentDeleteView(
     def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
+
+
+class AllRegisterObjectsView(PermissionRequiredMixin, View):
+    """Provide overview of all register objects for coordinators."""
+
+    permission_required = "alsijil.view_register_objects_list"
+
+    def get_context_data(self, request):
+        context = {}
+        # Filter selectable groups by permissions
+        groups = Group.objects.all()
+        if not check_global_permission(request.user, "alsijil.view_full_register"):
+            allowed_groups = get_objects_for_user(
+                self.request.user, "core.view_full_register_group", Group
+            ).values_list("pk", flat=True)
+            groups = groups.filter(Q(parent_groups__in=allowed_groups) | Q(pk__in=allowed_groups))
+
+        # Build filter with own form and logic as django-filter can't work with different models
+        filter_form = FilterRegisterObjectForm(
+            request, request.GET or None, for_person=False, groups=groups
+        )
+        filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+        filter_dict["groups"] = groups
+        context["filter_form"] = filter_form
+
+        register_objects = generate_list_of_all_register_objects(filter_dict)
+
+        self.action_form = RegisterObjectActionForm(request, register_objects, request.POST or None)
+        context["action_form"] = self.action_form
+
+        if register_objects:
+            self.table = RegisterObjectSelectTable(register_objects)
+            items_per_page = request.user.person.preferences[
+                "alsijil__register_objects_table_items_per_page"
+            ]
+            RequestConfig(request, paginate={"per_page": items_per_page}).configure(self.table)
+            context["table"] = self.table
+        return context
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        context = self.get_context_data(request)
+        return render(request, "alsijil/class_register/all_objects.html", context)
+
+    def post(self, request: HttpRequest):
+        context = self.get_context_data(request)
+        if self.action_form.is_valid():
+            self.action_form.execute()
+        return render(request, "alsijil/class_register/all_objects.html", context)
