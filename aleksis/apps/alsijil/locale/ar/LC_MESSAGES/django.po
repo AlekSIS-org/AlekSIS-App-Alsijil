@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-18 14:33+0100\n"
+"POT-Creation-Date: 2021-03-21 14:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: actions.py:30
-msgid "{} wants you to check some class register entries."
+msgid "{} asks you to check some class register entries."
 msgstr ""
 
 #: actions.py:48
@@ -28,7 +28,7 @@ msgid "We have successfully sent notifications to {count_teachers} persons for {
 msgstr ""
 
 #: actions.py:54
-msgid "Notify teacher to check data"
+msgid "Ask teacher to check data"
 msgstr ""
 
 #: data_checks.py:12
@@ -121,7 +121,7 @@ msgstr ""
 
 #: forms.py:142 templates/alsijil/absences/register_confirm.html:52
 #: templates/alsijil/class_register/lesson.html:261
-#: templates/alsijil/class_register/person.html:235
+#: templates/alsijil/class_register/person.html:234
 #: templates/alsijil/class_register/week_view.html:342
 #: templates/alsijil/print/full_register.html:75
 #: templates/alsijil/print/full_register.html:312
@@ -131,7 +131,7 @@ msgstr ""
 #: forms.py:143 templates/alsijil/absences/register_confirm.html:56
 #: templates/alsijil/class_register/lesson.html:263
 #: templates/alsijil/class_register/person.html:113
-#: templates/alsijil/class_register/person.html:243
+#: templates/alsijil/class_register/person.html:242
 #: templates/alsijil/partials/mark_as_buttons.html:2
 #: templates/alsijil/partials/mark_as_buttons.html:3
 #: templates/alsijil/partials/persons_with_stats.html:74
@@ -451,7 +451,7 @@ msgid "Edit"
 msgstr ""
 
 #: tables.py:25 tables.py:45 tables.py:70
-#: templates/alsijil/class_register/person.html:277
+#: templates/alsijil/class_register/person.html:276
 #: templates/alsijil/group_role/partials/assignment_options.html:29
 msgid "Delete"
 msgstr ""
@@ -573,7 +573,7 @@ msgid "%(period)s. period"
 msgstr ""
 
 #: templates/alsijil/class_register/lesson.html:56
-#: templates/alsijil/class_register/person.html:207
+#: templates/alsijil/class_register/person.html:206
 #: templates/alsijil/class_register/week_view.html:151
 #: templates/alsijil/class_register/week_view.html:214
 #: templates/alsijil/class_register/week_view.html:268
@@ -692,17 +692,17 @@ msgstr ""
 
 #: templates/alsijil/class_register/person.html:61
 #: templates/alsijil/class_register/person.html:80
-#: templates/alsijil/class_register/person.html:218
-#: templates/alsijil/class_register/person.html:265
+#: templates/alsijil/class_register/person.html:217
+#: templates/alsijil/class_register/person.html:264
 msgid "Mark as"
 msgstr ""
 
 #: templates/alsijil/class_register/person.html:64
 #: templates/alsijil/class_register/person.html:83
-#: templates/alsijil/class_register/person.html:221
-#: templates/alsijil/class_register/person.html:227
-#: templates/alsijil/class_register/person.html:268
-#: templates/alsijil/class_register/person.html:274
+#: templates/alsijil/class_register/person.html:220
+#: templates/alsijil/class_register/person.html:226
+#: templates/alsijil/class_register/person.html:267
+#: templates/alsijil/class_register/person.html:273
 msgid "Delete note"
 msgstr ""
 
@@ -742,17 +742,15 @@ msgstr ""
 
 #: templates/alsijil/class_register/person.html:158
 #, python-format
-msgid ""
-"Week\n"
-"                        %(week)s"
+msgid "Week %(week)s"
 msgstr ""
 
-#: templates/alsijil/class_register/person.html:167
-#: templates/alsijil/class_register/person.html:185
+#: templates/alsijil/class_register/person.html:166
+#: templates/alsijil/class_register/person.html:184
 msgid "Mark all as"
 msgstr ""
 
-#: templates/alsijil/class_register/person.html:250
+#: templates/alsijil/class_register/person.html:249
 #, python-format
 msgid "%(late)s' late"
 msgstr ""
