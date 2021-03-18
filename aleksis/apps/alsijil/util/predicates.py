@@ -1,13 +1,12 @@
 from typing import Any, Union
 
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import User
 
-from guardian.models import UserObjectPermission
 from rules import predicate
 
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import get_content_type_by_perm
+from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
 
@@ -128,16 +127,11 @@ def has_person_group_object_perm(perm: str):
 
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
-        ct = get_content_type_by_perm(perm)
-        permissions = Permission.objects.filter(content_type=ct, codename=perm)
         groups = obj.member_of.all()
-        qs = UserObjectPermission.objects.filter(
-            object_pk__in=list(groups.values_list("pk", flat=True)),
-            content_type=ct,
-            user=user,
-            permission__in=permissions,
-        )
-        return qs.exists()
+        for group in groups:
+            if check_object_permission(user, perm, group, checker_obj=obj):
+                return True
+        return False
 
     return fn
 
@@ -167,15 +161,9 @@ def has_lesson_group_object_perm(perm: str):
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
             groups = obj.lesson.groups.all()
-            ct = get_content_type_by_perm(perm)
-            permissions = Permission.objects.filter(content_type=ct, codename=perm)
-            qs = UserObjectPermission.objects.filter(
-                object_pk__in=list(groups.values_list("pk", flat=True)),
-                content_type=ct,
-                user=user,
-                permission__in=permissions,
-            )
-            return qs.exists()
+            for group in groups:
+                if check_object_permission(user, perm, group, checker_obj=obj):
+                    return True
         return False
 
     return fn
@@ -191,16 +179,10 @@ def has_personal_note_group_perm(perm: str):
     @predicate(name)
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
-            ct = get_content_type_by_perm(perm)
-            permissions = Permission.objects.filter(content_type=ct, codename=perm)
             groups = obj.person.member_of.all()
-            qs = UserObjectPermission.objects.filter(
-                object_pk__in=list(groups.values_list("pk", flat=True)),
-                content_type=ct,
-                user=user,
-                permission__in=permissions,
-            )
-            return qs.exists()
+            for group in groups:
+                if check_object_permission(user, perm, group, checker_obj=obj):
+                    return True
         return False
 
     return fn

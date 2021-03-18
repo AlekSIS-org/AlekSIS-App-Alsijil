@@ -1,9 +1,8 @@
 from datetime import date
 from typing import Dict, Iterable, Iterator, Optional, Union
 
-from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models import Exists, FilteredRelation, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
-from django.db.models.expressions import Subquery
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -386,59 +385,45 @@ def generate_person_list_with_class_register_statistics(
     if persons is None:
         persons = self.members.all()
 
-    # Build reusable Q objects for filtering by school term and by groups
-    # Necessary for the following annotations
-    school_term_q = (
-        Q(personal_notes__lesson_period__lesson__validity__school_term=self.school_term)
-        | Q(personal_notes__extra_lesson__school_term=self.school_term)
-        | Q(personal_notes__event__school_term=self.school_term)
+    lesson_periods = LessonPeriod.objects.filter(
+        lesson__validity__school_term=self.school_term
+    ).filter(Q(lesson__groups=self) | Q(lesson__groups__parent_groups=self))
+    extra_lessons = ExtraLesson.objects.filter(school_term=self.school_term).filter(
+        Q(groups=self) | Q(groups__parent_groups=self)
     )
-    groups_q = (
-        Q(personal_notes__lesson_period__lesson__groups=self)
-        | Q(personal_notes__lesson_period__lesson__groups__parent_groups=self)
-        | Q(personal_notes__extra_lesson__groups=self)
-        | Q(personal_notes__extra_lesson__groups__parent_groups=self)
-        | Q(personal_notes__event__groups=self)
-        | Q(personal_notes__event__groups__parent_groups=self)
+    events = Event.objects.filter(school_term=self.school_term).filter(
+        Q(groups=self) | Q(groups__parent_groups=self)
     )
 
-    persons = persons.filter(personal_notes__groups_of_person=self).filter(school_term_q).distinct()
-
+    persons = persons.select_related("primary_group", "primary_group__school_term")
     persons = persons.annotate(
-        absences_count=Count(
+        filtered_personal_notes=FilteredRelation(
             "personal_notes",
-            filter=Q(personal_notes__absent=True) & school_term_q & groups_q,
-            distinct=True,
+            condition=(
+                Q(personal_notes__event__in=events)
+                | Q(personal_notes__lesson_period__in=lesson_periods)
+                | Q(personal_notes__extra_lesson__in=extra_lessons)
+            ),
+        )
+    ).annotate(
+        absences_count=Count(
+            "filtered_personal_notes", filter=Q(filtered_personal_notes__absent=True),
         ),
         excused=Count(
-            "personal_notes",
+            "filtered_personal_notes",
             filter=Q(
-                personal_notes__absent=True,
-                personal_notes__excused=True,
-                personal_notes__excuse_type__isnull=True,
-            )
-            & school_term_q
-            & groups_q,
-            distinct=True,
+                filtered_personal_notes__absent=True,
+                filtered_personal_notes__excused=True,
+                filtered_personal_notes__excuse_type__isnull=True,
+            ),
         ),
         unexcused=Count(
-            "personal_notes",
-            filter=Q(personal_notes__absent=True, personal_notes__excused=False)
-            & school_term_q
-            & groups_q,
-            distinct=True,
+            "filtered_personal_notes",
+            filter=Q(filtered_personal_notes__absent=True, filtered_personal_notes__excused=False),
         ),
-        tardiness=Subquery(
-            Person.objects.filter(school_term_q & groups_q)
-            .filter(pk=OuterRef("pk"),)
-            .distinct()
-            .annotate(tardiness=Sum("personal_notes__late"))
-            .values("tardiness")
-        ),
+        tardiness=Sum("filtered_personal_notes__late"),
         tardiness_count=Count(
-            "personal_notes",
-            filter=~Q(personal_notes__late=0) & school_term_q & groups_q,
-            distinct=True,
+            "filtered_personal_notes", filter=Q(filtered_personal_notes__late__gt=0),
         ),
     )
 
@@ -446,9 +431,8 @@ def generate_person_list_with_class_register_statistics(
         persons = persons.annotate(
             **{
                 extra_mark.count_label: Count(
-                    "personal_notes",
-                    filter=Q(personal_notes__extra_marks=extra_mark) & school_term_q & groups_q,
-                    distinct=True,
+                    "filtered_personal_notes",
+                    filter=Q(filtered_personal_notes__extra_marks=extra_mark),
                 )
             }
         )
@@ -457,11 +441,11 @@ def generate_person_list_with_class_register_statistics(
         persons = persons.annotate(
             **{
                 excuse_type.count_label: Count(
-                    "personal_notes__absent",
-                    filter=Q(personal_notes__absent=True, personal_notes__excuse_type=excuse_type,)
-                    & school_term_q
-                    & groups_q,
-                    distinct=True,
+                    "filtered_personal_notes__absent",
+                    filter=Q(
+                        filtered_personal_notes__absent=True,
+                        filtered_personal_notes__excuse_type=excuse_type,
+                    ),
                 )
             }
         )
