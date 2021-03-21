@@ -644,7 +644,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, filtered_documentations, filtered_personal_notes, substitution)
                 )
 
-    persons = Person.objects.prefetch_related(None).select_related(None)
+    persons = group.members.prefetch_related(None).select_related(None)
     persons = group.generate_person_list_with_class_register_statistics(persons)
 
     prefetched_persons = []
