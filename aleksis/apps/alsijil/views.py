@@ -20,6 +20,7 @@ from django.views.generic import DetailView
 import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig, SingleTableView
+from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_objects_for_user
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
@@ -192,6 +193,14 @@ def register_object(
         lesson_documentation_form = LessonDocumentationForm(
             request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
         )
+
+        # Prefetch object permissions for all related groups of the register object
+        # because the object permissions are checked for all groups of the register object
+        # That has to be set as an attribute of the register object,
+        # so that the permission system can use the prefetched data.
+        checker = ObjectPermissionChecker(request.user)
+        checker.prefetch_perms(register_object.get_groups().all())
+        register_object.set_object_permission_checker(checker)
 
         # Create a formset that holds all personal notes for all persons in this lesson
         if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
@@ -396,6 +405,12 @@ def week_view(
                 | Q(member_of__extra_lessons__in=extra_lessons_pk)
             )
 
+        # Prefetch object permissions for persons and groups the persons are members of
+        # because the object permissions are checked for both persons and groups
+        checker = ObjectPermissionChecker(request.user)
+        checker.prefetch_perms(persons_qs)
+        checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
+
         persons_qs = (
             Person.objects.filter(pk__in=persons_qs)
             .select_related("primary_group")
@@ -472,6 +487,7 @@ def week_view(
                 if note.lesson_period:
                     note.lesson_period.annotate_week(wanted_week)
                 personal_notes.append(note)
+            person.set_object_permission_checker(checker)
             persons.append({"person": person, "personal_notes": personal_notes})
     else:
         persons = None
@@ -674,7 +690,9 @@ def my_students(request: HttpRequest) -> HttpResponse:
 
     new_groups = []
     for group in relevant_groups:
-        persons = group.generate_person_list_with_class_register_statistics()
+        persons = group.generate_person_list_with_class_register_statistics(
+            group.members.prefetch_related("primary_group__owners")
+        )
         new_groups.append((group, persons))
 
     context["groups"] = new_groups
@@ -707,13 +725,18 @@ class StudentsList(PermissionRequiredMixin, DetailView):
 
 
 @permission_required(
-    "alsijil.view_person_overview", fn=objectgetter_optional(Person, "request.user.person", True),
+    "alsijil.view_person_overview",
+    fn=objectgetter_optional(
+        Person.objects.prefetch_related("member_of__owners"), "request.user.person", True
+    ),
 )
 def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
     context = {}
-    person = objectgetter_optional(Person, default="request.user.person", default_eval=True)(
-        request, id_
-    )
+    person = objectgetter_optional(
+        Person.objects.prefetch_related("member_of__owners"),
+        default="request.user.person",
+        default_eval=True,
+    )(request, id_)
     context["person"] = person
 
     if request.method == "POST":
@@ -788,6 +811,14 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         "lesson_period__substitutions",
     )
 
+    # Prefetch object permissions for groups the person is a member of
+    # because the object permissions are checked for all groups the person is a member of
+    # That has to be set as an attribute of the register object,
+    # so that the permission system can use the prefetched data.
+    checker = ObjectPermissionChecker(request.user)
+    checker.prefetch_perms(Group.objects.filter(members=person))
+    person.set_object_permission_checker(checker)
+
     if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
         allowed_personal_notes = person_personal_notes.all()
     else:
@@ -837,7 +868,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
         )
     )
-    context["personal_notes"] = personal_notes
+    personal_notes_list = []
+    for note in personal_notes:
+        note.set_object_permission_checker(checker)
+        personal_notes_list.append(note)
+    context["personal_notes"] = personal_notes_list
     context["excuse_types"] = ExcuseType.objects.all()
 
     extra_marks = ExtraMark.objects.all()
