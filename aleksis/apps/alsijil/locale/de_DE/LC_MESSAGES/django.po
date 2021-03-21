@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-18 14:33+0100\n"
-"PO-Revision-Date: 2021-02-24 18:54+0000\n"
+"POT-Creation-Date: 2021-03-21 14:38+0100\n"
+"PO-Revision-Date: 2021-03-18 14:35+0000\n"
 "Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
 "Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
@@ -19,17 +19,21 @@ msgstr ""
 "X-Generator: Weblate 4.4\n"
 
 #: actions.py:30
-msgid "{} wants you to check some class register entries."
-msgstr ""
+#, fuzzy
+#| msgid "{} wants you to check some class register entries."
+msgid "{} asks you to check some class register entries."
+msgstr "{} bittet Sie, einige Klassenbucheinträge zu überprüfen."
 
 #: actions.py:48
 #, python-brace-format
 msgid "We have successfully sent notifications to {count_teachers} persons for {count_items} lessons."
-msgstr ""
+msgstr "Wir haben erfolgreich Benachrichtigungen an {count_teachers} Personen für {count_items} Stunden gesendet."
 
 #: actions.py:54
-msgid "Notify teacher to check data"
-msgstr ""
+#, fuzzy
+#| msgid "Notify teacher to check data"
+msgid "Ask teacher to check data"
+msgstr "Lehrkraft bitten, die Daten zu überprüfen"
 
 #: data_checks.py:12
 msgid "Delete object"
@@ -121,7 +125,7 @@ msgstr "Endstunde"
 
 #: forms.py:142 templates/alsijil/absences/register_confirm.html:52
 #: templates/alsijil/class_register/lesson.html:261
-#: templates/alsijil/class_register/person.html:235
+#: templates/alsijil/class_register/person.html:234
 #: templates/alsijil/class_register/week_view.html:342
 #: templates/alsijil/print/full_register.html:75
 #: templates/alsijil/print/full_register.html:312
@@ -131,7 +135,7 @@ msgstr "Abwesend"
 #: forms.py:143 templates/alsijil/absences/register_confirm.html:56
 #: templates/alsijil/class_register/lesson.html:263
 #: templates/alsijil/class_register/person.html:113
-#: templates/alsijil/class_register/person.html:243
+#: templates/alsijil/class_register/person.html:242
 #: templates/alsijil/partials/mark_as_buttons.html:2
 #: templates/alsijil/partials/mark_as_buttons.html:3
 #: templates/alsijil/partials/persons_with_stats.html:74
@@ -160,13 +164,11 @@ msgstr "Person"
 
 #: forms.py:270
 msgid "School term"
-msgstr ""
+msgstr "Schuljahr"
 
 #: forms.py:271
-#, fuzzy
-#| msgid "Lesson documentation"
 msgid "Has lesson documentation"
-msgstr "Stunden-Dokumentation"
+msgstr "Hat eine Stunden-Dokumentation"
 
 #: forms.py:273 templates/alsijil/class_register/week_view.html:106
 #: templates/alsijil/class_register/week_view.html:202
@@ -208,10 +210,8 @@ msgstr "Gruppenrolle zuweisen"
 
 #: menus.py:82 templates/alsijil/class_register/all_objects.html:5
 #: templates/alsijil/class_register/all_objects.html:8
-#, fuzzy
-#| msgid "All assignments"
 msgid "All lessons"
-msgstr "Alle Zuweisungen"
+msgstr "Alle Stunden"
 
 #: menus.py:93 models.py:63 templates/alsijil/excuse_type/list.html:8
 #: templates/alsijil/excuse_type/list.html:9
@@ -399,7 +399,7 @@ msgstr "Erlaube Primärgruppeninhabern Absenzen in der Zukunft für Mitglieder i
 
 #: preferences.py:43
 msgid "Allow original teachers to edit their lessons although they are substituted"
-msgstr ""
+msgstr "Erlaube den Ursprungslehrkräften, ihre Stunden zu bearbeiten, obwohl sie vertreten worden sind"
 
 #: preferences.py:52
 msgid "Carry over data from first lesson period to the following lesson periods in lessons over multiple periods"
@@ -443,11 +443,11 @@ msgstr "Zugewiesene Gruppenrollen in der Stundenansicht anzeigen"
 
 #: preferences.py:122
 msgid "Items per page in lessons table"
-msgstr ""
+msgstr "Einträge pro Seite in der Stundentabelle"
 
 #: preferences.py:126
 msgid "Each page must show at least one item."
-msgstr ""
+msgstr "Jede Seite muss mindestens einen Eintrag anzeigen."
 
 #: tables.py:19 tables.py:39 tables.py:64
 #: templates/alsijil/group_role/partials/assignment_options.html:13
@@ -455,7 +455,7 @@ msgid "Edit"
 msgstr "Bearbeiten"
 
 #: tables.py:25 tables.py:45 tables.py:70
-#: templates/alsijil/class_register/person.html:277
+#: templates/alsijil/class_register/person.html:276
 #: templates/alsijil/group_role/partials/assignment_options.html:29
 msgid "Delete"
 msgstr "Löschen"
@@ -587,7 +587,7 @@ msgid "%(period)s. period"
 msgstr "%(period)s. Stunde"
 
 #: templates/alsijil/class_register/lesson.html:56
-#: templates/alsijil/class_register/person.html:207
+#: templates/alsijil/class_register/person.html:206
 #: templates/alsijil/class_register/week_view.html:151
 #: templates/alsijil/class_register/week_view.html:214
 #: templates/alsijil/class_register/week_view.html:268
@@ -724,17 +724,17 @@ msgstr "Unentschuldigte Fehlzeiten"
 
 #: templates/alsijil/class_register/person.html:61
 #: templates/alsijil/class_register/person.html:80
-#: templates/alsijil/class_register/person.html:218
-#: templates/alsijil/class_register/person.html:265
+#: templates/alsijil/class_register/person.html:217
+#: templates/alsijil/class_register/person.html:264
 msgid "Mark as"
 msgstr "Markiere als"
 
 #: templates/alsijil/class_register/person.html:64
 #: templates/alsijil/class_register/person.html:83
-#: templates/alsijil/class_register/person.html:221
-#: templates/alsijil/class_register/person.html:227
-#: templates/alsijil/class_register/person.html:268
-#: templates/alsijil/class_register/person.html:274
+#: templates/alsijil/class_register/person.html:220
+#: templates/alsijil/class_register/person.html:226
+#: templates/alsijil/class_register/person.html:267
+#: templates/alsijil/class_register/person.html:273
 msgid "Delete note"
 msgstr "Notiz löschen"
 
@@ -774,17 +774,15 @@ msgstr "Relevante persönliche Notizen"
 
 #: templates/alsijil/class_register/person.html:158
 #, python-format
-msgid ""
-"Week\n"
-"                        %(week)s"
-msgstr ""
+msgid "Week %(week)s"
+msgstr "Woche %(week)s"
 
-#: templates/alsijil/class_register/person.html:167
-#: templates/alsijil/class_register/person.html:185
+#: templates/alsijil/class_register/person.html:166
+#: templates/alsijil/class_register/person.html:184
 msgid "Mark all as"
 msgstr "Alle als markieren"
 
-#: templates/alsijil/class_register/person.html:250
+#: templates/alsijil/class_register/person.html:249
 #, python-format
 msgid "%(late)s' late"
 msgstr "%(late)s' verspätet"
@@ -954,7 +952,7 @@ msgstr "Beenden"
 
 #: templates/alsijil/notifications/check.html:1
 msgid "Please check if the following class register entries are complete and correct:"
-msgstr ""
+msgstr "Bitte prüfen Sie, ob die folgenden Klassenbucheinträge komplett und richtig sind:"
 
 #: templates/alsijil/partials/absences.html:6
 #: templates/alsijil/partials/persons_with_stats.html:27
@@ -1014,26 +1012,20 @@ msgid "e"
 msgstr "e"
 
 #: templates/alsijil/partials/objects_table.html:4
-#, fuzzy
-#| msgid "Lesson start"
 msgid "Lesson filter"
-msgstr "Unterrichtsbeginn"
+msgstr "Stundenfilter"
 
 #: templates/alsijil/partials/objects_table.html:9
-#, fuzzy
-#| msgid "Add filter"
 msgid "Update filters"
-msgstr "Filter hinzufügen"
+msgstr "Filter aktualisieren"
 
 #: templates/alsijil/partials/objects_table.html:22
-#, fuzzy
-#| msgid "Lesson start"
 msgid "Lesson table"
-msgstr "Unterrichtsbeginn"
+msgstr "Stundentabelle"
 
 #: templates/alsijil/partials/objects_table.html:31
 msgid "Execute"
-msgstr ""
+msgstr "Ausführen"
 
 #: templates/alsijil/partials/persons_with_stats.html:7
 msgid "No students available."
@@ -1224,10 +1216,8 @@ msgid "Yes"
 msgstr "Ja"
 
 #: templates/alsijil/print/full_register.html:373
-#, fuzzy
-#| msgid "Week view"
 msgid "Week"
-msgstr "Wochenansicht"
+msgstr "Woche"
 
 #: templates/alsijil/print/full_register.html:383
 msgid "Notes"
@@ -1319,8 +1309,12 @@ msgstr "Die Gruppenrollenzuweisung wurde beendet."
 msgid "The group role assignment has been deleted."
 msgstr "Die Gruppenrollenzuweisung wurde gelöscht."
 
-#~ msgid "Week %(week)s"
-#~ msgstr "Woche %(week)s"
+#~ msgid ""
+#~ "Week\n"
+#~ "                        %(week)s"
+#~ msgstr ""
+#~ "Woche \n"
+#~ "%(week)s"
 
 #~ msgid "Lesson documentation for week"
 #~ msgstr "Unterrichtsdokumentation für Woche"
