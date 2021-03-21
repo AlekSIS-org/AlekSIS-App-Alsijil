@@ -197,7 +197,7 @@ def register_object(
         # Create a formset that holds all personal notes for all persons in this lesson
         checker = ObjectPermissionChecker(request.user)
         checker.prefetch_perms(register_object.get_groups().all())
-        register_object.annotate_object_permission_checker(checker)
+        register_object.set_object_permission_checker(checker)
         if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
             persons = Person.objects.filter(pk=request.user.person.pk)
         else:
@@ -480,7 +480,7 @@ def week_view(
                 if note.lesson_period:
                     note.lesson_period.annotate_week(wanted_week)
                 personal_notes.append(note)
-            person.annotate_object_permission_checker(checker)
+            person.set_object_permission_checker(checker)
             persons.append({"person": person, "personal_notes": personal_notes})
     else:
         persons = None
@@ -859,7 +859,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )
     personal_notes_list = []
     for note in personal_notes:
-        note.annotate_object_permission_checker(checker)
+        note.set_object_permission_checker(checker)
         personal_notes_list.append(note)
     context["personal_notes"] = personal_notes_list
     context["excuse_types"] = ExcuseType.objects.all()
