@@ -250,6 +250,7 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
                 check=lesson_related_constraint_q, name="one_relation_only_personal_note"
             )
         ]
+        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
@@ -337,6 +338,7 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
                 check=lesson_related_constraint_q, name="one_relation_only_lesson_documentation",
             )
         ]
+        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class ExtraMark(ExtensibleModel):
