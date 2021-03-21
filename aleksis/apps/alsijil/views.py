@@ -194,10 +194,15 @@ def register_object(
             request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
         )
 
-        # Create a formset that holds all personal notes for all persons in this lesson
+        # Prefetch object permissions for all related groups of the register object
+        # because the object permissions are checked for all groups of the register object
+        # That has to be set as an attribute of the register object,
+        # so that the permission system can use the prefetched data.
         checker = ObjectPermissionChecker(request.user)
         checker.prefetch_perms(register_object.get_groups().all())
         register_object.set_object_permission_checker(checker)
+
+        # Create a formset that holds all personal notes for all persons in this lesson
         if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
             persons = Person.objects.filter(pk=request.user.person.pk)
         else:
@@ -400,6 +405,8 @@ def week_view(
                 | Q(member_of__extra_lessons__in=extra_lessons_pk)
             )
 
+        # Prefetch object permissions for persons and groups the persons are members of
+        # because the object permissions are checked for both persons and groups
         checker = ObjectPermissionChecker(request.user)
         checker.prefetch_perms(persons_qs)
         checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
@@ -804,9 +811,13 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         "lesson_period__substitutions",
     )
 
+    # Prefetch object permissions for groups the person is a member of
+    # because the object permissions are checked for all groups the person is a member of
+    # That has to be set as an attribute of the register object,
+    # so that the permission system can use the prefetched data.
     checker = ObjectPermissionChecker(request.user)
     checker.prefetch_perms(Group.objects.filter(members=person))
-    person.annotate_object_permission_checker(checker)
+    person.set_object_permission_checker(checker)
 
     if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
         allowed_personal_notes = person_personal_notes.all()
