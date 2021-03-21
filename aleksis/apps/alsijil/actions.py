@@ -27,7 +27,7 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
     for teacher, items in grouped_by_teachers.items():
         msg = template.render({"items": items})
 
-        title = _("{} wants you to check some class register entries.").format(
+        title = _("{} asks you to check some class register entries.").format(
             request.user.person.addressing_name
         )
 
@@ -51,4 +51,4 @@ def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items
     )
 
 
-send_request_to_check_entry.short_description = _("Notify teacher to check data")
+send_request_to_check_entry.short_description = _("Ask teacher to check data")

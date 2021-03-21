@@ -155,8 +155,7 @@
 
                   {% ifchanged note.week %}
                     <li class="collection-item">
-                      <strong>{% blocktrans with week=note.calendar_week.week %}Week
-                        {{ week }}{% endblocktrans %}</strong>
+                      <strong>{% blocktrans with week=note.calendar_week.week %}Week {{ week }}{% endblocktrans %}</strong>
                     </li>
                   {% endifchanged %}
                   {% ifchanged note.date %}

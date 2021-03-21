@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models import Count, Exists, FilteredRelation, OuterRef, Prefetch, Q, Sum
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Extract
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
@@ -404,46 +404,39 @@ def week_view(
         checker.prefetch_perms(persons_qs)
         checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
 
-        personal_notes_q = (
-            Q(
-                personal_notes__week=wanted_week.week,
-                personal_notes__year=wanted_week.year,
-                personal_notes__lesson_period__in=lesson_periods_pk,
+        persons_qs = (
+            Person.objects.filter(pk__in=persons_qs)
+            .select_related("primary_group")
+            .prefetch_related("primary_group__owners")
+            .annotate(
+                filtered_personal_notes=FilteredRelation(
+                    "personal_notes",
+                    condition=(
+                        Q(personal_notes__event__in=events_pk)
+                        | Q(
+                            personal_notes__week=wanted_week.week,
+                            personal_notes__year=wanted_week.year,
+                            personal_notes__lesson_period__in=lesson_periods_pk,
+                        )
+                        | Q(personal_notes__extra_lesson__in=extra_lessons_pk)
+                    ),
+                )
             )
-            | Q(
-                personal_notes__event__date_start__lte=wanted_week[6],
-                personal_notes__event__date_end__gte=wanted_week[0],
-                personal_notes__event__in=events_pk,
-            )
-            | Q(
-                personal_notes__extra_lesson__week=wanted_week.week,
-                personal_notes__extra_lesson__year=wanted_week.year,
-                personal_notes__extra_lesson__in=extra_lessons_pk,
-            )
-        )
-
-        persons_qs = persons_qs.distinct().prefetch_related(
-            Prefetch(
-                "personal_notes",
-                queryset=PersonalNote.objects.filter(
-                    Q(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
-                    )
-                    | Q(
-                        event__date_start__lte=wanted_week[6],
-                        event__date_end__gte=wanted_week[0],
-                        event__in=events_pk,
-                    )
-                    | Q(
-                        extra_lesson__week=wanted_week.week,
-                        extra_lesson__year=wanted_week.year,
-                        extra_lesson__in=extra_lessons_pk,
-                    )
+            .prefetch_related(
+                Prefetch(
+                    "personal_notes",
+                    queryset=PersonalNote.objects.filter(
+                        Q(event__in=events_pk)
+                        | Q(
+                            week=wanted_week.week,
+                            year=wanted_week.year,
+                            lesson_period__in=lesson_periods_pk,
+                        )
+                        | Q(extra_lesson__in=extra_lessons_pk)
+                    ),
                 ),
-            ),
-            "member_of__owners",
+                "member_of__owners",
+            )
         )
 
         # Annotate group roles
@@ -456,27 +449,17 @@ def week_view(
             )
         persons_qs = persons_qs.annotate(
             absences_count=Count(
-                "personal_notes",
-                filter=personal_notes_q & Q(personal_notes__absent=True,),
-                distinct=True,
+                "filtered_personal_notes", filter=Q(filtered_personal_notes__absent=True),
             ),
             unexcused_count=Count(
-                "personal_notes",
-                filter=personal_notes_q
-                & Q(personal_notes__absent=True, personal_notes__excused=False,),
-                distinct=True,
+                "filtered_personal_notes",
+                filter=Q(
+                    filtered_personal_notes__absent=True, filtered_personal_notes__excused=False
+                ),
             ),
-            tardiness_sum=Subquery(
-                Person.objects.filter(personal_notes_q)
-                .filter(pk=OuterRef("pk"),)
-                .distinct()
-                .annotate(tardiness_sum=Sum("personal_notes__late"))
-                .values("tardiness_sum")
-            ),
+            tardiness_sum=Sum("filtered_personal_notes__late"),
             tardiness_count=Count(
-                "personal_notes",
-                filter=personal_notes_q & ~Q(personal_notes__late=0),
-                distinct=True,
+                "filtered_personal_notes", filter=Q(filtered_personal_notes__late__gt=0),
             ),
         )
 
@@ -484,9 +467,8 @@ def week_view(
             persons_qs = persons_qs.annotate(
                 **{
                     extra_mark.count_label: Count(
-                        "personal_notes",
-                        filter=personal_notes_q & Q(personal_notes__extra_marks=extra_mark,),
-                        distinct=True,
+                        "filtered_personal_notes",
+                        filter=Q(filtered_personal_notes__extra_marks=extra_mark),
                     )
                 }
             )
