@@ -473,7 +473,7 @@
               </td>
               <td class="lesson-te">
                 {% if documentations.0.topic %}
-                  {{ substitution.teachers.first.short_name|default:register_object.get_teachers.first.short_name }}
+                  {{ register_object.get_teachers.first.short_name }}
                 {% endif %}
               </td>
             </tr>
