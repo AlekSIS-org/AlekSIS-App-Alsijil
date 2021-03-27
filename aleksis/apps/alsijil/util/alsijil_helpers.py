@@ -210,11 +210,7 @@ def _generate_dicts_for_lesson_periods(
                 ):
                     continue
 
-                teachers = (
-                    sub.teacher_names
-                    if sub and sub.teachers.all()
-                    else lesson_period.lesson.teacher_names
-                )
+                teachers = lesson_period.teacher_names
                 if (
                     filter_dict.get("subject")
                     and filter_dict.get("subject") != lesson_period.get_subject()
