@@ -114,11 +114,13 @@
                 <a href="#personal-notes">{% trans "Personal notes" %}</a>
               </li>
             {% endif %}
-            {% has_perm "alsijil.view_lessondocumentation" user register_object.prev as can_view_prev_lesson_documentation %}
-            {% if register_object.prev.get_lesson_documentation and can_view_prev_lesson_documentation %}
-              <li class="tab">
-                <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
-              </li>
+            {% if prev_lesson %}
+              {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+              {% if prev_lesson.get_lesson_documentation and can_view_prev_lesson_documentation %}
+                <li class="tab">
+                  <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
+                </li>
+              {% endif %}
             {% endif %}
             {% if group_roles %}
               <li class="tab">
@@ -172,7 +174,7 @@
           </div>
         </div>
 
-        {% with prev_lesson=register_object.prev prev_doc=prev_lesson.get_lesson_documentation %}
+        {% with prev_doc=prev_lesson.get_lesson_documentation %}
           {% with absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
             {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
             {% if prev_doc and can_view_prev_lesson_documentation %}
