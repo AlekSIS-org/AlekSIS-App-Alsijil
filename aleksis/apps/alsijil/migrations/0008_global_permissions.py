@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('extended_data', models.JSONField(default=dict, editable=False)),
             ],
+            "default_permissions": (),
             options={
                 'permissions': (('view_week', 'Can view week overview'), ('register_absence', 'Can register absence'), ('list_personal_note_filters', 'Can list all personal note filters')),
                 'managed': False,
