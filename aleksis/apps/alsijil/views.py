@@ -1,3 +1,4 @@
+import time
 from contextlib import nullcontext
 from copy import deepcopy
 from datetime import date, datetime, timedelta
@@ -280,6 +281,16 @@ def register_object(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
+class catchtime(object):
+    def __enter__(self):
+        self.t = time.time()
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        self.t = time.time() - self.t
+        print(self.t)
+
+
 @permission_required("alsijil.view_week", fn=get_timetable_instance_by_pk)
 def week_view(
     request: HttpRequest,
@@ -373,6 +384,7 @@ def week_view(
     if show_group_roles:
         group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
         context["group_roles"] = group_roles
+        group_roles_persons = GroupRoleAssignment.objects.in_week(wanted_week).for_group(group)
 
     extra_marks = ExtraMark.objects.all()
 
@@ -380,11 +392,16 @@ def week_view(
         lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
         lesson_periods = annotate_documentations(LessonPeriod, wanted_week, lesson_periods_pk)
 
-        events_pk = list(events.values_list("pk", flat=True))
+        events_pk = [event.pk for event in events]
         events = annotate_documentations(Event, wanted_week, events_pk)
 
         extra_lessons_pk = list(extra_lessons.values_list("pk", flat=True))
         extra_lessons = annotate_documentations(ExtraLesson, wanted_week, extra_lessons_pk)
+        groups = Group.objects.filter(
+            Q(lessons__lesson_periods__in=lesson_periods_pk)
+            | Q(events__in=events_pk)
+            | Q(extra_lessons__in=extra_lessons_pk)
+        )
     else:
         lesson_periods_pk = []
         events_pk = []
@@ -399,22 +416,39 @@ def week_view(
         elif group:
             persons_qs = persons_qs.filter(member_of=group)
         else:
-            persons_qs = persons_qs.filter(
-                Q(member_of__lessons__lesson_periods__in=lesson_periods_pk)
-                | Q(member_of__events__in=events_pk)
-                | Q(member_of__extra_lessons__in=extra_lessons_pk)
-            )
+            persons_qs = persons_qs.filter(member_of__in=groups)
 
         # Prefetch object permissions for persons and groups the persons are members of
         # because the object permissions are checked for both persons and groups
         checker = ObjectPermissionChecker(request.user)
-        checker.prefetch_perms(persons_qs)
-        checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
+        with catchtime():
+            print("Prefetch checker")
+            checker.prefetch_perms(persons_qs.prefetch_related(None))
+            checker.prefetch_perms(groups)
 
+        with catchtime():
+            print("personal notes")
+            prefetched_personal_notes = list(
+                PersonalNote.objects.filter(  #
+                    Q(event__in=events_pk)
+                    | Q(
+                        week=wanted_week.week,
+                        year=wanted_week.year,
+                        lesson_period__in=lesson_periods_pk,
+                    )
+                    | Q(extra_lesson__in=extra_lessons_pk)
+                ).filter(~Q(remarks=""))
+            )
         persons_qs = (
-            Person.objects.filter(pk__in=persons_qs)
-            .select_related("primary_group")
-            .prefetch_related("primary_group__owners")
+            persons_qs.select_related("primary_group")
+            .prefetch_related(
+                Prefetch(
+                    "primary_group__owners",
+                    queryset=Person.objects.filter(pk=request.user.person.pk),
+                    to_attr="owners_prefetched",
+                ),
+                Prefetch("member_of", queryset=groups, to_attr="member_of_prefetched"),
+            )
             .annotate(
                 filtered_personal_notes=FilteredRelation(
                     "personal_notes",
@@ -429,31 +463,8 @@ def week_view(
                     ),
                 )
             )
-            .prefetch_related(
-                Prefetch(
-                    "personal_notes",
-                    queryset=PersonalNote.objects.filter(
-                        Q(event__in=events_pk)
-                        | Q(
-                            week=wanted_week.week,
-                            year=wanted_week.year,
-                            lesson_period__in=lesson_periods_pk,
-                        )
-                        | Q(extra_lesson__in=extra_lessons_pk)
-                    ),
-                ),
-                "member_of__owners",
-            )
         )
 
-        # Annotate group roles
-        if show_group_roles:
-            persons_qs = persons_qs.prefetch_related(
-                Prefetch(
-                    "group_roles",
-                    queryset=GroupRoleAssignment.objects.in_week(wanted_week).for_group(group),
-                ),
-            )
         persons_qs = persons_qs.annotate(
             absences_count=Count(
                 "filtered_personal_notes", filter=Q(filtered_personal_notes__absent=True),
@@ -481,14 +492,22 @@ def week_view(
             )
 
         persons = []
+        with catchtime():
+            print("Persons")
+            persons_test = list(persons_qs)
         for person in persons_qs:
             personal_notes = []
-            for note in person.personal_notes.all():
+            for note in filter(lambda note: note.person_id == person.pk, prefetched_personal_notes):
                 if note.lesson_period:
                     note.lesson_period.annotate_week(wanted_week)
                 personal_notes.append(note)
             person.set_object_permission_checker(checker)
-            persons.append({"person": person, "personal_notes": personal_notes})
+            person_dict = {"person": person, "personal_notes": personal_notes}
+            if show_group_roles:
+                person_dict["group_roles"] = filter(
+                    lambda role: role.person_id == person.pk, group_roles_persons
+                )
+            persons.append(person_dict)
     else:
         persons = None
 
@@ -508,23 +527,27 @@ def week_view(
 
     regrouped_objects = {}
 
-    for register_object in list(lesson_periods) + list(extra_lessons):
-        register_object.weekday = register_object.period.weekday
-        regrouped_objects.setdefault(register_object.period.weekday, [])
-        regrouped_objects[register_object.period.weekday].append(register_object)
+    with catchtime():
+        print("Register objects")
+        for register_object in list(lesson_periods) + list(extra_lessons):
+            register_object.weekday = register_object.period.weekday
+            regrouped_objects.setdefault(register_object.period.weekday, [])
+            regrouped_objects[register_object.period.weekday].append(register_object)
 
-    for event in events:
-        weekday_from = event.get_start_weekday(wanted_week)
-        weekday_to = event.get_end_weekday(wanted_week)
+    with catchtime():
+        print("events")
+        for event in events:
+            weekday_from = event.get_start_weekday(wanted_week)
+            weekday_to = event.get_end_weekday(wanted_week)
 
-        for weekday in range(weekday_from, weekday_to + 1):
-            # Make a copy in order to keep the annotation only on this weekday
-            event_copy = deepcopy(event)
-            event_copy.annotate_day(wanted_week[weekday])
-            event_copy.weekday = weekday
+            for weekday in range(weekday_from, weekday_to + 1):
+                # Make a copy in order to keep the annotation only on this weekday
+                event_copy = deepcopy(event)
+                event_copy.annotate_day(wanted_week[weekday])
+                event_copy.weekday = weekday
 
-            regrouped_objects.setdefault(weekday, [])
-            regrouped_objects[weekday].append(event_copy)
+                regrouped_objects.setdefault(weekday, [])
+                regrouped_objects[weekday].append(event_copy)
 
     # Sort register objects
     for weekday in regrouped_objects.keys():

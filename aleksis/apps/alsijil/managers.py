@@ -89,6 +89,9 @@ class PersonalNoteManager(CurrentSiteManagerWithoutMigrations):
                 "lesson_period__period",
                 "lesson_period__lesson__validity",
                 "lesson_period__lesson__validity__school_term",
+                "event",
+                "extra_lesson",
+                "extra_lesson__subject",
             )
             .prefetch_related("extra_marks")
         )
