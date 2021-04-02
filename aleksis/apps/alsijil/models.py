@@ -312,6 +312,33 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
             if changed:
                 lesson_documentation.save()
 
+        if not self.lesson_period.week:
+            self.lesson_period.annotate_week(CalendarWeek(year=self.year, week=self.week))
+
+        previous_lesson = self.lesson_period.prev
+
+        if previous_lesson:
+            lesson_documentation = previous_lesson.get_or_create_lesson_documentation(
+                CalendarWeek(week=self.week, year=self.year)
+            )
+
+            changed = False
+
+            if not lesson_documentation.topic:
+                lesson_documentation.topic = self.topic
+                changed = True
+
+            if not lesson_documentation.homework:
+                lesson_documentation.homework = self.homework
+                changed = True
+
+            if not lesson_documentation.group_note:
+                lesson_documentation.group_note = self.group_note
+                changed = True
+
+            if changed:
+                lesson_documentation.save()
+
     def __str__(self) -> str:
         return f"{self.lesson_period}, {self.date_formatted}"
 
