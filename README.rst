@@ -24,7 +24,7 @@ Licence
   Copyright © 2020 Hangzhi Yu <yuha@katharineum.de>
 
 
-  Licenced under the EUPL, version 1.2 or later
+  Licenced under the EUPL, version 1.2 or later, by Teckids e.V. (Bonn, Germany).
 
 Please see the LICENCE.rst file accompanying this distribution for the
 full licence text or on the `European Union Public Licence`_ website
