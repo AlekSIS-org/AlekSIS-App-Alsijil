@@ -286,8 +286,7 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
         Can be deactivated using site preference ``alsijil__carry_over``.
         """
         all_periods_of_lesson = LessonPeriod.objects.filter(
-            lesson=self.lesson_period.lesson,
-            period__weekday=self.lesson_period.period.weekday,
+            lesson=self.lesson_period.lesson, period__weekday=self.lesson_period.period.weekday,
         )
         for period in all_periods_of_lesson:
             lesson_documentation = period.get_or_create_lesson_documentation(
