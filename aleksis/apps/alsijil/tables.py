@@ -6,7 +6,7 @@ import django_tables2 as tables
 from django_tables2.utils import A
 
 from aleksis.apps.chronos.models import Event, LessonPeriod
-from aleksis.core.tables import MaterializeCheckboxColumn
+from aleksis.core.util.tables import SelectColumn
 
 from .models import PersonalNote
 
@@ -87,14 +87,14 @@ class GroupRoleTable(tables.Table):
 
 
 class PersonalNoteTable(tables.Table):
-    selected = MaterializeCheckboxColumn(
+    selected = SelectColumn(
         attrs={"input": {"name": "selected_objects"}}, accessor=A("pk")
     )
     date = tables.Column(
         verbose_name=_("Date"), accessor=A("date_formatted"), order_by=A("day_start")
     )
     period = tables.Column(
-        verbose_name=_("Period"), accessor=A("period_formatted"), order_by=A("period")
+        verbose_name=_("Period"), accessor=A("period_formatted"), order_by=A("order_period")
     )
     groups = tables.Column(verbose_name=_("Groups"), accessor=A("register_object__group_names"))
     teachers = tables.Column(
@@ -104,6 +104,7 @@ class PersonalNoteTable(tables.Table):
         verbose_name=_("Subject"), accessor=A("register_object__get_subject__name")
     )
     absent = tables.Column()
+    late = tables.Column()
     excused = tables.Column(verbose_name=_("Excuse"))
     extra_marks = tables.Column(verbose_name="Extra marks", accessor=A("extra_marks__all"))
 
@@ -122,7 +123,7 @@ class PersonalNoteTable(tables.Table):
     def render_absent(self, value):
         return render_to_string(
             "components/materialize-chips.html", dict(content="Absent", classes="red white-text")
-        )
+        ) if value else "–"
 
     def render_excused(self, value, record):
         if record.absent:
@@ -133,7 +134,7 @@ class PersonalNoteTable(tables.Table):
                     context = dict(content=record.excuse_type.name, classes="green white-text")
                     badge = render_to_string("components/materialize-chips.html", context)
                 return badge
-        return ""
+        return "–"
 
     def render_late(self, value):
         if value:
@@ -159,3 +160,51 @@ class PersonalNoteTable(tables.Table):
         model = PersonalNote
         fields = ()
         template_name = "django_tables2/materialize.html"
+
+
+def _get_link(value, record):
+    return record["register_object"].get_alsijil_url(record.get("week"))
+
+
+class RegisterObjectTable(tables.Table):
+    """Table to show all register objects in an overview.
+
+    .. warning::
+        Works only with ``generate_list_of_all_register_objects``.
+    """
+
+    class Meta:
+        attrs = {"class": "highlight responsive-table"}
+
+    status = tables.Column(accessor="register_object")
+    date = tables.Column(order_by="date_sort", linkify=_get_link)
+    period = tables.Column(order_by="period_sort", linkify=_get_link)
+    groups = tables.Column(linkify=_get_link)
+    teachers = tables.Column(linkify=_get_link)
+    subject = tables.Column(linkify=_get_link)
+    topic = tables.Column(linkify=_get_link)
+    homework = tables.Column(linkify=_get_link)
+    group_note = tables.Column(linkify=_get_link)
+
+    def render_status(self, value, record):
+        return render_to_string(
+            "alsijil/partials/lesson_status_icon.html",
+            dict(
+                week=record.get("week"),
+                has_documentation=record.get("has_documentation", False),
+                substitution=record.get("substitution"),
+                register_object=value,
+            ),
+        )
+
+
+class RegisterObjectSelectTable(RegisterObjectTable):
+    """Table to show all register objects with multi-select support.
+
+    More information at ``RegisterObjectTable``
+    """
+
+    selected = SelectColumn()
+
+    class Meta(RegisterObjectTable.Meta):
+        sequence = ("selected", "...")

@@ -1,0 +1,19 @@
+{# -*- engine:django -*- #}
+{% extends "core/base.html" %}
+{% load i18n rules static django_tables2 material_form %}
+
+{% block browser_title %}{% blocktrans %}All lessons{% endblocktrans %}{% endblock %}
+
+{% block page_title %}
+  {% blocktrans %}All lessons{% endblocktrans %}
+{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/alsijil/alsijil.css' %}"/>
+{% endblock %}
+
+{% block content %}
+  {% include "alsijil/partials/objects_table.html" %}
+  <script src="{% static "js/multi_select.js" %}"></script>
+{% endblock %}

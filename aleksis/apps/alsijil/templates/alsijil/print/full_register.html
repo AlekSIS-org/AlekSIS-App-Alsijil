@@ -370,7 +370,7 @@
   {% endfor %}
 
   {% for week in weeks %}
-    <h4>{% trans 'Lesson documentation for week' %} {{ week.week }}</h4>
+    <h4>{% trans 'Week' %} {{ week.week }}: {{ week.0 }}–{{ week.6 }}</h4>
 
     <table class="small-print">
       <thead>
@@ -401,7 +401,7 @@
                     {% endif %}
                   ">
               {% if forloop.first %}
-                <th rowspan="{{ register_objects|length }}" class="lessons-day-head">{{ day }}</th>
+                <th rowspan="{{ register_objects|length }}" class="lessons-day-head">{{ day|date:"D" }}</th>
               {% endif %}
               <td class="lesson-pe">
                 {% if register_object.label_ != "event" %}
@@ -473,7 +473,7 @@
               </td>
               <td class="lesson-te">
                 {% if documentations.0.topic %}
-                  {{ substitution.teachers.first.short_name|default:register_object.get_teachers.first.short_name }}
+                  {{ register_object.get_teachers.first.short_name }}
                 {% endif %}
               </td>
             </tr>

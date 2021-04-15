@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models import Count, Exists, FilteredRelation, OuterRef, Prefetch, Q, Sum
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Extract
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseNotFound
@@ -13,12 +13,15 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
+from django.views import View
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 import reversion
 from calendarweek import CalendarWeek
 from django_tables2 import RequestConfig, SingleTableView
+from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import get_objects_for_user
 from reversion.views import RevisionMixin
 from rules.contrib.views import PermissionRequiredMixin, permission_required
 
@@ -35,17 +38,20 @@ from aleksis.core.mixins import (
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
+from aleksis.core.util.predicates import check_global_permission
 
 from .forms import (
     AssignGroupRoleForm,
     ExcuseTypeForm,
     ExtraMarkForm,
+    FilterRegisterObjectForm,
     GroupRoleAssignmentEditForm,
     GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
     PersonOverviewForm,
     RegisterAbsenceForm,
+    RegisterObjectActionForm,
     SelectForm,
 )
 from .models import (
@@ -56,9 +62,17 @@ from .models import (
     LessonDocumentation,
     PersonalNote,
 )
-from .tables import ExcuseTypeTable, ExtraMarkTable, GroupRoleTable, PersonalNoteTable
+from .tables import (
+    ExcuseTypeTable,
+    ExtraMarkTable,
+    GroupRoleTable,
+    PersonalNoteTable,
+    RegisterObjectSelectTable,
+    RegisterObjectTable,
+)
 from .util.alsijil_helpers import (
     annotate_documentations,
+    generate_list_of_all_register_objects,
     get_register_object_by_pk,
     get_timetable_instance_by_pk,
     register_objects_sorter,
@@ -168,7 +182,9 @@ def register_object(
         # Group roles
         show_group_roles = request.user.person.preferences[
             "alsijil__group_roles_in_lesson_view"
-        ] and request.user.has_perm("alsijil.view_assigned_grouproles", register_object)
+        ] and request.user.has_perm(
+            "alsijil.view_assigned_grouproles_for_register_object", register_object
+        )
         if show_group_roles:
             groups = register_object.get_groups().all()
             group_roles = GroupRole.objects.with_assignments(date_of_lesson, groups)
@@ -179,6 +195,14 @@ def register_object(
         lesson_documentation_form = LessonDocumentationForm(
             request.POST or None, instance=lesson_documentation, prefix="lesson_documentation",
         )
+
+        # Prefetch object permissions for all related groups of the register object
+        # because the object permissions are checked for all groups of the register object
+        # That has to be set as an attribute of the register object,
+        # so that the permission system can use the prefetched data.
+        checker = ObjectPermissionChecker(request.user)
+        checker.prefetch_perms(register_object.get_groups().all())
+        register_object.set_object_permission_checker(checker)
 
         # Create a formset that holds all personal notes for all persons in this lesson
         if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
@@ -383,46 +407,45 @@ def week_view(
                 | Q(member_of__extra_lessons__in=extra_lessons_pk)
             )
 
-        personal_notes_q = (
-            Q(
-                personal_notes__week=wanted_week.week,
-                personal_notes__year=wanted_week.year,
-                personal_notes__lesson_period__in=lesson_periods_pk,
-            )
-            | Q(
-                personal_notes__event__date_start__lte=wanted_week[6],
-                personal_notes__event__date_end__gte=wanted_week[0],
-                personal_notes__event__in=events_pk,
-            )
-            | Q(
-                personal_notes__extra_lesson__week=wanted_week.week,
-                personal_notes__extra_lesson__year=wanted_week.year,
-                personal_notes__extra_lesson__in=extra_lessons_pk,
-            )
-        )
+        # Prefetch object permissions for persons and groups the persons are members of
+        # because the object permissions are checked for both persons and groups
+        checker = ObjectPermissionChecker(request.user)
+        checker.prefetch_perms(persons_qs)
+        checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
 
-        persons_qs = persons_qs.distinct().prefetch_related(
-            Prefetch(
-                "personal_notes",
-                queryset=PersonalNote.objects.filter(
-                    Q(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
-                    )
-                    | Q(
-                        event__date_start__lte=wanted_week[6],
-                        event__date_end__gte=wanted_week[0],
-                        event__in=events_pk,
-                    )
-                    | Q(
-                        extra_lesson__week=wanted_week.week,
-                        extra_lesson__year=wanted_week.year,
-                        extra_lesson__in=extra_lessons_pk,
-                    )
+        persons_qs = (
+            Person.objects.filter(pk__in=persons_qs)
+            .select_related("primary_group")
+            .prefetch_related("primary_group__owners")
+            .annotate(
+                filtered_personal_notes=FilteredRelation(
+                    "personal_notes",
+                    condition=(
+                        Q(personal_notes__event__in=events_pk)
+                        | Q(
+                            personal_notes__week=wanted_week.week,
+                            personal_notes__year=wanted_week.year,
+                            personal_notes__lesson_period__in=lesson_periods_pk,
+                        )
+                        | Q(personal_notes__extra_lesson__in=extra_lessons_pk)
+                    ),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "personal_notes",
+                    queryset=PersonalNote.objects.filter(
+                        Q(event__in=events_pk)
+                        | Q(
+                            week=wanted_week.week,
+                            year=wanted_week.year,
+                            lesson_period__in=lesson_periods_pk,
+                        )
+                        | Q(extra_lesson__in=extra_lessons_pk)
+                    ),
                 ),
-            ),
-            "member_of__owners",
+                "member_of__owners",
+            )
         )
 
         # Annotate group roles
@@ -435,27 +458,17 @@ def week_view(
             )
         persons_qs = persons_qs.annotate(
             absences_count=Count(
-                "personal_notes",
-                filter=personal_notes_q & Q(personal_notes__absent=True,),
-                distinct=True,
+                "filtered_personal_notes", filter=Q(filtered_personal_notes__absent=True),
             ),
             unexcused_count=Count(
-                "personal_notes",
-                filter=personal_notes_q
-                & Q(personal_notes__absent=True, personal_notes__excused=False,),
-                distinct=True,
+                "filtered_personal_notes",
+                filter=Q(
+                    filtered_personal_notes__absent=True, filtered_personal_notes__excused=False
+                ),
             ),
-            tardiness_sum=Subquery(
-                Person.objects.filter(personal_notes_q)
-                .filter(pk=OuterRef("pk"),)
-                .distinct()
-                .annotate(tardiness_sum=Sum("personal_notes__late"))
-                .values("tardiness_sum")
-            ),
+            tardiness_sum=Sum("filtered_personal_notes__late"),
             tardiness_count=Count(
-                "personal_notes",
-                filter=personal_notes_q & ~Q(personal_notes__late=0),
-                distinct=True,
+                "filtered_personal_notes", filter=Q(filtered_personal_notes__late__gt=0),
             ),
         )
 
@@ -463,9 +476,8 @@ def week_view(
             persons_qs = persons_qs.annotate(
                 **{
                     extra_mark.count_label: Count(
-                        "personal_notes",
-                        filter=personal_notes_q & Q(personal_notes__extra_marks=extra_mark,),
-                        distinct=True,
+                        "filtered_personal_notes",
+                        filter=Q(filtered_personal_notes__extra_marks=extra_mark),
                     )
                 }
             )
@@ -477,6 +489,7 @@ def week_view(
                 if note.lesson_period:
                     note.lesson_period.annotate_week(wanted_week)
                 personal_notes.append(note)
+            person.set_object_permission_checker(checker)
             persons.append({"person": person, "personal_notes": personal_notes})
     else:
         persons = None
@@ -633,7 +646,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
                     (lesson_period, filtered_documentations, filtered_personal_notes, substitution)
                 )
 
-    persons = Person.objects.prefetch_related(None).select_related(None)
+    persons = group.members.prefetch_related(None).select_related(None)
     persons = group.generate_person_list_with_class_register_statistics(persons)
 
     prefetched_persons = []
@@ -679,7 +692,9 @@ def my_students(request: HttpRequest) -> HttpResponse:
 
     new_groups = []
     for group in relevant_groups:
-        persons = group.generate_person_list_with_class_register_statistics()
+        persons = group.generate_person_list_with_class_register_statistics(
+            group.members.prefetch_related("primary_group__owners")
+        )
         new_groups.append((group, persons))
 
     context["groups"] = new_groups
@@ -712,13 +727,18 @@ class StudentsList(PermissionRequiredMixin, DetailView):
 
 
 @permission_required(
-    "alsijil.view_person_overview", fn=objectgetter_optional(Person, "request.user.person", True),
+    "alsijil.view_person_overview",
+    fn=objectgetter_optional(
+        Person.objects.prefetch_related("member_of__owners"), "request.user.person", True
+    ),
 )
 def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResponse:
     context = {}
-    person = objectgetter_optional(Person, default="request.user.person", default_eval=True)(
-        request, id_
-    )
+    person = objectgetter_optional(
+        Person.objects.prefetch_related("member_of__owners"),
+        default="request.user.person",
+        default_eval=True,
+    )(request, id_)
     context["person"] = person
 
     person_personal_notes = (
@@ -730,6 +750,14 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         )
         .annotate_date_range()
     )
+
+    # Prefetch object permissions for groups the person is a member of
+    # because the object permissions are checked for all groups the person is a member of
+    # That has to be set as an attribute of the register object,
+    # so that the permission system can use the prefetched data.
+    checker = ObjectPermissionChecker(request.user)
+    checker.prefetch_perms(Group.objects.filter(members=person))
+    person.set_object_permission_checker(checker)
 
     if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
         allowed_personal_notes = person_personal_notes.all()
@@ -780,7 +808,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
         )
     )
-    context["personal_notes"] = personal_notes
+    personal_notes_list = []
+    for note in personal_notes:
+        note.set_object_permission_checker(checker)
+        personal_notes_list.append(note)
+    context["personal_notes"] = personal_notes_list
     context["excuse_types"] = ExcuseType.objects.all()
 
     form = PersonOverviewForm(request, request.POST or None, queryset=PersonalNote.objects.all())
@@ -849,6 +881,20 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["excuse_types"] = excuse_types
     context["extra_marks"] = extra_marks
 
+    # Build filter with own form and logic as django-filter can't work with different models
+    filter_form = FilterRegisterObjectForm(request, request.GET or None, for_person=True)
+    filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+    filter_dict["person"] = person
+    context["filter_form"] = filter_form
+
+    register_objects = generate_list_of_all_register_objects(filter_dict)
+    if register_objects:
+        table = RegisterObjectTable(register_objects)
+        items_per_page = request.user.person.preferences[
+            "alsijil__register_objects_table_items_per_page"
+        ]
+        RequestConfig(request, paginate={"per_page": items_per_page}).configure(table)
+        context["register_object_table"] = table
     return render(request, "alsijil/class_register/person.html", context)
 
 
@@ -1187,3 +1233,51 @@ class GroupRoleAssignmentDeleteView(
     def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
         return reverse("assigned_group_roles", args=[pk])
+
+
+class AllRegisterObjectsView(PermissionRequiredMixin, View):
+    """Provide overview of all register objects for coordinators."""
+
+    permission_required = "alsijil.view_register_objects_list"
+
+    def get_context_data(self, request):
+        context = {}
+        # Filter selectable groups by permissions
+        groups = Group.objects.all()
+        if not check_global_permission(request.user, "alsijil.view_full_register"):
+            allowed_groups = get_objects_for_user(
+                self.request.user, "core.view_full_register_group", Group
+            ).values_list("pk", flat=True)
+            groups = groups.filter(Q(parent_groups__in=allowed_groups) | Q(pk__in=allowed_groups))
+
+        # Build filter with own form and logic as django-filter can't work with different models
+        filter_form = FilterRegisterObjectForm(
+            request, request.GET or None, for_person=False, groups=groups
+        )
+        filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {}
+        filter_dict["groups"] = groups
+        context["filter_form"] = filter_form
+
+        register_objects = generate_list_of_all_register_objects(filter_dict)
+
+        self.action_form = RegisterObjectActionForm(request, register_objects, request.POST or None)
+        context["action_form"] = self.action_form
+
+        if register_objects:
+            self.table = RegisterObjectSelectTable(register_objects)
+            items_per_page = request.user.person.preferences[
+                "alsijil__register_objects_table_items_per_page"
+            ]
+            RequestConfig(request, paginate={"per_page": items_per_page}).configure(self.table)
+            context["table"] = self.table
+        return context
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        context = self.get_context_data(request)
+        return render(request, "alsijil/class_register/all_objects.html", context)
+
+    def post(self, request: HttpRequest):
+        context = self.get_context_data(request)
+        if self.action_form.is_valid():
+            self.action_form.execute()
+        return render(request, "alsijil/class_register/all_objects.html", context)

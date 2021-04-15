@@ -1,13 +1,12 @@
 from typing import Any, Union
 
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import User
 
-from guardian.models import UserObjectPermission
 from rules import predicate
 
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
 from aleksis.core.models import Group, Person
-from aleksis.core.util.core_helpers import get_content_type_by_perm
+from aleksis.core.util.predicates import check_object_permission
 
 from ..models import PersonalNote
 
@@ -22,12 +21,25 @@ def is_none(user: User, obj: Any) -> bool:
 def is_lesson_teacher(user: User, obj: Union[LessonPeriod, Event, ExtraLesson]) -> bool:
     """Predicate for teachers of a lesson.
 
-    Checks whether the person linked to the user is a teacher
-    in the lesson or the substitution linked to the given LessonPeriod.
+    Checks whether the person linked to the user is a teacher in the register object.
+    If the register object is a lesson period and has a substitution linked,
+    this will **only** check if the person is one of the substitution teachers.
     """
     if obj:
-        sub = obj.get_substitution() if isinstance(obj, LessonPeriod) else None
-        if sub and sub in user.person.lesson_substitutions.all():
+        return user.person in obj.get_teachers().all()
+    return False
+
+
+@predicate
+def is_lesson_original_teacher(user: User, obj: Union[LessonPeriod, Event, ExtraLesson]) -> bool:
+    """Predicate for teachers of a lesson.
+
+    Checks whether the person linked to the user is a teacher in the register object.
+    If the register object is a lesson period and has a substitution linked,
+    this will **also** check if the person is one of the substitution teachers.
+    """
+    if obj:
+        if isinstance(obj, LessonPeriod) and user.person in obj.lesson.teachers.all():
             return True
         return user.person in obj.get_teachers().all()
     return False
@@ -115,16 +127,11 @@ def has_person_group_object_perm(perm: str):
 
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
-        ct = get_content_type_by_perm(perm)
-        permissions = Permission.objects.filter(content_type=ct, codename=perm)
         groups = obj.member_of.all()
-        qs = UserObjectPermission.objects.filter(
-            object_pk__in=list(groups.values_list("pk", flat=True)),
-            content_type=ct,
-            user=user,
-            permission__in=permissions,
-        )
-        return qs.exists()
+        for group in groups:
+            if check_object_permission(user, perm, group, checker_obj=obj):
+                return True
+        return False
 
     return fn
 
@@ -154,15 +161,9 @@ def has_lesson_group_object_perm(perm: str):
     def fn(user: User, obj: LessonPeriod) -> bool:
         if hasattr(obj, "lesson"):
             groups = obj.lesson.groups.all()
-            ct = get_content_type_by_perm(perm)
-            permissions = Permission.objects.filter(content_type=ct, codename=perm)
-            qs = UserObjectPermission.objects.filter(
-                object_pk__in=list(groups.values_list("pk", flat=True)),
-                content_type=ct,
-                user=user,
-                permission__in=permissions,
-            )
-            return qs.exists()
+            for group in groups:
+                if check_object_permission(user, perm, group, checker_obj=obj):
+                    return True
         return False
 
     return fn
@@ -178,16 +179,10 @@ def has_personal_note_group_perm(perm: str):
     @predicate(name)
     def fn(user: User, obj: PersonalNote) -> bool:
         if hasattr(obj, "person"):
-            ct = get_content_type_by_perm(perm)
-            permissions = Permission.objects.filter(content_type=ct, codename=perm)
             groups = obj.person.member_of.all()
-            qs = UserObjectPermission.objects.filter(
-                object_pk__in=list(groups.values_list("pk", flat=True)),
-                content_type=ct,
-                user=user,
-                permission__in=permissions,
-            )
-            return qs.exists()
+            for group in groups:
+                if check_object_permission(user, perm, group, checker_obj=obj):
+                    return True
         return False
 
     return fn
@@ -206,22 +201,35 @@ def is_own_personal_note(user: User, obj: PersonalNote) -> bool:
 
 @predicate
 def is_personal_note_lesson_teacher(user: User, obj: PersonalNote) -> bool:
-    """Predicate for teachers of a lesson referred to in the lesson period of a personal note.
+    """Predicate for teachers of a register object linked to a personal note.
 
     Checks whether the person linked to the user is a teacher
-    in the lesson or the substitution linked to the LessonPeriod of the given PersonalNote.
+    in the register object linked to the personal note.
+    If the register object is a lesson period and has a substitution linked,
+    this will **only** check if the person is one of the substitution teachers.
     """
     if hasattr(obj, "register_object"):
-        if getattr(obj, "lesson_period", None):
-            sub = obj.lesson_period.get_substitution()
-            if sub and user.person in Person.objects.filter(
-                lesson_substitutions=obj.lesson_period.get_substitution()
-            ):
-                return True
+        return user.person in obj.register_object.get_teachers().all()
+    return False
+
+
+@predicate
+def is_personal_note_lesson_original_teacher(user: User, obj: PersonalNote) -> bool:
+    """Predicate for teachers of a register object linked to a personal note.
+
+    Checks whether the person linked to the user is a teacher
+    in the register object linked to the personal note.
+    If the register object is a lesson period and has a substitution linked,
+    this will **also** check if the person is one of the substitution teachers.
+    """
+    if hasattr(obj, "register_object"):
+        if (
+            isinstance(obj.register_object, LessonPeriod)
+            and user.person in obj.lesson_period.lesson.teachers.all()
+        ):
+            return True
 
         return user.person in obj.register_object.get_teachers().all()
-
-        return False
     return False
 
 

@@ -31,7 +31,7 @@ from aleksis.apps.alsijil.managers import (
 from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod, TimePeriod
-from aleksis.core.mixins import ExtensibleModel
+from aleksis.core.mixins import ExtensibleModel, GlobalPermissionModel
 from aleksis.core.models import SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.model_helpers import ICONS
@@ -277,6 +277,7 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
                 check=lesson_related_constraint_q, name="one_relation_only_personal_note"
             )
         ]
+        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
@@ -364,6 +365,7 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
                 check=lesson_related_constraint_q, name="one_relation_only_lesson_documentation",
             )
         ]
+        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class ExtraMark(ExtensibleModel):
@@ -445,7 +447,7 @@ class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
         verbose_name_plural = _("Group role assignments")
 
 
-class AlsijilGlobalPermissions(ExtensibleModel):
+class AlsijilGlobalPermissions(GlobalPermissionModel):
     class Meta:
         managed = False
         permissions = (

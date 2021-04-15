@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
             options={
                 'permissions': (('view_week', 'Can view week overview'), ('register_absence', 'Can register absence'), ('list_personal_note_filters', 'Can list all personal note filters')),
                 'managed': False,
+                'default_permissions': (),
             },
             managers=[
                 ('objects', django.contrib.sites.managers.CurrentSiteManager()),

@@ -100,4 +100,5 @@ urlpatterns = [
         views.AssignGroupRoleMultipleView.as_view(),
         name="assign_group_role_multiple",
     ),
+    path("all/", views.AllRegisterObjectsView.as_view(), name="all_register_objects"),
 ]
