@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='GroupRole',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('extended_data', models.JSONField(default=dict, editable=False)),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
                 ('icon', models.CharField(blank=True, choices=(lambda: ICONS)(), max_length=50, verbose_name='Icon')),
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='GroupRoleAssignment',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('extended_data', models.JSONField(default=dict, editable=False)),
                 ('date_start', models.DateField(verbose_name='Start date')),
                 ('date_end', models.DateField(blank=True, help_text='Can be left empty if end date is not clear yet', null=True, verbose_name='End date')),
