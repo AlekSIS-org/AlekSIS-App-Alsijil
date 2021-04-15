@@ -285,40 +285,12 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
 
         Can be deactivated using site preference ``alsijil__carry_over``.
         """
-        following_periods = LessonPeriod.objects.filter(
+        all_periods_of_lesson = LessonPeriod.objects.filter(
             lesson=self.lesson_period.lesson,
             period__weekday=self.lesson_period.period.weekday,
-            period__period__gt=self.lesson_period.period.period,
         )
-        for period in following_periods:
+        for period in all_periods_of_lesson:
             lesson_documentation = period.get_or_create_lesson_documentation(
-                CalendarWeek(week=self.week, year=self.year)
-            )
-
-            changed = False
-
-            if not lesson_documentation.topic:
-                lesson_documentation.topic = self.topic
-                changed = True
-
-            if not lesson_documentation.homework:
-                lesson_documentation.homework = self.homework
-                changed = True
-
-            if not lesson_documentation.group_note:
-                lesson_documentation.group_note = self.group_note
-                changed = True
-
-            if changed:
-                lesson_documentation.save()
-
-        if not self.lesson_period.week:
-            self.lesson_period.annotate_week(CalendarWeek(year=self.year, week=self.week))
-
-        previous_lesson = self.lesson_period.prev
-
-        if previous_lesson:
-            lesson_documentation = previous_lesson.get_or_create_lesson_documentation(
                 CalendarWeek(week=self.week, year=self.year)
             )
 
