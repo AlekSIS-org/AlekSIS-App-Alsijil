@@ -60,3 +60,10 @@ span.input-field.inline > .select-wrapper .caret {
 td.material-icons {
     display: table-cell;
 }
+
+.medium-high {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}

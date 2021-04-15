@@ -63,10 +63,16 @@
 
     <div class="col s12" id="overview">
       <h5>{% trans "Relevant personal notes" %}</h5>
-      <form action="" method="post">
+      <form action="" method="post" class="row">
         {% csrf_token %}
-        {% form form=action_form %}{% endform %}
-        <button type="submit" class="btn waves-effect waves-light">Enter</button>
+        <div class="col s11 m8 l6 xl5">
+          {% form form=action_form %}{% endform %}
+        </div>
+        <div class="col s1">
+          <button type="submit" class="btn waves-effect waves-light medium-high">
+            Run <i class="material-icons right">send</i>
+          </button>
+        </div>
         {% render_table personal_notes_table %}
       </form>
     </div>
