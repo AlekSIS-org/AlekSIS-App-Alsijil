@@ -25,6 +25,8 @@
 
 {% block content %}
   <div class="row">
+
+  <!-- Tab Buttons -->
   <div class="col s12">
     <ul class="tabs">
       {% if register_object_table %}
@@ -40,11 +42,15 @@
       {% endif %}
     </ul>
   </div>
+
+  <!-- Lesson Documentation Tab -->
   {% if register_object_table %}
     <div class="col s12" id="lesson-documentations">
       {% include "alsijil/partials/objects_table.html" with table=register_object_table filter_form=filter_form %}
     </div>
   {% endif %}
+
+  <!-- Personal Note Tab -->
   <div class="col s12" id="personal-notes">
     {% has_perm "alsijil.edit_person_overview_personalnote" user person as can_mark_all_as_excused %}
     {% has_perm "alsijil.register_absence" user person as can_register_absence %}
@@ -54,8 +60,6 @@
         {% trans "Register absence" %}
       </a>
     {% endif %}
-
-
 
     <div class="col s12" id="overview">
       <h5>{% trans "Relevant personal notes" %}</h5>
@@ -67,6 +71,8 @@
       </form>
     </div>
   </div>
+
+  <!-- Statistics Tab -->
   {% if stats %}
     <div class="col s12" id="statistics">
       <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
