@@ -309,16 +309,17 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
                 changed = True
 
             if changed:
-                lesson_documentation.save()
+                lesson_documentation.save(carry_over=False)
 
     def __str__(self) -> str:
         return f"{self.lesson_period}, {self.date_formatted}"
 
-    def save(self, *args, **kwargs):
+    def save(self, carry_over=True, *args, **kwargs):
         if (
             get_site_preferences()["alsijil__carry_over"]
             and (self.topic or self.homework or self.group_note)
             and self.lesson_period
+            and carry_over
         ):
             self._carry_over_data()
         super().save(*args, **kwargs)
