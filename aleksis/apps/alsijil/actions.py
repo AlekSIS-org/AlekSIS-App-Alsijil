@@ -19,6 +19,13 @@ def mark_as_excused(modeladmin, request, queryset):
 mark_as_excused.short_description = _("Mark as excused")
 
 
+def mark_as_unexcused(modeladmin, request, queryset):
+    queryset.update(excused=False, excuse_type=None)
+
+
+mark_as_unexcused.short_description = _("Mark as unexcused")
+
+
 def mark_as_excuse_type_generator(excuse_type) -> Callable:
     def mark_as_excuse_type(modeladmin, request, queryset):
         queryset.update(excused=True, excuse_type=excuse_type)
