@@ -711,12 +711,26 @@ def my_students(request: HttpRequest) -> HttpResponse:
         .distinct()
     )
 
+    # Prefetch object permissions for persons and groups the persons are members of
+    # because the object permissions are checked for both persons and groups
+    all_persons = Person.objects.filter(member_of__in=relevant_groups)
+    checker = ObjectPermissionChecker(request.user)
+    checker.prefetch_perms(relevant_groups)
+    checker.prefetch_perms(all_persons)
+
     new_groups = []
     for group in relevant_groups:
         persons = group.generate_person_list_with_class_register_statistics(
-            group.members.prefetch_related("primary_group__owners")
+            group.members.prefetch_related(
+                "primary_group__owners",
+                Prefetch("member_of", queryset=relevant_groups, to_attr="member_of_prefetched"),
+            )
         )
-        new_groups.append((group, persons))
+        persons_for_group = []
+        for person in persons:
+            person.set_object_permission_checker(checker)
+            persons_for_group.append(person)
+        new_groups.append((group, persons_for_group))
 
     context["groups"] = new_groups
     context["excuse_types"] = ExcuseType.objects.all()
