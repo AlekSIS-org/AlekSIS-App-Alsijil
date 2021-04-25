@@ -31,7 +31,7 @@ from aleksis.apps.alsijil.managers import (
 from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
 from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
-from aleksis.core.mixins import ExtensibleModel
+from aleksis.core.mixins import ExtensibleModel, GlobalPermissionModel
 from aleksis.core.models import SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.model_helpers import ICONS
@@ -285,12 +285,10 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
 
         Can be deactivated using site preference ``alsijil__carry_over``.
         """
-        following_periods = LessonPeriod.objects.filter(
-            lesson=self.lesson_period.lesson,
-            period__weekday=self.lesson_period.period.weekday,
-            period__period__gt=self.lesson_period.period.period,
+        all_periods_of_lesson = LessonPeriod.objects.filter(
+            lesson=self.lesson_period.lesson, period__weekday=self.lesson_period.period.weekday,
         )
-        for period in following_periods:
+        for period in all_periods_of_lesson:
             lesson_documentation = period.get_or_create_lesson_documentation(
                 CalendarWeek(week=self.week, year=self.year)
             )
@@ -310,16 +308,17 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
                 changed = True
 
             if changed:
-                lesson_documentation.save()
+                lesson_documentation.save(carry_over=False)
 
     def __str__(self) -> str:
         return f"{self.lesson_period}, {self.date_formatted}"
 
-    def save(self, *args, **kwargs):
+    def save(self, carry_over=True, *args, **kwargs):
         if (
             get_site_preferences()["alsijil__carry_over"]
             and (self.topic or self.homework or self.group_note)
             and self.lesson_period
+            and carry_over
         ):
             self._carry_over_data()
         super().save(*args, **kwargs)
@@ -420,7 +419,7 @@ class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
         verbose_name_plural = _("Group role assignments")
 
 
-class AlsijilGlobalPermissions(ExtensibleModel):
+class AlsijilGlobalPermissions(GlobalPermissionModel):
     class Meta:
         managed = False
         permissions = (

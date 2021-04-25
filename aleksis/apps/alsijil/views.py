@@ -39,6 +39,7 @@ from aleksis.core.mixins import (
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
+from aleksis.core.util.pdf import render_pdf
 from aleksis.core.util.predicates import check_global_permission
 
 from .forms import (
@@ -696,7 +697,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
         "lessons__teachers",
         "lessons__lesson_periods",
     )
-    return render(request, "alsijil/print/full_register.html", context)
+    return render_pdf(request, "alsijil/print/full_register.html", context)
 
 
 @permission_required("alsijil.view_my_students")
