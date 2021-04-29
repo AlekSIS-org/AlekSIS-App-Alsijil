@@ -40,6 +40,7 @@ from aleksis.core.util import messages
 from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_optional
 from aleksis.core.util.predicates import check_global_permission
 
+from .filters import PersonalNoteFilter
 from .forms import (
     AssignGroupRoleForm,
     ExcuseTypeForm,
@@ -808,6 +809,10 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
         )
     )
+    personal_note_filter_object = PersonalNoteFilter(request.GET, queryset=personal_notes)
+    filtered_personal_notes = personal_note_filter_object.qs
+    context["personal_note_filter_form"] = personal_note_filter_object.form
+
     personal_notes_list = []
     for note in personal_notes:
         note.set_object_permission_checker(checker)
@@ -824,7 +829,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                 form.execute()
             person.refresh_from_db()
     context["action_form"] = form
-    table = PersonalNoteTable(personal_notes)
+    table = PersonalNoteTable(filtered_personal_notes)
     RequestConfig(request, paginate={"per_page": 20}).configure(table)
     context["personal_notes_table"] = table
     print(table.columns, table.rows, sep="\n" * 3)
