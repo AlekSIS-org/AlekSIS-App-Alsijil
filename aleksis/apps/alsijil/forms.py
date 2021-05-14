@@ -275,13 +275,14 @@ class FilterRegisterObjectForm(forms.Form):
     date_end = forms.DateField(label=_("End date"))
 
     @classmethod
-    def get_initial(cls):
+    def get_initial(cls, has_documentation=None):
         date_end = timezone.now().date()
         date_start = date_end - timedelta(days=30)
         return {
             "school_term": SchoolTerm.current,
             "date_start": date_start,
             "date_end": date_end,
+            "has_documentation": has_documentation,
         }
 
     def __init__(
@@ -289,13 +290,14 @@ class FilterRegisterObjectForm(forms.Form):
         request: HttpRequest,
         *args,
         for_person: bool = True,
+        default_documentation: Optional[bool] = None,
         groups: Optional[Sequence[Group]] = None,
         **kwargs
     ):
         self.request = request
         person = self.request.user.person
 
-        kwargs["initial"] = self.get_initial()
+        kwargs["initial"] = self.get_initial(has_documentation=default_documentation)
         super().__init__(*args, **kwargs)
 
         self.fields["school_term"].queryset = SchoolTerm.objects.all()
