@@ -946,8 +946,12 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["extra_marks"] = extra_marks
 
     # Build filter with own form and logic as django-filter can't work with different models
-    filter_form = FilterRegisterObjectForm(request, request.GET or None, for_person=True, default_documentation=False)
-    filter_dict = filter_form.cleaned_data if filter_form.is_valid() else {"has_documentation": False}
+    filter_form = FilterRegisterObjectForm(
+        request, request.GET or None, for_person=True, default_documentation=False
+    )
+    filter_dict = (
+        filter_form.cleaned_data if filter_form.is_valid() else {"has_documentation": False}
+    )
     filter_dict["person"] = person
     context["filter_form"] = filter_form
 
