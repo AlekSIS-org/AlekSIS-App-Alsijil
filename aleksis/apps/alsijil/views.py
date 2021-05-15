@@ -812,6 +812,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     personal_note_filter_object = PersonalNoteFilter(request.GET, queryset=personal_notes)
     filtered_personal_notes = personal_note_filter_object.qs
     context["personal_note_filter_form"] = personal_note_filter_object.form
+    used_filters = list(personal_note_filter_object.data.values())
+    context["num_filters"] = len(used_filters) - used_filters.count("") - used_filters.count("unknown")
 
     personal_notes_list = []
     for note in personal_notes:

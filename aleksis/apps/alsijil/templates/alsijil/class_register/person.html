@@ -63,18 +63,47 @@
 
     <div class="col s12" id="overview">
       <h5>{% trans "Relevant personal notes" %}</h5>
-      <form action="" method="post" class="row">
-        {% csrf_token %}
-        <div class="col s11 m8 l6 xl5">
-          {% form form=action_form %}{% endform %}
+      <form class="modal" id="filter-modal">
+        <div class="modal-content">
+          <h4>{% trans "Filter personal notes" %}</h4>
+          {% form form=personal_note_filter_form %}{% endform %}
         </div>
-        <div class="col s1">
-          <button type="submit" class="btn waves-effect waves-light medium-high">
-            Run <i class="material-icons right">send</i>
+        <div class="modal-footer">
+          <button type="button" class="btn-flat secondary-color-text waves-effect waves-ripple" id="remove-filters">
+            <i class="material-icons left">clear</i>{% trans "Clear all filters" %}
+          </button>
+          <button type="button" class="modal-close btn-flat red-text waves-effect waves-ripple waves-red">
+            <i class="material-icons left">cancel</i>{% trans "Close" %}
+          </button>
+          <button type="submit" class="modal-close btn-flat primary-color-text waves-effect waves-ripple waves-light">
+            {% trans "Filter" %} <i class="material-icons left">filter_alt</i>
           </button>
         </div>
-        {% render_table personal_notes_table %}
       </form>
+      <div class="row">
+        <div class="col s12 m3 l5 push-m9 push-l7">
+          <button
+              class="modal-trigger right btn primary-color waves-effect waves-light medium-high-right"
+              data-target="filter-modal"
+              type="button">
+              Filter results ({{ num_filters }})<i class="material-icons right">filter_alt</i>
+            </button>
+        </div>
+        <form action="" method="post" class="">
+          {% csrf_token %}
+          <div class="col s12 m9 l7 pull-m3 pull-l5 row">
+            <div class="col s12 m10">
+            {% form form=action_form %}{% endform %}
+          </div>
+          <div class="col s10 m2">
+            <button type="submit" class="btn waves-effect waves-light medium-high">
+              Run <i class="material-icons right">send</i>
+            </button>
+          </div>
+          </div>
+          {% render_table personal_notes_table %}
+        </form>
+      </div>
     </div>
   </div>
 
