@@ -21,6 +21,13 @@
   {% blocktrans with person=person %}
     Class register overview for {{ person }}
   {% endblocktrans %}
+  {% has_perm "alsijil.register_absence" user person as can_register_absence %}
+  {% if can_register_absence %}
+    <a class="btn primary-color waves-effect waves-light right" href="{% url "register_absence" person.pk %}">
+      <i class="material-icons left">rate_review</i>
+      {% trans "Register absence" %}
+    </a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -52,15 +59,6 @@
 
   <!-- Personal Note Tab -->
   <div class="col s12" id="personal-notes">
-    {% has_perm "alsijil.edit_person_overview_personalnote" user person as can_mark_all_as_excused %}
-    {% has_perm "alsijil.register_absence" user person as can_register_absence %}
-    {% if can_register_absence %}
-      <a class="btn primary-color waves-effect waves-light" href="{% url "register_absence" person.pk %}">
-        <i class="material-icons left">rate_review</i>
-        {% trans "Register absence" %}
-      </a>
-    {% endif %}
-
     <div class="col s12" id="overview">
       <h5>{% trans "Relevant personal notes" %}</h5>
       <form class="modal" id="filter-modal">
@@ -80,14 +78,16 @@
           </button>
         </div>
       </form>
+      {% has_perm "alsijil.edit_person_overview_personalnote" user person as can_mark_all_as_excused %}
       <div class="row">
         <div class="col s12 m3 l5 push-m9 push-l7">
           <button
-              class="modal-trigger right btn primary-color waves-effect waves-light medium-high-right"
+              class="modal-trigger right btn primary-color waves-effect waves-light
+              {% if can_mark_all_as_excused %} medium-high-right {% endif %}"
               data-target="filter-modal"
               type="button">
-              Filter results ({{ num_filters }})<i class="material-icons right">filter_alt</i>
-            </button>
+            Filter results ({{ num_filters }})<i class="material-icons right">filter_alt</i>
+          </button>
         </div>
         <form action="" method="post" class="">
           {% csrf_token %}
