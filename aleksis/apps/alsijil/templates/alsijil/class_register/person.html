@@ -153,4 +153,12 @@
       </ul>
     </div>
   {% endif %}
+<script type="text/javascript">
+    $("#remove-filters").click(function () {
+        $("#filter-modal").trigger("reset");
+        $("#filter-modal input, #filter-modal select").each(function () {
+            $(this).val("");
+        })
+    })
+</script>
 {% endblock %}
