@@ -92,14 +92,16 @@
         <form action="" method="post" class="">
           {% csrf_token %}
           <div class="col s12 m9 l7 pull-m3 pull-l5 row">
-            <div class="col s12 m10">
-            {% form form=action_form %}{% endform %}
-          </div>
-          <div class="col s10 m2">
-            <button type="submit" class="btn waves-effect waves-light medium-high">
-              Run <i class="material-icons right">send</i>
-            </button>
-          </div>
+            {% if can_mark_all_as_excused %}
+              <div class="col s12 m10">
+                {% form form=action_form %}{% endform %}
+              </div>
+              <div class="col s10 m2">
+                <button type="submit" class="btn waves-effect waves-light medium-high">
+                  Run <i class="material-icons right">send</i>
+                </button>
+              </div>
+            {% endif %}
           </div>
           {% render_table personal_notes_table %}
         </form>
