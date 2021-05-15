@@ -807,7 +807,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
         )
         .order_by(
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
-        )
+        ).annotate_date_range().annotate_subject()
     )
     personal_note_filter_object = PersonalNoteFilter(request.GET, queryset=personal_notes)
     filtered_personal_notes = personal_note_filter_object.qs

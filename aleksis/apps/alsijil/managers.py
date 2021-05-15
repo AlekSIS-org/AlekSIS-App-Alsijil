@@ -6,6 +6,7 @@ from django.db.models.fields import DateField
 from django.db.models.functions import Concat
 from django.db.models.query import Prefetch
 from django.db.models.query_utils import Q
+from django.utils.translation import gettext as _
 
 from calendarweek import CalendarWeek
 
@@ -69,6 +70,24 @@ class RegisterObjectRelatedQuerySet(QuerySet):
             day_end=Case(
                 When(day__isnull=False, then="day"), When(day__isnull=True, then="event__date_end"),
             ),
+        )
+
+    def annotate_subject(self) -> QuerySet:
+        """
+        Annotate every personal note/lesson documentation with the subject of the lesson/event.
+        """
+        return self.annotate(
+            subject=Case(
+                When(
+                    lesson_period__isnull=False,
+                    then="lesson_period__lesson__subject__name",
+                ),
+                When(
+                    extra_lesson__isnull=False,
+                    then="extra_lesson__subject__name",
+                ),
+                default=Value(_("Event"))
+            )
         )
 
 
