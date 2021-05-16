@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import ugettext as _
 from django.views import View
 from django.views.decorators.cache import never_cache
@@ -274,6 +275,22 @@ def register_object(
                     None, queryset=persons_qs, prefix="personal_notes"
                 )
 
+        back_url = request.GET.get("back", "")
+        back_url_is_safe = url_has_allowed_host_and_scheme(
+            url=back_url, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+        )
+        if back_url_is_safe:
+            context["back_to_week_url"] = back_url
+        else:
+            context["back_to_week_url"] = reverse(
+                "week_view_by_week",
+                args=[
+                    lesson_documentation.calendar_week.year,
+                    lesson_documentation.calendar_week.week,
+                    "group",
+                    register_object.get_groups().all()[0].pk,
+                ],
+            )
         context["lesson_documentation"] = lesson_documentation
         context["lesson_documentation_form"] = lesson_documentation_form
         context["personal_note_formset"] = personal_note_formset

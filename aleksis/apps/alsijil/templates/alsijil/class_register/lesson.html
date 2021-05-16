@@ -14,8 +14,8 @@
     <div class="row no-margin">
       <div class="col s12 no-padding">
         {# Back to week view #}
-        {% if lesson_documentation %}
-          <a href="{% url "week_view_by_week" lesson_documentation.calendar_week.year lesson_documentation.calendar_week.week "group" register_object.get_groups.all.0.pk %}"
+        {% if back_to_week_url %}
+          <a href="{{ back_to_week_url }}"
              class="btn primary-color waves-light waves-effect alsijil-top-button">
             <i class="material-icons left">chevron_left</i> {% trans "Back to week view" %}
           </a>

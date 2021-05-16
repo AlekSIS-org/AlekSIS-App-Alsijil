@@ -120,7 +120,7 @@
                           </td>
                           <td class="tr-link">
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                               {% if register_object.period %}
                                 {{ register_object.period.period }}.
                               {% else %}
@@ -131,7 +131,7 @@
                           {% if not group %}
                             <td>
                               <a class="tr-link"
-                                 href="{{ register_object.alsijil_url }}">
+                                 href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                                 {% if register_object.lesson %}
                                   {{ register_object.lesson.group_names }}
                                 {% else %}
@@ -142,7 +142,7 @@
                           {% endif %}
                           <td>
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                               {% if register_object.get_subject %}
                                 {{ register_object.get_subject.name }}
                               {% elif register_object.subject %}
@@ -154,25 +154,25 @@
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                                 {{ register_object.teacher_names }}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                               {% firstof register_object.get_lesson_documentation.topic "–" %}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                               {% firstof register_object.get_lesson_documentation.homework "–" %}
                             </a>
                           </td>
                           <td>
                             <a class="tr-link"
-                               href="{{ register_object.alsijil_url }}">
+                               href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                               {% firstof register_object.get_lesson_documentation.group_note "–" %}
                             </a>
                           </td>
@@ -195,7 +195,7 @@
                         {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
                         {% if can_view_lesson_documentation %}
                           <a class="collection-item avatar"
-                             href="{{ register_object.alsijil_url }}">
+                             href="{{ register_object.alsijil_url }}?back={{ back_url }}">
                             {% include "alsijil/partials/lesson_status_icon.html" with register_object=register_object css_class="materialize-circle" color_suffix=" " %}
                             <table class="hide-on-med-and-down">
                               <tr>
@@ -278,7 +278,7 @@
                                   </li>
                                 {% endif %}
                                 <li class="collection-item">
-                                    {{ register_object.teacher_names }}
+                                  {{ register_object.teacher_names }}
                                 </li>
                                 <li class="collection-item">
                                   {{ register_object.get_lesson_documentation.topic }}
