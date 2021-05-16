@@ -165,7 +165,6 @@ class PersonalNoteTable(tables.Table):
     class Meta:
         model = PersonalNote
         fields = ()
-        template_name = "django_tables2/materialize.html"
 
 
 def _get_link(value, record):
