@@ -30,17 +30,17 @@ span.input-field.inline > .select-wrapper .caret {
 }
 
 #select_all_box:indeterminate + span:not(.lever):before {
-	top: -4px;
-	left: -6px;
-	width: 10px;
-	height: 12px;
-	border-top: none;
-	border-left: none;
-	border-right: white 2px solid;
-	border-bottom: none;
-	transform: rotate(90deg);
-	backface-visibility: hidden;
-	transform-origin: 100% 100%;
+    top: -4px;
+    left: -6px;
+    width: 10px;
+    height: 12px;
+    border-top: none;
+    border-left: none;
+    border-right: white 2px solid;
+    border-bottom: none;
+    transform: rotate(90deg);
+    backface-visibility: hidden;
+    transform-origin: 100% 100%;
 
 }
 
