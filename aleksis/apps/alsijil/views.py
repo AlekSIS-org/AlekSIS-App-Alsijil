@@ -856,7 +856,6 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     table = PersonalNoteTable(filtered_personal_notes)
     RequestConfig(request, paginate={"per_page": 20}).configure(table)
     context["personal_notes_table"] = table
-    print(table.columns, table.rows, sep="\n" * 3)
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()
