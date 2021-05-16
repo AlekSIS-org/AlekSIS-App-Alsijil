@@ -856,12 +856,11 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     context["personal_notes"] = personal_notes_list
     context["excuse_types"] = ExcuseType.objects.all()
 
-    form = PersonOverviewForm(request, request.POST or None, queryset=PersonalNote.objects.all())
+    form = PersonOverviewForm(request, request.POST or None, queryset=allowed_personal_notes)
     if request.method == "POST":
         if form.is_valid():
             with reversion.create_revision():
                 reversion.set_user(request.user)
-                # FIXME CHECK PERMISSION
                 form.execute()
             person.refresh_from_db()
     context["action_form"] = form
