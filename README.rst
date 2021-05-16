@@ -19,8 +19,8 @@ Licence
   Copyright © 2019, 2021 Dominik George <dominik.george@teckids.org>
   Copyright © 2019, 2020 Tom Teichler <tom.teichler@teckids.org>
   Copyright © 2019 mirabilos <thorsten.glaser@teckids.org>
-  Copyright © 2020, 2021 Jonathan Weth <dev@jonathanweth.de>
   Copyright © 2020, 2021 Julian Leucker <leuckeju@katharineum.de>
+  Copyright © 2020, 2021 Jonathan Weth <dev@jonathanweth.de>
   Copyright © 2020 Hangzhi Yu <yuha@katharineum.de>
   Copyright © 2021 Lloyd Meins <meinsll@katharineum.de>
 
