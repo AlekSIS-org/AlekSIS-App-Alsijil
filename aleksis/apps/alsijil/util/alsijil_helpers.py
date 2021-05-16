@@ -168,8 +168,9 @@ def _generate_dicts_for_lesson_periods(
     """Generate a list of dicts for use with ``RegisterObjectTable``."""
     if not holiday_days:
         holiday_days = []
-    date_start = lesson_periods.first().lesson.validity.date_start
-    date_end = lesson_periods.last().lesson.validity.date_end
+    lesson_periods = list(lesson_periods)
+    date_start = lesson_periods[0].lesson.validity.date_start
+    date_end = lesson_periods[-1].lesson.validity.date_end
     if (
         filter_dict["filter_date"]
         and filter_dict.get("date_start") > date_start
@@ -288,6 +289,7 @@ def _generate_dicts_for_events_and_extra_lessons(
             period = f"{register_object.period.period}."
             period_sort = register_object.period.period
         else:
+            register_object.annotate_day(register_object.date_end)
             day = (
                 f"{date_format(register_object.date_start)}"
                 f"–{date_format(register_object.date_end)}"
