@@ -1,9 +1,9 @@
 from django.utils.translation import gettext as _
 
-from django_filters import CharFilter, DateFilter, FilterSet, ModelMultipleChoiceFilter
+from django_filters import CharFilter, DateFilter, FilterSet
 from material import Layout, Row
 
-from .models import ExcuseType, PersonalNote
+from .models import PersonalNote
 
 
 class PersonalNoteFilter(FilterSet):
