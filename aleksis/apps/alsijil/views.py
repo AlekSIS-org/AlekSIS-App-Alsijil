@@ -391,6 +391,7 @@ def week_view(
     if show_group_roles:
         group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
         context["group_roles"] = group_roles
+        group_roles_persons = GroupRoleAssignment.objects.in_week(wanted_week).for_group(group)
 
     extra_marks = ExtraMark.objects.all()
 
@@ -398,11 +399,16 @@ def week_view(
         lesson_periods_pk = list(lesson_periods.values_list("pk", flat=True))
         lesson_periods = annotate_documentations(LessonPeriod, wanted_week, lesson_periods_pk)
 
-        events_pk = list(events.values_list("pk", flat=True))
+        events_pk = [event.pk for event in events]
         events = annotate_documentations(Event, wanted_week, events_pk)
 
         extra_lessons_pk = list(extra_lessons.values_list("pk", flat=True))
         extra_lessons = annotate_documentations(ExtraLesson, wanted_week, extra_lessons_pk)
+        groups = Group.objects.filter(
+            Q(lessons__lesson_periods__in=lesson_periods_pk)
+            | Q(events__in=events_pk)
+            | Q(extra_lessons__in=extra_lessons_pk)
+        )
     else:
         lesson_periods_pk = []
         events_pk = []
@@ -417,22 +423,35 @@ def week_view(
         elif group:
             persons_qs = persons_qs.filter(member_of=group)
         else:
-            persons_qs = persons_qs.filter(
-                Q(member_of__lessons__lesson_periods__in=lesson_periods_pk)
-                | Q(member_of__events__in=events_pk)
-                | Q(member_of__extra_lessons__in=extra_lessons_pk)
-            )
+            persons_qs = persons_qs.filter(member_of__in=groups)
 
         # Prefetch object permissions for persons and groups the persons are members of
         # because the object permissions are checked for both persons and groups
         checker = ObjectPermissionChecker(request.user)
-        checker.prefetch_perms(persons_qs)
-        checker.prefetch_perms(Group.objects.filter(members__in=persons_qs))
+        checker.prefetch_perms(persons_qs.prefetch_related(None))
+        checker.prefetch_perms(groups)
 
+        prefetched_personal_notes = list(
+            PersonalNote.objects.filter(  #
+                Q(event__in=events_pk)
+                | Q(
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    lesson_period__in=lesson_periods_pk,
+                )
+                | Q(extra_lesson__in=extra_lessons_pk)
+            ).filter(~Q(remarks=""))
+        )
         persons_qs = (
-            Person.objects.filter(pk__in=persons_qs)
-            .select_related("primary_group")
-            .prefetch_related("primary_group__owners")
+            persons_qs.select_related("primary_group")
+            .prefetch_related(
+                Prefetch(
+                    "primary_group__owners",
+                    queryset=Person.objects.filter(pk=request.user.person.pk),
+                    to_attr="owners_prefetched",
+                ),
+                Prefetch("member_of", queryset=groups, to_attr="member_of_prefetched"),
+            )
             .annotate(
                 filtered_personal_notes=FilteredRelation(
                     "personal_notes",
@@ -447,31 +466,8 @@ def week_view(
                     ),
                 )
             )
-            .prefetch_related(
-                Prefetch(
-                    "personal_notes",
-                    queryset=PersonalNote.objects.filter(
-                        Q(event__in=events_pk)
-                        | Q(
-                            week=wanted_week.week,
-                            year=wanted_week.year,
-                            lesson_period__in=lesson_periods_pk,
-                        )
-                        | Q(extra_lesson__in=extra_lessons_pk)
-                    ),
-                ),
-                "member_of__owners",
-            )
         )
 
-        # Annotate group roles
-        if show_group_roles:
-            persons_qs = persons_qs.prefetch_related(
-                Prefetch(
-                    "group_roles",
-                    queryset=GroupRoleAssignment.objects.in_week(wanted_week).for_group(group),
-                ),
-            )
         persons_qs = persons_qs.annotate(
             absences_count=Count(
                 "filtered_personal_notes", filter=Q(filtered_personal_notes__absent=True),
@@ -501,12 +497,17 @@ def week_view(
         persons = []
         for person in persons_qs:
             personal_notes = []
-            for note in person.personal_notes.all():
+            for note in filter(lambda note: note.person_id == person.pk, prefetched_personal_notes):
                 if note.lesson_period:
                     note.lesson_period.annotate_week(wanted_week)
                 personal_notes.append(note)
             person.set_object_permission_checker(checker)
-            persons.append({"person": person, "personal_notes": personal_notes})
+            person_dict = {"person": person, "personal_notes": personal_notes}
+            if show_group_roles:
+                person_dict["group_roles"] = filter(
+                    lambda role: role.person_id == person.pk, group_roles_persons
+                )
+            persons.append(person_dict)
     else:
         persons = None
 
@@ -706,12 +707,26 @@ def my_students(request: HttpRequest) -> HttpResponse:
         .distinct()
     )
 
+    # Prefetch object permissions for persons and groups the persons are members of
+    # because the object permissions are checked for both persons and groups
+    all_persons = Person.objects.filter(member_of__in=relevant_groups)
+    checker = ObjectPermissionChecker(request.user)
+    checker.prefetch_perms(relevant_groups)
+    checker.prefetch_perms(all_persons)
+
     new_groups = []
     for group in relevant_groups:
         persons = group.generate_person_list_with_class_register_statistics(
-            group.members.prefetch_related("primary_group__owners")
+            group.members.prefetch_related(
+                "primary_group__owners",
+                Prefetch("member_of", queryset=relevant_groups, to_attr="member_of_prefetched"),
+            )
         )
-        new_groups.append((group, persons))
+        persons_for_group = []
+        for person in persons:
+            person.set_object_permission_checker(checker)
+            persons_for_group.append(person)
+        new_groups.append((group, persons_for_group))
 
     context["groups"] = new_groups
     context["excuse_types"] = ExcuseType.objects.all()
