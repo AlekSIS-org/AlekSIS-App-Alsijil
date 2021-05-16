@@ -183,9 +183,14 @@ class ExcuseTypeForm(forms.ModelForm):
 
 class PersonOverviewForm(ActionForm):
     def get_actions(self):
-        return [mark_as_excused, mark_as_unexcused, delete_personal_note] + [
-            mark_as_excuse_type_generator(excuse_type) for excuse_type in ExcuseType.objects.all()
-        ]
+        return (
+            [mark_as_excused, mark_as_unexcused]
+            + [
+                mark_as_excuse_type_generator(excuse_type)
+                for excuse_type in ExcuseType.objects.all()
+            ]
+            + [delete_personal_note]
+        )
 
 
 class GroupRoleForm(forms.ModelForm):
