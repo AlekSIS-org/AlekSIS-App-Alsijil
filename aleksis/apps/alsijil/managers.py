@@ -78,15 +78,9 @@ class RegisterObjectRelatedQuerySet(QuerySet):
         """
         return self.annotate(
             subject=Case(
-                When(
-                    lesson_period__isnull=False,
-                    then="lesson_period__lesson__subject__name",
-                ),
-                When(
-                    extra_lesson__isnull=False,
-                    then="extra_lesson__subject__name",
-                ),
-                default=Value(_("Event"))
+                When(lesson_period__isnull=False, then="lesson_period__lesson__subject__name",),
+                When(extra_lesson__isnull=False, then="extra_lesson__subject__name",),
+                default=Value(_("Event")),
             )
         )
 

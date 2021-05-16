@@ -16,7 +16,6 @@ from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import Subject, TimePeriod
 from aleksis.core.forms import ActionForm, ListActionForm
 from aleksis.core.models import Group, Person, SchoolTerm
-from aleksis.apps.chronos.models import TimePeriod
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
@@ -27,7 +26,6 @@ from .actions import (
     mark_as_unexcused,
     send_request_to_check_entry,
 )
-
 from .models import (
     ExcuseType,
     ExtraMark,

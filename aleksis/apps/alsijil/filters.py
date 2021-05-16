@@ -1,6 +1,6 @@
 from django.utils.translation import gettext as _
 
-from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter, DateFilter
+from django_filters import CharFilter, DateFilter, FilterSet, ModelMultipleChoiceFilter
 from material import Layout, Row
 
 from .models import ExcuseType, PersonalNote
@@ -19,7 +19,7 @@ class PersonalNoteFilter(FilterSet):
             Row("subject"),
             Row("day_start", "day_end"),
             Row("absent", "excused", "excuse_type"),
-            Row("late__gt", "late__lt", "extra_marks")
+            Row("late__gt", "late__lt", "extra_marks"),
         )
 
     class Meta:
@@ -27,7 +27,7 @@ class PersonalNoteFilter(FilterSet):
         fields = {
             "excused": ["exact"],
             "late": ["lt", "gt"],
-            "absent": ['exact'],
+            "absent": ["exact"],
             "excuse_type": ["exact"],
             "extra_marks": ["exact"],
         }

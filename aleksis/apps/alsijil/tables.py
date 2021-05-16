@@ -87,9 +87,7 @@ class GroupRoleTable(tables.Table):
 
 
 class PersonalNoteTable(tables.Table):
-    selected = SelectColumn(
-        attrs={"input": {"name": "selected_objects"}}, accessor=A("pk")
-    )
+    selected = SelectColumn(attrs={"input": {"name": "selected_objects"}}, accessor=A("pk"))
     date = tables.Column(
         verbose_name=_("Date"), accessor=A("date_formatted"), order_by=A("day_start")
     )
@@ -121,9 +119,14 @@ class PersonalNoteTable(tables.Table):
             return value
 
     def render_absent(self, value):
-        return render_to_string(
-            "components/materialize-chips.html", dict(content="Absent", classes="red white-text")
-        ) if value else "–"
+        return (
+            render_to_string(
+                "components/materialize-chips.html",
+                dict(content="Absent", classes="red white-text"),
+            )
+            if value
+            else "–"
+        )
 
     def render_excused(self, value, record):
         if record.absent:

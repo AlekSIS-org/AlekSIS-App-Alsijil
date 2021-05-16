@@ -9,8 +9,6 @@ from django.utils.translation import gettext_lazy as _
 
 from aleksis.core.models import Notification
 
-from django.utils.translation import gettext_lazy as _
-
 
 def mark_as_excused(modeladmin, request, queryset):
     queryset.update(excused=True, excuse_type=None)
@@ -40,6 +38,7 @@ def delete_personal_note(modeladmin, request, queryset):
 
 
 delete_personal_note.short_description = _("Delete")
+
 
 def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items: Sequence[dict]):
     """Send notifications to the teachers of the selected register objects.
