@@ -22,6 +22,7 @@ Licence
   Copyright © 2020,2021 Jonathan Weth <dev@jonathanweth.de>
   Copyright © 2020 Julian Leucker <leuckeju@katharineum.de>
   Copyright © 2020 Hangzhi Yu <yuha@katharineum.de>
+  Copyright © 2021 Lloyd Meins <meinsll@katharineum.de>
 
 
   Licenced under the EUPL, version 1.2 or later, by Teckids e.V. (Bonn, Germany).
