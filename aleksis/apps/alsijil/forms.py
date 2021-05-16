@@ -275,7 +275,7 @@ class FilterRegisterObjectForm(forms.Form):
     date_end = forms.DateField(label=_("End date"))
 
     @classmethod
-    def get_initial(cls, has_documentation=None):
+    def get_initial(cls, has_documentation: Optional[bool] = None):
         date_end = timezone.now().date()
         date_start = date_end - timedelta(days=30)
         return {
