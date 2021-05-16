@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Callable, Sequence
 
 from django.contrib import messages
 from django.contrib.humanize.templatetags.humanize import apnumber
@@ -8,6 +8,37 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from aleksis.core.models import Notification
+
+
+def mark_as_excused(modeladmin, request, queryset):
+    queryset.update(excused=True, excuse_type=None)
+
+
+mark_as_excused.short_description = _("Mark as excused")
+
+
+def mark_as_unexcused(modeladmin, request, queryset):
+    queryset.update(excused=False, excuse_type=None)
+
+
+mark_as_unexcused.short_description = _("Mark as unexcused")
+
+
+def mark_as_excuse_type_generator(excuse_type) -> Callable:
+    def mark_as_excuse_type(modeladmin, request, queryset):
+        queryset.update(excused=True, excuse_type=excuse_type)
+
+    mark_as_excuse_type.short_description = _(f"Mark as {excuse_type.name}")
+    mark_as_excuse_type.__name__ = f"mark_as_excuse_type_{excuse_type.short_name}"
+
+    return mark_as_excuse_type
+
+
+def delete_personal_note(modeladmin, request, queryset):
+    queryset.delete()
+
+
+delete_personal_note.short_description = _("Delete")
 
 
 def send_request_to_check_entry(modeladmin, request: HttpRequest, selected_items: Sequence[dict]):

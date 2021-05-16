@@ -14,12 +14,18 @@ from material import Fieldset, Layout, Row
 
 from aleksis.apps.chronos.managers import TimetableType
 from aleksis.apps.chronos.models import Subject, TimePeriod
-from aleksis.core.forms import ListActionForm
+from aleksis.core.forms import ActionForm, ListActionForm
 from aleksis.core.models import Group, Person, SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
 from aleksis.core.util.predicates import check_global_permission
 
-from .actions import send_request_to_check_entry
+from .actions import (
+    delete_personal_note,
+    mark_as_excuse_type_generator,
+    mark_as_excused,
+    mark_as_unexcused,
+    send_request_to_check_entry,
+)
 from .models import (
     ExcuseType,
     ExtraMark,
@@ -173,6 +179,18 @@ class ExcuseTypeForm(forms.ModelForm):
     class Meta:
         model = ExcuseType
         fields = ["short_name", "name"]
+
+
+class PersonOverviewForm(ActionForm):
+    def get_actions(self):
+        return (
+            [mark_as_excused, mark_as_unexcused]
+            + [
+                mark_as_excuse_type_generator(excuse_type)
+                for excuse_type in ExcuseType.objects.all()
+            ]
+            + [delete_personal_note]
+        )
 
 
 class GroupRoleForm(forms.ModelForm):

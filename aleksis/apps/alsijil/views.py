@@ -42,6 +42,7 @@ from aleksis.core.util.core_helpers import get_site_preferences, objectgetter_op
 from aleksis.core.util.pdf import render_pdf
 from aleksis.core.util.predicates import check_global_permission
 
+from .filters import PersonalNoteFilter
 from .forms import (
     AssignGroupRoleForm,
     ExcuseTypeForm,
@@ -51,6 +52,7 @@ from .forms import (
     GroupRoleForm,
     LessonDocumentationForm,
     PersonalNoteFormSet,
+    PersonOverviewForm,
     RegisterAbsenceForm,
     RegisterObjectActionForm,
     SelectForm,
@@ -67,6 +69,7 @@ from .tables import (
     ExcuseTypeTable,
     ExtraMarkTable,
     GroupRoleTable,
+    PersonalNoteTable,
     RegisterObjectSelectTable,
     RegisterObjectTable,
 )
@@ -772,76 +775,14 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     )(request, id_)
     context["person"] = person
 
-    if request.method == "POST":
-        if request.POST.get("excuse_type"):
-            # Get excuse type
-            excuse_type = request.POST["excuse_type"]
-            found = False
-            if excuse_type == "e":
-                excuse_type = None
-                found = True
-            else:
-                try:
-                    excuse_type = ExcuseType.objects.get(pk=int(excuse_type))
-                    found = True
-                except (ExcuseType.DoesNotExist, ValueError):
-                    pass
-
-            if found:
-                if request.POST.get("date"):
-                    # Mark absences on date as excused
-                    try:
-                        date = datetime.strptime(request.POST["date"], "%Y-%m-%d").date()
-
-                        if not request.user.has_perm(
-                            "alsijil.edit_person_overview_personalnote", person
-                        ):
-                            raise PermissionDenied()
-
-                        notes = person.personal_notes.filter(absent=True, excused=False,).filter(
-                            Q(
-                                week=date.isocalendar()[1],
-                                lesson_period__period__weekday=date.weekday(),
-                                lesson_period__lesson__validity__date_start__lte=date,
-                                lesson_period__lesson__validity__date_end__gte=date,
-                            )
-                            | Q(
-                                extra_lesson__week=date.isocalendar()[1],
-                                extra_lesson__period__weekday=date.weekday(),
-                            )
-                        )
-                        for note in notes:
-                            note.excused = True
-                            note.excuse_type = excuse_type
-                            with reversion.create_revision():
-                                reversion.set_user(request.user)
-                                note.save()
-
-                        messages.success(request, _("The absences have been marked as excused."))
-                    except ValueError:
-                        pass
-                elif request.POST.get("personal_note"):
-                    # Mark specific absence as excused
-                    try:
-                        note = PersonalNote.objects.get(pk=int(request.POST["personal_note"]))
-                        if not request.user.has_perm("alsijil.edit_personalnote", note):
-                            raise PermissionDenied()
-                        if note.absent:
-                            note.excused = True
-                            note.excuse_type = excuse_type
-                            with reversion.create_revision():
-                                reversion.set_user(request.user)
-                                note.save()
-                            messages.success(request, _("The absence has been marked as excused."))
-                    except (PersonalNote.DoesNotExist, ValueError):
-                        pass
-
-                person.refresh_from_db()
-
-    person_personal_notes = person.personal_notes.all().prefetch_related(
-        "lesson_period__lesson__groups",
-        "lesson_period__lesson__teachers",
-        "lesson_period__substitutions",
+    person_personal_notes = (
+        person.personal_notes.all()
+        .prefetch_related(
+            "lesson_period__lesson__groups",
+            "lesson_period__lesson__teachers",
+            "lesson_period__substitutions",
+        )
+        .annotate_date_range()
     )
 
     # Prefetch object permissions for groups the person is a member of
@@ -896,17 +837,52 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                 When(extra_lesson__isnull=False, then="extra_lesson__period__period"),
                 When(lesson_period__isnull=False, then="lesson_period__period__period"),
             ),
+            order_groups=Case(
+                When(event__isnull=False, then="event__groups"),
+                When(extra_lesson__isnull=False, then="extra_lesson__groups"),
+                When(lesson_period__isnull=False, then="lesson_period__lesson__groups"),
+            ),
+            order_teachers=Case(
+                When(event__isnull=False, then="event__teachers"),
+                When(extra_lesson__isnull=False, then="extra_lesson__teachers"),
+                When(lesson_period__isnull=False, then="lesson_period__lesson__teachers"),
+            ),
         )
         .order_by(
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",
         )
+        .annotate_date_range()
+        .annotate_subject()
     )
+
+    personal_note_filter_object = PersonalNoteFilter(request.GET, queryset=personal_notes)
+    filtered_personal_notes = personal_note_filter_object.qs
+    context["personal_note_filter_form"] = personal_note_filter_object.form
+
+    used_filters = list(personal_note_filter_object.data.values())
+    context["num_filters"] = (
+        len(used_filters) - used_filters.count("") - used_filters.count("unknown")
+    )
+
     personal_notes_list = []
     for note in personal_notes:
         note.set_object_permission_checker(checker)
         personal_notes_list.append(note)
     context["personal_notes"] = personal_notes_list
     context["excuse_types"] = ExcuseType.objects.all()
+
+    form = PersonOverviewForm(request, request.POST or None, queryset=allowed_personal_notes)
+    if request.method == "POST":
+        if form.is_valid():
+            with reversion.create_revision():
+                reversion.set_user(request.user)
+                form.execute()
+            person.refresh_from_db()
+    context["action_form"] = form
+
+    table = PersonalNoteTable(filtered_personal_notes)
+    RequestConfig(request, paginate={"per_page": 20}).configure(table)
+    context["personal_notes_table"] = table
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()

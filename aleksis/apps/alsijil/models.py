@@ -30,7 +30,7 @@ from aleksis.apps.alsijil.managers import (
 )
 from aleksis.apps.chronos.managers import GroupPropertiesMixin
 from aleksis.apps.chronos.mixins import WeekRelatedMixin
-from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod
+from aleksis.apps.chronos.models import Event, ExtraLesson, LessonPeriod, TimePeriod
 from aleksis.core.mixins import ExtensibleModel, GlobalPermissionModel
 from aleksis.core.models import SchoolTerm
 from aleksis.core.util.core_helpers import get_site_preferences
@@ -153,6 +153,33 @@ class RegisterObjectRelatedMixin(WeekRelatedMixin):
             date_format(self.date)
             if self.date
             else f"{date_format(self.event.date_start)}–{date_format(self.event.date_end)}"
+        )
+
+    @property
+    def period(self: Union["LessonDocumentation", "PersonalNote"]) -> TimePeriod:
+        """Get the date of this lesson documentation or personal note.
+
+        :: warning::
+
+            As events can be longer than one day,
+            this will return `None` for events.
+        """
+        if self.event:
+            return self.event.period_from
+        else:
+            return self.register_object.period
+
+    @property
+    def period_formatted(self: Union["LessonDocumentation", "PersonalNote"]) -> str:
+        """Get a formatted version of the period of this object.
+
+        Lesson periods, extra lessons: formatted period
+        Events: formatted period range
+        """
+        return (
+            f"{self.period.period}."
+            if not self.event
+            else f"{self.event.period_from.period}.–{self.event.period_to.period}."
         )
 
     def get_absolute_url(self: Union["LessonDocumentation", "PersonalNote"]) -> str:
