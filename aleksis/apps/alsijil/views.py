@@ -1,4 +1,3 @@
-import time
 from contextlib import nullcontext
 from copy import deepcopy
 from datetime import date, datetime, timedelta
@@ -282,16 +281,6 @@ def register_object(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
-class catchtime(object):
-    def __enter__(self):
-        self.t = time.time()
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        self.t = time.time() - self.t
-        print(self.t)
-
-
 @permission_required("alsijil.view_week", fn=get_timetable_instance_by_pk)
 def week_view(
     request: HttpRequest,
@@ -422,24 +411,20 @@ def week_view(
         # Prefetch object permissions for persons and groups the persons are members of
         # because the object permissions are checked for both persons and groups
         checker = ObjectPermissionChecker(request.user)
-        with catchtime():
-            print("Prefetch checker")
-            checker.prefetch_perms(persons_qs.prefetch_related(None))
-            checker.prefetch_perms(groups)
+        checker.prefetch_perms(persons_qs.prefetch_related(None))
+        checker.prefetch_perms(groups)
 
-        with catchtime():
-            print("personal notes")
-            prefetched_personal_notes = list(
-                PersonalNote.objects.filter(  #
-                    Q(event__in=events_pk)
-                    | Q(
-                        week=wanted_week.week,
-                        year=wanted_week.year,
-                        lesson_period__in=lesson_periods_pk,
-                    )
-                    | Q(extra_lesson__in=extra_lessons_pk)
-                ).filter(~Q(remarks=""))
-            )
+        prefetched_personal_notes = list(
+            PersonalNote.objects.filter(  #
+                Q(event__in=events_pk)
+                | Q(
+                    week=wanted_week.week,
+                    year=wanted_week.year,
+                    lesson_period__in=lesson_periods_pk,
+                )
+                | Q(extra_lesson__in=extra_lessons_pk)
+            ).filter(~Q(remarks=""))
+        )
         persons_qs = (
             persons_qs.select_related("primary_group")
             .prefetch_related(
@@ -493,9 +478,6 @@ def week_view(
             )
 
         persons = []
-        with catchtime():
-            print("Persons")
-            persons_test = list(persons_qs)
         for person in persons_qs:
             personal_notes = []
             for note in filter(lambda note: note.person_id == person.pk, prefetched_personal_notes):
@@ -528,27 +510,23 @@ def week_view(
 
     regrouped_objects = {}
 
-    with catchtime():
-        print("Register objects")
-        for register_object in list(lesson_periods) + list(extra_lessons):
-            register_object.weekday = register_object.period.weekday
-            regrouped_objects.setdefault(register_object.period.weekday, [])
-            regrouped_objects[register_object.period.weekday].append(register_object)
+    for register_object in list(lesson_periods) + list(extra_lessons):
+        register_object.weekday = register_object.period.weekday
+        regrouped_objects.setdefault(register_object.period.weekday, [])
+        regrouped_objects[register_object.period.weekday].append(register_object)
 
-    with catchtime():
-        print("events")
-        for event in events:
-            weekday_from = event.get_start_weekday(wanted_week)
-            weekday_to = event.get_end_weekday(wanted_week)
+    for event in events:
+        weekday_from = event.get_start_weekday(wanted_week)
+        weekday_to = event.get_end_weekday(wanted_week)
 
-            for weekday in range(weekday_from, weekday_to + 1):
-                # Make a copy in order to keep the annotation only on this weekday
-                event_copy = deepcopy(event)
-                event_copy.annotate_day(wanted_week[weekday])
-                event_copy.weekday = weekday
+        for weekday in range(weekday_from, weekday_to + 1):
+            # Make a copy in order to keep the annotation only on this weekday
+            event_copy = deepcopy(event)
+            event_copy.annotate_day(wanted_week[weekday])
+            event_copy.weekday = weekday
 
-                regrouped_objects.setdefault(weekday, [])
-                regrouped_objects[weekday].append(event_copy)
+            regrouped_objects.setdefault(weekday, [])
+            regrouped_objects[weekday].append(event_copy)
 
     # Sort register objects
     for weekday in regrouped_objects.keys():
