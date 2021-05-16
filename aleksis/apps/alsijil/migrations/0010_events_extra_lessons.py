@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lessondocumentation',
             name='year',
-            field=models.IntegerField(blank=True, default=aleksis.apps.chronos.util.date.get_current_year, null=True, verbose_name='Year'),
+            field=models.IntegerField(blank=True, null=True, verbose_name='Year'),
         ),
         migrations.AlterField(
             model_name='personalnote',
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='personalnote',
             name='year',
-            field=models.IntegerField(blank=True, default=aleksis.apps.chronos.util.date.get_current_year, null=True, verbose_name='Year'),
+            field=models.IntegerField(blank=True, null=True, verbose_name='Year'),
         ),
         migrations.AlterUniqueTogether(
             name='lessondocumentation',

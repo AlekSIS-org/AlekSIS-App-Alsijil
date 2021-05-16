@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
                 ('extended_data', models.JSONField(default=dict, editable=False)),
             ],
             options={
-                "default_permissions": (),
                 'permissions': (('view_week', 'Can view week overview'), ('register_absence', 'Can register absence'), ('list_personal_note_filters', 'Can list all personal note filters')),
                 'managed': False,
             },
