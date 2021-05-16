@@ -73,9 +73,7 @@ class RegisterObjectRelatedQuerySet(QuerySet):
         )
 
     def annotate_subject(self) -> QuerySet:
-        """
-        Annotate every personal note/lesson documentation with the subject of the lesson/event.
-        """
+        """Annotate lesson documentations with the subjects."""
         return self.annotate(
             subject=Case(
                 When(lesson_period__isnull=False, then="lesson_period__lesson__subject__name",),
