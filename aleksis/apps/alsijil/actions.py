@@ -29,6 +29,7 @@ def mark_as_excuse_type_generator(excuse_type) -> Callable:
         queryset.update(excused=True, excuse_type=excuse_type)
 
     mark_as_excuse_type.short_description = _(f"Mark as {excuse_type.name}")
+    mark_as_excuse_type.__name__ = f"mark_as_excuse_type_{excuse_type.short_name}"
 
     return mark_as_excuse_type
 
