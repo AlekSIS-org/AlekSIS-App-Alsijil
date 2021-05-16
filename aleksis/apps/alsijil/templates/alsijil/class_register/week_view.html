@@ -318,12 +318,7 @@
             </span>
             {% for person in persons %}
               <h5 class="card-title">
-                {% has_perm "alsijil.view_person_overview" user person.person as can_view_person_overview %}
-                {% if can_view_person_overview %}
-                  <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
-                {% else %}
-                  {{ person.person.full_name }}
-                {% endif %}
+                <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
                 {% has_perm "alsijil.register_absence" user person.person as can_register_absence %}
                 {% if can_register_absence %}
                   <a class="btn primary-color waves-effect waves-light right"
@@ -335,7 +330,7 @@
               </h5>
               {% if group_roles %}
                 <p>
-                  {% for assignment in person.person.group_roles.all %}
+                  {% for assignment in person.group_roles %}
                     {% include "alsijil/group_role/chip.html" with role=assignment.role small=assignment.date_range %}
                   {% endfor %}
                 </p>
@@ -356,17 +351,15 @@
                 </p>
               {% endfor %}
               {% for note in person.personal_notes %}
-                {% if note.remarks %}
-                  <blockquote>
-                    {{ note.remarks }}
-                    {% weekday_to_date week note.register_object.period.weekday as note_date %}
-                    <em class="right">
-                      <a href="{{ note.register_object.alsijil_url }}">
-                        {{ note.date }}, {{ note.register_object.get_subject.name }}
-                      </a>
-                    </em>
-                  </blockquote>
-                {% endif %}
+                <blockquote>
+                  {{ note.remarks }}
+                  {% weekday_to_date week note.register_object.period.weekday as note_date %}
+                  <em class="right">
+                    <a href="{{ note.register_object.alsijil_url }}">
+                      {{ note.date }}, {{ note.register_object.get_subject.name }}
+                    </a>
+                  </em>
+                </blockquote>
               {% endfor %}
             {% endfor %}
           </div>

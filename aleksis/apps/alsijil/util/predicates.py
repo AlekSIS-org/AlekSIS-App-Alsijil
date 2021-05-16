@@ -98,11 +98,18 @@ def is_person_group_owner(user: User, obj: Person) -> bool:
     the owner of any group of the given person.
     """
     if obj:
-        for group in obj.member_of.all():
-            if user.person in list(group.owners.all()):
+        for group in use_prefetched(obj, "member_of"):
+            if user.person in use_prefetched(group, "owners"):
                 return True
         return False
     return False
+
+
+def use_prefetched(obj, attr):
+    prefetched_attr = f"{attr}_prefetched"
+    if hasattr(obj, prefetched_attr):
+        return getattr(obj, prefetched_attr)
+    return getattr(obj, attr).all()
 
 
 @predicate
@@ -114,7 +121,7 @@ def is_person_primary_group_owner(user: User, obj: Person) -> bool:
     the owner of the primary group of the given person.
     """
     if obj.primary_group:
-        return user.person in obj.primary_group.owners.all()
+        return user.person in use_prefetched(obj.primary_group, "owners")
     return False
 
 
@@ -127,7 +134,7 @@ def has_person_group_object_perm(perm: str):
 
     @predicate(name)
     def fn(user: User, obj: Person) -> bool:
-        groups = obj.member_of.all()
+        groups = use_prefetched(obj, "member_of")
         for group in groups:
             if check_object_permission(user, perm, group, checker_obj=obj):
                 return True
