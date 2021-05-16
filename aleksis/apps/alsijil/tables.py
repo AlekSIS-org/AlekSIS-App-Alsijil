@@ -133,14 +133,13 @@ class PersonalNoteTable(tables.Table):
         )
 
     def render_excused(self, value, record):
-        if record.absent:
-            if value:
-                context = dict(content=_("Excused"), classes="green white-text")
+        if record.absent and value:
+            context = dict(content=_("Excused"), classes="green white-text")
+            badge = render_to_string("components/materialize-chips.html", context)
+            if record.excuse_type:
+                context = dict(content=record.excuse_type.name, classes="green white-text")
                 badge = render_to_string("components/materialize-chips.html", context)
-                if record.excuse_type:
-                    context = dict(content=record.excuse_type.name, classes="green white-text")
-                    badge = render_to_string("components/materialize-chips.html", context)
-                return badge
+            return badge
         return "–"
 
     def render_late(self, value):
