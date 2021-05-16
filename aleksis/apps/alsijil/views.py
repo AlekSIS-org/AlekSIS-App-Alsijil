@@ -822,6 +822,16 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
                 When(extra_lesson__isnull=False, then="extra_lesson__period__period"),
                 When(lesson_period__isnull=False, then="lesson_period__period__period"),
             ),
+            order_groups=Case(
+                When(event__isnull=False, then="event__groups"),
+                When(extra_lesson__isnull=False, then="extra_lesson__groups"),
+                When(lesson_period__isnull=False, then="lesson_period__lesson__groups"),
+            ),
+            order_teachers=Case(
+                When(event__isnull=False, then="event__teachers"),
+                When(extra_lesson__isnull=False, then="extra_lesson__teachers"),
+                When(lesson_period__isnull=False, then="lesson_period__lesson__teachers"),
+            ),
         )
         .order_by(
             "-school_term_start", "-order_year", "-order_week", "-order_weekday", "order_period",

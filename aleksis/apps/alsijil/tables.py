@@ -94,13 +94,17 @@ class PersonalNoteTable(tables.Table):
     period = tables.Column(
         verbose_name=_("Period"), accessor=A("period_formatted"), order_by=A("order_period")
     )
-    groups = tables.Column(verbose_name=_("Groups"), accessor=A("register_object__group_names"))
+    groups = tables.Column(
+        verbose_name=_("Groups"),
+        accessor=A("register_object__group_names"),
+        order_by=A("order_groups"),
+    )
     teachers = tables.Column(
-        verbose_name=_("Teachers"), accessor=A("register_object__teacher_names")
+        verbose_name=_("Teachers"),
+        accessor=A("register_object__teacher_names"),
+        order_by=A("order_teachers"),
     )
-    subject = tables.Column(
-        verbose_name=_("Subject"), accessor=A("register_object__get_subject__name")
-    )
+    subject = tables.Column(verbose_name=_("Subject"), accessor=A("subject"))
     absent = tables.Column()
     late = tables.Column()
     excused = tables.Column(verbose_name=_("Excuse"))
