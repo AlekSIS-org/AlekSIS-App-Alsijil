@@ -68,9 +68,28 @@ td.material-icons {
     transform: translate(-50%, 50%);
 }
 
-.medium-high-right {
-    position: relative;
-    top: 50%;
-    right: 0;
-    transform: translate(0%, 50%);
+@media screen and (min-width: 600px) {
+    /* On medium and up devices */
+    .medium-high-right {
+        float: right;
+        transform: translate(0%, 50%);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    /* Only on small devices */
+    .full-width-s {
+        width: 100%;
+    }
+
+    #heading {
+        display: block;
+    }
+    #heading + a {
+        float: none!important;
+    }
+}
+
+.overflow-x-scroll {
+    overflow-x: scroll;
 }
