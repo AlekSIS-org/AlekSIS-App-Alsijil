@@ -18,9 +18,11 @@
       <i class="material-icons left">chevron_left</i> {% trans "Back" %}
     </a>
   {% endif %}
-  {% blocktrans with person=person %}
-    <span id="heading">Class register overview for {{ person }}</span>
-  {% endblocktrans %}
+  <span id="heading">
+    {% blocktrans with person=person %}
+      Class register overview for {{ person }}
+    {% endblocktrans %}
+  </span>
   {% has_perm "alsijil.register_absence" user person as can_register_absence %}
   {% if can_register_absence %}
     <a class="btn primary-color waves-effect waves-light right" href="{% url "register_absence" person.pk %}">
@@ -74,7 +76,7 @@
             <i class="material-icons left">cancel</i>{% trans "Close" %}
           </button>
           <button type="submit" class="modal-close btn-flat primary-color-text waves-effect waves-ripple waves-light">
-            {% trans "Filter" %} <i class="material-icons left">filter_alt</i>
+            <i class="material-icons left">filter_alt</i>{% trans "Filter" %}
           </button>
         </div>
       </form>
@@ -157,12 +159,12 @@
       </ul>
     </div>
   {% endif %}
-<script type="text/javascript">
+  <script type="text/javascript">
     $("#remove-filters").click(function () {
-        $("#filter-modal").trigger("reset");
-        $("#filter-modal input, #filter-modal select").each(function () {
-            $(this).val("");
-        })
+      $("#filter-modal").trigger("reset");
+      $("#filter-modal input, #filter-modal select").each(function () {
+        $(this).val("");
+      })
     })
-</script>
+  </script>
 {% endblock %}
