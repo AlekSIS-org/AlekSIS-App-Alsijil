@@ -395,7 +395,9 @@ def generate_person_list_with_class_register_statistics(
         Q(groups=self) | Q(groups__parent_groups=self)
     )
 
-    persons = persons.select_related("primary_group", "primary_group__school_term")
+    persons = persons.select_related("primary_group", "primary_group__school_term").order_by(
+        "last_name", "first_name"
+    )
     persons = persons.annotate(
         filtered_personal_notes=FilteredRelation(
             "personal_notes",
