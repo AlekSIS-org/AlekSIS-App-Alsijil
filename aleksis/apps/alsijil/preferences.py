@@ -124,3 +124,11 @@ class RegisterObjectsTableItemsPerPage(IntegerPreference):
     def validate(self, value):
         if value < 1:
             raise ValidationError(_("Each page must show at least one item."))
+
+
+@person_preferences_registry.register
+class DefaultLessonDocumentationFilter(BooleanPreference):
+    section = alsijil
+    name = "default_lesson_documentation_filter"
+    default = True
+    verbose_name = _("Filter lessons by existence of their lesson documentation on default")
