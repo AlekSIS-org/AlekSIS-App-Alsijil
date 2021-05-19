@@ -14,6 +14,7 @@ class AlsijilConfig(AppConfig):
         ([2019, 2020], "Tom Teichler", "tom.teichler@teckids.org"),
         ([2019], "mirabilos", "thorsten.glaser@teckids.org"),
         ([2020, 2021], "Jonathan Weth", "dev@jonathanweth.de"),
-        ([2020], "Julian Leucker", "leuckeju@katharineum.de"),
+        ([2020, 2021], "Julian Leucker", "leuckeju@katharineum.de"),
         ([2020], "Hangzhi Yu", "yuha@katharineum.de"),
+        ([2021], "Lloyd Meins", "meinsll@katharineum.de"),
     )
