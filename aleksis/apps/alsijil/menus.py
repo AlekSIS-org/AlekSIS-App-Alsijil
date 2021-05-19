@@ -19,7 +19,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_lesson_menu",
+                            "alsijil.view_lesson_menu_rule",
                         ),
                     ],
                 },
@@ -30,7 +30,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_week_menu",
+                            "alsijil.view_week_menu_rule",
                         ),
                     ],
                 },
@@ -41,7 +41,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_my_groups",
+                            "alsijil.view_my_groups_rule",
                         ),
                     ],
                 },
@@ -52,7 +52,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_person_overview_menu",
+                            "alsijil.view_person_overview_menu_rule",
                         ),
                     ],
                 },
@@ -63,7 +63,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_my_students",
+                            "alsijil.view_my_students_rule",
                         ),
                     ],
                 },
@@ -74,7 +74,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.assign_grouprole_for_multiple",
+                            "alsijil.assign_grouprole_for_multiple_rule",
                         ),
                     ],
                 },
@@ -85,7 +85,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_register_objects_list",
+                            "alsijil.view_register_objects_list_rule",
                         ),
                     ],
                 },
@@ -96,7 +96,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_excusetypes",
+                            "alsijil.view_excusetypes_rule",
                         ),
                     ],
                 },
@@ -107,7 +107,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_extramarks",
+                            "alsijil.view_extramarks_rule",
                         ),
                     ],
                 },
@@ -118,7 +118,7 @@ MENUS = {
                     "validators": [
                         (
                             "aleksis.core.util.predicates.permission_validator",
-                            "alsijil.view_grouproles",
+                            "alsijil.view_grouproles_rule",
                         ),
                     ],
                 },
