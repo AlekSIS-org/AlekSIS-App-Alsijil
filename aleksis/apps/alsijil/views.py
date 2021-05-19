@@ -82,7 +82,7 @@ from .util.alsijil_helpers import (
 )
 
 
-@permission_required("alsijil.view_register_object", fn=get_register_object_by_pk)  # FIXME
+@permission_required("alsijil.view_register_object_rule", fn=get_register_object_by_pk)  # FIXME
 def register_object(
     request: HttpRequest,
     model: Optional[str] = None,
@@ -186,7 +186,7 @@ def register_object(
         show_group_roles = request.user.person.preferences[
             "alsijil__group_roles_in_lesson_view"
         ] and request.user.has_perm(
-            "alsijil.view_assigned_grouproles_for_register_object", register_object
+            "alsijil.view_assigned_grouproles_for_register_object_rule", register_object
         )
         if show_group_roles:
             groups = register_object.get_groups().all()
@@ -208,7 +208,9 @@ def register_object(
         register_object.set_object_permission_checker(checker)
 
         # Create a formset that holds all personal notes for all persons in this lesson
-        if not request.user.has_perm("alsijil.view_register_object_personalnote", register_object):
+        if not request.user.has_perm(
+            "alsijil.view_register_object_personalnote_rule", register_object
+        ):
             persons = Person.objects.filter(pk=request.user.person.pk)
         else:
             persons = Person.objects.all()
@@ -230,7 +232,7 @@ def register_object(
 
         if request.method == "POST":
             if lesson_documentation_form.is_valid() and request.user.has_perm(
-                "alsijil.edit_lessondocumentation", register_object
+                "alsijil.edit_lessondocumentation_rule", register_object
             ):
                 with reversion.create_revision():
                     reversion.set_user(request.user)
@@ -248,7 +250,7 @@ def register_object(
                 or not get_site_preferences()["alsijil__block_personal_notes_for_cancelled"]
             ):
                 if personal_note_formset.is_valid() and request.user.has_perm(
-                    "alsijil.edit_register_object_personalnote", register_object
+                    "alsijil.edit_register_object_personalnote_rule", register_object
                 ):
                     with reversion.create_revision():
                         reversion.set_user(request.user)
@@ -301,7 +303,7 @@ def register_object(
     return render(request, "alsijil/class_register/lesson.html", context)
 
 
-@permission_required("alsijil.view_week", fn=get_timetable_instance_by_pk)
+@permission_required("alsijil.view_week_rule", fn=get_timetable_instance_by_pk)
 def week_view(
     request: HttpRequest,
     year: Optional[int] = None,
@@ -389,7 +391,7 @@ def week_view(
     show_group_roles = (
         group
         and request.user.person.preferences["alsijil__group_roles_in_week_view"]
-        and request.user.has_perm("alsijil.view_assigned_grouproles", group)
+        and request.user.has_perm("alsijil.view_assigned_grouproles_rule", group)
     )
     if show_group_roles:
         group_roles = GroupRole.objects.with_assignments(wanted_week, [group])
@@ -421,7 +423,7 @@ def week_view(
         # Aggregate all personal notes for this group and week
         persons_qs = Person.objects.filter(is_active=True)
 
-        if not request.user.has_perm("alsijil.view_week_personalnote", instance):
+        if not request.user.has_perm("alsijil.view_week_personalnote_rule", instance):
             persons_qs = persons_qs.filter(pk=request.user.person.pk)
         elif group:
             persons_qs = persons_qs.filter(member_of=group)
@@ -575,7 +577,9 @@ def week_view(
     return render(request, "alsijil/class_register/week_view.html", context)
 
 
-@permission_required("alsijil.view_full_register", fn=objectgetter_optional(Group, None, False))
+@permission_required(
+    "alsijil.view_full_register_rule", fn=objectgetter_optional(Group, None, False)
+)
 def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -698,7 +702,7 @@ def full_register_group(request: HttpRequest, id_: int) -> HttpResponse:
     return render_pdf(request, "alsijil/print/full_register.html", context)
 
 
-@permission_required("alsijil.view_my_students")
+@permission_required("alsijil.view_my_students_rule")
 def my_students(request: HttpRequest) -> HttpResponse:
     context = {}
     relevant_groups = (
@@ -737,7 +741,7 @@ def my_students(request: HttpRequest) -> HttpResponse:
     return render(request, "alsijil/class_register/persons.html", context)
 
 
-@permission_required("alsijil.view_my_groups",)
+@permission_required("alsijil.view_my_groups_rule",)
 def my_groups(request: HttpRequest) -> HttpResponse:
     context = {}
     context["groups"] = request.user.person.get_owner_groups_with_lessons().annotate(
@@ -749,7 +753,7 @@ def my_groups(request: HttpRequest) -> HttpResponse:
 class StudentsList(PermissionRequiredMixin, DetailView):
     model = Group
     template_name = "alsijil/class_register/students_list.html"
-    permission_required = "alsijil.view_students_list"
+    permission_required = "alsijil.view_students_list_rule"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -761,7 +765,7 @@ class StudentsList(PermissionRequiredMixin, DetailView):
 
 
 @permission_required(
-    "alsijil.view_person_overview",
+    "alsijil.view_person_overview_rule",
     fn=objectgetter_optional(
         Person.objects.prefetch_related("member_of__owners"), "request.user.person", True
     ),
@@ -793,7 +797,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     checker.prefetch_perms(Group.objects.filter(members=person))
     person.set_object_permission_checker(checker)
 
-    if request.user.has_perm("alsijil.view_person_overview_personalnote", person):
+    if request.user.has_perm("alsijil.view_person_overview_personalnote_rule", person):
         allowed_personal_notes = person_personal_notes.all()
     else:
         allowed_personal_notes = person_personal_notes.filter(
@@ -886,7 +890,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
     extra_marks = ExtraMark.objects.all()
     excuse_types = ExcuseType.objects.all()
-    if request.user.has_perm("alsijil.view_person_statistics_personalnote", person):
+    if request.user.has_perm("alsijil.view_person_statistics_personalnote_rule", person):
         school_terms = SchoolTerm.objects.all().order_by("-date_start")
         stats = []
         for school_term in school_terms:
@@ -965,7 +969,7 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
 
 
 @never_cache
-@permission_required("alsijil.register_absence", fn=objectgetter_optional(Person))
+@permission_required("alsijil.register_absence_rule", fn=objectgetter_optional(Person))
 def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
     context = {}
 
@@ -1035,7 +1039,7 @@ def register_absence(request: HttpRequest, id_: int) -> HttpResponse:
 class DeletePersonalNoteView(PermissionRequiredMixin, DetailView):
     model = PersonalNote
     template_name = "core/pages/delete.html"
-    permission_required = "alsijil.edit_personalnote"
+    permission_required = "alsijil.edit_personalnote_rule"
 
     def post(self, request, *args, **kwargs):
         note = self.get_object()
@@ -1052,7 +1056,7 @@ class ExtraMarkListView(PermissionRequiredMixin, SingleTableView):
 
     model = ExtraMark
     table_class = ExtraMarkTable
-    permission_required = "alsijil.view_extramark"
+    permission_required = "alsijil.view_extramarks_rule"
     template_name = "alsijil/extra_mark/list.html"
 
 
@@ -1062,7 +1066,7 @@ class ExtraMarkCreateView(PermissionRequiredMixin, AdvancedCreateView):
 
     model = ExtraMark
     form_class = ExtraMarkForm
-    permission_required = "alsijil.create_extramark"
+    permission_required = "alsijil.add_extramark_rule"
     template_name = "alsijil/extra_mark/create.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been created.")
@@ -1074,7 +1078,7 @@ class ExtraMarkEditView(PermissionRequiredMixin, AdvancedEditView):
 
     model = ExtraMark
     form_class = ExtraMarkForm
-    permission_required = "alsijil.edit_extramark"
+    permission_required = "alsijil.edit_extramark_rule"
     template_name = "alsijil/extra_mark/edit.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been saved.")
@@ -1085,7 +1089,7 @@ class ExtraMarkDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelete
     """Delete view for extra marks."""
 
     model = ExtraMark
-    permission_required = "alsijil.delete_extramark"
+    permission_required = "alsijil.delete_extramark_rule"
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("extra_marks")
     success_message = _("The extra mark has been deleted.")
@@ -1096,7 +1100,7 @@ class ExcuseTypeListView(PermissionRequiredMixin, SingleTableView):
 
     model = ExcuseType
     table_class = ExcuseTypeTable
-    permission_required = "alsijil.view_excusetypes"
+    permission_required = "alsijil.view_excusetypes_rule"
     template_name = "alsijil/excuse_type/list.html"
 
 
@@ -1106,7 +1110,7 @@ class ExcuseTypeCreateView(PermissionRequiredMixin, AdvancedCreateView):
 
     model = ExcuseType
     form_class = ExcuseTypeForm
-    permission_required = "alsijil.add_excusetype"
+    permission_required = "alsijil.add_excusetype_rule"
     template_name = "alsijil/excuse_type/create.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been created.")
@@ -1118,7 +1122,7 @@ class ExcuseTypeEditView(PermissionRequiredMixin, AdvancedEditView):
 
     model = ExcuseType
     form_class = ExcuseTypeForm
-    permission_required = "alsijil.edit_excusetype"
+    permission_required = "alsijil.edit_excusetype_rule"
     template_name = "alsijil/excuse_type/edit.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been saved.")
@@ -1129,7 +1133,7 @@ class ExcuseTypeDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelet
     """Delete view for excuse types."""
 
     model = ExcuseType
-    permission_required = "alsijil.delete_excusetype"
+    permission_required = "alsijil.delete_excusetype_rule"
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("excuse_types")
     success_message = _("The excuse type has been deleted.")
@@ -1140,7 +1144,7 @@ class GroupRoleListView(PermissionRequiredMixin, SingleTableView):
 
     model = GroupRole
     table_class = GroupRoleTable
-    permission_required = "alsijil.view_grouproles"
+    permission_required = "alsijil.view_grouproles_rule"
     template_name = "alsijil/group_role/list.html"
 
 
@@ -1150,7 +1154,7 @@ class GroupRoleCreateView(PermissionRequiredMixin, AdvancedCreateView):
 
     model = GroupRole
     form_class = GroupRoleForm
-    permission_required = "alsijil.add_grouprole"
+    permission_required = "alsijil.add_grouprole_rule"
     template_name = "alsijil/group_role/create.html"
     success_url = reverse_lazy("group_roles")
     success_message = _("The group role has been created.")
@@ -1162,7 +1166,7 @@ class GroupRoleEditView(PermissionRequiredMixin, AdvancedEditView):
 
     model = GroupRole
     form_class = GroupRoleForm
-    permission_required = "alsijil.edit_grouprole"
+    permission_required = "alsijil.edit_grouprole_rule"
     template_name = "alsijil/group_role/edit.html"
     success_url = reverse_lazy("group_roles")
     success_message = _("The group role has been saved.")
@@ -1173,14 +1177,14 @@ class GroupRoleDeleteView(PermissionRequiredMixin, RevisionMixin, AdvancedDelete
     """Delete view for group roles."""
 
     model = GroupRole
-    permission_required = "alsijil.delete_grouprole"
+    permission_required = "alsijil.delete_grouprole_rule"
     template_name = "core/pages/delete.html"
     success_url = reverse_lazy("group_roles")
     success_message = _("The group role has been deleted.")
 
 
 class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
-    permission_required = "alsijil.view_assigned_grouproles"
+    permission_required = "alsijil.view_assigned_grouproles_rule"
     model = Group
     template_name = "alsijil/group_role/assigned_list.html"
 
@@ -1207,7 +1211,7 @@ class AssignedGroupRolesView(PermissionRequiredMixin, DetailView):
 class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
     model = GroupRoleAssignment
     form_class = AssignGroupRoleForm
-    permission_required = "alsijil.assign_grouprole_for_group"
+    permission_required = "alsijil.assign_grouprole_for_group_rule"
     template_name = "alsijil/group_role/assign.html"
     success_message = _("The group role has been assigned.")
 
@@ -1239,7 +1243,7 @@ class AssignGroupRoleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCre
 class AssignGroupRoleMultipleView(PermissionRequiredMixin, SuccessNextMixin, AdvancedCreateView):
     model = GroupRoleAssignment
     form_class = AssignGroupRoleForm
-    permission_required = "alsijil.assign_grouprole_for_multiple"
+    permission_required = "alsijil.assign_grouprole_for_multiple_rule"
     template_name = "alsijil/group_role/assign.html"
     success_message = _("The group role has been assigned.")
 
@@ -1258,7 +1262,7 @@ class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, Adv
 
     model = GroupRoleAssignment
     form_class = GroupRoleAssignmentEditForm
-    permission_required = "alsijil.edit_grouproleassignment"
+    permission_required = "alsijil.edit_grouproleassignment_rule"
     template_name = "alsijil/group_role/edit_assignment.html"
     success_message = _("The group role assignment has been saved.")
 
@@ -1270,7 +1274,7 @@ class GroupRoleAssignmentEditView(PermissionRequiredMixin, SuccessNextMixin, Adv
 @method_decorator(never_cache, "dispatch")
 class GroupRoleAssignmentStopView(PermissionRequiredMixin, SuccessNextMixin, DetailView):
     model = GroupRoleAssignment
-    permission_required = "alsijil.stop_grouproleassignment"
+    permission_required = "alsijil.stop_grouproleassignment_rule"
 
     def get_success_url(self) -> str:
         pk = self.object.groups.first().pk
@@ -1292,7 +1296,7 @@ class GroupRoleAssignmentDeleteView(
     """Delete view for group role assignments."""
 
     model = GroupRoleAssignment
-    permission_required = "alsijil.delete_grouproleassignment"
+    permission_required = "alsijil.delete_grouproleassignment_rule"
     template_name = "core/pages/delete.html"
     success_message = _("The group role assignment has been deleted.")
 
@@ -1304,7 +1308,7 @@ class GroupRoleAssignmentDeleteView(
 class AllRegisterObjectsView(PermissionRequiredMixin, View):
     """Provide overview of all register objects for coordinators."""
 
-    permission_required = "alsijil.view_register_objects_list"
+    permission_required = "alsijil.view_register_objects_list_rule"
 
     def get_context_data(self, request):
         context = {}
