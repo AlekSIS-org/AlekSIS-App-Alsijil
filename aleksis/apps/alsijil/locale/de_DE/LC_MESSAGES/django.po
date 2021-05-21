@@ -8,9 +8,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-03-21 14:38+0100\n"
-"PO-Revision-Date: 2021-03-18 14:35+0000\n"
-"Last-Translator: Jonathan Weth <teckids@jonathanweth.de>\n"
-"Language-Team: German <https://translate.edugit.org/projects/aleksis/aleksis-app-alsijil/de/>\n"
+"PO-Revision-Date: 2021-05-21 16:09+0000\n"
+"Last-Translator: Lloyd Meins <teckids@lloydmeins.de>\n"
+"Language-Team: German <https://translate.edugit.org/projects/aleksis/"
+"aleksis-app-alsijil/de/>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,8 +20,6 @@ msgstr ""
 "X-Generator: Weblate 4.4\n"
 
 #: actions.py:30
-#, fuzzy
-#| msgid "{} wants you to check some class register entries."
 msgid "{} asks you to check some class register entries."
 msgstr "{} bittet Sie, einige Klassenbucheinträge zu überprüfen."
 
@@ -30,8 +29,6 @@ msgid "We have successfully sent notifications to {count_teachers} persons for {
 msgstr "Wir haben erfolgreich Benachrichtigungen an {count_teachers} Personen für {count_items} Stunden gesendet."
 
 #: actions.py:54
-#, fuzzy
-#| msgid "Notify teacher to check data"
 msgid "Ask teacher to check data"
 msgstr "Lehrkraft bitten, die Daten zu überprüfen"
 
