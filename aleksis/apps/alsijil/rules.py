@@ -261,7 +261,7 @@ add_perm("alsijil.delete_grouprole_rule", delete_group_role_predicate)
 
 view_assigned_group_roles_predicate = has_person & (
     is_group_owner
-    | has_global_perm("alsjil.assign_grouprole")
+    | has_global_perm("alsijil.assign_grouprole")
     | has_object_perm("core.assign_grouprole")
 )
 add_perm("alsijil.view_assigned_grouproles_rule", view_assigned_group_roles_predicate)
@@ -270,7 +270,7 @@ view_assigned_group_roles_register_object_predicate = has_person & (
     is_lesson_teacher
     | is_lesson_original_teacher
     | is_lesson_parent_group_owner
-    | has_global_perm("alsjil.assign_grouprole")
+    | has_global_perm("alsijil.assign_grouprole")
 )
 add_perm(
     "alsijil.view_assigned_grouproles_for_register_object",
@@ -278,12 +278,12 @@ add_perm(
 )
 
 assign_group_role_person_predicate = has_person & (
-    is_person_group_owner | has_global_perm("alsjil.assign_grouprole")
+    is_person_group_owner | has_global_perm("alsijil.assign_grouprole")
 )
 add_perm("alsijil.assign_grouprole_to_person_rule", assign_group_role_person_predicate)
 
 assign_group_role_for_multiple_predicate = has_person & (
-    is_owner_of_any_group | has_global_perm("alsjil.assign_grouprole")
+    is_owner_of_any_group | has_global_perm("alsijil.assign_grouprole")
 )
 add_perm("alsijil.assign_grouprole_for_multiple_rule", assign_group_role_for_multiple_predicate)
 
@@ -291,7 +291,7 @@ assign_group_role_group_predicate = view_assigned_group_roles_predicate
 add_perm("alsijil.assign_grouprole_for_group_rule", assign_group_role_group_predicate)
 
 edit_group_role_assignment_predicate = has_person & (
-    has_global_perm("alsjil.assign_grouprole") | is_group_role_assignment_group_owner
+    has_global_perm("alsijil.assign_grouprole") | is_group_role_assignment_group_owner
 )
 add_perm("alsijil.edit_grouproleassignment_rule", edit_group_role_assignment_predicate)
 
@@ -299,7 +299,7 @@ stop_group_role_assignment_predicate = edit_group_role_assignment_predicate
 add_perm("alsijil.stop_grouproleassignment_rule", stop_group_role_assignment_predicate)
 
 delete_group_role_assignment_predicate = has_person & (
-    has_global_perm("alsjil.assign_grouprole") | is_group_role_assignment_group_owner
+    has_global_perm("alsijil.assign_grouprole") | is_group_role_assignment_group_owner
 )
 add_perm("alsijil.delete_grouproleassignment_rule", delete_group_role_assignment_predicate)
 

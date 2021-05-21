@@ -9,7 +9,7 @@
 {% block page_title %}{% blocktrans %}Group roles{% endblocktrans %}{% endblock %}
 
 {% block content %}
-  {% has_perm "alsijil.add_grouprole" user as add_group_role %}
+  {% has_perm "alsijil.add_grouprole_rule" user as add_group_role %}
   {% if add_group_role %}
     <a class="btn green waves-effect waves-light" href="{% url 'create_group_role' %}">
       <i class="material-icons left">add</i>

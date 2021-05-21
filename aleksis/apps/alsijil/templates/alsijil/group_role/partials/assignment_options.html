@@ -2,9 +2,9 @@
 
 {% load i18n rules %}
 
-{% has_perm "alsijil.edit_grouproleassignment" user assignment as can_edit %}
-{% has_perm "alsijil.stop_grouproleassignment" user assignment as can_stop %}
-{% has_perm "alsijil.delete_grouproleassignment" user assignment as can_delete %}
+{% has_perm "alsijil.edit_grouproleassignment_rule" user assignment as can_edit %}
+{% has_perm "alsijil.stop_grouproleassignment_rule" user assignment as can_stop %}
+{% has_perm "alsijil.delete_grouproleassignment_rule" user assignment as can_delete %}
 
 <ul id="dropdown-{{ assignment.pk }}{{ suffix }}" class="dropdown-content">
   {% if can_edit %}

@@ -108,7 +108,7 @@
           <span class="hide-on-large-only">{% trans "Details" %}</span>
         </a>
 
-        {% has_perm "alsijil.register_absence" user person as can_register_absence %}
+        {% has_perm "alsijil.register_absence_rule" user person as can_register_absence %}
         {% if can_register_absence %}
           <a class="btn primary-color waves-effect waves-light" href="{% url "register_absence" person.pk %}">
             <i class="material-icons left">rate_review</i>
