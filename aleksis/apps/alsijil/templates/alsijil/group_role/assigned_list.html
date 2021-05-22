@@ -21,7 +21,7 @@
   {% url "assigned_group_roles" object.pk as back_url %}
 
   <p>
-    {% has_perm "alsijil.view_my_groups" user as can_view_group_overview %}
+    {% has_perm "alsijil.view_my_groups_rule" user as can_view_group_overview %}
     {% if can_view_group_overview %}
       <a class="btn waves-effect waves-light" href="{% url "my_groups" %}">
         <i class="material-icons left">arrow_back</i>
@@ -29,7 +29,7 @@
       </a>
     {% endif %}
 
-    {% has_perm "alsijil.assign_grouprole_for_group" user object as can_assign_group_role %}
+    {% has_perm "alsijil.assign_grouprole_for_group_rule" user object as can_assign_group_role %}
     {% if can_assign_group_role %}
       <a class="btn green waves-effect waves-light" href="{% url "assign_group_role" object.pk %}">
         <i class="material-icons left">assignment_ind</i>

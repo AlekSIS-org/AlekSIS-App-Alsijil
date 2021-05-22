@@ -112,7 +112,7 @@
                     </thead>
                     <tbody>
                     {% for register_object in objects %}
-                      {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
+                      {% has_perm "alsijil.view_lessondocumentation_rule" user register_object as can_view_lesson_documentation %}
                       {% if can_view_lesson_documentation %}
                         <tr>
                           <td class="center-align">
@@ -192,7 +192,7 @@
                   <div class="collapsible-body">
                     <div class="collection">
                       {% for register_object in objects %}
-                        {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
+                        {% has_perm "alsijil.view_lessondocumentation_rule" user register_object as can_view_lesson_documentation %}
                         {% if can_view_lesson_documentation %}
                           <a class="collection-item avatar"
                              href="{{ register_object.alsijil_url }}?back={{ back_url }}">
@@ -319,7 +319,7 @@
             {% for person in persons %}
               <h5 class="card-title">
                 <a href="{% url "overview_person" person.person.pk %}">{{ person.person.full_name }}</a>
-                {% has_perm "alsijil.register_absence" user person.person as can_register_absence %}
+                {% has_perm "alsijil.register_absence_rule" user person.person as can_register_absence %}
                 {% if can_register_absence %}
                   <a class="btn primary-color waves-effect waves-light right"
                      href="{% url "register_absence" person.person.pk %}">
