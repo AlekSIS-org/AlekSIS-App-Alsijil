@@ -9,7 +9,19 @@ This is an application for use with the `AlekSIS`_ platform.
 Features
 --------
 
-The Alsijil app provides functionality for digital class registers.
+This AlekSIS app currently provides the following features for managing digital class registers:
+
+* For users:
+
+ * Manage and assign group roles
+ * Manage custom excuse types
+ * Manage extra marks (e. g. forgotten homework)
+ * Manage group notes for every lesson
+ * Manage lesson documentations for every lesson
+ * Manage personal notes for every lesson
+ * Show all owned groups of the current person
+ * Show all students of the current person
+ * Show filterable (week) overview for lesson documentations and personal/group notes
 
 Licence
 -------
