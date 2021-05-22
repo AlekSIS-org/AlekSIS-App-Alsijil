@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AlekSIS-App-Alsijil"
-version = "2.0a4.dev0"
+version = "2.0b0"
 packages = [
     { include = "aleksis" }
 ]
@@ -26,7 +26,7 @@ secondary = true
 
 [tool.poetry.dependencies]
 python = "^3.7"
-aleksis-core = "^2.0a3.dev0"
+aleksis-core = "^2.0b0"
 aleksis-app-chronos = "^2.0a3.dev0"
 
 [tool.poetry.dev-dependencies]
