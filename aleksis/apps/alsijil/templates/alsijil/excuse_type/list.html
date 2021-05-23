@@ -11,7 +11,7 @@
 {% block content %}
   {% include "alsijil/excuse_type/warning.html" %}
 
-  {% has_perm "alsijil.add_excusetype" user as add_excusetype %}
+  {% has_perm "alsijil.add_excusetype_rule" user as add_excusetype %}
   {% if add_excusetype %}
     <a class="btn green waves-effect waves-light" href="{% url 'create_excuse_type' %}">
       <i class="material-icons left">add</i>

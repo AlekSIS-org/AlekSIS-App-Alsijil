@@ -51,9 +51,9 @@ class ExcuseTypeTable(tables.Table):
     )
 
     def before_render(self, request):
-        if not request.user.has_perm("alsijil.edit_excusetype"):
+        if not request.user.has_perm("alsijil.edit_excusetype_rule"):
             self.columns.hide("edit")
-        if not request.user.has_perm("alsijil.delete_excusetype"):
+        if not request.user.has_perm("alsijil.delete_excusetype_rule"):
             self.columns.hide("delete")
 
 
@@ -80,9 +80,9 @@ class GroupRoleTable(tables.Table):
         return render_to_string("alsijil/group_role/chip.html", context)
 
     def before_render(self, request):
-        if not request.user.has_perm("alsijil.edit_grouprole"):
+        if not request.user.has_perm("alsijil.edit_grouprole_rule"):
             self.columns.hide("edit")
-        if not request.user.has_perm("alsijil.delete_grouprole"):
+        if not request.user.has_perm("alsijil.delete_grouprole_rule"):
             self.columns.hide("delete")
 
 

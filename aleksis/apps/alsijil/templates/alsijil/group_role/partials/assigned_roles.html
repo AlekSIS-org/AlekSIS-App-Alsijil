@@ -1,5 +1,5 @@
 {% load i18n rules %}
-{% has_perm "alsijil.assign_grouprole_for_group" user group as can_assign_group_role %}
+{% has_perm "alsijil.assign_grouprole_for_group_rule" user group as can_assign_group_role %}
 <div class="collection">
   {% for role in roles %}
     <div class="collection-item">

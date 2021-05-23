@@ -1,6 +1,6 @@
 {% load rules %}
 {% for note in notes %}
-  {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+  {% has_perm "alsijil.view_personalnote_rule" user note as can_view_personalnote %}
   {% if can_view_personalnote %}
     <span>{{ note.person }} ({{ note.late }}'){% if not forloop.last %},{% endif %}</span>
   {% endif %}

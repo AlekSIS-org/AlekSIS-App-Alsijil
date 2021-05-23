@@ -66,9 +66,9 @@
   </h4>
   <br/>
 
-  {% has_perm "alsijil.view_lessondocumentation" user register_object as can_view_lesson_documentation %}
-  {% has_perm "alsijil.edit_lessondocumentation" user register_object as can_edit_lesson_documentation %}
-  {% has_perm "alsijil.edit_register_object_personalnote" user register_object as can_edit_register_object_personalnote %}
+  {% has_perm "alsijil.view_lessondocumentation_rule" user register_object as can_view_lesson_documentation %}
+  {% has_perm "alsijil.edit_lessondocumentation_rule" user register_object as can_edit_lesson_documentation %}
+  {% has_perm "alsijil.edit_register_object_personalnote_rule" user register_object as can_edit_register_object_personalnote %}
 
   <form method="post" class="row">
     <p>
@@ -115,7 +115,7 @@
               </li>
             {% endif %}
             {% if prev_lesson %}
-              {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+              {% has_perm "alsijil.view_lessondocumentation_rule" user prev_lesson as can_view_prev_lesson_documentation %}
               {% if prev_lesson.get_lesson_documentation and can_view_prev_lesson_documentation %}
                 <li class="tab">
                   <a href="#previous-lesson">{% trans "Previous lesson" %}</a>
@@ -176,7 +176,7 @@
 
         {% with prev_doc=prev_lesson.get_lesson_documentation %}
           {% with absences=prev_lesson.get_absences tardinesses=prev_lesson.get_tardinesses extra_marks=prev_lesson.get_extra_marks %}
-            {% has_perm "alsijil.view_lessondocumentation" user prev_lesson as can_view_prev_lesson_documentation %}
+            {% has_perm "alsijil.view_lessondocumentation_rule" user prev_lesson as can_view_prev_lesson_documentation %}
             {% if prev_doc and can_view_prev_lesson_documentation %}
               {% weekday_to_date prev_lesson.week prev_lesson.period.weekday as prev_date %}
               <div class="col s12" id="previous-lesson">
@@ -228,7 +228,7 @@
                           <th>{{ extra_mark.name }}</th>
                           <td>
                             {% for note in notes %}
-                              {% has_perm "alsijil.view_personalnote" user note as can_view_personalnote %}
+                              {% has_perm "alsijil.view_personalnote_rule" user note as can_view_personalnote %}
                               {% if can_view_personalnote %}
                                 <span>{{ note.person }}{% if not forloop.last %},{% endif %}</span>
                               {% endif %}
