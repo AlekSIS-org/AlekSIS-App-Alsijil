@@ -8,15 +8,30 @@ readme = "README.rst"
 include = ["CHANGELOG.rst", "LICENCE.rst", "aleksis/**/*.mo"]
 
 description = "AlekSIS (School Information System) — App كتاب السجل (class register and school records)"
-authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
+authors = [
+    "Dominik George <dominik.george@teckids.org>",
+    "Julian Leucker <leuckeju@katharineum.de>",
+    "Jonathan Weth <dev@jonathanweth.de>",
+    "Hangzhi Yu <yuha@katharineum.de>",
+    "Lloyd Meins <meinsll@katharineum.de>",
+    "mirabilos <thorsten.glaser@teckids.org>",
+    "Tom Teichler <tom.teichler@teckids.org>"
+]
+maintainers = [
+    "Dominik George <dominik.george@teckids.org>",
+    "Jonathan Weth <dev@jonathanweth.de>",
+]
 license = "EUPL-1.2"
 homepage = "https://aleksis.edugit.io/"
 repository = "https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil"
 documentation = "https://aleksis.edugit.io/AlekSIS/docs/html/"
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
+    "Framework :: Django :: 3.0",
     "Intended Audience :: Education",
-    "Topic :: Education"
+    "Topic :: Education",
+    "Typing :: Typed",
 ]
 
 [[tool.poetry.source]]
