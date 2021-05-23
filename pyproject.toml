@@ -5,7 +5,7 @@ packages = [
     { include = "aleksis" }
 ]
 readme = "README.rst"
-include = ["CHANGELOG.rst", "LICENCE.rst", "aleksis/**/locale/*.mo"]
+include = ["CHANGELOG.rst", "LICENCE.rst", "aleksis/**/*.mo"]
 
 description = "AlekSIS (School Information System) — App كتاب السجل (class register and school records)"
 authors = ["Dominik George <dominik.george@teckids.org>", "mirabilos <thorsten.glaser@teckids.org>", "Tom Teichler <tom.teichler@teckids.org>"]
@@ -25,9 +25,9 @@ url = "https://edugit.org/api/v4/projects/461/packages/pypi/simple"
 secondary = true
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 aleksis-core = "^2.0b0"
-aleksis-app-chronos = "^2.0a3.dev0"
+aleksis-app-chronos = "^2.0b0"
 
 [tool.poetry.dev-dependencies]
 aleksis-builddeps = "*"
