@@ -61,6 +61,12 @@ class ExcuseType(ExtensibleModel):
         ordering = ["name"]
         verbose_name = _("Excuse type")
         verbose_name_plural = _("Excuse types")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("site_id", "short_name"), name="unique_excuse_short_name"
+            ),
+            models.UniqueConstraint(fields=("site_id", "name"), name="unique_excuse_name"),
+        ]
 
 
 lesson_related_constraint_q = (
@@ -275,9 +281,12 @@ class PersonalNote(RegisterObjectRelatedMixin, ExtensibleModel):
         constraints = [
             CheckConstraint(
                 check=lesson_related_constraint_q, name="one_relation_only_personal_note"
-            )
+            ),
+            models.UniqueConstraint(
+                fields=("lesson_period", "week", "year", "event", "extra_lesson"),
+                name="unique_personal_note_per_object",
+            ),
         ]
-        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
@@ -362,9 +371,12 @@ class LessonDocumentation(RegisterObjectRelatedMixin, ExtensibleModel):
         constraints = [
             CheckConstraint(
                 check=lesson_related_constraint_q, name="one_relation_only_lesson_documentation",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=("lesson_period", "week", "year", "event", "extra_lesson"),
+                name="unique_documentation_per_object",
+            ),
         ]
-        unique_together = ["lesson_period", "week", "year", "event", "extra_lesson"]
 
 
 class ExtraMark(ExtensibleModel):
@@ -387,6 +399,12 @@ class ExtraMark(ExtensibleModel):
         ordering = ["short_name"]
         verbose_name = _("Extra mark")
         verbose_name_plural = _("Extra marks")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("site_id", "short_name"), name="unique_mark_short_name"
+            ),
+            models.UniqueConstraint(fields=("site_id", "name"), name="unique_mark_name"),
+        ]
 
 
 class GroupRole(ExtensibleModel):
@@ -402,6 +420,9 @@ class GroupRole(ExtensibleModel):
     class Meta:
         verbose_name = _("Group role")
         verbose_name_plural = _("Group roles")
+        constraints = [
+            models.UniqueConstraint(fields=("site_id", "name"), name="unique_role_per_site"),
+        ]
 
 
 class GroupRoleAssignment(GroupPropertiesMixin, ExtensibleModel):
