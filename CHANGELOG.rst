@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
+Unreleased
+----------
+
+Fixed
+~~~~~
+
+* Preference section verbose names were displayed in server language and not
+  user language (fixed by using gettext_lazy).
+
 `2.0b0`_ - 2021-05-21
 ---------------------
 
