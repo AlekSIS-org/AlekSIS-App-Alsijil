@@ -9,6 +9,10 @@ and this project adheres to `Semantic Versioning`_.
 Unreleased
 ----------
 
+Changed
+~~~~~~~
+* Show 'Lesson documentations' tab on person overview only if the person is a teacher.
+
 Fixed
 ~~~~~
 
