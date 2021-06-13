@@ -21,15 +21,13 @@
           <i class="material-icons left">date_range</i>
           {{ form_data.date_start }}, {{ form_data.from_period }}. – {{ form_data.date_end }}, {{ form_data.to_period }}.
           {% if form_data.date_start != form_data.date_end %}
-            <div class="alert warning">
-              <div>
-                <i class="material-icons left">warning</i>
-                {% blocktrans %}
-                  As the length of this absence is longer than one day,
-                  please double check the correctness of your entry.
-                {% endblocktrans %}
-              </div>
-            </div>
+            <figure class="alert warning">
+              <i class="material-icons left">warning</i>
+              {% blocktrans %}
+                As the length of this absence is longer than one day,
+                please double check the correctness of your entry.
+              {% endblocktrans %}
+            </figure>
           {% endif %}
         </div>
         <div class="collection-item">

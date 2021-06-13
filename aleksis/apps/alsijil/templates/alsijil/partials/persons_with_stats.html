@@ -1,12 +1,10 @@
 {% load data_helpers time_helpers i18n rules %}
 
 {% if not persons %}
-  <div class="alert primary">
-    <div>
-      <i class="material-icons left">warning</i>
-      {% blocktrans %}No students available.{% endblocktrans %}
-    </div>
-  </div>
+  <figure class="alert primary">
+    <i class="material-icons left">warning</i>
+    {% blocktrans %}No students available.{% endblocktrans %}
+  </figure>
 {% else %}
   <table class="highlight responsive-table">
   <thead>
