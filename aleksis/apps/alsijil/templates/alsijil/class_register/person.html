@@ -62,7 +62,7 @@
   <!-- Personal Note Tab -->
   <div class="col s12" id="personal-notes">
     <div class="col s12" id="overview">
-      <h5>{% trans "Relevant personal notes" %}</h5>
+      <h2>{% trans "Relevant personal notes" %}</h2>
       <form class="modal" id="filter-modal">
         <figure class="modal-content">
           <figcaption>{% trans "Filter personal notes" %}</figcaption>
@@ -116,7 +116,7 @@
   <!-- Statistics Tab -->
   {% if stats %}
     <div class="col s12" id="statistics">
-      <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
+      <h2>{% trans "Statistics on absences, tardiness and remarks" %}</h2>
       <ul class="collapsible">
         {% for school_term, stat in stats %}
           <li {% if forloop.first %}class="active"{% endif %}>
