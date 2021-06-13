@@ -93,3 +93,9 @@ td.material-icons {
 .overflow-x-scroll {
     overflow-x: scroll;
 }
+
+figure.modal-content figcaption {
+    font-weight: 300;
+    font-size: 2.28rem;
+    line-height: 110%;
+}
