@@ -12,6 +12,7 @@ Unreleased
 Changed
 ~~~~~~~
 * Show 'Lesson documentations' tab on person overview only if the person is a teacher.
+* Use semantically correct html elements for headings and alerts.
 
 Fixed
 ~~~~~
