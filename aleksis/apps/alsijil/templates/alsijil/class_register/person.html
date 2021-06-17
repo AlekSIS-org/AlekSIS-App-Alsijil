@@ -62,12 +62,12 @@
   <!-- Personal Note Tab -->
   <div class="col s12" id="personal-notes">
     <div class="col s12" id="overview">
-      <h5>{% trans "Relevant personal notes" %}</h5>
+      <h2>{% trans "Relevant personal notes" %}</h2>
       <form class="modal" id="filter-modal">
-        <div class="modal-content">
-          <h4>{% trans "Filter personal notes" %}</h4>
+        <figure class="modal-content">
+          <figcaption>{% trans "Filter personal notes" %}</figcaption>
           {% form form=personal_note_filter_form %}{% endform %}
-        </div>
+        </figure>
         <div class="modal-footer">
           <button type="button" class="btn-flat secondary-color-text waves-effect waves-ripple" id="remove-filters">
             <i class="material-icons left">clear</i>{% trans "Clear all filters" %}
@@ -116,7 +116,7 @@
   <!-- Statistics Tab -->
   {% if stats %}
     <div class="col s12" id="statistics">
-      <h5>{% trans "Statistics on absences, tardiness and remarks" %}</h5>
+      <h2>{% trans "Statistics on absences, tardiness and remarks" %}</h2>
       <ul class="collapsible">
         {% for school_term, stat in stats %}
           <li {% if forloop.first %}class="active"{% endif %}>
