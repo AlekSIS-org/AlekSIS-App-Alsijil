@@ -957,8 +957,8 @@ def overview_person(request: HttpRequest, id_: Optional[int] = None) -> HttpResp
     filter_dict["person"] = person
     context["filter_form"] = filter_form
 
-    register_objects = generate_list_of_all_register_objects(filter_dict)
-    if register_objects:
+    if request.user.person.is_teacher:
+        register_objects = generate_list_of_all_register_objects(filter_dict)
         table = RegisterObjectTable(register_objects)
         items_per_page = request.user.person.preferences[
             "alsijil__register_objects_table_items_per_page"

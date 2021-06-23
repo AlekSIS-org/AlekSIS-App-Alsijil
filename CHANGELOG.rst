@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
+`2.0rc1`_ - 2021-06-23
+----------------------
+
+Changed
+~~~~~~~
+* Show 'Lesson documentations' tab on person overview only if the person is a teacher.
+* Use semantically correct html elements for headings and alerts.
+
+Fixed
+~~~~~
+
+* Preference section verbose names were displayed in server language and not
+  user language (fixed by using gettext_lazy).
+
 `2.0b0`_ - 2021-05-21
 ---------------------
 
@@ -126,3 +140,4 @@ Fixed
 .. _1.0a3: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/1.0a3
 .. _2.0a1: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0a1
 .. _2.0b0: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0b0
+.. _2.0rc1: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0rc1
