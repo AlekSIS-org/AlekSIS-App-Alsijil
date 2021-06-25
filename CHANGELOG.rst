@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
+Unreleased
+----------
+
+Fixed
+~~~~~
+
+* "My overview" and "All lessons" didn't work if there was no current school term.
+
 `2.0rc1`_ - 2021-06-23
 ----------------------
 
