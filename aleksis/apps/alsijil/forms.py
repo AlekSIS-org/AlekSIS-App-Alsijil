@@ -296,8 +296,14 @@ class FilterRegisterObjectForm(forms.Form):
     def get_initial(cls, has_documentation: Optional[bool] = None):
         date_end = timezone.now().date()
         date_start = date_end - timedelta(days=30)
+        school_term = SchoolTerm.current
+
+        # If there is no current school year, use last known school year.
+        if not school_term:
+            school_term = SchoolTerm.objects.all().last()
+
         return {
-            "school_term": SchoolTerm.current,
+            "school_term": school_term,
             "date_start": date_start,
             "date_end": date_end,
             "has_documentation": has_documentation,
