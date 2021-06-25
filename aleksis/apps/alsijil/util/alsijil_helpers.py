@@ -336,6 +336,11 @@ def generate_list_of_all_register_objects(filter_dict: Dict[str, Any]) -> List[D
     # Always force a value for school term, start and end date so that queries won't get too big
     initial_filter_data = FilterRegisterObjectForm.get_initial()
     filter_dict["school_term"] = filter_dict.get("school_term", initial_filter_data["school_term"])
+
+    # If there is not school year at all, there are definitely no data.
+    if not filter_dict["school_term"]:
+        return []
+
     filter_dict["date_start"] = filter_dict.get("date_start", initial_filter_data["date_start"])
     filter_dict["date_end"] = filter_dict.get("date_end", initial_filter_data["date_end"])
     filter_dict["filter_date"] = bool(filter_dict.get("date_start")) and bool(
