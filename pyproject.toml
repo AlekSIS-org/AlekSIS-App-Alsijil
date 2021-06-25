@@ -41,8 +41,8 @@ secondary = true
 
 [tool.poetry.dependencies]
 python = "^3.9"
-aleksis-core = "^2.0b0"
-aleksis-app-chronos = "^2.0b0"
+aleksis-core = "^2.0rc"
+aleksis-app-chronos = "^2.0rc"
 
 [tool.poetry.dev-dependencies]
 aleksis-builddeps = "*"
