@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
-Unreleased
-----------
+`2.0rc2`_ - 2021-06-26
+----------------------
 
 Fixed
 ~~~~~
@@ -149,3 +149,4 @@ Fixed
 .. _2.0a1: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0a1
 .. _2.0b0: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0b0
 .. _2.0rc1: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0rc1
+.. _2.0rc2: https://edugit.org/AlekSIS/Official/AlekSIS-App-Alsijil/-/tags/2.0rc2
